@@ -1,0 +1,7 @@
+<h1>Data Opslaan</h1>
+
+<input #naamInput type="text" placeholder="Typ een naam">
+
+<button (click)="saveData(naamInput.value)">Opslaan in DB</button>
+
+<p>Status: {{ status }}</p>
