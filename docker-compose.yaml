@@ -8,11 +8,17 @@ services:
       - "3307:3306"
     networks:
       - proxy
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   backend:
     build: ./backend
     depends_on:
-      - mysqldb
+      mysqldb:
+        condition: service_healthy
     restart: always
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysqldb:3306/schooldb
