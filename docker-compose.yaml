@@ -28,6 +28,8 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.backend.rule=Host(`frontend.localhost`) && PathPrefix(`/api`)"
       - "traefik.http.routers.backend.entrypoints=web"
+      - "traefik.http.routers.backend.middlewares=strip-api"
+      - "traefik.http.middlewares.strip-api.stripprefix.prefixes=/api"
       - "traefik.http.services.backend.loadbalancer.server.port=8080"
     networks:
       - proxy
