@@ -1,11 +1,21 @@
-FROM eclipse-temurin:25
+# De Bouwer (heeft Maven nodig)
+FROM maven:3.9.6-eclipse-temurin-21 AS build
 
-RUN mkdir /opt/app
+WORKDIR /app
 
-COPY target/backend-0.0.1-SNAPSHOT.jar /opt/app
+COPY pom.xml .
+
+COPY src ./src
+
+RUN mvn clean package -DskipTests
+
+# De Uitvoerder (heeft alleen Java nodig)
+FROM eclipse-temurin:21
+
+WORKDIR /app
+
+COPY --from=build /app/target/*.jar app.jar
 
 EXPOSE 8080
 
-CMD ["java", "-jar", "/opt/app/backend-0.0.1-SNAPSHOT.jar"]
-
-
+ENTRYPOINT ["java", "-jar", "app.jar"]
