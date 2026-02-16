@@ -6,22 +6,53 @@ services:
       MYSQL_DATABASE: schooldb
     ports:
       - "3307:3306"
+    networks:
+      - proxy
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   backend:
     build: ./backend
-    ports:
-      - "8080:8080"
     depends_on:
-      - mysqldb
+      mysqldb:
+        condition: service_healthy
     restart: always
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysqldb:3306/schooldb
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.rule=Host(`frontend.localhost`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.backend.entrypoints=web"
+      - "traefik.http.routers.backend.middlewares=strip-api"
+      - "traefik.http.middlewares.strip-api.stripprefix.prefixes=/api"
+      - "traefik.http.services.backend.loadbalancer.server.port=8080"
+    networks:
+      - proxy
 
   frontend:
     build: ./frontend
-    ports:
-      - "4200:4200"
     depends_on:
       - backend
+    environment:
+      - API_URL=http://backend:8080
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=Host(`frontend.localhost`)"
+      - "traefik.http.routers.frontend.entrypoints=web"
+      - "traefik.http.services.frontend.loadbalancer.server.port=4200"
+    networks:
+      - proxy
+
+networks:
+  proxy:
+      external: true
+
+volumes:
+  mysql_data:
