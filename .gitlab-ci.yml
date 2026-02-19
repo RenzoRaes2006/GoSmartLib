@@ -5,15 +5,19 @@ stages:
 variables:
   BACKEND_IMAGE: $CI_REGISTRY_IMAGE/backend:latest
   FRONTEND_IMAGE: $CI_REGISTRY_IMAGE/frontend:latest
-  DOCKER_TLS_CERTDIR: "" 
+  # Dit vertelt de Docker-client waar de motor (de service) te vinden is
+  DOCKER_HOST: tcp://docker:2375
+  # Schakel TLS uit om certificaat-problemen binnen de pipeline te voorkomen
+  DOCKER_TLS_CERTDIR: ""
 
 .docker-build-template:
-  image: docker:cli
+  image: docker:24.0.5
   stage: build
   tags:
     - docker
   services:
-    - name: docker:dind
+    - name: docker:24.0.5-dind
+      # Cruciaal voor de school-registry certificaat-fout!
       command: ["--insecure-registry=registry.gitlab.apstudent.be"]
   before_script:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
@@ -41,6 +45,7 @@ deploy-to-server:
   tags:
     - docker
   script:
+    # Hier praten we direct met de Docker op jouw server
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
     - docker compose pull
     - docker compose up -d
