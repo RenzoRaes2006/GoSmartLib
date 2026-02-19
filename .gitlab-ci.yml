@@ -7,7 +7,7 @@ variables:
   FRONTEND_IMAGE: $CI_REGISTRY_IMAGE/frontend:latest
 
 .docker-build-template:
-  image: docker:24.0.5
+  image: docker:27.5.1
   stage: build
   tags:
     - docker
@@ -34,6 +34,7 @@ build-frontend:
 
 deploy-to-server:
   stage: deploy
+  image: docker:27.5.1
   tags:
     - docker
   script:
