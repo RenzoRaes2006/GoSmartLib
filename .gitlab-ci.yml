@@ -1,0 +1,46 @@
+stages:
+  - build
+
+variables:
+  # Definieer de namen van de images in de GitLab Registry
+  BACKEND_IMAGE: $CI_REGISTRY_IMAGE/backend:$CI_COMMIT_REF_SLUG
+  FRONTEND_IMAGE: $CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_REF_SLUG
+
+# Dit is een herbruikbaar stukje code voor beide build jobs
+.docker-build-template:
+  image: docker:cli
+  stage: build
+  services:
+    - docker:dind
+  before_script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+
+build-backend:
+  extends: .docker-build-template
+  script:
+    - docker build --pull -t "$BACKEND_IMAGE" ./backend
+    - docker push "$BACKEND_IMAGE"
+    # Tag als 'latest' als we op de main/master branch zitten
+    - |
+      if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]]; then
+        docker tag "$BACKEND_IMAGE" "$CI_REGISTRY_IMAGE/backend:latest"
+        docker push "$CI_REGISTRY_IMAGE/backend:latest"
+      fi
+  rules:
+    # Draai dit alleen als er iets in de backend map is aangepast
+    - changes:
+        - backend/**/*
+
+build-frontend:
+  extends: .docker-build-template
+  script:
+    - docker build --pull -t "$FRONTEND_IMAGE" ./frontend
+    - docker push "$FRONTEND_IMAGE"
+    - |
+      if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]]; then
+        docker tag "$FRONTEND_IMAGE" "$CI_REGISTRY_IMAGE/frontend:latest"
+        docker push "$CI_REGISTRY_IMAGE/frontend:latest"
+      fi
+  rules:
+    - changes:
+        - frontend/**/*
