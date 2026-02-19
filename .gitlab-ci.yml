@@ -5,17 +5,12 @@ stages:
 variables:
   BACKEND_IMAGE: $CI_REGISTRY_IMAGE/backend:latest
   FRONTEND_IMAGE: $CI_REGISTRY_IMAGE/frontend:latest
-  DOCKER_HOST: tcp://docker:2375
-  DOCKER_TLS_CERTDIR: ""
 
 .docker-build-template:
   image: docker:24.0.5
   stage: build
   tags:
     - docker
-  services:
-    - name: docker:24.0.5-dind
-      command: ["--insecure-registry=registry.gitlab.apstudent.be"]
   before_script:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
 
