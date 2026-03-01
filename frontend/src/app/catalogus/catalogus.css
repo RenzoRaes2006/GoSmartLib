@@ -1,0 +1,95 @@
+.catalogus-container {
+  padding: 20px;
+  background-color: #f8fbff;
+}
+
+.boeken-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 25px;
+  margin-top: 20px;
+}
+
+.boek-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  transition: transform 0.2s;
+}
+
+.boek-card:hover {
+  transform: translateY(-5px);
+}
+
+.image-container {
+  position: relative;
+  /* Behoud de vaste hoogte om de grid strak te houden */
+  height: 280px; 
+  /* Voeg een lichte achtergrondkleur toe voor lege ruimtes */
+  background-color: #f4f4f4; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 12px 12px 0 0;
+}
+
+.image-container img {
+  /* De cruciale verandering: contain i.p.v. cover */
+  object-fit: contain; 
+  width: 100%;
+  height: 100%;
+  /* Zorgt ervoor dat de afbeelding scherp blijft bij het schalen */
+  image-rendering: high-quality; 
+}
+
+/* Badges op de afbeelding */
+.locatie-badge, .status-badge {
+  position: absolute;
+  top: 10px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: bold;
+  color: white;
+}
+
+.locatie-badge {
+  left: 10px;
+  background-color: #4a90e2; /* Blauw uit je voorbeeld */
+}
+
+.status-badge {
+  right: 10px;
+}
+
+.status-badge.beschikbaar { background-color: #27ae60; }
+.status-badge.uitgeleend { background-color: #e74c3c; }
+
+/* Tekst styling */
+.boek-info {
+  padding: 15px;
+}
+
+.titel {
+  margin: 0;
+  font-size: 16px;
+  color: #2c3e50;
+}
+
+.auteur {
+  margin: 5px 0;
+  color: #7f8c8d;
+  font-size: 14px;
+}
+
+.genres {
+  color: #3498db;
+  margin: 5px 0;
+}
+
+.pagina-info {
+  color: #bdc3c7;
+  font-size: 12px;
+}
