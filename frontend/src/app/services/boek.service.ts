@@ -6,7 +6,7 @@ import { Boek } from '../models/Boek';
   providedIn: 'root'
 })
 export class BoekService {
-  private apiUrl = 'http://localhost:8081/api/boeken';
+  private apiUrl = 'http://frontend.localhost/api/boeken';
 
   constructor(private http: HttpClient) { }
 

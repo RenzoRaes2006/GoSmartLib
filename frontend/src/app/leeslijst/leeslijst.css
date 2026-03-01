@@ -1,0 +1,112 @@
+.reading-list-container {
+  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
+}
+
+.header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+h1 {
+  font-size: 1.5rem;
+  color: #0056b3;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.book-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.book-card {
+  width: 180px;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s;
+}
+
+.book-card:hover {
+  transform: translateY(-5px);
+}
+
+.image-container {
+  position: relative;
+  width: 100%;
+  height: 240px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  margin-bottom: 10px;
+}
+
+.book-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.book-title {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #0056b3;
+  margin-bottom: 4px;
+}
+
+.add-placeholder {
+  width: 180px;
+  height: 240px;
+  border: 2px dashed #b3d7ff;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  color: #007bff;
+  transition: background-color 0.2s;
+  text-decoration: none;
+}
+
+.add-placeholder:hover {
+  background-color: #f0f7ff;
+}
+
+.add-icon {
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+
+.add-text {
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.delete-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(255, 255, 255, 0.8);
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  color: #ff4d4d;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+}
+
+.empty-message {
+  margin-top: 40px;
+  text-align: center;
+  color: #999;
+}
