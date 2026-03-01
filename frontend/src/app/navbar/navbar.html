@@ -1,0 +1,26 @@
+<nav class="navbar">
+  <div class="nav-left">
+    <div class="logo" routerLink="/">
+        <a [routerLink]="['/']"><span class="logo-text"><strong>GO!</strong> Bib</span></a>
+    </div>
+  </div>
+
+  <div class="nav-center">
+    <div class="search-container">
+      <i class="search-icon">🔍</i>
+      <input type="text" placeholder="Zoek naar boeken, auteurs, ISBN...">
+    </div>
+  </div>
+
+  <div class="nav-right">
+    <a [routerLink]="['/leeslijst']" class="nav-link">
+      <i class="heart-icon"></i> Mijn Lijsten
+    </a>
+    <a [routerLink]="['/profiel']" class="nav-link">
+      <i class="user-icon"></i> Profiel
+    </a>
+    <button class="logout-btn">
+      <i class="exit-icon">➔</i>
+    </button>
+  </div>
+</nav>
