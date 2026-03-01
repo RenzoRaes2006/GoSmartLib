@@ -11,10 +11,27 @@ import { RouterModule } from '@angular/router';
 })
 export class Leeslijst {
   testBoeken = [
-    { id: 1, titel: 'De Brief voor de Koning', auteur: 'Tonke Dragt', jaar: 1962 },
-    { id: 2, titel: 'Harry Potter en de Steen der Wijzen', auteur: 'J.K. Rowling', jaar: 1997 },
-    { id: 3, titel: 'Kruistocht in Spijkerbroek', auteur: 'Thea Beckman', jaar: 1973 },
-    { id: 4, titel: 'The Hobbit', auteur: 'J.R.R. Tolkien', jaar: 1937 },
+    {
+      id: 1,
+      titel: 'De Brief voor de Koning',
+      auteur: 'Tonke Dragt',
+      jaar: 1962,
+      afbeelding: 'https://m.media-amazon.com/images/I/51-m9R1-pPL._SY445_SX342_.jpg',
+    },
+    {
+      id: 2,
+      titel: 'Harry Potter',
+      auteur: 'J.K. Rowling',
+      jaar: 1997,
+      afbeelding: '',
+    },
+    {
+      id: 3,
+      titel: 'Kruistocht in Spijkerbroek',
+      auteur: 'Thea Beckman',
+      jaar: 1973,
+      afbeelding: 'https://images.kb.nl/jp2/high/gvn/KONW01/KONW01_118196150.jp2',
+    },
   ];
   constructor(private gebruikerService: GebruikerService) {}
 

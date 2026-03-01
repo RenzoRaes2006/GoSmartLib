@@ -1,11 +1,17 @@
 package ap.be.backend.entity;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 
 enum Rol {
@@ -17,7 +23,7 @@ enum Rol {
 public class Gebruiker {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long userId;
+    private Long gebruikerID;
 
     private long SchoolId;
     private String VoorNaam;
@@ -27,28 +33,29 @@ public class Gebruiker {
     @Enumerated(EnumType.STRING) // Slaat "LEERLING" op ipv 0
     private Rol Rol;
 
-    // Zodra Book er is, haal je dit uit commentaar:
-    /*
-     * @ManyToMany
-     * 
-     * @JoinTable(
-     * name = "user_reading_list",
-     * joinColumns = @JoinColumn(name = "user_id"),
-     * inverseJoinColumns = @JoinColumn(name = "book_id")
-     * )
-     * private Set<Book> readingList = new HashSet<>();
-     */
+    @ManyToMany
+    @JoinTable(name = "gebruiker_leeslijst", joinColumns = @JoinColumn(name = "gebruikerId"), inverseJoinColumns = @JoinColumn(name = "boekId"))
+
+    private Set<Boek> leeslijst = new HashSet<>();
+
+    public Set<Boek> getLeeslijst() {
+        return leeslijst;
+    }
+
+    public void setLeeslijst(Set<Boek> leeslijst) {
+        this.leeslijst = leeslijst;
+    }
 
     public Gebruiker() {
     }
 
     // Gebruik camelCase (kleine letters aan het begin)
-    public Long getUserId() {
-        return userId;
+    public Long getGebruikerID() {
+        return gebruikerID;
     }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
+    public void setGebruikerID(Long userId) {
+        this.gebruikerID = userId;
     }
 
     public String getVoorNaam() {
