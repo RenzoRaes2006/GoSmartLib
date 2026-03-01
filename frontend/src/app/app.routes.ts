@@ -6,7 +6,8 @@ import { HoofdPagina } from './hoofd-pagina/hoofd-pagina';
 
 export const routes: Routes = [
     { path: 'catalogus', component: Catalogus },
-    { path: 'details', component: Detail },
+    { path: 'details/:title', component: Detail },
     { path: 'leeslijst', component: Leeslijst },
-    { path: '', component: HoofdPagina }
+    { path: '', component: HoofdPagina },
+    {path: '**', redirectTo: ''}
 ];

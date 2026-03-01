@@ -1,0 +1,73 @@
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 40px;
+  background-color: white;
+  border-bottom: 1px solid #eef2f7;
+  height: 70px;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.logo-text { font-size: 20px; color: #333; }
+.logo-text strong { color: #4a90e2; }
+
+.search-container {
+  display: flex;
+  align-items: center;
+  background-color: #f0f4f9;
+  border-radius: 8px;
+  padding: 5px 15px;
+  width: 500px;
+  border-color:#4a90e2 ;
+}
+
+.search-container input {
+  border: none;
+  background: transparent;
+  padding: 10px;
+  width: 100%;
+  outline: none;
+  color: #555;
+}
+
+.scan-btn {
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 5px 8px;
+  cursor: pointer;
+  color: #ff8c00; /* Oranje zoals in screenshot */
+}
+
+.nav-right {
+  display: flex;
+  gap: 25px;
+  align-items: center;
+}
+
+.nav-link {
+  text-decoration: none;
+  color: #666;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.logout-btn {
+  background: none;
+  border: none;
+  color: #ff8c00;
+  cursor: pointer;
+  font-size: 18px;
+}
