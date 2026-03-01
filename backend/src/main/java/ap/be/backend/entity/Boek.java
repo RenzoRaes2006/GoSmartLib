@@ -126,5 +126,15 @@ public class Boek {
         this.locatie = locatie;
     }
 
+    // toegevoegd door Mohamed, om id te kunnen teruggeven in de API
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+    // einde toegevoegd door Mohamed
+
     
 }

@@ -1,19 +1,19 @@
+<a routerLink="/catalogus">← Terug naar catalogus</a>
 <div class="detail-container">
 	<div class="foto-column">
-		<img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRFNeyR0FM1Qo3UBZAGXUMf90p5l1ckanYwkM-4fYecHIsB-HE0edHQcXJ7_YJ5"
-			alt="Book Cover">
+		<img [src]="boek?.afbeelding" alt="Book Cover">
 		<button type="button">Leen Book</button>
 
 		<div class="book-info">
 			<h3>Informatie</h3>
-			<p>Auteur</p>
-			<p>Publicatiejaar</p>
-			<p>ISBN</p>
+			<p>Auteur: {{ boek?.auteur }}</p>
+			<!-- <p>Publicatiejaar: {{ boek?.publicatiejaar }}</p> -->
+			<p>ISBN: {{ boek?.isbn }}</p>
 		</div>
 	</div>
 
 	<div class="main-column">
-		<h1>Boektitel</h1>
+		<h1>{{ boek?.titel }}</h1>
 		<p>Beschrijving van het boek...</p>
 		<div class="book-specs">
 			<div class="book-specs">

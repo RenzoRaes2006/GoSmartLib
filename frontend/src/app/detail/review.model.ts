@@ -1,7 +1,7 @@
-export interface Review {
+export interface Beoordeling {
     id?: number;
-    userId: number;
-    bookId: number;
-    rating: number;
-    content: string;
+    gebruikerId: number;
+    boekId: number;
+    waardering: number;
+    inhoud: string;
 }
