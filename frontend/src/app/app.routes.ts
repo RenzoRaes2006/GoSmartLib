@@ -6,7 +6,8 @@ import { HoofdPagina } from './hoofd-pagina/hoofd-pagina';
 
 export const routes: Routes = [
     { path: 'catalogus', component: Catalogus },
-    { path: 'details/:title', component: Detail },
+    //aangekomen van Mohamed, ik heb de path aangepast van isbn naar id omdat dat logischer is voor een RESTful API en ook omdat we in de backend werken met een id veld als primary key
+    { path: 'details/:id', component: Detail },
     { path: 'leeslijst', component: Leeslijst },
     { path: '', component: HoofdPagina },
     {path: '**', redirectTo: ''}

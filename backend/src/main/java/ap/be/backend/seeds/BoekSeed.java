@@ -7,8 +7,8 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import ap.be.backend.BoekRepository;
 import ap.be.backend.entity.Boek;
+import ap.be.backend.repository.BoekRepository;
 
 @Component
 public class BoekSeed implements CommandLineRunner {
@@ -25,6 +25,7 @@ public class BoekSeed implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         if (boekRepository.count() == 0) {
+            try {
             // 1. Haal data op van Google Books (bijvoorbeeld boeken over 'Java
             // programming')
             String url = "https://www.googleapis.com/books/v1/volumes?q=maxResults=10";
@@ -74,7 +75,26 @@ public class BoekSeed implements CommandLineRunner {
                     }
                 }
             }
-
+            } catch (Exception e) {
+                System.out.println("Google Books API niet beschikbaar, fallback boeken worden toegevoegd: " + e.getMessage());
+                String[][] boeken = {
+                    {"De Hobbit", "J.R.R. Tolkien", "9780261102217", "https://covers.openlibrary.org/b/isbn/9780261102217-M.jpg"},
+                    {"Harry Potter en de Steen der Wijzen", "J.K. Rowling", "9789022326626", "https://covers.openlibrary.org/b/isbn/9789022326626-M.jpg"},
+                    {"1984", "George Orwell", "9789044965544", "https://covers.openlibrary.org/b/isbn/9789044965544-M.jpg"},
+                    {"De Kleine Prins", "Antoine de Saint-Exupéry", "9789047600183", "https://covers.openlibrary.org/b/isbn/9789047600183-M.jpg"},
+                    {"Het Dagboek van een Jonge Meid", "Anne Frank", "9789041741707", "https://covers.openlibrary.org/b/isbn/9789041741707-M.jpg"}
+                };
+                for (String[] b : boeken) {
+                    Boek boek = new Boek();
+                    boek.setTitel(b[0]);
+                    boek.setAuteur(b[1]);
+                    boek.setISBN(b[2]);
+                    boek.setAfbeelding(b[3]);
+                    boek.setAantalExemplaren("5");
+                    boek.setLocatie("Ekeren");
+                    boekRepository.save(boek);
+                }
+            }
         }
     }
 }

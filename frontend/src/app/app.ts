@@ -11,16 +11,18 @@ import { Navbar } from "./navbar/navbar";
   styleUrl: './app.css',
 })
 export class App {
-  http = inject(HttpClient);
-  status = 'Wacht op input...';
+  // http = inject(HttpClient);
+  // status = 'Wacht op input...';
 
-  saveData(ingevoerdeNaam: string) {
-    this.http.post('http://frontend.localhost/api/save', { naam: ingevoerdeNaam }).subscribe({
-      next: (result) => (this.status = 'Gelukt! Opgeslagen in MySQL.'),
-      error: (err) => {
-        this.status = 'Fout bij opslaan!';
-        console.log(err);
-      },
-    });
-  }
+  // saveData(ingevoerdeNaam: string) {
+    
+  //   // this.http.post('http://frontend.localhost/api/save', { naam: ingevoerdeNaam }).subscribe({
+  //    this.http.post('http://frontend.localhost/api/save', { naam: ingevoerdeNaam }).subscribe({
+  //     next: (result) => (this.status = 'Gelukt! Opgeslagen in MySQL.'),
+  //     error: (err) => {
+  //       this.status = 'Fout bij opslaan!';
+  //       console.log(err);
+  //     },
+  //   });
+  // }
 }

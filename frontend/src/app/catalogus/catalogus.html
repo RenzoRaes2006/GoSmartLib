@@ -2,8 +2,11 @@
     <h3>{{ boekenlijst.length }} resultaten</h3>
 
     <div class="boeken-grid">
-        
-        <div class="boek-card" *ngFor="let boek of boekenlijst" [routerLink]="['/details', boek.isbn]">
+
+        <!-- <div class="boek-card" *ngFor="let boek of boekenlijst" [routerLink]="['/details', boek.isbn]"> -->
+        <!-- toegevoegd door Mohamed-->
+        <div class="boek-card" *ngFor="let boek of boekenlijst" [routerLink]="['/details', boek.id]">
+        <!-- eind toegevoegd door Mohamed-->
             <div class="image-container">
                 <span class="locatie-badge">{{ boek.locatie }}</span>
                 <span class="status-badge" [ngClass]="boek.aantalExemplaren !== '0' ? 'beschikbaar' : 'uitgeleend'">
