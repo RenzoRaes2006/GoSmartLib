@@ -1,3 +1,20 @@
+<div class="isbn-zoek-boek">
+    <button type="button" (click)="toggleIsbnZoek()">
+        {{ toonIsbnZoek ? 'Verberg ISBN Zoekveld' : 'Zoek boek op ISBN' }}
+    </button>
+
+    <div *ngIf="toonIsbnZoek">
+        <label for="zoekIsbn">ISBN-13:</label>
+        <input id="zoekIsbn" type="text" [value]="zoekIsbn" (input)="zoekIsbn = $any($event.target).value.slice(0, 13)" placeholder="9789012345678" maxlength="13"/>
+        <button type="button" (click)="zoekBoekOpIsbn()" [disabled]="zoekIsbn.length !== 13">
+            Zoek
+        </button>
+        <small *ngIf="zoekMessage" class="zoek-melding">{{ zoekMessage }}</small>
+    </div>
+</div>
+
+
+
 <form [formGroup]="boekForm" (ngSubmit)="onSubmit()">
     <div>
         <label for="titel">Titel:</label>
@@ -107,6 +124,7 @@
     
     <div class="form-actions">
         <button type="submit" [disabled]="boekForm.invalid">Boek Toevoegen</button>
+        <button type="button" (click)="resetForm()" class="reset-button">Clear</button>
         <button type="button" class="terug-button" routerLink="/">Terug</button>
     </div>
 </form>

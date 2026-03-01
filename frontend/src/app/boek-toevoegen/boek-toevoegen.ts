@@ -1,5 +1,4 @@
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
 import { Component } from '@angular/core';
 import {
   FormBuilder,
@@ -7,13 +6,17 @@ import {
   Validators,
   AbstractControl,
   ValidationErrors,
+  FormsModule,
 } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { BoekService } from '../services/boek.service';
+import { NieuwBoek } from '../models/NieuwBoek';
+import { GoogleBookService } from '../services/googleBook.service';
 
 @Component({
   selector: 'app-boek-toevoegen',
   standalone: true,
-  imports: [ReactiveFormsModule, CommonModule, RouterLink],
+  imports: [ReactiveFormsModule, CommonModule, RouterLink, FormsModule],
   templateUrl: './boek-toevoegen.html',
   styleUrl: './boek-toevoegen.css',
 })
@@ -21,10 +24,14 @@ export class BoekToevoegen {
   boekForm;
   errorMessage: string = '';
   successMessage: string = '';
+  toonIsbnZoek: boolean = false;
+  zoekIsbn: string = '';
+  zoekMessage: string = '';
 
   constructor(
     private fb: FormBuilder,
-    private http: HttpClient,
+    private boekService: BoekService,
+    private googleBookService: GoogleBookService,
   ) {
     this.boekForm = this.fb.group({
       titel: ['', [Validators.required, Validators.minLength(2)]],
@@ -37,10 +44,7 @@ export class BoekToevoegen {
       beschrijving: ['', [Validators.required, Validators.minLength(10)]],
       aantalExemplaren: ['', [Validators.required, Validators.pattern(/^\d+$/)]],
       locatie: ['', [Validators.required, Validators.minLength(1)]],
-      coverUrl: [
-        '',
-        [Validators.required, Validators.pattern(/^(https?:\/\/.*\.(?:png|jpg|jpeg|gif|svg))$/i)],
-      ],
+      coverUrl: ['', [Validators.required, Validators.pattern(/^(https?:\/\/.+|)$/)]],
     });
   }
 
@@ -100,6 +104,45 @@ export class BoekToevoegen {
     this.boekForm.patchValue({ isbn: value }, { emitEvent: false });
   }
 
+  // Zet de ISBN zoekmodus aan/uit
+  toggleIsbnZoek() {
+    this.toonIsbnZoek = !this.toonIsbnZoek;
+    this.zoekIsbn = '';
+    this.zoekMessage = '';
+  }
+
+  zoekBoekOpIsbn() {
+    if (!this.zoekIsbn || this.zoekIsbn.length !== 13) {
+      this.zoekMessage = 'Voer een geldig 13-cijferig ISBN in.';
+      return;
+    }
+
+    this.zoekMessage = 'Boek zoeken...';
+
+    this.googleBookService.zoekOpIsbn(this.zoekIsbn).subscribe({
+      next: (boekData) => {
+        if (boekData) {
+          this.boekForm.patchValue(boekData);
+          this.boekForm.updateValueAndValidity();
+          this.zoekMessage = 'Boek gevonden! vul de overige velden aan.';
+          setTimeout(() => (this.toonIsbnZoek = false), 3000);
+        } else {
+          this.zoekMessage = 'Geen boek gevonden met dit ISBN.';
+        }
+      },
+      error: () => {
+        this.zoekMessage = 'Fout bij het zoeken naar het boek.';
+      },
+    });
+  }
+
+  resetForm() {
+    this.boekForm.reset();
+    this.errorMessage = '';
+    this.successMessage = '';
+    this.toonIsbnZoek = false;
+  }
+
   onSubmit() {
     this.errorMessage = '';
     this.successMessage = '';
@@ -108,8 +151,8 @@ export class BoekToevoegen {
       this.boekForm.markAllAsTouched();
       return;
     } else {
-      const nieuwBoek = this.boekForm.value;
-      this.http.post('/api/boeken', nieuwBoek).subscribe({
+      const nieuwBoek = this.boekForm.value as NieuwBoek;
+      this.boekService.toevoegen(nieuwBoek).subscribe({
         next: () => {
           console.log('Boek succesvol toegevoegd');
           this.successMessage = 'Boek succesvol toegevoegd!';
@@ -126,6 +169,8 @@ export class BoekToevoegen {
           } else {
             this.errorMessage = 'Er is een fout opgetreden: ' + err.message;
           }
+
+          setTimeout(() => (this.errorMessage = ''), 5000);
         },
       });
     }
