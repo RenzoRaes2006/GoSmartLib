@@ -1,11 +1,10 @@
 <div class="reading-list-container">
-  
   <div class="header-section">
     <h1>Mijn Favorieten & Leeslijsten</h1>
   </div>
 
   <div class="book-grid">
-    @for (boek of testBoeken; track boek.id) {
+    @for (boek of boekLijst; track boek.id) {
       <div class="book-card">
         <div class="image-container">
           <img [src]="boek.afbeelding || 'https://via.placeholder.com/180x240?text=Geen+Cover'" 
@@ -24,9 +23,9 @@
     </a>
   </div>
 
-  @if (testBoeken.length === 0) {
-    <div style="margin-top: 40px; text-align: center; color: #999;">
-      Je leeslijst is momenteel leeg.
+  @if (boekLijst.length === 0) {
+    <div class="empty-message">
+      Er staan nog geen boeken in de database...
     </div>
   }
 </div>

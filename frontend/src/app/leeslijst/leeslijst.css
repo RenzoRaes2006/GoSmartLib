@@ -104,3 +104,9 @@ h1 {
   align-items: center;
   font-weight: bold;
 }
+
+.empty-message {
+  margin-top: 40px;
+  text-align: center;
+  color: #999;
+}
