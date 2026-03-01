@@ -1,1 +1,37 @@
-<p>leeslijst works!</p>
+<div class="reading-list-container">
+  <h1>Mijn Test Leeslijst</h1>
+
+  <table border="1" style="width:100%; border-collapse: collapse; text-align: left;">
+    <thead>
+      <tr style="background-color: #f2f2f2;">
+        <th>ID</th>
+        <th>Titel</th>
+        <th>Auteur</th>
+        <th>Jaar</th>
+        <th>Actie</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (boek of testBoeken; track boek.id){
+      <tr>
+        <td>{{ boek.id }}</td>
+        <td><strong>{{ boek.titel }}</strong></td>
+        <td>{{ boek.auteur }}</td>
+        <td>{{ boek.jaar }}</td>
+        <td>
+          <button (click)="verwijderBoek(boek.id)" style="color: red;">Verwijder</button>
+        </td>
+      </tr>
+      }
+    </tbody>
+  </table>
+
+  @if (testBoeken.length === 0) {
+  <div>
+    De lijst is helemaal leeg...
+  </div> }
+  <button routerLink="/catalogus">
+    + Voeg nieuw boek toe
+  </button>
+
+</div>
