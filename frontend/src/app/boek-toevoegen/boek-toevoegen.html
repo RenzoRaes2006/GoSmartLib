@@ -1,0 +1,121 @@
+<form [formGroup]="boekForm" (ngSubmit)="onSubmit()">
+    <div>
+        <label for="titel">Titel:</label>
+        <input id="titel" formControlName="titel" />
+        <div *ngIf="boekForm.get('titel')?.invalid && boekForm.get('titel')?.touched">
+        <small *ngIf="boekForm.get('titel')?.errors?.['required']">Titel is verplicht.</small>
+        <small *ngIf="boekForm.get('titel')?.errors?.['minlength']">Titel moet minimaal 2 tekens bevatten.</small>
+        </div>
+    </div>
+
+    <div>
+        <label for="auteur">Auteur:</label>
+        <input id="auteur" formControlName="auteur" />
+        <div *ngIf="boekForm.get('auteur')?.invalid && boekForm.get('auteur')?.touched">
+        <small *ngIf="boekForm.get('auteur')?.errors?.['required']">Auteur is verplicht.</small>
+        <small *ngIf="boekForm.get('auteur')?.errors?.['minlength']">Auteur moet minimaal 2 tekens bevatten.</small>
+        </div>
+    </div>
+
+    <div>
+        <label for="isbn">ISBN:</label>
+        <div style="display: flex; gap: 10px;">
+            <input 
+                id="isbn" 
+                type="text" 
+                formControlName="isbn"
+                (input)="onIsbnInput($event)"
+                placeholder="9789012345678"
+                maxlength="13"
+            />
+            <button type="button" (click)="genereerIsbn()">Genereer ISBN</button>
+        </div>
+        <div *ngIf="boekForm.get('isbn')?.invalid && boekForm.get('isbn')?.touched">
+            <small *ngIf="boekForm.get('isbn')?.errors?.['required']">ISBN is verplicht.</small>
+            <small *ngIf="boekForm.get('isbn')?.errors?.['isbn']">{{ boekForm.get('isbn')?.errors?.['isbn'] }}</small>
+        </div>
+    </div>
+
+    <div>
+        <label for="uitgever">Uitgever:</label>
+        <input id="uitgever" formControlName="uitgever" />
+        <div *ngIf="boekForm.get('uitgever')?.invalid && boekForm.get('uitgever')?.touched">
+        <small *ngIf="boekForm.get('uitgever')?.errors?.['required']">Uitgever is verplicht.</small>
+        <small *ngIf="boekForm.get('uitgever')?.errors?.['minlength']">Uitgever moet minimaal 2 tekens bevatten.</small>
+        </div>
+    </div>
+
+    <div>
+        <label for="publicatieJaar">Publicatiejaar:</label>
+        <input id="publicatieJaar" formControlName="publicatieJaar" />
+        <div *ngIf="boekForm.get('publicatieJaar')?.invalid && boekForm.get('publicatieJaar')?.touched">
+        <small *ngIf="boekForm.get('publicatieJaar')?.errors?.['required']">Publicatiejaar is verplicht.</small>
+        <small *ngIf="boekForm.get('publicatieJaar')?.errors?.['pattern']">Publicatiejaar moet een geldig jaar zijn (bijv. 2023).</small>
+        </div>
+    </div>
+
+    <div>
+        <label for="aantalPaginas">Aantal Paginas:</label>
+        <input id="aantalPaginas" formControlName="aantalPaginas" />
+        <div *ngIf="boekForm.get('aantalPaginas')?.invalid && boekForm.get('aantalPaginas')?.touched">
+        <small *ngIf="boekForm.get('aantalPaginas')?.errors?.['required']">Aantal Paginas is verplicht.</small>
+        <small *ngIf="boekForm.get('aantalPaginas')?.errors?.['min']">Aantal Paginas moet minimaal 1 zijn.</small>
+        </div>
+    </div>
+
+    <div>
+        <label for="genre">Genre:</label>
+        <input id="genre" formControlName="genre" />
+        <div *ngIf="boekForm.get('genre')?.invalid && boekForm.get('genre')?.touched">
+        <small *ngIf="boekForm.get('genre')?.errors?.['required']">Genre is verplicht.</small>
+        <small *ngIf="boekForm.get('genre')?.errors?.['minlength']">Genre moet minimaal 2 tekens bevatten.</small>
+        </div>
+    </div>
+
+    <div>
+        <label for="beschrijving">Beschrijving:</label>
+        <textarea id="beschrijving" formControlName="beschrijving"></textarea>
+        <div *ngIf="boekForm.get('beschrijving')?.invalid && boekForm.get('beschrijving')?.touched">
+        <small *ngIf="boekForm.get('beschrijving')?.errors?.['required']">Beschrijving is verplicht.</small>
+        </div>
+    </div>
+
+    <div>
+        <label for="aantalExemplaren">Aantal exemplaren:</label>
+        <input id="aantalExemplaren" formControlName="aantalExemplaren" />
+        <div *ngIf="boekForm.get('aantalExemplaren')?.invalid && boekForm.get('aantalExemplaren')?.touched">
+        <small *ngIf="boekForm.get('aantalExemplaren')?.errors?.['required']">Aantal exemplaren is verplicht.</small>
+        <small *ngIf="boekForm.get('aantalExemplaren')?.errors?.['min']">Aantal exemplaren moet minimaal 1 zijn.</small>
+        </div>
+    </div>
+
+    <div>
+        <label for="locatie">Locatie:</label>
+        <input id="locatie" formControlName="locatie" />
+        <div *ngIf="boekForm.get('locatie')?.invalid && boekForm.get('locatie')?.touched">
+        <small *ngIf="boekForm.get('locatie')?.errors?.['required']">Locatie is verplicht.</small>
+        </div>
+    </div>
+
+    <div>
+        <label for="coverUrl">Cover URL:</label>
+        <input id="coverUrl" formControlName="coverUrl" />
+        <div *ngIf="boekForm.get('coverUrl')?.invalid && boekForm.get('coverUrl')?.touched">
+        <small *ngIf="boekForm.get('coverUrl')?.errors?.['required']">Cover URL is verplicht.</small>
+        </div>
+    </div>
+    
+    <div class="form-actions">
+        <button type="submit" [disabled]="boekForm.invalid">Boek Toevoegen</button>
+        <button type="button" class="terug-button" routerLink="/">Terug</button>
+    </div>
+</form>
+
+<div class="message-container error-message" *ngIf="errorMessage">
+    {{ errorMessage }}
+</div>
+
+<div class="message-container success-message" *ngIf="successMessage">
+    {{ successMessage }}
+</div>
+
