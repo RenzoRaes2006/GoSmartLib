@@ -7,7 +7,7 @@ import { BoekToevoegen } from './boek-toevoegen/boek-toevoegen';
 
 export const routes: Routes = [
   { path: 'catalogus', component: Catalogus },
-  { path: 'details/:title', component: Detail },
+  { path: 'details/:id', component: Detail },
   { path: 'leeslijst', component: Leeslijst },
   { path: 'boek-toevoegen', component: BoekToevoegen },
   { path: '', component: HoofdPagina },

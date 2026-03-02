@@ -3,7 +3,7 @@
 
     <div class="boeken-grid">
         @for (boek of boekenlijst; track boek.id) {
-            <div class="boek-card" [routerLink]="['/details', boek.isbn]">
+            <div class="boek-card" [routerLink]="['/details', boek.id]">
                 <div class="image-container">
                     <span class="locatie-badge">{{ boek.locatie }}</span>
                     
