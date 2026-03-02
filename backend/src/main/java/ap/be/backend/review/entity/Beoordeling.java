@@ -11,86 +11,86 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "reviews")
-public class Review {
+public class Beoordeling {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
-
+    
     // relaties voor later, we hebben geen user en book entities
     // @ManyToOne
     // @JoinColumn(name = "user_id", nullable = false)
     @Column(name = "user_id", nullable = false)
-    long userId;
+    long gebruikerId;
 
     // @ManyToOne
     // @JoinColumn(name = "book_id", nullable = false)
     @Column(name = "book_id", nullable = false)
-    long bookId;
+    long boekId;
 
     @Column(name = "rating", nullable = false)
-    int rating;
+    int waardering;
 
     @Column(name = "content", length = 1000)
-    String content;
+    String inhoud;
 
-    public Review() {
+    public Beoordeling() {
     }
 
-    public Review(long userId, long bookId, int rating, String content) {
-        this.userId = userId;
-        this.bookId = bookId;
-        this.rating = rating;
-        this.content = content;
+    public Beoordeling(long gebruikerId, long boekId, int waardering, String content) {
+        this.gebruikerId = gebruikerId;
+        this.boekId = boekId;
+        this.waardering = waardering;
+        this.inhoud = content;
     }
 
     public Long getId() {
         return id;
     }
 
-    public long getUserId() {
-        return userId;
+    public long getGebruikerId() {
+        return gebruikerId;
     }
 
-    public long getBookId() {
-        return bookId;
+    public long getBoekId() {
+        return boekId;
     }
 
-    public int getRating() {
-        return rating;
+    public int getWaardering() {
+        return waardering;
     }
 
-    public String getContent() {
-        return content;
+    public String getInhoud() {
+        return inhoud;
     }
 
     public void setId(Long id) {
         this.id = id;
     }
 
-    public void setUserId(long userId) {
-        this.userId = userId;
+    public void setGebruikerId(long gebruikerId) {
+        this.gebruikerId = gebruikerId;
     }
 
-    public void setBookId(long bookId) {
-        this.bookId = bookId;
+    public void setBoekId(long boekId) {
+        this.boekId = boekId;
     }
 
-    public void setRating(int rating) {
-        this.rating = rating;
+    public void setWaardering(int waardering) {
+        this.waardering = waardering;
     }
 
-    public void setContent(String content) {
-        this.content = content;
+    public void setInhoud(String content) {
+        this.inhoud = content;
     }
 
     @Override
     public String toString() {
         return "Review{" +
                 "id=" + id +
-                ", userId=" + userId +
-                ", bookId=" + bookId +
-                ", rating=" + rating +
-                ", content='" + content + '\'' +
+                ", userId=" + gebruikerId +
+                ", boekId=" + boekId +
+                ", waardering=" + waardering +
+                ", content='" + inhoud + '\'' +
                 '}';
     }
 }

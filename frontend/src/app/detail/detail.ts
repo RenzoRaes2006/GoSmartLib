@@ -21,6 +21,7 @@ export class Detail implements OnInit {
   boek: Boek | null = null;
   form!: FormGroup;
   submissionError: string = "";
+  boekGenresString: string = "";
 
   ngOnInit(): void {
     const boekId = Number(this.route.snapshot.paramMap.get('id'));
@@ -28,6 +29,7 @@ export class Detail implements OnInit {
       next: (boek) => {
         console.log('Boek details:', boek);
         this.boek = boek;
+        this.boekGenresString = boek.genre.join(', ');
       },
       error: (err) => console.log("Iets mis gegaan met het krijgen van de boek details. ", err)
     });
@@ -51,6 +53,8 @@ export class Detail implements OnInit {
       inhoud: raw.comment,
     };
 
+    console.log('Ingediende review:', review);
+    
     this.reviewService.voegBeoordelingToe(review).subscribe({
       next: (response) => {
         console.log('Review succesvol toegevoegd:', response);
