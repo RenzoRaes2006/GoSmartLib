@@ -1,4 +1,4 @@
-package ap.be.backend.review.entity;
+package ap.be.backend.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

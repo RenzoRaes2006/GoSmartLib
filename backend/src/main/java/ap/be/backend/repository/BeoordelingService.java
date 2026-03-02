@@ -1,11 +1,10 @@
-package ap.be.backend.review.service;
+package ap.be.backend.repository;
 
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import ap.be.backend.review.entity.Beoordeling;
-import ap.be.backend.review.repository.BeoordelingRepository;
+import ap.be.backend.entity.Beoordeling;
 
 @Service
 public class BeoordelingService {

@@ -1,4 +1,4 @@
-package ap.be.backend;
+package ap.be.backend.controller;
 
 import java.util.List;
 
@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RestController;
 
+import ap.be.backend.BoekRepository;
 import ap.be.backend.entity.Boek;
 
 import org.springframework.web.bind.annotation.GetMapping;

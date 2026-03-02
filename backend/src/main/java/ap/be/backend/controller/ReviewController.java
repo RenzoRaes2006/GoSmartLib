@@ -1,4 +1,4 @@
-package ap.be.backend.review.controller;
+package ap.be.backend.controller;
 
 import java.util.List;
 
@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import ap.be.backend.review.entity.Beoordeling;
-import ap.be.backend.review.service.BeoordelingService;
+import ap.be.backend.entity.Beoordeling;
+import ap.be.backend.repository.BeoordelingService;
 
 @RestController
 @CrossOrigin(origins = {"http://frontend.localhost", "http://localhost:4200"})
