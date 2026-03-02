@@ -11,7 +11,7 @@
                class="book-image" 
                alt="Cover">
           
-          <button class="delete-btn" (click)="verwijderBoek(boek.id)">✕</button>
+          <button class="delete-btn" (click)="boek.id !== undefined && verwijderBoek(boek.id)">✕</button>
         </div>
         <div class="book-title">{{ boek.titel }}</div>
       </div>

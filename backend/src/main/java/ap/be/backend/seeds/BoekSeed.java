@@ -7,8 +7,8 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import ap.be.backend.BoekRepository;
 import ap.be.backend.entity.Boek;
+import ap.be.backend.repository.BoekRepository;
 
 @Component
 public class BoekSeed implements CommandLineRunner {
@@ -58,16 +58,16 @@ public class BoekSeed implements CommandLineRunner {
                     if (identifiers != null) {
                         for (Map<String, String> idMap : identifiers) {
                             if ("ISBN_13".equals(idMap.get("type"))) {
-                                nieuwBoek.setISBN(idMap.get("identifier"));
+                                nieuwBoek.setIsbn(idMap.get("identifier"));
                                 break;
                             } else if ("ISBN_10".equals(idMap.get("type"))) {
-                                nieuwBoek.setISBN(idMap.get("identifier"));
+                                nieuwBoek.setIsbn(idMap.get("identifier"));
                             } else if ("OTHER".equals(idMap.get("type"))) {
-                                nieuwBoek.setISBN(idMap.get("identifier"));
+                                nieuwBoek.setIsbn(idMap.get("identifier"));
                             }
                         }
 
-                        nieuwBoek.setAantalExemplaren("5"); // Standaard waarde
+                        nieuwBoek.setAantalExemplaren(5); // Standaard waarde
                         nieuwBoek.setLocatie("Ekeren");
 
                         boekRepository.save(nieuwBoek);
