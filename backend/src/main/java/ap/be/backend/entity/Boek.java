@@ -16,8 +16,11 @@ public class Boek {
     @Column
     private String auteur;
 
-    @ElementCollection
-    private List<String> genre;
+    @Column
+    private String isbn;
+
+    @Column
+    private String uitgever;
 
     @Column
     private int pagina;
@@ -25,25 +28,36 @@ public class Boek {
     @Column
     private String uitgaveJaar;
 
+    @ElementCollection
+    private List<String> genre;
+
     @Column
     private String beschrijving;
 
     @Column
     private String afbeelding;
+
     @Column
-    private String isbn;
-    @Column
-    private String aantalExemplaren;
+    private int aantalExemplaren;
+
     @Column
     private String locatie;
 
-    public Boek () {
+    public Boek() {
 
     }
 
     public Boek(String titel, String auteur) {
         this.titel = titel;
         this.auteur = auteur;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 
     public String getTitel() {
@@ -62,12 +76,20 @@ public class Boek {
         this.auteur = auteur;
     }
 
-    public List<String> getGenre() {
-        return genre;
+    public String getIsbn() {
+        return isbn;
     }
 
-    public void setGenre(List<String> genre) {
-        this.genre = genre;
+    public void setIsbn(String isbn) {
+        this.isbn = isbn;
+    }
+
+    public String getUitgever() {
+        return uitgever;
+    }
+
+    public void setUitgever(String uitgever) {
+        this.uitgever = uitgever;
     }
 
     public int getPagina() {
@@ -86,6 +108,14 @@ public class Boek {
         this.uitgaveJaar = uitgaveJaar;
     }
 
+    public List<String> getGenre() {
+        return genre;
+    }
+
+    public void setGenre(List<String> genre) {
+        this.genre = genre;
+    }
+
     public String getBeschrijving() {
         return beschrijving;
     }
@@ -102,19 +132,11 @@ public class Boek {
         this.afbeelding = afbeelding;
     }
 
-    public String getISBN() {
-        return isbn;
-    }
-
-    public void setISBN(String iSBN) {
-        isbn = iSBN;
-    }
-
-    public String getAantalExemplaren() {
+    public int getAantalExemplaren() {
         return aantalExemplaren;
     }
 
-    public void setAantalExemplaren(String aantalExemplaren) {
+    public void setAantalExemplaren(int aantalExemplaren) {
         this.aantalExemplaren = aantalExemplaren;
     }
 
@@ -125,6 +147,4 @@ public class Boek {
     public void setLocatie(String locatie) {
         this.locatie = locatie;
     }
-
-    
 }

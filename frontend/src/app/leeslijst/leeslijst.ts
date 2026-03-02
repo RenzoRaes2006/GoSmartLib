@@ -30,7 +30,9 @@ export class Leeslijst implements OnInit {
       },
     });
   }
-  verwijderBoek(id: number) {
-    this.boekLijst = this.boekLijst.filter((b) => b.id !== id);
+  verwijderBoek(id: number | undefined) {
+    if (id !== undefined) {
+      this.boekLijst = this.boekLijst.filter((b) => b.id !== id);
+    }
   }
 }

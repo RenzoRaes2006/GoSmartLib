@@ -1,7 +1,8 @@
 export interface Boek {
-  id: number;
+  id?: number;
   titel: string;
   auteur: string;
+  uitgever: string;
   genre: string[];
   pagina: number;
   uitgaveJaar: string;
