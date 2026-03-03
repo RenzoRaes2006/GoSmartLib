@@ -47,7 +47,7 @@ public class Beoordeling {
         return id;
     }
 
-    public long getGebruikerId() {
+    public Long getGebruikerId() {
         return gebruikerId;
     }
 
