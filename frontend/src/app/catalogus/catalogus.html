@@ -7,8 +7,8 @@
                 <div class="image-container">
                     <span class="locatie-badge">{{ boek.locatie }}</span>
                     
-                    <span class="status-badge" [class.beschikbaar]="boek.aantalExemplaren !== '0'" [class.uitgeleend]="boek.aantalExemplaren === '0'">
-                        @if (boek.aantalExemplaren !== '0') {
+                    <span class="status-badge" [class.beschikbaar]="boek.aantalExemplaren !== 0" [class.uitgeleend]="boek.aantalExemplaren === 0">
+                        @if (boek.aantalExemplaren !== 0) {
                             Beschikbaar
                         } @else {
                             Uitgeleend

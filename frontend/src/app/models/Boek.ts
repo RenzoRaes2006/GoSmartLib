@@ -9,6 +9,6 @@ export interface Boek {
   beschrijving: string;
   afbeelding: string;
   isbn: string;
-  aantalExemplaren: string;
+  aantalExemplaren: number;
   locatie: string;
 }
