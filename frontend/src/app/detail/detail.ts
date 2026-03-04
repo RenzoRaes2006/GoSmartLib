@@ -7,10 +7,10 @@ import {
   Validators,
 } from '@angular/forms';
 import { RouterLink, ActivatedRoute } from '@angular/router';
-import { ReviewService } from './review-service';
-import { Beoordeling } from './review.model';
 import { BoekService } from '../services/boek.service';
 import { Boek } from '../models/Boek';
+import { ReviewService } from '../services/review-service';
+import { Beoordeling } from '../models/review.model';
 
 @Component({
   selector: 'app-detail',
@@ -19,7 +19,7 @@ import { Boek } from '../models/Boek';
   styleUrl: './detail.css',
 })
 export class Detail implements OnInit {
-  reviewService = inject(ReviewService);
+  beoordelingService = inject(ReviewService);
   boekService = inject(BoekService);
   fb = inject(FormBuilder);
   route = inject(ActivatedRoute);
@@ -28,8 +28,14 @@ export class Detail implements OnInit {
   form!: FormGroup;
   submissionError: string = '';
   boekGenresString: string = '';
+  beoordelingen: Beoordeling[] = [];
 
   ngOnInit(): void {
+    this.form = this.fb.group({
+      waardering: ['', [Validators.required]],
+      inhoud: ['', [Validators.required, Validators.maxLength(500)]],
+    });
+
     const boekId = Number(this.route.snapshot.paramMap.get('id'));
     this.boekService.getBoekOpId(boekId).subscribe({
       next: (boek) => {
@@ -40,36 +46,45 @@ export class Detail implements OnInit {
       error: (err) => console.log('Iets mis gegaan met het krijgen van de boek details. ', err),
     });
 
-    this.form = this.fb.group({
-      rating: ['', [Validators.required]],
-      comment: ['', [Validators.required, Validators.maxLength(500)]],
+    this.beoordelingService.getBeoordelingenOpBoekId(boekId).subscribe({
+      next: (beoordelingen) => {
+        this.beoordelingen = beoordelingen;
+      },
+      error: (err) => console.log('Iets mis gegaan met het krijgen van de beoordelingen. ', err),
     });
+
+    // ik kan later deze manier gebruken als ik van deze pagina naar een andere pagina van boekdetails ga en terug, zodat ik de details en beoordelingen opnieuw kan laden
+    // this.route.paramMap.subscribe(params => {
+    //   const boekId = Number(params.get('id'));
+    //   // Roep hier boekService en beoordelingService aan met boekId
+    // });
   }
 
-  submitReview() {
+  submitBeoordeling() {
     if (this.form.invalid) {
       this.submissionError =
         'Vul alle verplichte velden in en zorg dat je commentaar niet langer is dan 500 karakters.';
       return;
     }
     const raw = this.form.value;
-    const review: Beoordeling = {
+    const beoordeling: Beoordeling = {
       gebruikerId: 1, // TODO: haal dit van de ingelogde gebruiker
       boekId: this.boek?.id ?? 0,
-      waardering: Number(raw.rating),
-      inhoud: raw.comment,
+      waardering: Number(raw.waardering),
+      inhoud: raw.inhoud,
     };
 
-    console.log('Ingediende review:', review);
+    console.log('Ingediende beoordeling:', beoordeling);
 
-    this.reviewService.voegBeoordelingToe(review).subscribe({
+    this.beoordelingService.voegBeoordelingToe(beoordeling).subscribe({
       next: (response) => {
-        console.log('Review succesvol toegevoegd:', response);
+        console.log('Beoordeling succesvol toegevoegd:', response);
         this.form.reset();
         this.submissionError = '';
+        this.beoordelingen.push(response); // Voeg de nieuwe beoordeling toe aan de lijst zodat deze direct zichtbaar is
       },
       error: (error) => {
-        console.error('Fout bij het toevoegen van review:', error);
+        console.error('Fout bij het toevoegen van beoordeling:', error);
         this.submissionError = 'Er ging iets mis bij het toevoegen. Probeer opnieuw.';
       },
     });

@@ -5,8 +5,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-// import jakarta.persistence.JoinColumn;
-// import jakarta.persistence.ManyToOne;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -15,17 +15,16 @@ public class Beoordeling {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
-    
+
     // relaties voor later, we hebben geen user en book entities
     // @ManyToOne
     // @JoinColumn(name = "user_id", nullable = false)
     @Column(name = "user_id", nullable = false)
     long gebruikerId;
 
-    // @ManyToOne
-    // @JoinColumn(name = "book_id", nullable = false)
-    @Column(name = "book_id", nullable = false)
-    long boekId;
+    @ManyToOne
+    @JoinColumn(name = "book_id", nullable = false)
+    private Boek boek;
 
     @Column(name = "rating", nullable = false)
     int waardering;
@@ -36,9 +35,9 @@ public class Beoordeling {
     public Beoordeling() {
     }
 
-    public Beoordeling(long gebruikerId, long boekId, int waardering, String content) {
+    public Beoordeling(long gebruikerId, Boek boek, int waardering, String content) {
         this.gebruikerId = gebruikerId;
-        this.boekId = boekId;
+        this.boek = boek;
         this.waardering = waardering;
         this.inhoud = content;
     }
@@ -47,12 +46,12 @@ public class Beoordeling {
         return id;
     }
 
-    public long getGebruikerId() {
+    public Long getGebruikerId() {
         return gebruikerId;
     }
 
-    public long getBoekId() {
-        return boekId;
+    public Boek getBoek() {
+        return boek;
     }
 
     public int getWaardering() {
@@ -71,8 +70,8 @@ public class Beoordeling {
         this.gebruikerId = gebruikerId;
     }
 
-    public void setBoekId(long boekId) {
-        this.boekId = boekId;
+    public void setBoek(Boek boek) {
+        this.boek = boek;
     }
 
     public void setWaardering(int waardering) {
@@ -88,7 +87,7 @@ public class Beoordeling {
         return "Review{" +
                 "id=" + id +
                 ", userId=" + gebruikerId +
-                ", boekId=" + boekId +
+                ", boek=" + boek +
                 ", waardering=" + waardering +
                 ", content='" + inhoud + '\'' +
                 '}';

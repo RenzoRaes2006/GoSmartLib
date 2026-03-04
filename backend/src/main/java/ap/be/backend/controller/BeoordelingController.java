@@ -10,28 +10,27 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import ap.be.backend.entity.Beoordeling;
-import ap.be.backend.repository.BeoordelingService;
+import ap.be.backend.dto.BeoordelingDTO;
+import ap.be.backend.service.BeoordelingService;
 
 @RestController
 @CrossOrigin(origins = {"http://frontend.localhost", "http://localhost:4200"})
 @RequestMapping("/api")
-public class ReviewController {
-    private final BeoordelingService reviewService;
+public class BeoordelingController {
+    private final BeoordelingService beoordelingService;
 
-    public ReviewController(BeoordelingService reviewService) {
-        this.reviewService = reviewService;
+    public BeoordelingController(BeoordelingService beoordelingService) {
+        this.beoordelingService = beoordelingService;
     }
 
     @GetMapping("/books/{id}/reviews")
-    public List<Beoordeling> getReviewsByBookId(@PathVariable("id") Long id) {
-        List<Beoordeling> reviews = reviewService.getReviewByBookId(id);
-        return reviews;
+    public List<BeoordelingDTO> getBeoordelingenOpBoekId(@PathVariable("id") Long id) {
+        return beoordelingService.getBeoordelingenOpBoekId(id);
     }
 
     @PostMapping("/reviews")
-    public Beoordeling addReview(@RequestBody Beoordeling beoordeling) {
-        reviewService.saveReview(beoordeling);
+    public BeoordelingDTO beoordelingOpslaan(@RequestBody BeoordelingDTO beoordeling) {
+        beoordelingService.beoordelingOpslaan(beoordeling);
         return beoordeling;
     }
 }
