@@ -1,10 +1,10 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink, ActivatedRoute } from '@angular/router';
-import { ReviewService } from './review-service';
-import { Beoordeling } from './review.model';
 import { BoekService } from '../services/boek.service';
 import { Boek } from '../models/Boek';
+import { ReviewService } from '../services/review-service';
+import { Beoordeling } from '../models/review.model';
 
 @Component({
   selector: 'app-detail',
