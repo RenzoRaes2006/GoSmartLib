@@ -34,7 +34,7 @@
 
 				<dl class="spec-item">
 					<dt>Dikte</dt>
-					<dd>{{ boek?.pagina }}  pagina's</dd>
+					<dd>{{ boek?.pagina }} pagina's</dd>
 				</dl>
 			</div>
 		</div>
@@ -42,28 +42,26 @@
 
 	<div class="review-column">
 		<h2>Reviews</h2>
+		@for (beoordeling of beoordelingen; track beoordeling.id) {
 		<div class="review">
 			<div class="review-header">
-				<span class="reviewer-name">John Doe</span>
-				<span class="review-rating">★★★★☆</span>
+				<span class="reviewer-name">Test Gebruiker</span>
+				<span class="review-rating">{{ '★'.repeat(beoordeling.waardering) + '☆'.repeat(5 -
+					beoordeling.waardering) }}</span>
 			</div>
-			<p class="review-content">Dit boek was geweldig! Ik kon het niet wegleggen.</p>
+			<p class="review-content">{{ beoordeling.inhoud }}</p>
 		</div>
+		} @empty {
+			<p>Er zijn nog geen reviews voor dit boek.</p>
+		}
 
-		<div class="review">
-			<div class="review-header">
-				<span class="reviewer-name">Jane Smith</span>
-				<span class="review-rating">★★★☆☆</span>
-			</div>
-			<p class="review-content">Het verhaal was interessant, maar het einde was teleurstellend.</p>
-		</div>
 
 		<div>
 			<h3>Voeg een review toe</h3>
 
-			<form class="review-form" [formGroup]="form" (ngSubmit)="submitReview()">
-				<label for="rating">Beoordeling:</label>
-				<select id="rating" name="rating" formControlName="rating">
+			<form class="review-form" [formGroup]="form" (ngSubmit)="submitBeoordeling()">
+				<label for="waardering">Beoordeling:</label>
+				<select id="waardering" name="waardering" formControlName="waardering">
 					<option value="5">★★★★★</option>
 					<option value="4">★★★★☆</option>
 					<option value="3">★★★☆☆</option>
@@ -71,8 +69,8 @@
 					<option value="1">★☆☆☆☆</option>
 				</select>
 
-				<label for="content">Review:</label>
-				<textarea id="content" name="content" rows="4" formControlName="comment"></textarea>
+				<label for="inhoud">Review:</label>
+				<textarea id="inhoud" name="inhoud" rows="4" formControlName="inhoud"></textarea>
 
 				<button type="submit">Submit Review</button>
 

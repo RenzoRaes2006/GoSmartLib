@@ -48,18 +48,17 @@ export class BoekToevoegen {
     });
   }
 
-  // Custom ISBN validator
-  isbnValidator(control: AbstractControl): ValidationErrors | null {
+  // Custom ISBN validator - accepteert ISBN-10 en ISBN-13
+  isbnValidator = (control: AbstractControl): ValidationErrors | null => {
     const value = control.value;
     if (!value) return null;
 
-    // Check of het 13 cijfers zijn
-    if (!/^\d{13}$/.test(value)) {
-      return { isbn: 'ISBN moet 13 cijfers bevatten' };
+    // Check of het 10 of 13 cijfers zijn
+    if (/^\d{10}$/.test(value) || /^\d{13}$/.test(value)) {
+      return null;
     }
-
-    return null;
-  }
+    return { isbn: 'ISBN moet 10 of 13 cijfers zijn' };
+  };
 
   // Genereer ISBN-13
   genereerIsbn(): void {
@@ -79,19 +78,16 @@ export class BoekToevoegen {
     return Array.from({ length: lengte }, () => Math.floor(Math.random() * 10)).join('');
   }
 
-  // Bereken ISBN-13 checkdigit
+  // Genereer ISBN-13 checkdigit
   private static berekenIsbn13CheckDigit(basis12: string): string {
-    // Gewogen som: 1,3,1,3,1,3...
     const som = basis12
       .split('')
       .map(Number)
       .reduce((acc, cijfer, i) => acc + cijfer * (i % 2 === 0 ? 1 : 3), 0);
-
-    // Checkdigit zodat totaal deelbaar door 10 is
     return String((10 - (som % 10)) % 10);
   }
 
-  // Filter: alleen cijfers toestaan
+  // Filter: alleen cijfers toestaan (max 13)
   onIsbnInput(event: Event): void {
     const input = event.target as HTMLInputElement;
     let value = input.value.replace(/\D/g, '');
@@ -112,8 +108,8 @@ export class BoekToevoegen {
   }
 
   zoekBoekOpIsbn() {
-    if (!this.zoekIsbn || this.zoekIsbn.length !== 13) {
-      this.zoekMessage = 'Voer een geldig 13-cijferig ISBN in.';
+    if (!this.zoekIsbn || (this.zoekIsbn.length !== 10 && this.zoekIsbn.length !== 13)) {
+      this.zoekMessage = 'Voer een geldig ISBN in (10 of 13 cijfers).';
       return;
     }
 
@@ -152,6 +148,13 @@ export class BoekToevoegen {
       return;
     } else {
       const nieuwBoek = this.boekForm.value as NieuwBoek;
+      // Converteer kommagescheiden genre-string naar array
+      if (typeof nieuwBoek.genre === 'string') {
+        nieuwBoek.genre = nieuwBoek.genre
+          .split(',')
+          .map((g) => g.trim())
+          .filter((g) => g.length > 0);
+      }
       this.boekService.toevoegen(nieuwBoek).subscribe({
         next: () => {
           console.log('Boek succesvol toegevoegd');

@@ -5,7 +5,7 @@ export interface NieuwBoek {
   uitgever: string;
   uitgaveJaar: string;
   pagina: string;
-  genre: string;
+  genre: string | string[];
   beschrijving: string;
   aantalExemplaren: string;
   locatie: string;
