@@ -20,7 +20,7 @@ export class Catalogus implements OnInit {
     this.boekService.getBoeken().subscribe({
       next: (data) => {
         console.log("Boeken succesvol opgehaald: ", data);
-        this.boekenlijst = data;
+        this.boekenlijst = data.sort((a,b) => a.locatie.localeCompare(b.locatie));
       },
       error: (err) => console.log("Iets mis gegaan met het krijgen van de boeken. ", err)
     })

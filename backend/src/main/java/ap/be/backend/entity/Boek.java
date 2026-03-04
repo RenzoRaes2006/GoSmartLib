@@ -31,7 +31,7 @@ public class Boek {
     @ElementCollection
     private List<String> genre;
 
-    @Column
+    @Column(columnDefinition = "TEXT")
     private String beschrijving;
 
     @Column
