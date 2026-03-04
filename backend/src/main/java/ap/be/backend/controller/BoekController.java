@@ -1,4 +1,3 @@
-
 package ap.be.backend.controller;
 
 import java.util.List;
@@ -31,37 +30,19 @@ public class BoekController {
 
     @GetMapping("/api/boeken")
     @CrossOrigin(origins = "*", allowedHeaders = "*")
-    public List<BoekDTO> getAlleBoeken() {
-        return boekService.getAllBoeken();
+    public List<Boek> getAlleBoeken() {
+
+        return boekRepository.findAll();
     }
 
     @PostMapping("/api/boeken")
-<<<<<<< HEAD
-    public ResponseEntity<BoekDTO> postBoek(@Valid @RequestBody BoekDTO boekDTO) {
-        try {
-            Boek nieuwBoek = boekService.addBoek(boekDTO);
-            return ResponseEntity.status(HttpStatus.CREATED).body(boekService.mapToDTO(nieuwBoek));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
-        }
-    }
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<String> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Ongeldige invoer: " + ex.getMessage());
-=======
     public ResponseEntity<Boek> postBoek(@Valid @RequestBody BoekDTO boekDTO) {
         Boek nieuwBoek = boekService.addBoek(boekDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(nieuwBoek);
->>>>>>> 02973030103b9ffe3e07b1f896294c71a57390af
     }
 
     @GetMapping("/api/boeken/{id}")
-    public BoekDTO getBoekById(@PathVariable("id") Long id) {
-        @SuppressWarnings("null")
-        Long safeId = id;
-        return boekRepository.findById(safeId)
-            .map(boekService::mapToDTO)
-            .orElseThrow(() -> new IllegalArgumentException("Boek met ID " + safeId + " niet gevonden"));
+    public Boek getBoekById(@PathVariable("id") Long id) {
+        return boekRepository.findById(id).orElse(null);
     }
 }

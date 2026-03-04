@@ -1,10 +1,5 @@
 package ap.be.backend.service;
 
-<<<<<<< HEAD
-import java.util.Arrays;
-import java.util.List;
-=======
->>>>>>> 02973030103b9ffe3e07b1f896294c71a57390af
 import org.springframework.stereotype.Service;
 
 import ap.be.backend.dto.BoekDTO;
@@ -41,31 +36,5 @@ public class BoekService {
         boek.setLocatie(boekDTO.locatie());
         boek.setAfbeelding(boekDTO.afbeelding());
         return boekRepository.save(boek);
-<<<<<<< HEAD
-    }
-
-    public BoekDTO mapToDTO(Boek boek) {
-        return new BoekDTO(
-            boek.getId(),
-            boek.getTitel(),
-            boek.getAuteur(),
-            boek.getIsbn(),
-            boek.getUitgever(),
-            boek.getUitgaveJaar(),
-            boek.getPagina(),
-            boek.getGenre().isEmpty() ? "" : boek.getGenre().get(0),
-            boek.getBeschrijving(),
-            boek.getAantalExemplaren(),
-            boek.getLocatie(),
-            boek.getAfbeelding()
-        );
-    }
-
-    public List<BoekDTO> getAllBoeken() {
-        return boekRepository.findAll().stream()
-            .map(this::mapToDTO)
-            .toList();
-=======
->>>>>>> 02973030103b9ffe3e07b1f896294c71a57390af
     }
 }
