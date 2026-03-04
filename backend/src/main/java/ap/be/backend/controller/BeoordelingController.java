@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import ap.be.backend.dto.BeoordelingDTO;
-import ap.be.backend.entity.Beoordeling;
 import ap.be.backend.service.BeoordelingService;
 
 @RestController

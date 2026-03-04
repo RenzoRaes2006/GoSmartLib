@@ -22,7 +22,9 @@ public class BeoordelingService {
     }
 
     public void beoordelingOpslaan(BeoordelingDTO dto) {
-        beoordelingRepository.save(assemble(dto));
+        @SuppressWarnings("null")
+        Beoordeling beoordeling = assemble(dto);
+        beoordelingRepository.save(beoordeling);
     }
 
     private BeoordelingDTO assemble(Beoordeling beoordeling) {

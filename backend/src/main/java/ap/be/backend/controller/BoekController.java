@@ -33,16 +33,15 @@ public class BoekController {
 
     @GetMapping("/api/boeken")
     @CrossOrigin(origins = "*", allowedHeaders = "*")
-    public List<Boek> getAlleBoeken() {
-
-        return boekRepository.findAll();
+    public List<BoekDTO> getAlleBoeken() {
+        return boekService.getAllBoeken();
     }
 
     @PostMapping("/api/boeken")
-    public ResponseEntity<Boek> postBoek(@Valid @RequestBody BoekDTO boekDTO) {
+    public ResponseEntity<BoekDTO> postBoek(@Valid @RequestBody BoekDTO boekDTO) {
         try {
             Boek nieuwBoek = boekService.addBoek(boekDTO);
-            return ResponseEntity.status(HttpStatus.CREATED).body(nieuwBoek);
+            return ResponseEntity.status(HttpStatus.CREATED).body(boekService.mapToDTO(nieuwBoek));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
@@ -54,7 +53,11 @@ public class BoekController {
     }
 
     @GetMapping("/api/boeken/{id}")
-    public Boek getBoekById(@PathVariable("id") Long id) {
-        return boekRepository.findById(id).orElse(null);
+    public BoekDTO getBoekById(@PathVariable("id") Long id) {
+        @SuppressWarnings("null")
+        Long safeId = id;
+        return boekRepository.findById(safeId)
+            .map(boekService::mapToDTO)
+            .orElseThrow(() -> new IllegalArgumentException("Boek met ID " + safeId + " niet gevonden"));
     }
 }

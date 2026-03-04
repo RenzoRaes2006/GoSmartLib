@@ -14,9 +14,6 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 
-enum Rol {
-    LEERLING, LEERKRACHT, BEHEERDER
-}
 
 @Entity
 @Table(name = "Gebruikers")
@@ -88,5 +85,13 @@ public class Gebruiker {
 
     public void setRol(Rol role) {
         this.Rol = role;
+    }
+
+    public long getSchoolId() {
+        return SchoolId;
+    }
+
+    public void setSchoolId(long schoolId) {
+        this.SchoolId = schoolId;
     }
 }
