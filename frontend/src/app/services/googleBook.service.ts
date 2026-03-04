@@ -21,11 +21,11 @@ export class GoogleBookService {
             auteur: boekInfo.authors ? boekInfo.authors.join(', ') : '',
             isbn: isbn,
             uitgever: boekInfo.publisher || '',
-            publicatieJaar: boekInfo.publishedDate ? boekInfo.publishedDate.substring(0, 4) : '',
-            aantalPaginas: boekInfo.pageCount ? boekInfo.pageCount.toString() : '',
-            genre: boekInfo.categories ? boekInfo.categories[0] : '',
+            uitgaveJaar: boekInfo.publishedDate ? boekInfo.publishedDate.substring(0, 4) : '',
+            pagina: boekInfo.pageCount ? boekInfo.pageCount.toString() : '',
+            genre: boekInfo.categories ? boekInfo.categories.join(', ') : '',
             beschrijving: boekInfo.description || '',
-            coverUrl: boekInfo.imageLinks ? boekInfo.imageLinks.thumbnail : '',
+            afbeelding: boekInfo.imageLinks ? boekInfo.imageLinks.thumbnail : '',
           };
         }
         return null;

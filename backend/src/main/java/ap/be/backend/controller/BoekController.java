@@ -11,8 +11,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import ap.be.backend.dto.BoekDTO;
 import ap.be.backend.entity.Boek;
@@ -40,17 +38,8 @@ public class BoekController {
 
     @PostMapping("/api/boeken")
     public ResponseEntity<Boek> postBoek(@Valid @RequestBody BoekDTO boekDTO) {
-        try {
-            Boek nieuwBoek = boekService.addBoek(boekDTO);
-            return ResponseEntity.status(HttpStatus.CREATED).body(nieuwBoek);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
-        }
-    }
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<String> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Ongeldige invoer: " + ex.getMessage());
+        Boek nieuwBoek = boekService.addBoek(boekDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(nieuwBoek);
     }
 
     @GetMapping("/api/boeken/{id}")
