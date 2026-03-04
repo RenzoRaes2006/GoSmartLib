@@ -9,10 +9,9 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 public record BeoordelingDTO(
-        @JsonProperty("id") Long id,
-        @JsonProperty("gebruikerId") @NotNull @Min(1) long gebruikerId,
-        @JsonProperty("boekId") @NotNull @Min(1) long boekId,
-        @JsonProperty("waardering") @NotNull @Min(1) @Max(5) int waardering,
-        @JsonProperty("inhoud") @NotBlank @Size(max = 1000) String inhoud) {
-
+                @JsonProperty("id") Long id,
+                @JsonProperty("gebruikerId") @NotNull @Min(1) long gebruikerId,
+                @JsonProperty("boekId") @NotNull @Min(1) long boekId,
+                @JsonProperty("waardering") @NotNull @Min(1) @Max(5) int waardering,
+                @JsonProperty("inhoud") @NotBlank @Size(max = 1000) String inhoud) {
 }
