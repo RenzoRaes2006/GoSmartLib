@@ -6,11 +6,12 @@ import { Beoordeling } from './review.model';
   providedIn: 'root',
 })
 export class ReviewService {
+  private readonly gebruikTraefik = true; // Zet op true als je Traefik gebruikt, anders false
+  private apiUrl = this.gebruikTraefik
+    ? 'http://frontend.localhost/api'
+    : 'http://localhost:8081/api';
 
-  private readonly gebruikTraefik = false; // Zet op true als je Traefik gebruikt, anders false
-  private apiUrl = this.gebruikTraefik ? 'http://frontend.localhost/api' : 'http://localhost:8081/api';
-
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
   // ik moet de pathen nog checken qua restful api
   getBeoordelingenOpBoekId(bookId: number) {
