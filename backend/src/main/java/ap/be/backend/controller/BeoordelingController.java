@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import ap.be.backend.dto.BeoordelingDTO;
-import ap.be.backend.entity.Beoordeling;
 import ap.be.backend.service.BeoordelingService;
 
 @RestController
@@ -25,12 +24,12 @@ public class BeoordelingController {
     }
 
     @GetMapping("/books/{id}/reviews")
-    public List<BeoordelingDTO> getReviewsByBookId(@PathVariable("id") Long id) {
-        return beoordelingService.getReviewByBookId(id);
+    public List<BeoordelingDTO> getBeoordelingenOpBoekId(@PathVariable("id") Long id) {
+        return beoordelingService.getBeoordelingenOpBoekId(id);
     }
 
     @PostMapping("/reviews")
-    public BeoordelingDTO addReview(@RequestBody BeoordelingDTO beoordeling) {
+    public BeoordelingDTO beoordelingOpslaan(@RequestBody BeoordelingDTO beoordeling) {
         beoordelingService.beoordelingOpslaan(beoordeling);
         return beoordeling;
     }
