@@ -1,5 +1,11 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  FormBuilder,
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { RouterLink, ActivatedRoute } from '@angular/router';
 import { ReviewService } from './review-service';
 import { Beoordeling } from './review.model';
@@ -20,8 +26,8 @@ export class Detail implements OnInit {
 
   boek: Boek | null = null;
   form!: FormGroup;
-  submissionError: string = "";
-  boekGenresString: string = "";
+  submissionError: string = '';
+  boekGenresString: string = '';
 
   ngOnInit(): void {
     const boekId = Number(this.route.snapshot.paramMap.get('id'));
@@ -31,7 +37,7 @@ export class Detail implements OnInit {
         this.boek = boek;
         this.boekGenresString = boek.genre.join(', ');
       },
-      error: (err) => console.log("Iets mis gegaan met het krijgen van de boek details. ", err)
+      error: (err) => console.log('Iets mis gegaan met het krijgen van de boek details. ', err),
     });
 
     this.form = this.fb.group({
@@ -42,7 +48,8 @@ export class Detail implements OnInit {
 
   submitReview() {
     if (this.form.invalid) {
-      this.submissionError = "Vul alle verplichte velden in en zorg dat je commentaar niet langer is dan 500 karakters.";
+      this.submissionError =
+        'Vul alle verplichte velden in en zorg dat je commentaar niet langer is dan 500 karakters.';
       return;
     }
     const raw = this.form.value;
@@ -54,18 +61,17 @@ export class Detail implements OnInit {
     };
 
     console.log('Ingediende review:', review);
-    
+
     this.reviewService.voegBeoordelingToe(review).subscribe({
       next: (response) => {
         console.log('Review succesvol toegevoegd:', response);
         this.form.reset();
-        this.submissionError = "";
+        this.submissionError = '';
       },
       error: (error) => {
         console.error('Fout bij het toevoegen van review:', error);
-        this.submissionError = "Er ging iets mis bij het toevoegen. Probeer opnieuw.";
-      }
+        this.submissionError = 'Er ging iets mis bij het toevoegen. Probeer opnieuw.';
+      },
     });
   }
-
 }

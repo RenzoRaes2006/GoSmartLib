@@ -4,9 +4,9 @@
     </button>
 
     <div *ngIf="toonIsbnZoek">
-        <label for="zoekIsbn">ISBN-13:</label>
-        <input id="zoekIsbn" type="text" [value]="zoekIsbn" (input)="zoekIsbn = $any($event.target).value.slice(0, 13)" placeholder="9789012345678" maxlength="13"/>
-        <button type="button" (click)="zoekBoekOpIsbn()" [disabled]="zoekIsbn.length !== 13">
+        <label for="zoekIsbn">ISBN:</label>
+        <input id="zoekIsbn" type="text" [value]="zoekIsbn" (input)="zoekIsbn = $any($event.target).value.slice(0, 13)" placeholder="9789012345678 of 0747532699" maxlength="13"/>
+        <button type="button" (click)="zoekBoekOpIsbn()" [disabled]="zoekIsbn.length !== 10 && zoekIsbn.length !== 13">
             Zoek
         </button>
         <small *ngIf="zoekMessage" class="zoek-melding">{{ zoekMessage }}</small>
@@ -81,8 +81,8 @@
     </div>
 
     <div>
-        <label for="genre">Genre:</label>
-        <input id="genre" formControlName="genre" />
+        <label for="genre">Genre (kommagescheiden):</label>
+        <input id="genre" formControlName="genre" placeholder="Fantasy, Mystery, Science Fiction" />
         <div *ngIf="boekForm.get('genre')?.invalid && boekForm.get('genre')?.touched">
         <small *ngIf="boekForm.get('genre')?.errors?.['required']">Genre is verplicht.</small>
         <small *ngIf="boekForm.get('genre')?.errors?.['minlength']">Genre moet minimaal 2 tekens bevatten.</small>

@@ -3,8 +3,14 @@ package ap.be.backend.entity;
 import java.util.List;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
+@Getter
+@Setter
+@NoArgsConstructor
 public class Boek {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -16,7 +22,7 @@ public class Boek {
     @Column
     private String auteur;
 
-    @Column
+    @Column(unique = true)
     private String isbn;
 
     @Column
@@ -31,10 +37,10 @@ public class Boek {
     @ElementCollection
     private List<String> genre;
 
-    @Column
+    @Column(columnDefinition = "LONGTEXT")
     private String beschrijving;
 
-    @Column
+    @Column(columnDefinition = "LONGTEXT")
     private String afbeelding;
 
     @Column
@@ -43,108 +49,8 @@ public class Boek {
     @Column
     private String locatie;
 
-    public Boek() {
-
-    }
-
     public Boek(String titel, String auteur) {
         this.titel = titel;
         this.auteur = auteur;
-    }
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public String getTitel() {
-        return titel;
-    }
-
-    public void setTitel(String titel) {
-        this.titel = titel;
-    }
-
-    public String getAuteur() {
-        return auteur;
-    }
-
-    public void setAuteur(String auteur) {
-        this.auteur = auteur;
-    }
-
-    public String getIsbn() {
-        return isbn;
-    }
-
-    public void setIsbn(String isbn) {
-        this.isbn = isbn;
-    }
-
-    public String getUitgever() {
-        return uitgever;
-    }
-
-    public void setUitgever(String uitgever) {
-        this.uitgever = uitgever;
-    }
-
-    public int getPagina() {
-        return pagina;
-    }
-
-    public void setPagina(int pagina) {
-        this.pagina = pagina;
-    }
-
-    public String getUitgaveJaar() {
-        return uitgaveJaar;
-    }
-
-    public void setUitgaveJaar(String uitgaveJaar) {
-        this.uitgaveJaar = uitgaveJaar;
-    }
-
-    public List<String> getGenre() {
-        return genre;
-    }
-
-    public void setGenre(List<String> genre) {
-        this.genre = genre;
-    }
-
-    public String getBeschrijving() {
-        return beschrijving;
-    }
-
-    public void setBeschrijving(String beschrijving) {
-        this.beschrijving = beschrijving;
-    }
-
-    public String getAfbeelding() {
-        return afbeelding;
-    }
-
-    public void setAfbeelding(String afbeelding) {
-        this.afbeelding = afbeelding;
-    }
-
-    public int getAantalExemplaren() {
-        return aantalExemplaren;
-    }
-
-    public void setAantalExemplaren(int aantalExemplaren) {
-        this.aantalExemplaren = aantalExemplaren;
-    }
-
-    public String getLocatie() {
-        return locatie;
-    }
-
-    public void setLocatie(String locatie) {
-        this.locatie = locatie;
     }
 }
