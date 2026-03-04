@@ -14,10 +14,10 @@ export class ReviewService {
 
   // ik moet de pathen nog checken qua restful api
   getBeoordelingenOpBoekId(bookId: number) {
-    return this.http.get(`${this.apiUrl}/books/${bookId}/reviews`);
+    return this.http.get<Beoordeling[]>(`${this.apiUrl}/books/${bookId}/reviews`);
   }
 
   voegBeoordelingToe(beoordeling: Beoordeling) {
-    return this.http.post(`${this.apiUrl}/reviews`, beoordeling);
+    return this.http.post<Beoordeling>(`${this.apiUrl}/reviews`, beoordeling);
   }
 }
