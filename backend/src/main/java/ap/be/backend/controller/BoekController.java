@@ -1,4 +1,3 @@
-
 package ap.be.backend.controller;
 
 import java.util.List;
@@ -11,8 +10,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import ap.be.backend.dto.BoekDTO;
 import ap.be.backend.entity.Boek;
@@ -33,31 +30,19 @@ public class BoekController {
 
     @GetMapping("/api/boeken")
     @CrossOrigin(origins = "*", allowedHeaders = "*")
-    public List<BoekDTO> getAlleBoeken() {
-        return boekService.getAllBoeken();
+    public List<Boek> getAlleBoeken() {
+
+        return boekRepository.findAll();
     }
 
     @PostMapping("/api/boeken")
-    public ResponseEntity<BoekDTO> postBoek(@Valid @RequestBody BoekDTO boekDTO) {
-        try {
-            Boek nieuwBoek = boekService.addBoek(boekDTO);
-            return ResponseEntity.status(HttpStatus.CREATED).body(boekService.mapToDTO(nieuwBoek));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
-        }
-    }
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<String> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Ongeldige invoer: " + ex.getMessage());
+    public ResponseEntity<Boek> postBoek(@Valid @RequestBody BoekDTO boekDTO) {
+        Boek nieuwBoek = boekService.addBoek(boekDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(nieuwBoek);
     }
 
     @GetMapping("/api/boeken/{id}")
-    public BoekDTO getBoekById(@PathVariable("id") Long id) {
-        @SuppressWarnings("null")
-        Long safeId = id;
-        return boekRepository.findById(safeId)
-            .map(boekService::mapToDTO)
-            .orElseThrow(() -> new IllegalArgumentException("Boek met ID " + safeId + " niet gevonden"));
+    public Boek getBoekById(@PathVariable("id") Long id) {
+        return boekRepository.findById(id).orElse(null);
     }
 }
