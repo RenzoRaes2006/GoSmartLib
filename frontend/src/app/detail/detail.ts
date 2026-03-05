@@ -89,7 +89,7 @@ export class Detail implements OnInit {
         this.form.reset();
         this.submissionError = '';
         this.beoordelingen.push(response); // Voeg de nieuwe beoordeling toe aan de lijst zodat deze direct zichtbaar is
-        this.updateBoekWaardering();
+        this.updateBoekWaardering(); // Werk de gemiddelde waardering bij na het toevoegen van een nieuwe beoordeling
       },
       error: (error) => {
         console.error('Fout bij het toevoegen van beoordeling:', error);
