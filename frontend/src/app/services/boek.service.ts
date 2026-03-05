@@ -8,7 +8,7 @@ import { NieuwBoek } from '../models/NieuwBoek';
   providedIn: 'root',
 })
 export class BoekService {
-  private readonly gebruikTraefik = true; // Zet op true als je Traefik gebruikt, anders false
+  private readonly gebruikTraefik = false; // Zet op true als je Traefik gebruikt, anders false
   private apiUrl = this.gebruikTraefik
     ? 'http://frontend.localhost/api/boeken'
     : 'http://localhost:8081/api/boeken';
