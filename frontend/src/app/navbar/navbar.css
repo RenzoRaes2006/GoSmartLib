@@ -2,13 +2,20 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 40px;
+  padding: 0 24px;
   background-color: white;
   border-bottom: 1px solid #eef2f7;
-  height: 70px;
+  height: 42px;
+  box-sizing: border-box;
   position: sticky;
   top: 0;
   z-index: 1000;
+}
+
+.nav-left,
+.nav-right {
+  display: flex;
+  align-items: center;
 }
 
 .logo {
@@ -18,27 +25,14 @@
   cursor: pointer;
 }
 
-.logo-text { font-size: 20px; color: #333; }
-.logo-text strong { color: #4a90e2; }
-
-.search-container {
+.logo a {
   display: flex;
   align-items: center;
-  background-color: #f0f4f9;
-  border-radius: 8px;
-  padding: 5px 15px;
-  width: 500px;
-  border-color:#4a90e2 ;
+  text-decoration: none;
 }
 
-.search-container input {
-  border: none;
-  background: transparent;
-  padding: 10px;
-  width: 100%;
-  outline: none;
-  color: #555;
-}
+.logo-text { font-size: 18px; color: #333; }
+.logo-text strong { color: #4a90e2; }
 
 .scan-btn {
   background: white;
@@ -51,23 +45,28 @@
 
 .nav-right {
   display: flex;
-  gap: 25px;
+  gap: 18px;
   align-items: center;
 }
 
 .nav-link {
   text-decoration: none;
   color: #666;
-  font-size: 14px;
+  font-size: 13px;
   display: flex;
   align-items: center;
   gap: 5px;
+  line-height: 1;
 }
 
 .logout-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   background: none;
   border: none;
   color: #ff8c00;
   cursor: pointer;
   font-size: 18px;
+  line-height: 1;
 }

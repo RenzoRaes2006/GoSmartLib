@@ -57,8 +57,7 @@
 
 .locatie-badge {
   left: 10px;
-  background-color: #4a90e2;
-  border-radius: 20px;
+  color: #4a90e2;
   
 }
 
@@ -69,7 +68,6 @@
 .status-badge.beschikbaar { background-color: #27ae60; }
 .status-badge.uitgeleend { background-color: #e74c3c; }
 
-/* Tekst styling */
 .boek-info {
   padding: 15px;
 }

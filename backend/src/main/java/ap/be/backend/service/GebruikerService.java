@@ -16,19 +16,18 @@ public class GebruikerService {
 
     public GebruikerDTO mapToDTO(Gebruiker gebruiker) {
         return new GebruikerDTO(
-            gebruiker.getGebruikerID(),
-            gebruiker.getSchoolId(),
-            gebruiker.getVoorNaam(),
-            gebruiker.getAchternaam(),
-            gebruiker.getEmail(),
-            gebruiker.getRol().toString()
-        );
+                gebruiker.getGebruikerID(),
+                gebruiker.getSchoolId(),
+                gebruiker.getVoorNaam(),
+                gebruiker.getAchternaam(),
+                gebruiker.getEmail(),
+                gebruiker.getRol().toString());
     }
 
     public Gebruiker getGebruikerById(Long id) {
         @SuppressWarnings("null")
         Long safeId = id;
         return gebruikerRepository.findById(safeId)
-            .orElseThrow(() -> new IllegalArgumentException("Gebruiker met ID " + safeId + " niet gevonden"));
+                .orElseThrow(() -> new IllegalArgumentException("Gebruiker met ID " + safeId + " niet gevonden"));
     }
 }
