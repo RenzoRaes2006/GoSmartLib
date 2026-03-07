@@ -10,7 +10,7 @@ variables:
   image: docker:27.5.1
   stage: build
   tags:
-    - docker
+    - vm-runner
   before_script:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
 
@@ -36,10 +36,10 @@ deploy-to-server:
   stage: deploy
   image: docker:27.5.1
   tags:
-    - docker
+    - vm-runner
   script:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
     - docker compose pull
     - docker compose up -d
   rules:
-    - if: $CI_COMMIT_BRANCH == "feature-6-AddReview"s
+    - if: $CI_COMMIT_BRANCH == "feature-6-AddReview"
