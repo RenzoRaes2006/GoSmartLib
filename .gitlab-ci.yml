@@ -39,6 +39,7 @@ deploy-to-server:
     - vm-runner
   script:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+    - docker network create proxy || true
     - docker compose -f traefik/docker-compose.yaml up -d
     - docker compose pull
     - docker compose up -d
