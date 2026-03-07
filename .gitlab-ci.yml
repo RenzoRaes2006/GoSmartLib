@@ -42,4 +42,4 @@ deploy-to-server:
     - docker compose pull
     - docker compose up -d
   rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_BRANCH == "feature-6-AddReview"s

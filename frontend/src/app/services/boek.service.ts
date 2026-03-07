@@ -8,20 +8,21 @@ import { NieuwBoek } from '../models/NieuwBoek';
   providedIn: 'root',
 })
 export class BoekService {
-  private readonly gebruikTraefik = false; // Zet op true als je Traefik gebruikt, anders false
-  private apiUrl = this.gebruikTraefik
-    ? 'http://frontend.localhost/api/boeken'
-    : 'http://localhost:8081/api/boeken';
+  // private readonly gebruikTraefik = true; // Zet op true als je Traefik gebruikt, anders false
+  // private apiUrl = this.gebruikTraefik
+  //   ? 'http://frontend.localhost/api/boeken'
+  //   : 'http://localhost:8081/api/boeken';
+  private apiUrl = '/api';
 
   constructor(private http: HttpClient) {}
 
   getBoeken(): Observable<Boek[]> {
-    return this.http.get<Boek[]>(this.apiUrl);
+    return this.http.get<Boek[]>(`${this.apiUrl}/boeken`);
   }
   getBoekOpId(id: number): Observable<Boek> {
-    return this.http.get<Boek>(`${this.apiUrl}/${id}`);
+    return this.http.get<Boek>(`${this.apiUrl}/boeken/${id}`);
   }
   toevoegen(boek: NieuwBoek): Observable<Boek> {
-    return this.http.post<Boek>(this.apiUrl, boek);
+    return this.http.post<Boek>(`${this.apiUrl}/boeken`, boek);
   }
 }
