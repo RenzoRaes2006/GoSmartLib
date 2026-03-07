@@ -40,8 +40,8 @@ deploy-to-server:
   script:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
     - docker network create proxy || true
-    - docker compose -f traefik/docker-compose.yaml up -d
+    - docker compose -f traefik/docker-compose.yaml up -d --build
     - docker compose pull
-    - docker compose up -d
+    - docker compose up -d --build
   rules:
     - if: $CI_COMMIT_BRANCH == "feature-6-AddReview"
