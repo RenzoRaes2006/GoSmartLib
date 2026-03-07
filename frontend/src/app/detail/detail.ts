@@ -11,6 +11,7 @@ import { BoekService } from '../services/boek.service';
 import { Boek } from '../models/Boek';
 import { ReviewService } from '../services/review-service';
 import { Beoordeling } from '../models/review.model';
+import { LeeslijstService } from '../services/leeslijstService';
 
 @Component({
   selector: 'app-detail',
@@ -23,7 +24,7 @@ export class Detail implements OnInit {
   boekService = inject(BoekService);
   fb = inject(FormBuilder);
   route = inject(ActivatedRoute);
-
+  leeslijstService = inject(LeeslijstService);
   boek: Boek | null = null;
   form!: FormGroup;
   submissionError: string = '';
@@ -58,6 +59,45 @@ export class Detail implements OnInit {
     //   const boekId = Number(params.get('id'));
     //   // Roep hier boekService en beoordelingService aan met boekId
     // });
+  }
+
+  voegToeAanFavorieten() {
+    if (!this.boek) return;
+
+    const gebruikerId = 1; // TODO: dynamisch maken via inlog smartschool
+    this.leeslijstService.voegBoekToeAanMap(gebruikerId, 'Favorieten', this.boek.id!).subscribe({
+      next: (response) => {
+        alert('Boek succesvol toegevoegd aan je Favorieten!');
+      },
+      error: (err) => {
+        console.error('Fout bij toevoegen:', err);
+        alert('Er ging iets mis bij het toevoegen aan favorieten.');
+      },
+    });
+  }
+
+  voegToeAanLeeslijst() {
+    if (!this.boek) return;
+
+    const mapNaam = prompt(
+      'Aan welk mapje wil je dit boek toevoegen? (Bijv. Schoolboeken, Wil ik lezen)',
+      'Wil ik lezen',
+    );
+
+    if (mapNaam && mapNaam.trim() !== '') {
+      const gebruikerId = 1; // TODO:  dynamisch maken via inlog smartschool
+      this.leeslijstService
+        .voegBoekToeAanMap(gebruikerId, mapNaam.trim(), this.boek.id!)
+        .subscribe({
+          next: (response) => {
+            alert(`Boek succesvol toegevoegd aan mapje: ${mapNaam}!`);
+          },
+          error: (err) => {
+            console.error('Fout bij toevoegen:', err);
+            alert('Er ging iets mis bij het toevoegen aan de leeslijst.');
+          },
+        });
+    }
   }
 
   submitBeoordeling() {

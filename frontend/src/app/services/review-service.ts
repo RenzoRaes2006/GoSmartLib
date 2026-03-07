@@ -6,7 +6,7 @@ import { Beoordeling } from '../models/review.model';
   providedIn: 'root',
 })
 export class ReviewService {
-  private readonly gebruikTraefik = true; // Zet op true als je Traefik gebruikt, anders false
+  private readonly gebruikTraefik = false; // Zet op true als je Traefik gebruikt, anders false
   private apiUrl = this.gebruikTraefik
     ? 'http://frontend.localhost/api'
     : 'http://localhost:8081/api';

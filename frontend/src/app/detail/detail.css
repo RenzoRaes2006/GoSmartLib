@@ -31,6 +31,29 @@
     font-weight: bold;
     cursor: pointer;
 }
+/* Container voor de actieknoppen onder de foto */
+.action-buttons {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+}
+
+/* Zorgt dat beide knoppen even breed worden en de stijl van de andere knoppen overnemen */
+.action-buttons button {
+    flex: 1; 
+    background-color: #a8f0c1; /* Lichtgroen, of kies een andere kleur! */
+    border: none;
+    padding: 12px;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* Optioneel: Geef de Leeslijst knop een net iets andere kleur zodat ze opvallen */
+.action-buttons button:last-child {
+    background-color: #1a3a5a; 
+    color: white;
+}
 
 .book-info {
     border-top: 1px solid #ddd;

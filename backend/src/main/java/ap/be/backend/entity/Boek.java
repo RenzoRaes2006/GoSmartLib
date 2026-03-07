@@ -37,7 +37,8 @@ public class Boek {
     @ElementCollection
     private List<String> genre;
 
-    @Column(columnDefinition = "TEXT")
+    @Lob
+    @Column(length = 100000)
     private String beschrijving;
 
     @Column(columnDefinition = "LONGTEXT")

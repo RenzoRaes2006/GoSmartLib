@@ -37,7 +37,6 @@ public class GebruikerControllerTest {
 
         Boek mockBoek = new Boek();
         mockBoek.setTitel("Test Boek voor Leeslijst");
-        mockUser.setLeeslijst(Set.of(mockBoek));
 
         when(gebruikerRepository.findById(1L)).thenReturn(Optional.of(mockUser));
 
