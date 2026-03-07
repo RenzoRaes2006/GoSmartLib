@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 public class BeoordelingServiceTest {
@@ -34,7 +35,15 @@ public class BeoordelingServiceTest {
     @Test
     public void given_bestaandeBeoordelingen_when_getBeoordelingenOpBoekId_then_returnMappedDTOs() {
         Long boekId = 1L;
-        Beoordeling beoordeling = new Beoordeling(); // Lege entiteit is genoeg voor de lijst-test
+
+        // 1. Maak een Boek en stel de ID in
+        Boek boek = new Boek();
+        // Stel in hoe jij je ID set, bijv: boek.setId(boekId);
+
+        // 2. Koppel het boek aan de beoordeling
+        Beoordeling beoordeling = new Beoordeling();
+        beoordeling.setBoek(boek);
+
         when(beoordelingRepository.findByBoekId(boekId)).thenReturn(List.of(beoordeling));
 
         List<BeoordelingDTO> result = beoordelingService.getBeoordelingenOpBoekId(boekId);
