@@ -1,10 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
 import {
   FormBuilder,
-<<<<<<< HEAD
-=======
-  FormControl,
->>>>>>> b355cb2e211c6af08de288b29a7547bfeb4829f1
   FormGroup,
   ReactiveFormsModule,
   Validators,
