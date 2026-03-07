@@ -100,7 +100,7 @@ public class BoekSeed implements CommandLineRunner {
                     // 3. Uitgever
                     String uitgever = (String) volumeInfo.get("publisher");
                     nieuwBoek.setUitgever(uitgever != null ? uitgever : "Onbekende uitgever");
-                    
+
                     // Opslaan
                     boekRepository.save(nieuwBoek);
                 }
