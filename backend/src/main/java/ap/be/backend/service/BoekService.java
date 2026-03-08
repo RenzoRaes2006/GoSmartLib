@@ -1,5 +1,7 @@
 package ap.be.backend.service;
 
+import java.util.Optional;
+
 import org.springframework.stereotype.Service;
 
 import ap.be.backend.dto.BoekDTO;
@@ -36,5 +38,38 @@ public class BoekService {
         boek.setLocatie(boekDTO.locatie());
         boek.setAfbeelding(boekDTO.afbeelding());
         return boekRepository.save(boek);
+    }
+
+    public Boek updateBoek(Long id, BoekDTO boekDTO) {
+        Optional<Boek> bestaandBoek = boekRepository.findById(id);
+        if (bestaandBoek.isEmpty()) {
+            return null;
+        }
+
+        Boek boek = bestaandBoek.get();
+        boek.setTitel(boekDTO.titel());
+        boek.setAuteur(boekDTO.auteur());
+        boek.setIsbn(boekDTO.isbn());
+        boek.setUitgever(boekDTO.uitgever());
+        boek.setUitgaveJaar(boekDTO.uitgaveJaar());
+        boek.setGenre(boekDTO.genre());
+        boek.setPagina(boekDTO.pagina());
+        boek.setBeschrijving(boekDTO.beschrijving());
+        boek.setAantalExemplaren(boekDTO.aantalExemplaren());
+        boek.setLocatie(boekDTO.locatie());
+        boek.setAfbeelding(boekDTO.afbeelding());
+        return boekRepository.save(boek);
+    }
+
+    public boolean deleteBoek(Long id) {
+        if (boekRepository.existsById(id)) {
+            boekRepository.deleteById(id);
+            return true;
+        }
+        return false;
+    }
+
+    public Boek getBoekByIsbn(String isbn) {
+        return boekRepository.findByIsbn(isbn.trim()).orElse(null);
     }
 }

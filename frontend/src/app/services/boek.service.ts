@@ -21,7 +21,16 @@ export class BoekService {
   getBoekOpId(id: number): Observable<Boek> {
     return this.http.get<Boek>(`${this.apiUrl}/${id}`);
   }
+  getBoekOpIsbn(isbn: string): Observable<Boek> {
+    return this.http.get<Boek>(`${this.apiUrl}/isbn/${isbn}`);
+  }
   toevoegen(boek: NieuwBoek): Observable<Boek> {
     return this.http.post<Boek>(this.apiUrl, boek);
+  }
+  wijzigen(id: number, boek: Boek): Observable<Boek> {
+    return this.http.put<Boek>(`${this.apiUrl}/${id}`, boek);
+  }
+  verwijderen(id: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/${id}`, { responseType: 'text' });
   }
 }

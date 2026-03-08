@@ -1,6 +1,18 @@
+<div class="mode-selector">
+    <button type="button" (click)="setMode('toevoegen')" [class.active]="mode === 'toevoegen'">
+        Boek Toevoegen
+    </button>
+    <button type="button" (click)="setMode('wijzigen')" [class.active]="mode === 'wijzigen'">
+        Boek Wijzigen
+    </button>
+    <button type="button" (click)="setMode('verwijderen')" [class.active]="mode === 'verwijderen'">
+        Boek Verwijderen
+    </button>
+</div>
+
 <div class="isbn-zoek-boek">
     <button type="button" (click)="toggleIsbnZoek()">
-        {{ toonIsbnZoek ? 'Verberg ISBN Zoekveld' : 'Zoek met isbn' }}
+        {{ toonIsbnZoek ? 'Verberg ISBN Zoekveld' : 'Zoek op ISBN' }}
     </button>
 
     <div *ngIf="toonIsbnZoek">
@@ -13,9 +25,11 @@
     </div>
 </div>
 
+<p *ngIf="mode !== 'toevoegen' && !boekGevonden">
+    Zoek eerst een bestaand boek op ISBN om te {{ mode === 'wijzigen' ? 'wijzigen' : 'verwijderen' }}.
+</p>
 
-
-<form [formGroup]="boekForm" (ngSubmit)="onSubmit()">
+<form [formGroup]="boekForm" (ngSubmit)="onSubmit()" *ngIf="mode === 'toevoegen' || boekGevonden">
     <div>
         <label for="titel">Titel:</label>
         <input id="titel" formControlName="titel" />
@@ -45,7 +59,7 @@
                 placeholder="9789012345678"
                 maxlength="13"
             />
-            <button type="button" (click)="genereerIsbn()">Genereer ISBN</button>
+            <button type="button" (click)="genereerIsbn()" *ngIf="mode !== 'verwijderen'">Genereer ISBN</button>
         </div>
         <div *ngIf="boekForm.get('isbn')?.invalid && boekForm.get('isbn')?.touched">
             <small *ngIf="boekForm.get('isbn')?.errors?.['required']">ISBN is verplicht.</small>
@@ -123,8 +137,18 @@
     </div>
     
     <div class="form-actions">
-        <button type="submit" [disabled]="boekForm.invalid">Boek Toevoegen</button>
-        <button type="button" (click)="resetForm()" class="reset-button">Clear</button>
+        <button type="submit" [disabled]="(mode !== 'verwijderen' && boekForm.invalid) || (mode !== 'toevoegen' && !boekGevonden)">
+            {{
+                mode === 'toevoegen'
+                    ? 'Boek Toevoegen'
+                    : mode === 'wijzigen'
+                        ? 'Wijzigingen Opslaan'
+                        : 'Boek Verwijderen'
+            }}
+        </button>
+        <button type="button" (click)="resetForm()" class="reset-button">
+            {{ mode === 'verwijderen' ? 'Annuleren' : 'Clear' }}
+        </button>
         <button type="button" class="terug-button" routerLink="/">Terug</button>
     </div>
 </form>
@@ -135,5 +159,29 @@
 
 <div class="message-container success-message" *ngIf="successMessage">
     {{ successMessage }}
+</div>
+
+<!-- Custom Delete Confirmation Modal -->
+<div class="modal-overlay" *ngIf="toonVerwijderModal" (click)="sluitVerwijderModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h3>Boek Verwijderen</h3>
+        </div>
+        <div class="modal-body">
+            <p>Weet je zeker dat je dit boek wilt verwijderen?</p>
+            <p class="boek-info" *ngIf="naarTeWijzigenBoek">
+                <strong>{{ naarTeWijzigenBoek.titel }}</strong> door {{ naarTeWijzigenBoek.auteur }}
+            </p>
+            <p class="warning-text">Deze actie kan niet ongedaan worden gemaakt.</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn-annuleren" (click)="sluitVerwijderModal()">
+                Annuleren
+            </button>
+            <button type="button" class="btn-verwijderen" (click)="bevestigVerwijderen()">
+                Verwijderen
+            </button>
+        </div>
+    </div>
 </div>
 

@@ -108,6 +108,37 @@
   margin-top: 8px;
 }
 
+/* Mode Selector */
+.mode-selector {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.mode-selector button {
+  padding: 9px 14px;
+  background-color: #f5f5f5;
+  border: 1px solid #d4d4d4;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  color: #333;
+  transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.mode-selector button:hover {
+  background-color: #ececec;
+}
+
+.mode-selector button.active {
+  background-color: #ea580c;
+  color: #fff;
+  border-color: #c2410c;
+}
+
 /* Formulier */
 form {
   border: 1px solid #e0e0e0;
@@ -286,6 +317,134 @@ form > div > div button[type='button']:hover {
   border: 1px solid #bbf7d0;
 }
 
+/* Custom Delete Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.modal-content {
+  background: white;
+  border-radius: 12px;
+  padding: 0;
+  width: 90%;
+  max-width: 450px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal-header {
+  padding: 18px 22px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.modal-body {
+  padding: 20px 22px;
+}
+
+.modal-body p {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  color: #555;
+  line-height: 1.5;
+}
+
+.modal-body .boek-info {
+  background: #f9fafb;
+  padding: 12px;
+  border-radius: 8px;
+  border-left: 3px solid #ea580c;
+  margin: 16px 0;
+}
+
+.modal-body .boek-info strong {
+  color: #333;
+  font-weight: 600;
+}
+
+.modal-body .warning-text {
+  color: #dc2626;
+  font-size: 13px;
+  font-weight: 500;
+  margin-top: 16px;
+}
+
+.modal-footer {
+  padding: 16px 22px;
+  border-top: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.modal-footer button {
+  padding: 9px 18px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid;
+}
+
+.btn-annuleren {
+  background: white;
+  border-color: #e0e0e0 !important;
+  color: #333;
+}
+
+.btn-annuleren:hover {
+  background-color: #f9fafb;
+}
+
+.btn-verwijderen {
+  background: #dc2626;
+  border-color: #dc2626 !important;
+  color: white;
+}
+
+.btn-verwijderen:hover {
+  background: #b91c1c;
+  border-color: #b91c1c !important;
+}
+
 /* Responsive Design */
 @media (max-width: 1200px) {
   form {
@@ -296,6 +455,15 @@ form > div > div button[type='button']:hover {
 @media (max-width: 768px) {
   :host {
     padding: 12px;
+  }
+
+  .mode-selector {
+    gap: 8px;
+  }
+
+  .mode-selector button {
+    padding: 8px 10px;
+    font-size: 12px;
   }
 
   form {
@@ -323,5 +491,24 @@ form > div > div button[type='button']:hover {
 
   .isbn-zoek-boek label {
     padding-top: 0;
+  }
+
+  .modal-content {
+    width: 95%;
+    margin: 16px;
+  }
+
+  .modal-header,
+  .modal-body,
+  .modal-footer {
+    padding: 16px;
+  }
+
+  .modal-footer {
+    flex-direction: column-reverse;
+  }
+
+  .modal-footer button {
+    width: 100%;
   }
 }
