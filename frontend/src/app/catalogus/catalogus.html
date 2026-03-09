@@ -1,42 +1,55 @@
-<div class="catalogus-container">
-    <h3>{{ boekenlijst.length }} resultaten</h3>
-
-    <div class="boeken-grid">
-        @for (boek of boekenlijst; track boek.id) {
-        <div class="boek-card" [routerLink]="['/details', boek.id]">
-            <div class="image-container">
-
-                <span class="status-badge" [class.beschikbaar]="boek.aantalExemplaren !== 0"
-                    [class.uitgeleend]="boek.aantalExemplaren === 0">
-                    @if (boek.aantalExemplaren !== 0) {
-                    Beschikbaar
-                    } @else {
-                    Uitgeleend
-                    }
-                </span>
-
-                <img [src]="boek.afbeelding" alt="Cover">
-            </div>
-
-            <div class="boek-info">
-                <h4 class="titel">{{ boek.titel }}</h4>
-                <p class="auteur">{{ boek.auteur }}</p>
-
-                <p class="genres">
-                    @for (g of boek.genre; track g; let last = $last) {
-                    <small>{{ g }}{{ !last ? ' • ' : '' }}</small>
-                    } @empty {
-                    <small>Geen genres bekend</small>
-                    }
-                </p>
-
-                <p class="pagina-info">{{ boek.pagina }} pagina's</p>
-                <p class="locatie-badge">{{ boek.locatie }}</p>
-
-            </div>
+<div class="main-layout">
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h2 class="sidebar-title">Filters</h2>
         </div>
-        } @empty {
-        <p>Er zijn momenteel geen boeken gevonden in de catalogus.</p>
-        }
+
+        <div class="filter-section">
+            <label for="search-input">Zoekopdracht</label>
+            <input #searchInput id="search-input" type="text" placeholder="Titel, auteur of ISBN..."
+                (input)="onSearch(searchInput.value)" class="sidebar-input">
+        </div>
+
+        <button class="btn-reset" (click)="onSearch(''); searchInput.value=''">
+            Filters wissen
+        </button>
+    </aside>
+
+    <div class="catalogus-container">
+        <h3 class="result-count">
+            {{ boekenlijst().length }} 
+            {{ boekenlijst().length === 1 ? 'resultaat': 'resultaten' }}
+        </h3>
+
+        <div class="boeken-grid">
+            @for (boek of boekenlijst(); track boek.id) {
+            <div class="boek-card" [routerLink]="['/details', boek.id]">
+                <div class="image-container">
+                    <span class="status-badge" [class.beschikbaar]="boek.aantalExemplaren !== 0"
+                        [class.uitgeleend]="boek.aantalExemplaren === 0">
+                        {{ boek.aantalExemplaren !== 0 ? 'Beschikbaar' : 'Uitgeleend' }}
+                    </span>
+                    <img [src]="boek.afbeelding" alt="Cover">
+                </div>
+
+                <div class="boek-info">
+                    <h4 class="titel">{{ boek.titel }}</h4>
+                    <p class="auteur">{{ boek.auteur }}</p>
+
+                    <p class="genres">
+                        @for (g of boek.genre; track g; let last = $last) {
+                        <small>{{ g }}{{ !last ? ' • ' : '' }}</small>
+                        } @empty {
+                        <small>Geen genres</small>
+                        }
+                    </p>
+
+                    <p class="locatie-badge">{{ boek.locatie }}</p>
+                </div>
+            </div>
+            } @empty {
+            <p class="no-results">Geen boeken gevonden voor deze zoekopdracht.</p>
+            }
+        </div>
     </div>
 </div>

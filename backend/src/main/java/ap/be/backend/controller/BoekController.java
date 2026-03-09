@@ -9,7 +9,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.data.domain.Sort;
 
 import ap.be.backend.dto.BoekDTO;
 import ap.be.backend.entity.Boek;
@@ -30,9 +32,14 @@ public class BoekController {
 
     @GetMapping("/api/boeken")
     @CrossOrigin(origins = "*", allowedHeaders = "*")
-    public List<Boek> getAlleBoeken() {
+    public List<Boek> getAlleBoeken(@RequestParam(required = false) String zoekterm) {
+        Sort sort = Sort.by(Sort.Direction.ASC, "locatie");
 
-        return boekRepository.findAll();
+        if (zoekterm != null && !zoekterm.isEmpty()) {
+            return boekRepository.searchBoeken(zoekterm, sort);
+        }
+
+        return boekRepository.findAll(sort);
     }
 
     @PostMapping("/api/boeken")
@@ -44,5 +51,6 @@ public class BoekController {
     @GetMapping("/api/boeken/{id}")
     public Boek getBoekById(@PathVariable("id") Long id) {
         return boekRepository.findById(id).orElse(null);
+
     }
 }

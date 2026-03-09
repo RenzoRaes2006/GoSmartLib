@@ -23,8 +23,11 @@ export class Leeslijst implements OnInit {
     const gebruikerId = 1;
     this.leeslijstService.getMappenVanGebruiker(gebruikerId).subscribe({
       next: (data) => {
-        let gefilterdeMappen = data.filter(
-          (map: any) => map.boeken.length > 0 || map.naam.toLowerCase() === 'favorieten',
+        const mapLijst = data || [];
+
+        let gefilterdeMappen = mapLijst.filter(
+          (map: any) =>
+            (map.boeken && map.boeken.length > 0) || map.naam.toLowerCase() === 'favorieten',
         );
 
         const heeftFavorieten = gefilterdeMappen.some(
@@ -36,10 +39,12 @@ export class Leeslijst implements OnInit {
 
         this.mappen = gefilterdeMappen;
       },
-      error: (err) => console.error('Fout bij ophalen mappen', err),
+      error: (err) => {
+        console.error('Fout bij ophalen mappen', err);
+        this.mappen = [{ id: 'fav', naam: 'Favorieten', boeken: [] }];
+      },
     });
   }
-
   openMap(map: any) {
     this.geselecteerdeMap = map;
   }
@@ -53,7 +58,6 @@ export class Leeslijst implements OnInit {
   // Verwijder boek
   verwijderBoek(boekId: number, event: Event) {
     event.stopPropagation();
-
     if (!this.geselecteerdeMap) return;
 
     const mapNaam = this.geselecteerdeMap.naam;
@@ -64,8 +68,12 @@ export class Leeslijst implements OnInit {
         this.geselecteerdeMap.boeken = this.geselecteerdeMap.boeken.filter(
           (b: any) => b.id !== boekId,
         );
+
         if (this.geselecteerdeMap.boeken.length === 0) {
-          this.terugNaarOverzicht();
+          if (this.geselecteerdeMap.naam.toLowerCase() !== 'favorieten') {
+            this.mappen = this.mappen.filter((m) => m.id !== this.geselecteerdeMap.id);
+          }
+          this.geselecteerdeMap = null;
         }
       },
       error: (err) => console.error('Fout bij verwijderen', err),

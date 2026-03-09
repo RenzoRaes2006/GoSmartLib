@@ -6,12 +6,17 @@
         <div class="album-grid">
             @for (map of mappen; track map.id) {
                 <div class="album-card cursor-pointer" (click)="openMap(map)">
+                 
                     <div class="album-cover">
                         @if (map.boeken && map.boeken.length > 0) {
                             <img [src]="map.boeken[map.boeken.length - 1].afbeelding" alt="Cover" class="cover-image">
+                        } @else if (map.naam === 'Favorieten') {
+                            <div class="empty-cover">⭐</div> 
                         } @else {
-                            <div class="empty-cover">⭐</div> }
+                            <div class="empty-cover">📁</div> 
+                        }
                     </div>
+
                     <div class="album-title">{{ map.naam }}</div>
                 </div>
             }

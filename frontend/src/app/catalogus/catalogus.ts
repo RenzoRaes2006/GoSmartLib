@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { Boek } from '../models/Boek';
 import { BoekService } from '../services/boek.service';
 import { RouterLink } from '@angular/router';
@@ -12,17 +12,27 @@ import { RouterLink } from '@angular/router';
   standalone: true,
 })
 export class Catalogus implements OnInit {
-  boekenlijst: Boek[] = [];
 
-  constructor(private boekService: BoekService) {}
+  boekenlijst = signal<Boek[]>([]);
+  zoekTerm = signal<string>('');
+
+  private boekService = inject(BoekService);
 
   ngOnInit(): void {
-    this.boekService.getBoeken().subscribe({
+    this.laadBoeken();
+  }
+
+  private laadBoeken(term?: string): void {
+    this.boekService.getBoeken(term).subscribe({
       next: (data) => {
-        console.log("Boeken succesvol opgehaald: ", data);
-        this.boekenlijst = data.sort((a,b) => a.locatie.localeCompare(b.locatie));
+        this.boekenlijst.set(data);
       },
-      error: (err) => console.log('Iets mis gegaan met het krijgen van de boeken. ', err),
+      error: (err) => console.log('Fout bij ophalen boeken:', err),
     });
+  }
+
+  onSearch(term: string): void {
+    this.zoekTerm.set(term);
+    this.laadBoeken(term);
   }
 }

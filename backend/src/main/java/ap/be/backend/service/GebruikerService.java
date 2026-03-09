@@ -79,7 +79,8 @@ public class GebruikerService {
                 .orElseThrow(() -> new IllegalArgumentException("Boek niet gevonden"));
 
         map.getBoeken().remove(boek);
-        if (map.getBoeken().isEmpty()) {
+
+        if (map.getBoeken().isEmpty() && !map.getNaam().equalsIgnoreCase("Favorieten")) {
             leeslijstMapRepository.delete(map);
         } else {
             leeslijstMapRepository.save(map);

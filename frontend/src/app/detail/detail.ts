@@ -1,11 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
-import {
-  FormBuilder,
-  FormControl,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink, ActivatedRoute } from '@angular/router';
 import { BoekService } from '../services/boek.service';
 import { Boek } from '../models/Boek';
@@ -25,15 +19,19 @@ export class Detail implements OnInit {
   fb = inject(FormBuilder);
   route = inject(ActivatedRoute);
   leeslijstService = inject(LeeslijstService);
+
   boek: Boek | null = null;
   form!: FormGroup;
   submissionError: string = '';
-  boekGenresString: string = '';
   beoordelingen: Beoordeling[] = [];
+
   isModalOpen: boolean = false;
   isFavoriet: boolean = false;
   succesMeldingMap: string = '';
   mappen: any[] = [];
+
+  boekWaardering: number = 0;
+  waarderingPrecentage: number = 0;
 
   ngOnInit(): void {
     this.form = this.fb.group({
@@ -41,33 +39,43 @@ export class Detail implements OnInit {
       inhoud: ['', [Validators.required, Validators.maxLength(500)]],
     });
 
-    const boekId = Number(this.route.snapshot.paramMap.get('id'));
-    this.boekService.getBoekOpId(boekId).subscribe({
-      next: (boek) => {
-        console.log('Boek details:', boek);
-        this.boek = boek;
-        this.boekGenresString = boek.genre.join(', ');
-      },
-      error: (err) => console.log('Iets mis gegaan met het krijgen van de boek details. ', err),
+    this.route.paramMap.subscribe((params) => {
+      const boekId = Number(params.get('id'));
+
+      this.boekService.getBoekOpId(boekId).subscribe({
+        next: (boek) => {
+          this.boek = boek;
+        },
+        error: (err) => console.log('Iets mis gegaan met het krijgen van de boek details. ', err),
+      });
+
+      this.beoordelingService.getBeoordelingenOpBoekId(boekId).subscribe({
+        next: (beoordelingen) => {
+          this.beoordelingen = beoordelingen;
+          this.updateBoekWaardering();
+        },
+        error: (err) => console.log('Iets mis gegaan met het krijgen van de beoordelingen. ', err),
+      });
     });
 
-    this.beoordelingService.getBeoordelingenOpBoekId(boekId).subscribe({
-      next: (beoordelingen) => {
-        this.beoordelingen = beoordelingen;
-      },
-      error: (err) => console.log('Iets mis gegaan met het krijgen van de beoordelingen. ', err),
-    });
     const gebruikerId = 1;
     this.leeslijstService.getMappenVanGebruiker(gebruikerId).subscribe({
       next: (data) => {
         this.mappen = data;
       },
     });
-    // ik kan later deze manier gebruken als ik van deze pagina naar een andere pagina van boekdetails ga en terug, zodat ik de details en beoordelingen opnieuw kan laden
-    // this.route.paramMap.subscribe(params => {
-    //   const boekId = Number(params.get('id'));
-    //   // Roep hier boekService en beoordelingService aan met boekId
-    // });
+  }
+
+  updateBoekWaardering() {
+    if (this.beoordelingen.length > 0) {
+      const totaleWaardering = this.beoordelingen.reduce(
+        (sum, beoordeling) => sum + beoordeling.waardering,
+        0,
+      );
+      const gemiddelde = totaleWaardering / this.beoordelingen.length;
+      this.boekWaardering = Number(gemiddelde.toFixed(1));
+      this.waarderingPrecentage = (this.boekWaardering / 5) * 100;
+    }
   }
 
   voegToeAanFavorieten() {
@@ -75,7 +83,7 @@ export class Detail implements OnInit {
     const gebruikerId = 1;
     this.leeslijstService.voegBoekToeAanMap(gebruikerId, 'Favorieten', this.boek.id!).subscribe({
       next: () => {
-        this.isFavoriet = true; // Verandert de tekst in '✅ Opgeslagen'
+        this.isFavoriet = true;
         setTimeout(() => (this.isFavoriet = false), 3000);
       },
     });
@@ -85,6 +93,7 @@ export class Detail implements OnInit {
     if (!this.boek) return;
     this.isModalOpen = true;
   }
+
   sluitModal() {
     this.isModalOpen = false;
     this.succesMeldingMap = '';
@@ -116,23 +125,20 @@ export class Detail implements OnInit {
     }
     const raw = this.form.value;
     const beoordeling: Beoordeling = {
-      gebruikerId: 1, // TODO: haal dit van de ingelogde gebruiker
+      gebruikerId: 1,
       boekId: this.boek?.id ?? 0,
       waardering: Number(raw.waardering),
       inhoud: raw.inhoud,
     };
 
-    console.log('Ingediende beoordeling:', beoordeling);
-
     this.beoordelingService.voegBeoordelingToe(beoordeling).subscribe({
       next: (response) => {
-        console.log('Beoordeling succesvol toegevoegd:', response);
         this.form.reset();
         this.submissionError = '';
-        this.beoordelingen.push(response); // Voeg de nieuwe beoordeling toe aan de lijst zodat deze direct zichtbaar is
+        this.beoordelingen.push(response);
+        this.updateBoekWaardering();
       },
       error: (error) => {
-        console.error('Fout bij het toevoegen van beoordeling:', error);
         this.submissionError = 'Er ging iets mis bij het toevoegen. Probeer opnieuw.';
       },
     });
