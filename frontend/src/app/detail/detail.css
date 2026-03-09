@@ -138,3 +138,56 @@
     cursor: pointer;
     border-radius: 4px;
 }
+.modal-overlay {
+    position: fixed !important; /* Fixed zorgt dat hij over alles heen zweeft */
+    top: 0; 
+    left: 0; 
+    width: 100vw; 
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.6); /* Maakt de rest van de pagina donker */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999; /* Zorgt dat hij ALTIJD bovenaan ligt */
+}
+
+.modal-box {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    width: 400px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    text-align: center;
+}
+
+.modal-box input {
+    width: 90%;
+    padding: 12px;
+    margin: 20px 0;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.modal-actions button {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.cancel-btn { background: #e0e0e0; color: #333; }
+.save-btn { background: #1a3a5a; color: white; }
+.modal-select {
+    width: 90%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; font-family: inherit;
+}
+.modal-label { text-align: left; margin-left: 5%; margin-bottom: 5px; font-weight: bold; font-size: 14px; color: #555; }

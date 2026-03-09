@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -44,6 +45,19 @@ public class GebruikerController {
         try {
             gebruikerService.voegBoekToeAanMap(gebruikerId, mapNaam, boekId);
             return ResponseEntity.ok("Boek succesvol toegevoegd aan map");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/{gebruikerId}/mappen/{mapNaam}/boeken/{boekId}")
+    public ResponseEntity<String> verwijderBoekUitLijst(
+            @PathVariable Long gebruikerId,
+            @PathVariable String mapNaam,
+            @PathVariable Long boekId) {
+        try {
+            gebruikerService.verwijderBoekUitMap(gebruikerId, mapNaam, boekId);
+            return ResponseEntity.ok("Boek succesvol verwijderd uit map");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

@@ -70,4 +70,19 @@ public class GebruikerService {
         map.voegBoekToe(boek);
         leeslijstMapRepository.save(map);
     }
+
+    public void verwijderBoekUitMap(Long gebruikerId, String mapNaam, Long boekId) {
+        LeeslijstMap map = leeslijstMapRepository.findByGebruiker_GebruikerIDAndNaam(gebruikerId, mapNaam)
+                .orElseThrow(() -> new IllegalArgumentException("Map niet gevonden"));
+
+        Boek boek = boekRepository.findById(boekId)
+                .orElseThrow(() -> new IllegalArgumentException("Boek niet gevonden"));
+
+        map.getBoeken().remove(boek);
+        if (map.getBoeken().isEmpty()) {
+            leeslijstMapRepository.delete(map);
+        } else {
+            leeslijstMapRepository.save(map);
+        }
+    }
 }

@@ -1,8 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { GebruikerService } from '../services/GebruikerService';
 import { RouterModule, ActivatedRoute } from '@angular/router';
-import { Boek } from '../models/Boek';
+import { LeeslijstService } from '../services/leeslijstService';
 
 @Component({
   selector: 'app-leeslijst',
@@ -12,37 +11,64 @@ import { Boek } from '../models/Boek';
   styleUrl: './leeslijst.css',
 })
 export class Leeslijst implements OnInit {
-  boekLijst: Boek[] = [];
-  huidigeGebruikerId!: number;
-
-  constructor(
-    private gebruikerService: GebruikerService,
-    private route: ActivatedRoute,
-  ) {}
+  leeslijstService = inject(LeeslijstService);
+  mappen: any[] = [];
+  geselecteerdeMap: any = null;
 
   ngOnInit(): void {
-    this.route.paramMap.subscribe((params) => {
-      const idParam = params.get('id'); //:id ophalen uit url
-      if (idParam !== null) {
-        this.huidigeGebruikerId = +idParam; //number naar string
-        this.laadBoeken(this.huidigeGebruikerId);
-      }
+    this.haalMappenOp();
+  }
+
+  haalMappenOp() {
+    const gebruikerId = 1;
+    this.leeslijstService.getMappenVanGebruiker(gebruikerId).subscribe({
+      next: (data) => {
+        let gefilterdeMappen = data.filter(
+          (map: any) => map.boeken.length > 0 || map.naam.toLowerCase() === 'favorieten',
+        );
+
+        const heeftFavorieten = gefilterdeMappen.some(
+          (m: any) => m.naam.toLowerCase() === 'favorieten',
+        );
+        if (!heeftFavorieten) {
+          gefilterdeMappen.unshift({ id: 'fav', naam: 'Favorieten', boeken: [] });
+        }
+
+        this.mappen = gefilterdeMappen;
+      },
+      error: (err) => console.error('Fout bij ophalen mappen', err),
     });
   }
 
-  laadBoeken(userId: number) {
-    this.gebruikerService.getLeeslijst(userId).subscribe({
-      next: (data) => {
-        this.boekLijst = data;
-      },
-      error: (err) => {
-        console.log('Niet geladen: ', err);
-      },
-    });
+  openMap(map: any) {
+    this.geselecteerdeMap = map;
   }
-  verwijderBoek(id: number | undefined) {
-    if (id !== undefined) {
-      this.boekLijst = this.boekLijst.filter((b) => b.id !== id);
-    }
+
+  // Terugknop naar het album-overzicht
+  terugNaarOverzicht() {
+    this.geselecteerdeMap = null;
+    this.haalMappenOp();
+  }
+
+  // Verwijder boek
+  verwijderBoek(boekId: number, event: Event) {
+    event.stopPropagation();
+
+    if (!this.geselecteerdeMap) return;
+
+    const mapNaam = this.geselecteerdeMap.naam;
+    const gebruikerId = 1;
+
+    this.leeslijstService.verwijderBoekUitMap(gebruikerId, mapNaam, boekId).subscribe({
+      next: () => {
+        this.geselecteerdeMap.boeken = this.geselecteerdeMap.boeken.filter(
+          (b: any) => b.id !== boekId,
+        );
+        if (this.geselecteerdeMap.boeken.length === 0) {
+          this.terugNaarOverzicht();
+        }
+      },
+      error: (err) => console.error('Fout bij verwijderen', err),
+    });
   }
 }

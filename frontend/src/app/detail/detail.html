@@ -3,7 +3,7 @@
 	<div class="foto-column">
 		<img [src]="boek?.afbeelding" alt="Book Cover">
         <div class="action-buttons">
-            <button type="button" (click)="voegToeAanFavorieten()">Favoriet</button>
+			<button type="button" (click)="voegToeAanFavorieten()">{{ isFavoriet ? '✅ Opgeslagen' : 'Favoriet' }}</button>
             <button type="button" (click)="voegToeAanLeeslijst()">Leeslijst</button>
         </div>
 		<div class="book-info">
@@ -85,3 +85,32 @@
 		</div>
 	</div>
 </div>
+@if(isModalOpen) {
+<div class="modal-overlay">
+    <div class="modal-box">
+        @if (succesMeldingMap) {
+            <div class="success-state">
+                <h3>{{ succesMeldingMap }}</h3>
+            </div>
+        } @else {
+            <h3>Toevoegen aan leeslijst</h3>
+            
+            <p class="modal-label">Kies een bestaande map:</p>
+            <select #bestaandeMap class="modal-select">
+                <option value="">-- Selecteer een map --</option>
+                @for (map of mappen; track map.id) {
+                    <option [value]="map.naam">{{ map.naam }}</option>
+                }
+            </select>
+
+            <p class="modal-label">OF maak een nieuwe map:</p>
+            <input #nieuweMap type="text" placeholder="Nieuwe map naam...">
+            
+            <div class="modal-actions">
+                <button class="cancel-btn" (click)="sluitModal()">Annuleren</button>
+                <button class="save-btn" (click)="bevestigToevoegenAanMap(bestaandeMap.value, nieuweMap.value)">Opslaan</button>
+            </div>
+        }
+    </div>
+</div>
+}

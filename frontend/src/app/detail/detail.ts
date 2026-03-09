@@ -30,6 +30,10 @@ export class Detail implements OnInit {
   submissionError: string = '';
   boekGenresString: string = '';
   beoordelingen: Beoordeling[] = [];
+  isModalOpen: boolean = false;
+  isFavoriet: boolean = false;
+  succesMeldingMap: string = '';
+  mappen: any[] = [];
 
   ngOnInit(): void {
     this.form = this.fb.group({
@@ -53,7 +57,12 @@ export class Detail implements OnInit {
       },
       error: (err) => console.log('Iets mis gegaan met het krijgen van de beoordelingen. ', err),
     });
-
+    const gebruikerId = 1;
+    this.leeslijstService.getMappenVanGebruiker(gebruikerId).subscribe({
+      next: (data) => {
+        this.mappen = data;
+      },
+    });
     // ik kan later deze manier gebruken als ik van deze pagina naar een andere pagina van boekdetails ga en terug, zodat ik de details en beoordelingen opnieuw kan laden
     // this.route.paramMap.subscribe(params => {
     //   const boekId = Number(params.get('id'));
@@ -63,40 +72,39 @@ export class Detail implements OnInit {
 
   voegToeAanFavorieten() {
     if (!this.boek) return;
-
-    const gebruikerId = 1; // TODO: dynamisch maken via inlog smartschool
+    const gebruikerId = 1;
     this.leeslijstService.voegBoekToeAanMap(gebruikerId, 'Favorieten', this.boek.id!).subscribe({
-      next: (response) => {
-        alert('Boek succesvol toegevoegd aan je Favorieten!');
-      },
-      error: (err) => {
-        console.error('Fout bij toevoegen:', err);
-        alert('Er ging iets mis bij het toevoegen aan favorieten.');
+      next: () => {
+        this.isFavoriet = true; // Verandert de tekst in '✅ Opgeslagen'
+        setTimeout(() => (this.isFavoriet = false), 3000);
       },
     });
   }
 
   voegToeAanLeeslijst() {
     if (!this.boek) return;
+    this.isModalOpen = true;
+  }
+  sluitModal() {
+    this.isModalOpen = false;
+    this.succesMeldingMap = '';
+  }
 
-    const mapNaam = prompt(
-      'Aan welk mapje wil je dit boek toevoegen? (Bijv. Schoolboeken, Wil ik lezen)',
-      'Wil ik lezen',
-    );
+  bevestigToevoegenAanMap(bestaandeMap: string, nieuweMap: string) {
+    const doelMap = nieuweMap.trim() !== '' ? nieuweMap.trim() : bestaandeMap;
 
-    if (mapNaam && mapNaam.trim() !== '') {
-      const gebruikerId = 1; // TODO:  dynamisch maken via inlog smartschool
-      this.leeslijstService
-        .voegBoekToeAanMap(gebruikerId, mapNaam.trim(), this.boek.id!)
-        .subscribe({
-          next: (response) => {
-            alert(`Boek succesvol toegevoegd aan mapje: ${mapNaam}!`);
-          },
-          error: (err) => {
-            console.error('Fout bij toevoegen:', err);
-            alert('Er ging iets mis bij het toevoegen aan de leeslijst.');
-          },
-        });
+    if (doelMap && doelMap !== '') {
+      const gebruikerId = 1;
+      this.leeslijstService.voegBoekToeAanMap(gebruikerId, doelMap, this.boek!.id!).subscribe({
+        next: () => {
+          this.succesMeldingMap = `Boek toegevoegd aan '${doelMap}'!`;
+          this.leeslijstService
+            .getMappenVanGebruiker(gebruikerId)
+            .subscribe((data) => (this.mappen = data));
+          setTimeout(() => this.sluitModal(), 1500);
+        },
+        error: () => (this.succesMeldingMap = 'Er ging iets mis...'),
+      });
     }
   }
 

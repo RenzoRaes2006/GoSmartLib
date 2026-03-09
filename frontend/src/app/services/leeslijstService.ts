@@ -19,4 +19,12 @@ export class LeeslijstService {
       { responseType: 'text' },
     );
   }
+  getMappenVanGebruiker(gebruikerId: number) {
+    return this.http.get<any[]>(`${this.apiUrl}/${gebruikerId}/mappen`);
+  }
+  verwijderBoekUitMap(gebruikerId: number, mapNaam: string, boekId: number) {
+    return this.http.delete(`${this.apiUrl}/${gebruikerId}/mappen/${mapNaam}/boeken/${boekId}`, {
+      responseType: 'text',
+    });
+  }
 }

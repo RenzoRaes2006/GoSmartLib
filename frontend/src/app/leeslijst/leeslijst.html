@@ -1,31 +1,48 @@
 <div class="reading-list-container">
-  <div class="header-section">
-    <h1>Mijn Favorieten & Leeslijsten</h1>
-  </div>
 
-  <div class="book-grid">
-    @for (boek of boekLijst; track boek.id) {
-      <div class="book-card">
-        <div class="image-container">
-          <img [src]="boek.afbeelding || 'https://via.placeholder.com/180x240?text=Geen+Cover'" 
-               class="book-image" 
-               alt="Cover">
-          
-          <button class="delete-btn" (click)="boek.id !== undefined && verwijderBoek(boek.id)">✕</button>
+    @if (!geselecteerdeMap) {
+        <h1>Mijn Leeslijsten</h1>
+
+        <div class="album-grid">
+            @for (map of mappen; track map.id) {
+                <div class="album-card cursor-pointer" (click)="openMap(map)">
+                    <div class="album-cover">
+                        @if (map.boeken && map.boeken.length > 0) {
+                            <img [src]="map.boeken[map.boeken.length - 1].afbeelding" alt="Cover" class="cover-image">
+                        } @else {
+                            <div class="empty-cover">⭐</div> }
+                    </div>
+                    <div class="album-title">{{ map.naam }}</div>
+                </div>
+            }
         </div>
-        <div class="book-title">{{ boek.titel }}</div>
-      </div>
     }
 
-    <a routerLink="/catalogus" class="add-placeholder">
-      <div class="add-icon">📚</div>
-      <div class="add-text">Voeg boek toe</div>
-    </a>
-  </div>
+    @else {
+        <div class="header-section">
+            <button class="back-btn" (click)="terugNaarOverzicht()">← Terug naar Mappen</button>
+            <h1>{{ geselecteerdeMap.naam }}</h1>
+        </div>
 
-  @if (boekLijst.length === 0) {
-    <div class="empty-message">
-      Er staan nog geen boeken in de database...
-    </div>
-  }
+        @if (geselecteerdeMap.boeken.length === 0) {
+            <p style="color: #666; margin-top: 20px;">Je hebt nog geen boeken in deze map staan.</p>
+        }
+
+        <div class="album-grid">
+            @for (boek of geselecteerdeMap.boeken; track boek.id) {
+                <div class="album-card relative">
+                    
+                    <button class="delete-btn" (click)="verwijderBoek(boek.id, $event)" title="Verwijder uit map">✕</button>
+
+                    <a [routerLink]="['/details', boek.id]" class="book-link">
+                        <div class="album-cover hover-effect">
+                            <img [src]="boek.afbeelding" alt="Cover" class="cover-image">
+                        </div>
+                        <div class="album-title">{{ boek.titel }}</div>
+                    </a>
+                    
+                </div>
+            }
+        </div>
+    }
 </div>
