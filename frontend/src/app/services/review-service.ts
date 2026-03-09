@@ -6,7 +6,7 @@ import { Beoordeling } from '../models/review.model';
   providedIn: 'root',
 })
 export class ReviewService {
-  private apiUrl = '/api'; // Dit is de 'Incoming Change' van je groepsgenoot.
+  private apiUrl = '/api';
 
   constructor(private http: HttpClient) {}
 

@@ -32,9 +32,7 @@ public class GebruikerController {
     @GetMapping("/{id}/mappen")
     public ResponseEntity<List<LeeslijstMap>> getAlleMappenVanGebruiker(@PathVariable Long id) {
         List<LeeslijstMap> mappen = leeslijstMapRepository.findByGebruiker_GebruikerID(id);
-        if (mappen.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
+
         return ResponseEntity.ok(mappen);
     }
 

@@ -5,10 +5,7 @@ import { Injectable } from '@angular/core';
   providedIn: 'root',
 })
 export class LeeslijstService {
-  private readonly gebruikTraefik = false;
-  private apiUrl = this.gebruikTraefik
-    ? 'http://frontend.localhost/api/gebruiker'
-    : 'http://localhost:8081/api/gebruiker';
+  private apiUrl = 'http://frontend.localhost/api/gebruiker';
 
   constructor(private http: HttpClient) {}
 
@@ -19,9 +16,11 @@ export class LeeslijstService {
       { responseType: 'text' },
     );
   }
+
   getMappenVanGebruiker(gebruikerId: number) {
     return this.http.get<any[]>(`${this.apiUrl}/${gebruikerId}/mappen`);
   }
+
   verwijderBoekUitMap(gebruikerId: number, mapNaam: string, boekId: number) {
     return this.http.delete(`${this.apiUrl}/${gebruikerId}/mappen/${mapNaam}/boeken/${boekId}`, {
       responseType: 'text',
