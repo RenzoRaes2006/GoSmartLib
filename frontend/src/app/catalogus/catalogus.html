@@ -17,12 +17,12 @@
 
     <div class="catalogus-container">
         <h3 class="result-count">
-            {{ gefilterdeBoeken.length }} 
-            {{gefilterdeBoeken.length === 1 ? 'resultaat': 'resultaten'}}
+            {{ boekenlijst().length }} 
+            {{ boekenlijst().length === 1 ? 'resultaat': 'resultaten' }}
         </h3>
 
         <div class="boeken-grid">
-            @for (boek of gefilterdeBoeken; track boek.id) {
+            @for (boek of boekenlijst(); track boek.id) {
             <div class="boek-card" [routerLink]="['/details', boek.id]">
                 <div class="image-container">
                     <span class="status-badge" [class.beschikbaar]="boek.aantalExemplaren !== 0"

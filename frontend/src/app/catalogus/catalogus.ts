@@ -12,29 +12,20 @@ import { RouterLink } from '@angular/router';
   standalone: true,
 })
 export class Catalogus implements OnInit {
-  private boekenlijst = signal<Boek[]>([]);
+
+  boekenlijst = signal<Boek[]>([]);
   zoekTerm = signal<string>('');
 
   private boekService = inject(BoekService);
 
-
-  get gefilterdeBoeken() {
-    const term = this.zoekTerm().toLowerCase().trim();
-    if (!term) return this.boekenlijst();
-
-    return this.boekenlijst().filter(boek =>
-      boek.titel.toLowerCase().includes(term) ||
-      (boek.isbn && boek.isbn.includes(term)) ||
-      boek.auteur.toLowerCase().includes(term)
-    );
+  ngOnInit(): void {
+    this.laadBoeken();
   }
 
-  //op locatie sorteren
-  ngOnInit(): void {
-    this.boekService.getBoeken().subscribe({
+  private laadBoeken(term?: string): void {
+    this.boekService.getBoeken(term).subscribe({
       next: (data) => {
-        const gesorteerd = data.sort((a, b) => a.locatie.localeCompare(b.locatie));
-        this.boekenlijst.set(gesorteerd);
+        this.boekenlijst.set(data);
       },
       error: (err) => console.log('Fout bij ophalen boeken:', err),
     });
@@ -42,5 +33,6 @@ export class Catalogus implements OnInit {
 
   onSearch(term: string): void {
     this.zoekTerm.set(term);
+    this.laadBoeken(term);
   }
 }

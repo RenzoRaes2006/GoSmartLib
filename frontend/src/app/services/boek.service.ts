@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { inject, Injectable } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Boek } from '../models/Boek';
 import { NieuwBoek } from '../models/NieuwBoek';
@@ -12,17 +12,23 @@ export class BoekService {
   // private apiUrl = this.gebruikTraefik
   //   ? 'http://frontend.localhost/api/boeken'
   //   : 'http://localhost:8081/api/boeken';
-  private apiUrl = '/api';
+  private apiUrl = '/api/boeken';
 
-  constructor(private http: HttpClient) {}
+private http = inject(HttpClient);
 
-  getBoeken(): Observable<Boek[]> {
-    return this.http.get<Boek[]>(`${this.apiUrl}/boeken`);
+  getBoeken(zoekterm?: string): Observable<Boek[]> {
+    let params = new HttpParams();
+    
+    if (zoekterm && zoekterm.trim() !== '') {
+      params = params.set('zoekterm', zoekterm);
+    }
+
+    return this.http.get<Boek[]>(this.apiUrl, { params });
   }
   getBoekOpId(id: number): Observable<Boek> {
-    return this.http.get<Boek>(`${this.apiUrl}/boeken/${id}`);
+    return this.http.get<Boek>(`${this.apiUrl}/${id}`);
   }
   toevoegen(boek: NieuwBoek): Observable<Boek> {
-    return this.http.post<Boek>(`${this.apiUrl}/boeken`, boek);
+    return this.http.post<Boek>(this.apiUrl, boek);
   }
 }
