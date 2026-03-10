@@ -1,7 +1,7 @@
 <a routerLink="/catalogus">← Terug naar catalogus</a>
 <div class="detail-container">
 	<div class="foto-column">
-		<img [src]="boek?.afbeelding" alt="Book Cover">
+		<img [src]="boek?.afbeelding || 'https://bookshow.blurb.com/bookshow/cache/P11360640/md/cover_2.jpeg?access_key=675523b769268bce5b0b710b3d0e7841'" alt="Book Cover">
 		<button type="button">Leen Book</button>
 
 		<div class="book-info">

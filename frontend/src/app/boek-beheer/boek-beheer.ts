@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import {
   FormBuilder,
   ReactiveFormsModule,
@@ -21,7 +21,7 @@ import { Boek } from '../models/Boek';
   templateUrl: './boek-beheer.html',
   styleUrl: './boek-beheer.css',
 })
-export class BoekBeheer {
+export class BoekBeheer implements OnInit {
   // Formulier en status boek toevoegen
   boekForm;
   errorMessage: string = '';
@@ -30,14 +30,19 @@ export class BoekBeheer {
   zoekIsbn: string = '';
   zoekMessage: string = '';
   // Mode management
-  mode: 'toevoegen' | 'wijzigen' | 'verwijderen' = 'toevoegen';
-  selectedBoekId: number | null = null;
+  mode: 'toevoegen' | 'wijzigen' = 'wijzigen';
   // Voor wijzig en verwijdermodus
   boekIdnaarWijzigen: String = '';
   boekGevonden: boolean = false;
   naarTeWijzigenBoek: any = null;
   // Voor custom delete modal
   toonVerwijderModal: boolean = false;
+  // Voor boekenoverzicht en paginering
+  boeknOverzicht: Boek[] = [];
+  currentPage: number = 0;
+  pageSize: number = 6;
+  totaalPages: number = 0;
+  isLoadingBoeken: boolean = false;
 
   // Constructor met dependency injection en formulieropbouw
   constructor(
@@ -56,8 +61,15 @@ export class BoekBeheer {
       beschrijving: ['', [Validators.required, Validators.minLength(10)]],
       aantalExemplaren: ['', [Validators.required, Validators.pattern(/^\d+$/)]],
       locatie: ['', [Validators.required, Validators.minLength(1)]],
-      afbeelding: ['', [Validators.required, Validators.pattern(/^(https?:\/\/.+|)$/)]],
+      afbeelding: [''],
     });
+  }
+
+  // Initialisatie: laad boekenoverzicht als we in wijzigmodus starten
+  ngOnInit(): void {
+    if (this.mode === 'wijzigen') {
+      this.laadBoekenPagina(0);
+    }
   }
 
   // Custom ISBN validator - accepteert ISBN-10 en ISBN-13
@@ -176,12 +188,7 @@ export class BoekBeheer {
         this.boekForm.patchValue(this.mapBoekNaarFormValue(boekData));
         this.boekForm.updateValueAndValidity();
         this.boekGevonden = true;
-
-        if (this.mode === 'verwijderen') {
-          this.boekForm.disable();
-        } else {
-          this.boekForm.enable();
-        }
+        this.boekForm.enable();
 
         this.zoekMessage = 'Boek gevonden!';
         setTimeout(() => (this.toonIsbnZoek = false), 3000);
@@ -200,9 +207,11 @@ export class BoekBeheer {
     this.errorMessage = '';
     this.successMessage = '';
     this.toonIsbnZoek = false;
+    this.boekGevonden = false;
+    this.naarTeWijzigenBoek = null;
   }
 
-  setMode(newMode: 'toevoegen' | 'wijzigen' | 'verwijderen') {
+  setMode(newMode: 'toevoegen' | 'wijzigen') {
     this.mode = newMode;
     this.resetForm();
     this.errorMessage = '';
@@ -210,15 +219,17 @@ export class BoekBeheer {
     this.boekGevonden = false;
     this.naarTeWijzigenBoek = null;
     this.toonIsbnZoek = false;
+    this.boekForm.enable();
 
-    if (newMode === 'verwijderen') {
-      this.boekForm.disable();
+    // Laad het boekenoverzicht alleen in wijzigmodus
+    if (newMode === 'wijzigen') {
+      this.laadBoekenPagina(0);
     } else {
-      this.boekForm.enable();
+      this.boeknOverzicht = [];
     }
   }
 
-  // Verwerk het toevoegen van een nieuw boek
+  // Verwerk het toevoegen of wijzigen van een boek
   onSubmit() {
     this.errorMessage = '';
     this.successMessage = '';
@@ -227,8 +238,6 @@ export class BoekBeheer {
       this.submitToevoegen();
     } else if (this.mode === 'wijzigen') {
       this.submitWijzigen();
-    } else if (this.mode === 'verwijderen') {
-      this.submitVerwijderen();
     }
   }
 
@@ -300,6 +309,7 @@ export class BoekBeheer {
           this.boekGevonden = false;
           this.naarTeWijzigenBoek = null;
           this.toonIsbnZoek = false;
+          this.laadBoekenPagina(this.currentPage); // Herlaad de huidige pagina van het boekenoverzicht om de wijzigingen te tonen
           setTimeout(() => (this.successMessage = ''), 5000);
         },
         error: (err) => {
@@ -342,6 +352,7 @@ export class BoekBeheer {
         this.boekGevonden = false;
         this.naarTeWijzigenBoek = null;
         this.toonIsbnZoek = false;
+        this.laadBoekenPagina(this.currentPage); // Toon opnieuw de lijst na succesvol verwijderen
         setTimeout(() => (this.successMessage = ''), 5000);
       },
       error: (err) => {
@@ -352,12 +363,50 @@ export class BoekBeheer {
     });
   }
 
-  // Start de verwijderflow via de modal vanuit de submit-knop.
-  private submitVerwijderen() {
-    if (!this.naarTeWijzigenBoek || !this.naarTeWijzigenBoek.id) {
-      this.errorMessage = 'geen boek geselecteerd';
-      return;
+  // Laad een pagina met boeken voor het overzicht, inclusief paginering.
+  // Deze functie wordt aangeroepen bij het initialiseren van het component en bij het navigeren tussen pagina's.
+  laadBoekenPagina(page: number = 0) {
+    this.isLoadingBoeken = true;
+    this.boekService.getBoekenPaged(page, this.pageSize).subscribe({
+      next: (response) => {
+        // We krijgen een PageResponse terug van de API, die de boeken bevat in response.content en ook informatie over het totale aantal pagina's en elementen.
+        this.boeknOverzicht = response.content;
+        this.currentPage = response.number;
+        this.totaalPages = response.totalPages;
+        this.isLoadingBoeken = false;
+      },
+      error: (err) => {
+        console.error('Fout bij het laden van boeken:', err);
+        this.isLoadingBoeken = false;
+      },
+    });
+  }
+
+  gaNaarVolgendePagina() {
+    if (this.currentPage + 1 < this.totaalPages) {
+      this.laadBoekenPagina(this.currentPage + 1);
     }
-    this.openVerwijderModal();
+  }
+
+  gaNaarVorigePagina() {
+    if (this.currentPage > 0) {
+      this.laadBoekenPagina(this.currentPage - 1);
+    }
+  }
+
+  // Deze functie wordt aangeroepen wanneer een gebruiker een boek selecteert uit de lijst.
+  // Voor 'wijzig': toon het formulier. Voor 'verwijder': toon direct de modal.
+  selecteerBoekUitLijst(boek: Boek, actie: 'wijzig' | 'verwijder') {
+    if (actie === 'verwijder') {
+      this.naarTeWijzigenBoek = boek;
+      // Direct de modal tonen zonder formulier
+      this.openVerwijderModal();
+    } else {
+      this.naarTeWijzigenBoek = boek;
+      // Formulier tonen voor wijzigen
+      this.boekForm.patchValue(this.mapBoekNaarFormValue(boek));
+      this.boekGevonden = true;
+      this.boekForm.enable();
+    }
   }
 }

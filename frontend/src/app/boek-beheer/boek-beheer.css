@@ -1,514 +1,92 @@
-:host {
-  display: block;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: #333;
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 12px 32px;
-  box-sizing: border-box;
-  min-height: 100vh;
-}
+:host{display:block;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;color:#333;max-width:1400px;margin:0 auto;padding:12px 32px;box-sizing:border-box;min-height:100vh}
+.page-title{font-size:28px;font-weight:600;color:#333;margin:0 0 16px;text-align:center}
+.isbn-zoek-boek{border:1px solid #c7d2fe;border-radius:12px;padding:10px 14px;margin-bottom:8px;background:#fff}
+.isbn-zoek-boek>button[type='button']:first-child{display:block;background:#fff;border:1px solid #e0e0e0;color:#333;padding:8px 14px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;font-family:inherit;margin:6px 0;transition:background-color .2s}
+.isbn-zoek-boek>button[type='button']:first-child:hover{background:#f9fafb}
+.isbn-zoek-boek>div{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;margin-top:2px}
+.isbn-zoek-boek label{font-size:13px;color:#333;font-weight:500;padding-top:0}
+.isbn-zoek-boek input{width:100%;border:1px solid #e0e0e0;border-radius:8px;padding:8px 12px;font-size:13px;font-family:inherit;color:#333;box-sizing:border-box;margin-top:0}
+.isbn-zoek-boek input:focus{outline:0;border-color:#a78bfa;box-shadow:0 0 0 3px rgba(167,139,250,.1)}
+.isbn-zoek-boek>div>button[type='button']{background:#fff;border:1px solid #fed7aa;color:#ea580c;padding:8px 14px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;font-family:inherit;white-space:nowrap;transition:background-color .2s;margin-top:0}
+.isbn-zoek-boek>div>button[type='button']:hover:not(:disabled){background:#fffbf5}
+.isbn-zoek-boek>div>button[type='button']:disabled{opacity:.5;cursor:not-allowed}
+.zoek-melding{grid-column:1/-1;font-size:13px;color:#666;margin-top:8px}
+.beheer-topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}
+.mode-selector{display:flex;gap:10px;flex-wrap:wrap}
+.mode-selector button{padding:9px 14px;background:#f5f5f5;border:1px solid #d4d4d4;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;font-family:inherit;color:#333;transition:background-color .2s,border-color .2s,color .2s}
+.mode-selector button:hover{background:#ececec}
+.mode-selector button.active{background:#ea580c;color:#fff;border-color:#c2410c}
+.verlaat-button{background:#fff;border:1px solid #e0e0e0;color:#333;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;font-family:inherit;transition:background-color .2s;white-space:nowrap}
+.verlaat-button:hover{background:#f9fafb}
+form{border:1px solid #e0e0e0;border-radius:12px;padding:18px 22px;background:#fff;display:grid;grid-template-columns:repeat(3,1fr);gap:14px 18px}
+form>div:not(.form-actions){display:flex;flex-direction:column;gap:5px}
+form>div:has(textarea){grid-column:1/-1}
+label{font-size:13px;color:#333;font-weight:500}
+input,textarea{width:100%;box-sizing:border-box;border:1px solid #e0e0e0;border-radius:8px;padding:8px 12px;font-size:13px;font-family:inherit;color:#333;transition:border-color .2s,box-shadow .2s}
+textarea{min-height:60px;max-height:80px;resize:vertical}
+input::placeholder,textarea::placeholder{color:#999}
+input:focus,textarea:focus{outline:0;border-color:#a78bfa;box-shadow:0 0 0 3px rgba(167,139,250,.1)}
+small{font-size:12px;color:#dc2626;line-height:1.3}
+form>div>div{display:flex;gap:10px;align-items:stretch}
+form>div>div button[type='button']{background:#fff;border:1px solid #e0e0e0;color:#333;padding:8px 14px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;font-family:inherit;white-space:nowrap;transition:background-color .2s}
+form>div>div button[type='button']:hover{background:#f9fafb}
+.form-actions{grid-column:1/-1;display:flex;flex-direction:row;justify-content:center;align-items:center;gap:12px;margin-top:4px;flex-wrap:nowrap}
+.form-actions button[type='submit']{background:#fff;border:1px solid #fed7aa;color:#ea580c;padding:8px 20px;border-radius:8px;font-weight:600;cursor:pointer;font-size:13px;font-family:inherit;transition:background-color .2s}
+.form-actions button[type='submit']:hover:not(:disabled){background:#fffbf5}
+.form-actions button[type='submit']:disabled{opacity:.5;cursor:not-allowed}
+.form-actions .delete-button{background:#fff;border:1px solid #fecaca;color:#dc2626;padding:8px 20px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;font-family:inherit;transition:background-color .2s,border-color .2s}
+.form-actions .delete-button:hover{background:#fef2f2;border-color:#fca5a5}
+.form-actions .reset-button{background:#fff;border:1px solid #e0e0e0;color:#333;padding:8px 20px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;font-family:inherit;transition:background-color .2s}
+.form-actions .reset-button:hover{background:#f9fafb}
 
-/* Page Title */
-.page-title {
-  font-size: 28px;
-  font-weight: 600;
-  color: #333;
-  margin: 0 0 16px 0;
-  text-align: center;
-}
-
-/* ISBN Zoek Sectie */
-.isbn-zoek-boek {
-  border: 1px solid #c7d2fe;
-  border-radius: 12px;
-  padding: 10px 14px;
-  margin-bottom: 8px;
-  background: white;
-}
-
-.isbn-zoek-boek > button[type='button']:first-child {
-  display: block;
-  background: white;
-  border: 1px solid #e0e0e0;
-  color: #333;
-  padding: 8px 14px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 500;
-  font-family: inherit;
-  margin: 6px 0;
-  margin-left: 0;
-  transition: background-color 0.2s;
-}
-
-.isbn-zoek-boek > button[type='button']:first-child:hover {
-  background-color: #f9fafb;
-}
-
-.isbn-zoek-boek > div {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: start;
-  gap: 12px;
-}
-
-.isbn-zoek-boek label {
-  font-size: 13px;
-  color: #333;
-  font-weight: 500;
-  padding-top: 8px;
-}
-
-.isbn-zoek-boek input {
-  width: 100%;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  padding: 8px 12px;
-  font-size: 13px;
-  font-family: inherit;
-  color: #333;
-  box-sizing: border-box;
-}
-
-.isbn-zoek-boek input:focus {
-  outline: none;
-  border-color: #a78bfa;
-  box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.1);
-}
-
-.isbn-zoek-boek > div > button[type='button'] {
-  background: #fff;
-  border: 1px solid #fed7aa;
-  color: #ea580c;
-  padding: 8px 14px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 600;
-  font-family: inherit;
-  white-space: nowrap;
-  transition: background-color 0.2s;
-}
-
-.isbn-zoek-boek > div > button[type='button']:hover:not(:disabled) {
-  background-color: #fffbf5;
-}
-
-.isbn-zoek-boek > div > button[type='button']:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.zoek-melding {
-  grid-column: 1 / -1;
-  font-size: 13px;
-  color: #666;
-  margin-top: 8px;
-}
-
-/* Mode Selector */
-.mode-selector {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 14px;
-  flex-wrap: wrap;
-}
-
-.mode-selector button {
-  padding: 9px 14px;
-  background-color: #f5f5f5;
-  border: 1px solid #d4d4d4;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 600;
-  font-family: inherit;
-  color: #333;
-  transition: background-color 0.2s, border-color 0.2s, color 0.2s;
-}
-
-.mode-selector button:hover {
-  background-color: #ececec;
-}
-
-.mode-selector button.active {
-  background-color: #ea580c;
-  color: #fff;
-  border-color: #c2410c;
-}
-
-/* Formulier */
-form {
-  border: 1px solid #e0e0e0;
-  border-radius: 12px;
-  padding: 18px 22px;
-  background: white;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 14px 18px;
-}
-
-/* FIX: .form-actions uitgesloten zodat flex-direction: row behouden blijft */
-form > div:not(.form-actions) {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-form > div:has(textarea) {
-  grid-column: 1 / -1;
-}
-
-/* Labels en Inputs */
-label {
-  font-size: 13px;
-  color: #333;
-  font-weight: 500;
-}
-
-input,
-textarea {
-  width: 100%;
-  box-sizing: border-box;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  padding: 8px 12px;
-  font-size: 13px;
-  font-family: inherit;
-  color: #333;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-textarea {
-  min-height: 60px;
-  max-height: 80px;
-  resize: vertical;
-}
-
-input::placeholder,
-textarea::placeholder {
-  color: #999;
-}
-
-input:focus,
-textarea:focus {
-  outline: none;
-  border-color: #a78bfa;
-  box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.1);
-}
-
-/* Error messages */
-small {
-  font-size: 12px;
-  color: #dc2626;
-  line-height: 1.3;
-}
-
-/* Buttons binnen formulier velden */
-form > div > div {
-  display: flex;
-  gap: 10px;
-  align-items: stretch;
-}
-
-form > div > div button[type='button'] {
-  background: white;
-  border: 1px solid #e0e0e0;
-  color: #333;
-  padding: 8px 14px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 500;
-  font-family: inherit;
-  white-space: nowrap;
-  transition: background-color 0.2s;
-}
-
-form > div > div button[type='button']:hover {
-  background-color: #f9fafb;
-}
-
-/* Form Actions */
-.form-actions {
-  grid-column: 1 / -1;
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  gap: 12px;
-  margin-top: 4px;
-  flex-wrap: nowrap;
-}
-
-.form-actions button[type='submit'] {
-  background: #fff;
-  border: 1px solid #fed7aa;
-  color: #ea580c;
-  padding: 8px 20px;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  font-size: 13px;
-  font-family: inherit;
-  transition: background-color 0.2s;
-}
-
-.form-actions button[type='submit']:hover:not(:disabled) {
-  background-color: #fffbf5;
-}
-
-.form-actions button[type='submit']:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.form-actions .reset-button,
-.form-actions .terug-button {
-  background: white;
-  border: 1px solid #e0e0e0;
-  color: #333;
-  padding: 8px 20px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 500;
-  font-family: inherit;
-  transition: background-color 0.2s;
-}
-
-.form-actions .reset-button:hover,
-.form-actions .terug-button:hover {
-  background-color: #f9fafb;
-}
-
-/* Message Container */
-.message-container {
-  padding: 10px 14px;
-  margin-top: 12px;
-  border-radius: 12px;
-  font-size: 13px;
-  line-height: 1.4;
-  animation: slideIn 0.3s ease-out;
-}
-
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.error-message {
-  color: #991b1b;
-  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-  border: 1px solid #fecaca;
-}
-
-.success-message {
-  color: #166534;
-  background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
-  border: 1px solid #bbf7d0;
-}
+.message-container{padding:10px 14px;margin-top:12px;border-radius:12px;font-size:13px;line-height:1.4}
+.error-message{color:#991b1b;background:#fee2e2;border:1px solid #fecaca}
+.success-message{color:#166534;background:#dcfce7;border:1px solid #bbf7d0}
 
 /* Custom Delete Modal */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-  animation: fadeIn 0.2s ease-out;
+.modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);display:flex;justify-content:center;align-items:center;z-index:1000}
+.modal-content{background:#fff;border-radius:12px;padding:0;width:90%;max-width:450px;box-shadow:0 10px 40px rgba(0,0,0,.2)}
+.modal-header{padding:18px 22px;border-bottom:1px solid #e0e0e0}
+.modal-header h3{margin:0;font-size:18px;font-weight:600;color:#333}
+.modal-body{padding:20px 22px}
+.modal-body p{margin:0 0 12px;font-size:14px;color:#555;line-height:1.5}
+.modal-body .boek-info{background:#f9fafb;padding:12px;border-radius:8px;border-left:3px solid #ea580c;margin:16px 0}
+.modal-body .boek-info strong{color:#333;font-weight:600}
+.modal-body .warning-text{color:#dc2626;font-size:13px;font-weight:500;margin-top:16px}
+.modal-footer{padding:16px 22px;border-top:1px solid #e0e0e0;display:flex;justify-content:flex-end;gap:10px}
+.modal-footer button{padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;transition:all .2s;border:1px solid}
+.btn-annuleren{background:#fff;border-color:#e0e0e0!important;color:#333}
+.btn-annuleren:hover{background:#f9fafb}
+.btn-verwijderen{background:#dc2626;border-color:#dc2626!important;color:#fff}
+.btn-verwijderen:hover{background:#b91c1c;border-color:#b91c1c!important}
+
+/* Boeken Overzicht */
+.boeken-overzicht{margin-top:14px;border:1px solid #e0e0e0;border-radius:12px;background:#fff;padding:14px 16px}
+.boeken-overzicht h3{margin:0 0 10px;color:#333;font-size:16px;font-weight:600}
+.boeken-overzicht-empty,.loading-spinner{margin-bottom:12px;padding:10px 12px;border-radius:10px;font-size:13px}
+.boeken-overzicht-empty{color:#991b1b;background:#fee2e2;border:1px solid #fecaca}
+.loading-spinner{color:#555;background:#f9fafb;border:1px solid #e5e7eb}
+.boeken-overzicht table{width:100%;border-collapse:separate;border-spacing:0;margin-bottom:12px;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden}
+.boeken-overzicht table thead{background:#f8fafc}
+.boeken-overzicht table th{padding:10px 12px;text-align:left;font-size:12px;color:#666;font-weight:600;border-bottom:1px solid #e5e7eb}
+.boeken-overzicht table td{padding:10px 12px;border-bottom:1px solid #f1f5f9;font-size:13px}
+.boeken-overzicht table tbody tr:last-child td{border-bottom:none}
+.boeken-overzicht table td:last-child{display:flex;gap:6px}
+.action-button{padding:7px 12px;background:#fff;border:1px solid #fed7aa;color:#ea580c;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;transition:background-color .2s,border-color .2s}
+.action-button-verwijder{border-color:#fecaca;color:#dc2626}
+.action-button:disabled{opacity:.5;cursor:not-allowed}
+.pagination-controls{display:flex;justify-content:center;align-items:center;gap:10px;padding-top:4px}
+.pagination-button{padding:7px 12px;background:#fff;border:1px solid #e0e0e0;color:#333;border-radius:8px;cursor:pointer;font-weight:500;font-size:12px;transition:background-color .2s}
+.pagination-button:hover:not(:disabled){background:#f9fafb}
+.pagination-button:disabled{opacity:.5;cursor:not-allowed}
+.page-info{font-size:12px;font-weight:500;color:#666;white-space:nowrap}
+
+@media (hover:hover){
+	.boeken-overzicht table tr:hover{background:#fafafa}
+	.action-button-wijzig:hover:not(:disabled){background:#fffbf5;border-color:#fdba74}
+	.action-button-verwijder:hover:not(:disabled){background:#fef2f2;border-color:#fca5a5}
+	.pagination-button:hover:not(:disabled){background:#f9fafb}
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-.modal-content {
-  background: white;
-  border-radius: 12px;
-  padding: 0;
-  width: 90%;
-  max-width: 450px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-  animation: slideUp 0.3s ease-out;
-}
-
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.modal-header {
-  padding: 18px 22px;
-  border-bottom: 1px solid #e0e0e0;
-}
-
-.modal-header h3 {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 600;
-  color: #333;
-}
-
-.modal-body {
-  padding: 20px 22px;
-}
-
-.modal-body p {
-  margin: 0 0 12px 0;
-  font-size: 14px;
-  color: #555;
-  line-height: 1.5;
-}
-
-.modal-body .boek-info {
-  background: #f9fafb;
-  padding: 12px;
-  border-radius: 8px;
-  border-left: 3px solid #ea580c;
-  margin: 16px 0;
-}
-
-.modal-body .boek-info strong {
-  color: #333;
-  font-weight: 600;
-}
-
-.modal-body .warning-text {
-  color: #dc2626;
-  font-size: 13px;
-  font-weight: 500;
-  margin-top: 16px;
-}
-
-.modal-footer {
-  padding: 16px 22px;
-  border-top: 1px solid #e0e0e0;
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-}
-
-.modal-footer button {
-  padding: 9px 18px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  font-family: inherit;
-  cursor: pointer;
-  transition: all 0.2s;
-  border: 1px solid;
-}
-
-.btn-annuleren {
-  background: white;
-  border-color: #e0e0e0 !important;
-  color: #333;
-}
-
-.btn-annuleren:hover {
-  background-color: #f9fafb;
-}
-
-.btn-verwijderen {
-  background: #dc2626;
-  border-color: #dc2626 !important;
-  color: white;
-}
-
-.btn-verwijderen:hover {
-  background: #b91c1c;
-  border-color: #b91c1c !important;
-}
-
-/* Responsive Design */
-@media (max-width: 1200px) {
-  form {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 768px) {
-  :host {
-    padding: 12px;
-  }
-
-  .mode-selector {
-    gap: 8px;
-  }
-
-  .mode-selector button {
-    padding: 8px 10px;
-    font-size: 12px;
-  }
-
-  form {
-    grid-template-columns: 1fr;
-    padding: 16px;
-  }
-
-  .form-actions {
-    flex-direction: row;
-    justify-content: center;
-    flex-wrap: nowrap;
-    gap: 8px;
-  }
-
-  .form-actions button[type='submit'],
-  .form-actions .reset-button,
-  .form-actions .terug-button {
-    padding: 8px 12px;
-    font-size: 12px;
-  }
-
-  .isbn-zoek-boek > div {
-    grid-template-columns: 1fr;
-  }
-
-  .isbn-zoek-boek label {
-    padding-top: 0;
-  }
-
-  .modal-content {
-    width: 95%;
-    margin: 16px;
-  }
-
-  .modal-header,
-  .modal-body,
-  .modal-footer {
-    padding: 16px;
-  }
-
-  .modal-footer {
-    flex-direction: column-reverse;
-  }
-
-  .modal-footer button {
-    width: 100%;
-  }
-}
+@media (max-width:1200px){form{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:768px){:host{padding:12px}.beheer-topbar{align-items:flex-start;flex-direction:column}.mode-selector{gap:8px}.mode-selector button{padding:8px 10px;font-size:12px}.verlaat-button{padding:8px 12px;font-size:12px;align-self:flex-end}form{grid-template-columns:1fr;padding:16px}.form-actions{flex-direction:row;justify-content:center;flex-wrap:nowrap;gap:8px}.form-actions button[type='submit'],.form-actions .delete-button,.form-actions .reset-button{padding:8px 12px;font-size:12px}.isbn-zoek-boek>div{grid-template-columns:1fr}.isbn-zoek-boek label{padding-top:0}.modal-content{width:95%;margin:16px}.modal-header,.modal-body,.modal-footer{padding:16px}.modal-footer{flex-direction:column-reverse}.modal-footer button{width:100%}.boeken-overzicht table th,.boeken-overzicht table td{padding:8px}}

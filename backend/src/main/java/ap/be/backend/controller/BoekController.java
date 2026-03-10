@@ -2,6 +2,9 @@ package ap.be.backend.controller;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -18,6 +21,7 @@ import ap.be.backend.repository.BoekRepository;
 import ap.be.backend.service.BoekService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @CrossOrigin(origins = { "http://frontend.localhost", "http://localhost:4200" })
@@ -73,6 +77,12 @@ public class BoekController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok("Boek is verwijderd.");
+    }
+
+    @GetMapping("/api/boeken/paged")
+    public Page<Boek> getBoekenPaged(@RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size) {
+        return boekRepository.findAll(PageRequest.of(page, size, Sort.by("titel").ascending()));
     }
 
 }

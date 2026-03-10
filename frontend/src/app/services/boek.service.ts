@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Boek } from '../models/Boek';
 import { NieuwBoek } from '../models/NieuwBoek';
+import { PageResponse } from '../models/PageResponse';
 
 @Injectable({
   providedIn: 'root',
@@ -32,5 +33,8 @@ export class BoekService {
   }
   verwijderen(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${id}`, { responseType: 'text' });
+  }
+  getBoekenPaged(page: number, size: number): Observable<PageResponse<Boek>> {
+    return this.http.get<PageResponse<Boek>>(`${this.apiUrl}/paged?page=${page}&size=${size}`);
   }
 }
