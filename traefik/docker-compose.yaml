@@ -1,4 +1,3 @@
-
 services:
   traefik:
     image: traefik:v3.6.7
@@ -23,10 +22,14 @@ services:
       - "--api.insecure=false"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.dashboard.rule=Host(`dashboard.docker.localhost`)"
+      # - "traefik.http.routers.dashboard.rule=Host(`dashboard.docker.localhost`)"
+      - "traefik.http.routers.dashboard.rule=Host(`dashboard.195.201.38.27.nip.io`) || Host(`dashboard.docker.localhost`)"
       - "traefik.http.routers.dashboard.entrypoints=web"
       - "traefik.http.routers.dashboard.service=api@internal"
 
+# networks:
+#   proxy:
+#     name: proxy
 networks:
   proxy:
-    name: proxy
+    external: true

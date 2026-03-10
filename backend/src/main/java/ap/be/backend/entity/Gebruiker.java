@@ -3,17 +3,18 @@ package ap.be.backend.entity;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.Table;
 
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "Gebruikers")
@@ -27,26 +28,29 @@ public class Gebruiker {
     private String Achternaam;
     private String Email;
 
-    @Enumerated(EnumType.STRING) // Slaat "LEERLING" op ipv 0
+    @Enumerated(EnumType.STRING)
     private Rol Rol;
 
-    @ManyToMany
-    @JoinTable(name = "gebruiker_leeslijst", joinColumns = @JoinColumn(name = "gebruikerId"), inverseJoinColumns = @JoinColumn(name = "boekId"))
+    @OneToMany(mappedBy = "gebruiker", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private Set<LeeslijstMap> mappen = new HashSet<>();
 
-    private Set<Boek> leeslijst = new HashSet<>();
-
-    public Set<Boek> getLeeslijst() {
-        return leeslijst;
+    public Set<LeeslijstMap> getMappen() {
+        return mappen;
     }
 
-    public void setLeeslijst(Set<Boek> leeslijst) {
-        this.leeslijst = leeslijst;
+    public void setMappen(Set<LeeslijstMap> mappen) {
+        this.mappen = mappen;
+    }
+
+    public void voegMapToe(LeeslijstMap map) {
+        mappen.add(map);
+        map.setGebruiker(this);
     }
 
     public Gebruiker() {
     }
 
-    // Gebruik camelCase (kleine letters aan het begin)
     public Long getGebruikerID() {
         return gebruikerID;
     }
