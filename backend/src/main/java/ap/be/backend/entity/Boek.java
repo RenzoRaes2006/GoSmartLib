@@ -1,6 +1,9 @@
 package ap.be.backend.entity;
 
 import java.util.List;
+import java.util.Set;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -49,6 +52,14 @@ public class Boek {
 
     @Column
     private String locatie;
+
+    @OneToMany(mappedBy = "boek", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Beoordeling> beoordelingen;
+
+    @JsonIgnore
+    @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @JoinTable(name = "leeslijst_map_boeken", inverseJoinColumns = @JoinColumn(name = "map_id"))
+    private Set<LeeslijstMap> leeslijstMaps;
 
     public Boek(String titel, String auteur) {
         this.titel = titel;
