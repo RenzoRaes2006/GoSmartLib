@@ -50,8 +50,8 @@ public class Boek {
     @Column
     private String locatie;
 
-    @OneToMany(mappedBy = "boek", cascade = CascadeType.REMOVE)
-    private List<Beoordeling> beoordelingen;
+    // @OneToMany(mappedBy = "boek", cascade = CascadeType.REMOVE)
+    // private List<Beoordeling> beoordelingen;
 
     public Boek(String titel, String auteur) {
         this.titel = titel;
