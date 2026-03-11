@@ -14,8 +14,8 @@ public interface BoekRepository extends JpaRepository<Boek, Long> {
     Optional<Boek> findByIsbn(String isbn);
 
     @Query("SELECT b FROM Boek b WHERE " +
-           "LOWER(b.titel) LIKE LOWER(CONCAT('%', :term, '%')) OR " +
-           "LOWER(b.auteur) LIKE LOWER(CONCAT('%', :term, '%')) OR " +
-           "b.isbn LIKE CONCAT('%', :term, '%')")
-    List<Boek> searchBoeken(@Param("term") String term , Sort sort);
+            "LOWER(b.titel) LIKE LOWER(CONCAT('%', :term, '%')) OR " +
+            "LOWER(b.auteur) LIKE LOWER(CONCAT('%', :term, '%')) OR " +
+            "b.isbn LIKE CONCAT('%', :term, '%')")
+    List<Boek> searchBoeken(@Param("term") String term, Sort sort);
 }

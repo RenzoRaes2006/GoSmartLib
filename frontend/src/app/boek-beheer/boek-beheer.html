@@ -1,6 +1,18 @@
+<div class="beheer-topbar">
+    <div class="mode-selector">
+        <button type="button" (click)="setMode('wijzigen')" [class.active]="mode === 'wijzigen'">
+            Boek Beheren
+        </button>
+        <button type="button" (click)="setMode('toevoegen')" [class.active]="mode === 'toevoegen'">
+            Boek Toevoegen
+        </button>
+    </div>
+    <button type="button" class="verlaat-button" routerLink="/">Verlaten</button>
+</div>
+
 <div class="isbn-zoek-boek">
     <button type="button" (click)="toggleIsbnZoek()">
-        {{ toonIsbnZoek ? 'Verberg ISBN Zoekveld' : 'Zoek met isbn' }}
+        {{ toonIsbnZoek ? 'Verberg ISBN Zoekveld' : 'Zoek op ISBN' }}
     </button>
 
     <div *ngIf="toonIsbnZoek">
@@ -13,9 +25,80 @@
     </div>
 </div>
 
+<!-- Boeken Overzicht voor Beheren -->
+<div *ngIf="mode === 'wijzigen' && !boekGevonden && (boeknOverzicht.length > 0 || isLoadingBoeken)" class="boeken-overzicht">
+    <h3>Beschikbare Boeken</h3>
+    
+    <!-- Ladingindicator -->
+    <div *ngIf="isLoadingBoeken" class="loading-spinner">
+        Boeken laden...
+    </div>
 
+    <!-- Error als boeken niet laden -->
+    <div *ngIf="!isLoadingBoeken && boeknOverzicht.length === 0" class="boeken-overzicht-empty">
+        <strong>Geen boeken gevonden.</strong> Controleer of de backend API draait.
+    </div>
 
-<form [formGroup]="boekForm" (ngSubmit)="onSubmit()">
+    <!-- Tabel met Boeken -->
+    <table *ngIf="!isLoadingBoeken && boeknOverzicht.length > 0">
+        <thead>
+            <tr>
+                <th>Titel</th>
+                <th>Auteur</th>
+                <th>ISBN</th>
+                <th>Genre</th>
+                <th>Actie</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let boek of boeknOverzicht">
+                <td>{{ boek.titel }}</td>
+                <td>{{ boek.auteur }}</td>
+                <td>{{ boek.isbn }}</td>
+                <td>{{ boek.genre.join(', ') }}</td>
+                <td>
+                    <button 
+                        type="button" 
+                        class="action-button action-button-wijzig"
+                        (click)="selecteerBoekUitLijst(boek, 'wijzig')">
+                        Wijzig
+                    </button>
+                    <button 
+                        type="button" 
+                        class="action-button action-button-verwijder"
+                        (click)="selecteerBoekUitLijst(boek, 'verwijder')">
+                        Verwijder
+                    </button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Paginatie Controls -->
+    <div class="pagination-controls">
+        <button 
+            type="button" 
+            class="pagination-button"
+            (click)="gaNaarVorigePagina()"
+            [disabled]="currentPage === 0">
+            ← Vorige
+        </button>
+        
+        <span class="page-info">
+            Pagina {{ currentPage + 1 }} van {{ totaalPages }}
+        </span>
+        
+        <button 
+            type="button" 
+            class="pagination-button"
+            (click)="gaNaarVolgendePagina()"
+            [disabled]="currentPage + 1 >= totaalPages">
+            Volgende →
+        </button>
+    </div>
+</div>
+
+<form [formGroup]="boekForm" (ngSubmit)="onSubmit()" *ngIf="mode === 'toevoegen' || boekGevonden">
     <div>
         <label for="titel">Titel:</label>
         <input id="titel" formControlName="titel" />
@@ -117,15 +200,22 @@
     <div>
         <label for="afbeelding">Afbeelding URL:</label>
         <input id="afbeelding" formControlName="afbeelding" />
-        <div *ngIf="boekForm.get('afbeelding')?.invalid && boekForm.get('afbeelding')?.touched">
-        <small *ngIf="boekForm.get('afbeelding')?.errors?.['required']">Afbeelding URL is verplicht.</small>
-        </div>
     </div>
     
     <div class="form-actions">
-        <button type="submit" [disabled]="boekForm.invalid">Boek Toevoegen</button>
-        <button type="button" (click)="resetForm()" class="reset-button">Clear</button>
-        <button type="button" class="terug-button" routerLink="/">Terug</button>
+        <button type="submit" [disabled]="boekForm.invalid || (mode !== 'toevoegen' && !boekGevonden)">
+            {{ mode === 'toevoegen' ? 'Boek Toevoegen' : 'Wijzigingen Opslaan' }}
+        </button>
+        <button
+            type="button"
+            class="delete-button"
+            *ngIf="mode === 'wijzigen' && boekGevonden"
+            (click)="openVerwijderModal()">
+            Verwijder
+        </button>
+        <button type="button" (click)="resetForm()" class="reset-button">
+            {{ mode === 'toevoegen' ? 'Clear' : 'Annuleren' }}
+        </button>
     </div>
 </form>
 
@@ -135,5 +225,29 @@
 
 <div class="message-container success-message" *ngIf="successMessage">
     {{ successMessage }}
+</div>
+
+<!-- Custom Delete Confirmation Modal -->
+<div class="modal-overlay" *ngIf="toonVerwijderModal" (click)="sluitVerwijderModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h3>Boek Verwijderen</h3>
+        </div>
+        <div class="modal-body">
+            <p>Weet je zeker dat je dit boek wilt verwijderen?</p>
+            <p class="boek-info" *ngIf="naarTeWijzigenBoek">
+                <strong>{{ naarTeWijzigenBoek.titel }}</strong> door {{ naarTeWijzigenBoek.auteur }}
+            </p>
+            <p class="warning-text">Deze actie kan niet ongedaan worden gemaakt.</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn-annuleren" (click)="sluitVerwijderModal()">
+                Annuleren
+            </button>
+            <button type="button" class="btn-verwijderen" (click)="bevestigVerwijderen()">
+                Verwijderen
+            </button>
+        </div>
+    </div>
 </div>
 

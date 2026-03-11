@@ -11,7 +11,7 @@
                         @if (boek?.aantalExemplaren && boek!.aantalExemplaren > 0) {
                         <span class="status-badge">Beschikbaar</span>
                         }
-                        <img [src]="boek?.afbeelding" alt="Book Cover" class="book-cover">
+                        <img [src]="boek?.afbeelding || 'https://bookshow.blurb.com/bookshow/cache/P11360640/md/cover_2.jpeg?access_key=675523b769268bce5b0b710b3d0e7841'" alt="Book Cover" class="book-cover">
                     </div>
 
                     <div class="tags-section">

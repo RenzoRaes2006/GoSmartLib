@@ -2,9 +2,13 @@ package ap.be.backend.controller;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,6 +22,8 @@ import ap.be.backend.entity.Boek;
 import ap.be.backend.repository.BoekRepository;
 import ap.be.backend.service.BoekService;
 import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @CrossOrigin(origins = { "http://frontend.localhost", "http://localhost:4200" })
@@ -53,4 +59,38 @@ public class BoekController {
         return boekRepository.findById(id).orElse(null);
 
     }
+
+    @GetMapping("/api/boeken/isbn/{isbn}")
+    public ResponseEntity<Boek> getBoekByIsbn(@PathVariable("isbn") String isbn) {
+        Boek boek = boekService.getBoekByIsbn(isbn);
+        if (boek == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(boek);
+    }
+
+    @PutMapping("/api/boeken/{id}")
+    public ResponseEntity<Boek> updateBoek(@PathVariable Long id, @Valid @RequestBody BoekDTO boekDTO) {
+        Boek geupdate = boekService.updateBoek(id, boekDTO);
+        if (geupdate == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(geupdate);
+    }
+
+    @DeleteMapping("/api/boeken/{id}")
+    public ResponseEntity<String> deleteBoek(@PathVariable Long id) {
+        boolean deleted = boekService.deleteBoek(id);
+        if (!deleted) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok("Boek is verwijderd.");
+    }
+
+    @GetMapping("/api/boeken/paged")
+    public Page<Boek> getBoekenPaged(@RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size) {
+        return boekRepository.findAll(PageRequest.of(page, size, Sort.by("titel").ascending()));
+    }
+
 }

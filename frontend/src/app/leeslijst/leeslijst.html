@@ -9,7 +9,7 @@
                  
                     <div class="album-cover">
                         @if (map.boeken && map.boeken.length > 0) {
-                            <img [src]="map.boeken[map.boeken.length - 1].afbeelding" alt="Cover" class="cover-image">
+                            <img [src]="map.boeken[map.boeken.length - 1].afbeelding || 'https://bookshow.blurb.com/bookshow/cache/P11360640/md/cover_2.jpeg?access_key=675523b769268bce5b0b710b3d0e7841'" alt="Cover" class="cover-image">
                         } @else if (map.naam === 'Favorieten') {
                             <div class="empty-cover">⭐</div> 
                         } @else {
@@ -41,7 +41,7 @@
 
                     <a [routerLink]="['/details', boek.id]" class="book-link">
                         <div class="album-cover hover-effect">
-                            <img [src]="boek.afbeelding" alt="Cover" class="cover-image">
+                            <img [src]="boek.afbeelding || 'https://bookshow.blurb.com/bookshow/cache/P11360640/md/cover_2.jpeg?access_key=675523b769268bce5b0b710b3d0e7841'" alt="Cover" class="cover-image">
                         </div>
                         <div class="album-title">{{ boek.titel }}</div>
                     </a>
