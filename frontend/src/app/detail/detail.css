@@ -298,6 +298,99 @@
 }
 .modal-label { text-align: left; margin-left: 5%; margin-bottom: 5px; font-weight: bold; font-size: 14px; color: #555; }
 
+
+/* ==========================================================================
+   NIEUWE STYLING: Rapporteren, Modals en Meldingen
+   ========================================================================== */
+
+/* Specifieke styling voor de rapporteer knop onder een review */
+.rapporteer-btn {
+    background: transparent;
+    border: none;
+    color: #dc2626; /* Donkerrood */
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 4px 8px;
+    margin-top: 8px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.rapporteer-btn:hover {
+    background-color: #fee2e2; /* Lichtrode hover */
+}
+
+/* Aanpassingen voor de rapport-modal (gebruikt basis modal-box) */
+.rapport-modal h3 {
+    color: #dc2626; /* Rode titel voor waarschuwing */
+    margin-top: 0;
+}
+
+.rapport-modal .form-textarea {
+    margin: 15px 0 25px 0;
+    width: 100%;
+}
+
+/* Disabled state voor de save-btn (Verzenden knop) */
+.save-btn:disabled {
+    background: #94a3b8; /* Grijs als hij niet klikbaar is */
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+/* Toast Melding (Pop-up rechtsonder) */
+.toast-message {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background-color: #10b981; /* Groene succeskleur, matcht met thema tags */
+    color: white;
+    padding: 16px 24px;
+    border-radius: 8px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    z-index: 10000;
+    font-weight: 600;
+    animation: slideUpFade 0.4s ease-out forwards;
+}
+
+.toast-message p {
+    margin: 0;
+}
+
+/* Animatie voor de toast melding */
+@keyframes slideUpFade {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Bestaande error-message styling (indien nog niet aanwezig) */
+.error-message {
+    background-color: #fee2e2;
+    color: #dc2626;
+    padding: 10px;
+    border-radius: 6px;
+    font-size: 13px;
+    margin-top: 10px;
+    border: 1px solid #fca5a5;
+}
+
+.error-message p {
+    margin: 0;
+}
+
+
+
+
 /* 8. Responsiviteit */
 @media (max-width: 480px) {
     .image-container {
@@ -327,3 +420,5 @@
         align-items: start;
     }
 }
+
+

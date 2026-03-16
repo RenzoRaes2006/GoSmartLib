@@ -9,17 +9,21 @@ import { PageResponse } from '../models/PageResponse';
   providedIn: 'root',
 })
 export class BoekService {
-  // private readonly gebruikTraefik = true; // Zet op true als je Traefik gebruikt, anders false
+  // private readonly gebruikTraefik = false; // Zet op true als je Traefik gebruikt, anders false
   // private apiUrl = this.gebruikTraefik
   //   ? 'http://frontend.localhost/api/boeken'
   //   : 'http://localhost:8081/api/boeken';
-  private apiUrl = '/api/boeken';
+  // private apiUrl = '/api/boeken';
 
-private http = inject(HttpClient);
+  private apiUrl = window.location.hostname === 'localhost'
+    ? 'http://localhost:8081/api/boeken'
+    : '/api/boeken';
+
+  private http = inject(HttpClient);
 
   getBoeken(zoekterm?: string): Observable<Boek[]> {
     let params = new HttpParams();
-    
+
     if (zoekterm && zoekterm.trim() !== '') {
       params = params.set('zoekterm', zoekterm);
     }

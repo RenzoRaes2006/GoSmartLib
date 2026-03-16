@@ -12,15 +12,18 @@ import org.springframework.web.bind.annotation.RestController;
 
 import ap.be.backend.dto.BeoordelingDTO;
 import ap.be.backend.service.BeoordelingService;
+import ap.be.backend.service.GerapporteerdeBeoordelingService;
 
 @RestController
-@CrossOrigin(origins = {"http://frontend.localhost", "http://localhost:4200"})
+// @CrossOrigin(origins = {"http://frontend.localhost", "http://localhost:4200"})
 @RequestMapping("/api")
 public class BeoordelingController {
     private final BeoordelingService beoordelingService;
+    private final GerapporteerdeBeoordelingService gerapporteerdeBeoordelingService;
 
-    public BeoordelingController(BeoordelingService beoordelingService) {
+    public BeoordelingController(BeoordelingService beoordelingService, GerapporteerdeBeoordelingService gerapporteerdeBeoordelingService) {
         this.beoordelingService = beoordelingService;
+        this.gerapporteerdeBeoordelingService = gerapporteerdeBeoordelingService;
     }
 
     @GetMapping("/books/{id}/reviews")
@@ -28,9 +31,13 @@ public class BeoordelingController {
         return beoordelingService.getBeoordelingenOpBoekId(id);
     }
 
-    @PostMapping("/reviews")
+    @PostMapping("/reviews")// dat moet verbeter worden, want er moet ook een boekId meegegeven worden. dan in de service moet dan ook een boek opgehaald worden en dan de beoordeling aan dat boek koppelen
     public BeoordelingDTO beoordelingOpslaan(@RequestBody BeoordelingDTO beoordeling) {
         beoordelingService.beoordelingOpslaan(beoordeling);
         return beoordeling;
+    }
+    @PostMapping("/reviews/{id}/report")
+    public void rapporteerBeoordeling(@PathVariable("id") Long id, @RequestBody String reden) {
+        gerapporteerdeBeoordelingService.rapporteerBeoordeling(id, reden);
     }
 }

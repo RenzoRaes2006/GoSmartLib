@@ -21,7 +21,7 @@ public class BeoordelingMapper {
         Beoordeling beoordeling = new Beoordeling();
         beoordeling.setId(dto.id());
         beoordeling.setGebruikerId(dto.gebruikerId());
-        beoordeling.setBoek(boek); // Hier zet je het volledige Boek object
+        beoordeling.setBoek(boek); // Hier zetten we het volledige Boek object
         beoordeling.setWaardering(dto.waardering());
         beoordeling.setInhoud(dto.inhoud());
         return beoordeling;

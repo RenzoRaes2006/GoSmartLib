@@ -1,5 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, NgModel, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink, ActivatedRoute } from '@angular/router';
 import { BoekService } from '../services/boek.service';
 import { Boek } from '../models/Boek';
@@ -9,7 +9,7 @@ import { LeeslijstService } from '../services/leeslijstService';
 
 @Component({
   selector: 'app-detail',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, FormsModule],
   templateUrl: './detail.html',
   styleUrl: './detail.css',
 })
@@ -32,6 +32,12 @@ export class Detail implements OnInit {
 
   boekWaardering: number = 0;
   waarderingPrecentage: number = 0;
+
+  rapportMelding: string = '';
+  rapporteerModalOpen: boolean = false;
+  rapporteerReden: string = '';
+  geselecteerdeBeoordelingId: number | null = null;
+
 
   ngOnInit(): void {
     this.form = this.fb.group({
@@ -124,7 +130,7 @@ export class Detail implements OnInit {
       return;
     }
     const raw = this.form.value;
-    const beoordeling: Beoordeling = {
+    const beoordeling: Omit<Beoordeling, 'id'> = {
       gebruikerId: 1,
       boekId: this.boek?.id ?? 0,
       waardering: Number(raw.waardering),
@@ -142,5 +148,34 @@ export class Detail implements OnInit {
         this.submissionError = 'Er ging iets mis bij het toevoegen. Probeer opnieuw.';
       },
     });
+  }
+
+  bevestigRapport() {
+    this.beoordelingService.rapporteerBeoordeling(this.geselecteerdeBeoordelingId!, this.rapporteerReden).subscribe({
+      next: () => {
+        this.rapportMelding = 'Beoordeling succesvol gerapporteerd. Bedankt voor je feedback!';
+
+        this.rapporteerModalOpen = false;
+        this.geselecteerdeBeoordelingId = null;
+        this.rapporteerReden = '';
+
+        setTimeout(() => this.rapportMelding = '', 4000);
+      },
+      error: () => {
+        this.rapportMelding = 'Er ging iets mis bij het rapporteren. Probeer opnieuw.';
+      },
+    });
+  }
+
+  openRapporteerModal(beoordelingId: number) {
+    this.rapporteerModalOpen = true;
+    this.geselecteerdeBeoordelingId = beoordelingId;
+  }
+
+  sluitRapporteerModal() {
+    this.rapporteerModalOpen = false;
+    this.geselecteerdeBeoordelingId = null;
+    this.rapporteerReden = '';
+    this.rapportMelding = '';
   }
 }

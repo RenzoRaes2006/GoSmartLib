@@ -8,6 +8,7 @@ import ap.be.backend.dto.BeoordelingDTO;
 import ap.be.backend.mappers.BeoordelingMapper;
 import ap.be.backend.repository.BeoordelingRepository;
 import ap.be.backend.repository.BoekRepository;
+import ap.be.backend.repository.GerapporteerdeBeoordelingRepository;
 
 @Service
 public class BeoordelingService {
@@ -31,4 +32,5 @@ public class BeoordelingService {
         var beoordeling = BeoordelingMapper.toEntity(dto, boek);
         beoordelingRepository.save(beoordeling);
     }
+
 }
