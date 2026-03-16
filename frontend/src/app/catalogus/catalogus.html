@@ -6,11 +6,41 @@
 
         <div class="filter-section">
             <label for="search-input">Zoekopdracht</label>
-            <input #searchInput id="search-input" type="text" placeholder="Titel, auteur of ISBN..."
-                (input)="onSearch(searchInput.value)" class="sidebar-input">
+            <input id="search-input" type="text" placeholder="Titel, auteur of ISBN..."
+                [(ngModel)]="zoekTerm" (input)="updateFilters()" class="sidebar-input">
+            
+            <label for="genre-filter">Genre</label>
+            <select id="genre-filter" [(ngModel)]="selectedGenre" (change)="updateFilters()" class="sidebar-input">
+                <option [ngValue]="undefined" disabled hidden>Kies een genre...</option>
+                <option value="Fantasy">Fantasy</option>
+                <option value="Sciencefiction">Sciencefiction</option>
+                <option value="Horror">Horror</option>
+                <option value="Avontuur">Avontuur</option>
+                <option value="Thriller">Thriller</option>
+                <option value="Misdaad">Misdaad</option>
+                <option value="Mystery">Mystery</option>
+                <option value="Romantiek">Romantiek</option>
+                <option value="Historisch">Historisch</option>
+                <option value="Drama">Drama</option>
+                <option value="Humor">Humor</option>
+                <option value="Actie">Actie</option>
+            </select>
+
+            <label for="sort-select">Sorteren op</label>
+            <select id="sort-select" [(ngModel)]="selectedSorteerOp" (change)="updateFilters()" class="sidebar-input">
+                <option [ngValue]="undefined" disabled hidden>Kies een sorteervolgorde...</option>
+                <option value="locatie">Locatie</option>
+                <option value="titel">Titel</option>
+                <option value="auteur">Auteur</option>
+                <option value="uitgaveJaar">Jaar</option>
+            </select>
+
+            <button (click)="opSorteerRichtingVerandering()" class="sidebar-input sort-direction-btn">
+                Richting: {{ selectedSorteerRichting() === 'ASC' ? 'Oplopend' : 'Aflopend' }}
+            </button>
         </div>
 
-        <button class="btn-reset" (click)="onSearch(''); searchInput.value=''">
+        <button class="btn-reset" (click)="resetFilters()">
             Filters wissen
         </button>
     </aside>

@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { Boek } from '../models/Boek';
 import { NieuwBoek } from '../models/NieuwBoek';
 import { PageResponse } from '../models/PageResponse';
+import { FilterOptions } from '../models/FilterOptions';
 
 @Injectable({
   providedIn: 'root',
@@ -13,19 +14,32 @@ export class BoekService {
   // private apiUrl = this.gebruikTraefik
   //   ? 'http://frontend.localhost/api/boeken'
   //   : 'http://localhost:8081/api/boeken';
-  private apiUrl = '/api/boeken';
+  private apiUrl = 'http://frontend.localhost/api/boeken';
 
-private http = inject(HttpClient);
+  private http = inject(HttpClient);
 
   getBoeken(zoekterm?: string): Observable<Boek[]> {
     let params = new HttpParams();
-    
+
     if (zoekterm && zoekterm.trim() !== '') {
       params = params.set('zoekterm', zoekterm);
     }
 
     return this.http.get<Boek[]>(this.apiUrl, { params });
   }
+
+  getBoekenGefilterd(filters: FilterOptions): Observable<Boek[]> {
+    let params = new HttpParams();
+
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        params = params.set(key, value.toString());
+      }
+    });
+
+    return this.http.get<Boek[]>(this.apiUrl, { params });
+  }
+
   getBoekOpId(id: number): Observable<Boek> {
     return this.http.get<Boek>(`${this.apiUrl}/${id}`);
   }

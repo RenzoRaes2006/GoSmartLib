@@ -71,13 +71,19 @@ class BoekRepositoryTest {
     @Test
     public void givenBoekenInDatabase_whenSearchWithExistingTitle_thenReturnsFilteredList() {
         // Given
-        Boek b1 = new Boek(); b1.setTitel("Java for Beginners"); b1.setAuteur("John Doe"); b1.setLocatie("A1");
-        Boek b2 = new Boek(); b2.setTitel("Python Basics"); b2.setAuteur("Jane Smith"); b2.setLocatie("B2");
+        Boek b1 = new Boek();
+        b1.setTitel("Java for Beginners");
+        b1.setAuteur("John Doe");
+        b1.setLocatie("A1");
+        Boek b2 = new Boek();
+        b2.setTitel("Python Basics");
+        b2.setAuteur("Jane Smith");
+        b2.setLocatie("B2");
         boekRepository.saveAll(List.of(b1, b2));
         Sort sort = Sort.by(Sort.Direction.ASC, "locatie");
 
         // When
-        List<Boek> result = boekRepository.searchBoeken("java", sort);
+        List<Boek> result = boekRepository.filterBoeken("java", null, null, null, null, sort);
 
         // Then
         assertThat(result).hasSize(1);
@@ -87,12 +93,15 @@ class BoekRepositoryTest {
     @Test
     public void givenBoekWithAuthor_whenSearchOnAuthorName_thenReturnsMatchingBoek() {
         // Given
-        Boek b1 = new Boek(); b1.setTitel("Effective Java"); b1.setAuteur("Joshua Bloch"); b1.setLocatie("C3");
+        Boek b1 = new Boek();
+        b1.setTitel("Effective Java");
+        b1.setAuteur("Joshua Bloch");
+        b1.setLocatie("C3");
         boekRepository.save(b1);
         Sort sort = Sort.by(Sort.Direction.ASC, "locatie");
 
         // When
-        List<Boek> result = boekRepository.searchBoeken("Bloch", sort);
+        List<Boek> result = boekRepository.filterBoeken("Bloch", null, null, null, null, sort);
 
         // Then
         assertThat(result).isNotEmpty();

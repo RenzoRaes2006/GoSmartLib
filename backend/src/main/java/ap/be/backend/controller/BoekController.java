@@ -38,14 +38,19 @@ public class BoekController {
 
     @GetMapping("/api/boeken")
     @CrossOrigin(origins = "*", allowedHeaders = "*")
-    public List<Boek> getAlleBoeken(@RequestParam(required = false) String zoekterm) {
-        Sort sort = Sort.by(Sort.Direction.ASC, "locatie");
+    public List<Boek> getAlleBoeken(
+            @RequestParam(required = false) String zoekterm,
+            @RequestParam(required = false) String genre,
+            @RequestParam(required = false) String uitgever,
+            @RequestParam(required = false) Integer minPagina,
+            @RequestParam(required = false) Integer maxPagina,
+            @RequestParam(required = false) String sorteerOp,
+            @RequestParam(required = false) String sorteerRichting) {
 
-        if (zoekterm != null && !zoekterm.isEmpty()) {
-            return boekRepository.searchBoeken(zoekterm, sort);
-        }
+        Sort sort = Sort.by(Sort.Direction.fromString(sorteerRichting != null ? sorteerRichting : "ASC"),
+                sorteerOp != null ? sorteerOp : "id");
 
-        return boekRepository.findAll(sort);
+        return boekRepository.filterBoeken(zoekterm, genre, uitgever, minPagina, maxPagina, sort);
     }
 
     @PostMapping("/api/boeken")
