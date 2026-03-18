@@ -6,6 +6,7 @@ import { Boek } from '../models/Boek';
 import { ReviewService } from '../services/review-service';
 import { Beoordeling } from '../models/review.model';
 import { LeeslijstService } from '../services/leeslijstService';
+import { LeenMandjeService } from '../services/leen-mandje.service';
 
 @Component({
   selector: 'app-detail',
@@ -30,6 +31,11 @@ export class Detail implements OnInit {
   succesMeldingMap: string = '';
   mappen: any[] = [];
 
+  magLenen: boolean = false;
+  leenReden: string = 'Status ophalen...';
+  isLeenModalOpen: boolean = false;
+  succesMeldingLenen: string = '';
+  leenMandjeService = inject(LeenMandjeService);
   boekWaardering: number = 0;
   waarderingPrecentage: number = 0;
 
@@ -45,6 +51,15 @@ export class Detail implements OnInit {
       this.boekService.getBoekOpId(boekId).subscribe({
         next: (boek) => {
           this.boek = boek;
+
+          const gebruikerId = 1;
+          this.boekService.checkLeenStatus(gebruikerId, boekId).subscribe({
+            next: (status) => {
+              this.magLenen = status.magLenen;
+              this.leenReden = status.reden;
+            },
+            error: () => (this.leenReden = 'Kon uitleen status niet ophalen.'),
+          });
         },
         error: (err) => console.log('Iets mis gegaan met het krijgen van de boek details. ', err),
       });
@@ -142,5 +157,34 @@ export class Detail implements OnInit {
         this.submissionError = 'Er ging iets mis bij het toevoegen. Probeer opnieuw.';
       },
     });
+  }
+
+  //lenen
+
+  openLeenModal() {
+    if (this.magLenen) {
+      this.isLeenModalOpen = true;
+    }
+  }
+
+  sluitLeenModal() {
+    this.isLeenModalOpen = false;
+    this.succesMeldingLenen = '';
+  }
+  voegToeAanReservering() {
+    if (!this.boek) return;
+
+    // Probeer het boek in het mandje te stoppen
+    const resultaat = this.leenMandjeService.voegBoekToe(this.boek);
+
+    if (resultaat === 'Succes') {
+      this.succesMeldingLenen = `'${this.boek.titel}' is toegevoegd aan je reserveringen!`;
+    } else {
+      this.succesMeldingLenen = resultaat; // Laat de foutmelding zien (bijv. "Maximaal 3 boeken")
+    }
+
+    // Open de kleine pop-up om te vertellen of het gelukt is of niet
+    this.isLeenModalOpen = true;
+    setTimeout(() => this.sluitLeenModal(), 2500); // Sluit pop-up na 2.5 sec
   }
 }

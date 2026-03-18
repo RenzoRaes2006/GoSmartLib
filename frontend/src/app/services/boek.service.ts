@@ -13,13 +13,19 @@ export class BoekService {
   // private apiUrl = this.gebruikTraefik
   //   ? 'http://frontend.localhost/api/boeken'
   //   : 'http://localhost:8081/api/boeken';
-  private apiUrl = '/api/boeken';
+  // private apiUrl = '/api/boeken';
+  private apiUrl =
+    window.location.hostname === 'localhost' ? 'http://localhost:8081/api/boeken' : '/api/boeken';
 
-private http = inject(HttpClient);
+  private apiGebruikerUrl =
+    window.location.hostname === 'localhost'
+      ? 'http://localhost:8081/api/gebruiker'
+      : '/api/gebruiker';
+  private http = inject(HttpClient);
 
   getBoeken(zoekterm?: string): Observable<Boek[]> {
     let params = new HttpParams();
-    
+
     if (zoekterm && zoekterm.trim() !== '') {
       params = params.set('zoekterm', zoekterm);
     }
@@ -43,5 +49,19 @@ private http = inject(HttpClient);
   }
   getBoekenPaged(page: number, size: number): Observable<PageResponse<Boek>> {
     return this.http.get<PageResponse<Boek>>(`${this.apiUrl}/paged?page=${page}&size=${size}`);
+  }
+
+  checkLeenStatus(gebruikerId: number, boekId: number) {
+    return this.http.get<{ magLenen: boolean; reden: string }>(
+      `${this.apiGebruikerUrl}/${gebruikerId}/lenen/${boekId}/status`,
+    );
+  }
+
+  leenBoek(gebruikerId: number, boekId: number) {
+    return this.http.post(
+      `${this.apiGebruikerUrl}/${gebruikerId}/lenen/${boekId}`,
+      {},
+      { responseType: 'text' },
+    );
   }
 }

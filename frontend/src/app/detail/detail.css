@@ -327,3 +327,20 @@
         align-items: start;
     }
 }
+
+.primary-btn:disabled, .disabled-btn {
+    background: #f3f4f6 !important;
+    border: 1px solid #d1d5db !important;
+    color: #9ca3af !important;
+    cursor: not-allowed !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+.leen-reden-tekst {
+    color: #ef4444; 
+    font-size: 13px;
+    margin: 0 0 10px 0;
+    text-align: center;
+    font-weight: 500;
+}

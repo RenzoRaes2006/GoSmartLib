@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import ap.be.backend.repository.LeeslijstMapRepository;
 import ap.be.backend.service.GebruikerService;
+import ap.be.backend.dto.LeenStatusResponse;
 import ap.be.backend.entity.LeeslijstMap;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -56,6 +57,27 @@ public class GebruikerController {
         try {
             gebruikerService.verwijderBoekUitMap(gebruikerId, mapNaam, boekId);
             return ResponseEntity.ok("Boek succesvol verwijderd uit map");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/{gebruikerId}/lenen/{boekId}/status")
+    public ResponseEntity<LeenStatusResponse> checkLeenStatus(
+            @PathVariable Long gebruikerId,
+            @PathVariable Long boekId) {
+
+        LeenStatusResponse status = gebruikerService.checkLeenStatus(gebruikerId, boekId);
+        return ResponseEntity.ok(status);
+    }
+
+    @PostMapping("/{gebruikerId}/lenen/{boekId}")
+    public ResponseEntity<String> leenBoek(
+            @PathVariable Long gebruikerId,
+            @PathVariable Long boekId) {
+        try {
+            gebruikerService.bevestigUitlening(gebruikerId, boekId);
+            return ResponseEntity.ok("Boek succesvol geleend! Je hebt 1 maand de tijd om het terug te brengen.");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
