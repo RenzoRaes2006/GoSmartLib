@@ -8,12 +8,18 @@ public class BeoordelingMapper {
 
     // Van Entity naar DTO
     public static BeoordelingDTO toDTO(Beoordeling beoordeling) {
+        return toDTO(beoordeling, false);
+    }
+
+    // Van Entity naar DTO met gerapporteerd status
+    public static BeoordelingDTO toDTO(Beoordeling beoordeling, boolean gerapporteerd) {
         return new BeoordelingDTO(
                 beoordeling.getId(),
                 beoordeling.getGebruikerId(),
                 beoordeling.getBoek().getId(), // Haal ID uit het Boek object
                 beoordeling.getWaardering(),
-                beoordeling.getInhoud());
+                beoordeling.getInhoud(),
+                gerapporteerd);
     }
 
     // Van DTO naar Entity

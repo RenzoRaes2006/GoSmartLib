@@ -24,6 +24,10 @@ public class GerapporteerdeBeoordeling {
     @JoinColumn(name = "review_id", nullable = false)
     private Beoordeling beoordeling;
 
+    @ManyToOne
+    @JoinColumn(name = "gebruiker_id", nullable = false)
+    private Gebruiker gebruiker;
+
     @Column()
     private String reden;
 
