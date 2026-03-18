@@ -83,7 +83,8 @@ class BoekRepositoryTest {
         Sort sort = Sort.by(Sort.Direction.ASC, "locatie");
 
         // When
-        List<Boek> result = boekRepository.filterBoeken("java", null, null, null, null, sort);
+        List<Boek> result = boekRepository.filterBoeken("java", null, null, null, null, null, null, null, "java",
+                null, sort);
 
         // Then
         assertThat(result).hasSize(1);
@@ -101,7 +102,8 @@ class BoekRepositoryTest {
         Sort sort = Sort.by(Sort.Direction.ASC, "locatie");
 
         // When
-        List<Boek> result = boekRepository.filterBoeken("Bloch", null, null, null, null, sort);
+        List<Boek> result = boekRepository.filterBoeken("Bloch", null, null, null, null, null, null, null, "Bloch",
+                null, sort);
 
         // Then
         assertThat(result).isNotEmpty();

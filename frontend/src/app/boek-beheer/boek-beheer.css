@@ -19,7 +19,7 @@
 .verlaat-button{background:#fff;border:1px solid #e0e0e0;color:#333;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;font-family:inherit;transition:background-color .2s;white-space:nowrap}
 .verlaat-button:hover{background:#f9fafb}
 form{border:1px solid #e0e0e0;border-radius:12px;padding:18px 22px;background:#fff;display:grid;grid-template-columns:repeat(3,1fr);gap:14px 18px}
-form>div:not(.form-actions){display:flex;flex-direction:column;gap:5px}
+form>div:not(.form-actions):not(.genre-leesniveau-row){display:flex;flex-direction:column;gap:5px}
 form>div:has(textarea){grid-column:1/-1}
 label{font-size:13px;color:#333;font-weight:500}
 input,textarea{width:100%;box-sizing:border-box;border:1px solid #e0e0e0;border-radius:8px;padding:8px 12px;font-size:13px;font-family:inherit;color:#333;transition:border-color .2s,box-shadow .2s}
@@ -90,3 +90,36 @@ form>div>div button[type='button']:hover{background:#f9fafb}
 
 @media (max-width:1200px){form{grid-template-columns:repeat(2,1fr)}}
 @media (max-width:768px){:host{padding:12px}.beheer-topbar{align-items:flex-start;flex-direction:column}.mode-selector{gap:8px}.mode-selector button{padding:8px 10px;font-size:12px}.verlaat-button{padding:8px 12px;font-size:12px;align-self:flex-end}form{grid-template-columns:1fr;padding:16px}.form-actions{flex-direction:row;justify-content:center;flex-wrap:nowrap;gap:8px}.form-actions button[type='submit'],.form-actions .delete-button,.form-actions .reset-button{padding:8px 12px;font-size:12px}.isbn-zoek-boek>div{grid-template-columns:1fr}.isbn-zoek-boek label{padding-top:0}.modal-content{width:95%;margin:16px}.modal-header,.modal-body,.modal-footer{padding:16px}.modal-footer{flex-direction:column-reverse}.modal-footer button{width:100%}.boeken-overzicht table th,.boeken-overzicht table td{padding:8px}}
+
+select {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-family: inherit;
+  color: #333;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  background-color: #fff;
+}
+
+select:focus {
+  outline: 0;
+  border-color: #a78bfa;
+  box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.1);
+}
+
+.genre-leesniveau-row {
+  grid-column: 1 / span 2;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  align-items: start;
+}
+
+form > div.genre-leesniveau-row > div {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}

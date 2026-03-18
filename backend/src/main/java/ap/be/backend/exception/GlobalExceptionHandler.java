@@ -47,4 +47,9 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Er is een fout opgetreden");
     }
 
+    @ExceptionHandler(InvalidYearRangeException.class)
+    public ResponseEntity<String> handleInvalidYearRange(InvalidYearRangeException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+    }
+
 }

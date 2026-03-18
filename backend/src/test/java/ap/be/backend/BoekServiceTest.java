@@ -49,7 +49,7 @@ public class BoekServiceTest {
                 "A handbook of agile software craftsmanship",
                 3,
                 "A1",
-                "");
+                "", null, null);
 
         when(boekRepository.findByIsbn("9780132350884")).thenReturn(Optional.empty());
 
@@ -81,7 +81,7 @@ public class BoekServiceTest {
                 "DDD blue book",
                 2,
                 "B2",
-                "");
+                "", null, null);
 
         when(boekRepository.findByIsbn("9780321125217")).thenReturn(Optional.of(new Boek()));
 
@@ -137,7 +137,7 @@ public class BoekServiceTest {
                 "Updated description",
                 7,
                 "C3",
-                "");
+                "", null, null);
 
         when(boekRepository.findById(boekId)).thenReturn(Optional.of(bestaandBoek));
         when(boekRepository.save(bestaandBoek)).thenReturn(bestaandBoek);
@@ -174,7 +174,7 @@ public class BoekServiceTest {
                 "Any",
                 1,
                 "Z1",
-                "");
+                "", null, null);
 
         when(boekRepository.findById(boekId)).thenReturn(Optional.empty());
 

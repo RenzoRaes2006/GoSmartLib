@@ -255,3 +255,112 @@
 .sort-direction-btn:hover {
     background: #e9ecef;
 }
+
+/* Container */
+.radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+/* Optie rij */
+.radio-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;  /* Meer ruimte tussen radio en tekst */
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+/* Fallback voor spacing */
+.radio-option input[type="radio"] {
+  margin: 0;
+  margin-right: 8px;  /* Forceer ruimte ernaast */
+  accent-color: #4a90e2;
+  flex-shrink: 0;
+}
+
+/* Hover */
+.radio-option:hover {
+  background-color: #f0f4f8;
+}
+
+/* Tekst */
+.radio-option span {
+  font-size: 13px;          /* Kleiner lettertype */
+  font-family: inherit;    
+  color: #666;              /* Dezelfde kleur als andere labels */
+  line-height: 1;
+}
+
+/* Checked tekst */
+.radio-option input[type="radio"]:checked + span {
+  color: black;
+  font-weight: 500;
+}
+
+/* Selected achtergrond */
+.radio-option:has(input:checked) {
+  background-color: rgba(74, 144, 226, 0.08);
+}
+
+/* Verwijder pijlen van number inputs */
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.genre-filter {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.genre-filter select {
+  width: 100%;
+}
+
+.jaar-range {
+  display: flex;
+  gap: 8px;
+}
+
+.jaar-range .sidebar-input {
+  width: 50%;
+}
+
+.sort-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.sort-row .sidebar-input {
+  flex: 1;
+}
+
+.sort-row .sort-direction-btn {
+  width: 42px;
+  flex-shrink: 0;
+  padding: 10px;
+  font-size: 16px;
+  margin-top: 0;
+}
+
+.input-error {
+  border-color: #e74c3c;
+  box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
+}
+
+.error-text {
+  font-size: 11px;
+  color: #e74c3c;
+  margin-top: 2px;
+}

@@ -62,6 +62,7 @@ export class BoekBeheer implements OnInit {
       aantalExemplaren: ['', [Validators.required, Validators.pattern(/^\d+$/)]],
       locatie: ['', [Validators.required, Validators.minLength(1)]],
       afbeelding: [''],
+      leesniveau: [''],
     });
   }
 
@@ -149,6 +150,7 @@ export class BoekBeheer implements OnInit {
       aantalExemplaren: String(boek.aantalExemplaren),
       locatie: boek.locatie,
       afbeelding: boek.afbeelding,
+      leesniveau: boek.leesniveau || '',
     };
   }
 

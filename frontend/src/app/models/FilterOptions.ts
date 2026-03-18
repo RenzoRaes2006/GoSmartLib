@@ -6,4 +6,9 @@ export interface FilterOptions {
   maxPagina?: number;
   sorteerOp?: string;
   sorteerRichting?: 'ASC' | 'DESC';
+  beschikbaarheid?: string;
+  uitgaveJaarVan?: number;
+  uitgaveJaarTot?: number;
+  populariteit?: number;
+  leesniveau?: string;
 }

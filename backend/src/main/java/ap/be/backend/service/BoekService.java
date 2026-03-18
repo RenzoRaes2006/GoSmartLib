@@ -1,11 +1,14 @@
 package ap.be.backend.service;
 
+import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import ap.be.backend.dto.BoekDTO;
 import ap.be.backend.entity.Boek;
+import ap.be.backend.exception.InvalidYearRangeException;
 import ap.be.backend.exception.IsbnAlreadyExistsException;
 import ap.be.backend.repository.BoekRepository;
 
@@ -37,6 +40,7 @@ public class BoekService {
         boek.setAantalExemplaren(boekDTO.aantalExemplaren());
         boek.setLocatie(boekDTO.locatie());
         boek.setAfbeelding(boekDTO.afbeelding());
+        boek.setLeesniveau(boekDTO.leesniveau());
         return boekRepository.save(boek);
     }
 
@@ -58,6 +62,7 @@ public class BoekService {
         boek.setAantalExemplaren(boekDTO.aantalExemplaren());
         boek.setLocatie(boekDTO.locatie());
         boek.setAfbeelding(boekDTO.afbeelding());
+        boek.setLeesniveau(boekDTO.leesniveau());
         return boekRepository.save(boek);
     }
 
@@ -71,5 +76,38 @@ public class BoekService {
 
     public Boek getBoekByIsbn(String isbn) {
         return boekRepository.findByIsbn(isbn.trim()).orElse(null);
+    }
+
+    public List<Boek> filterBoeken(String zoekterm, String genre, String uitgever, Integer minPagina, Integer maxPagina,
+            Boolean beschikbaarheid, Integer uitgaveJaarVan, Integer uitgaveJaarTot,
+            String populariteit, String leesniveau,
+            Sort sort) {
+        validateYearRange(uitgaveJaarVan, uitgaveJaarTot);
+        return boekRepository.filterBoeken(zoekterm, genre, uitgever, minPagina, maxPagina, beschikbaarheid,
+                uitgaveJaarVan, uitgaveJaarTot, populariteit, leesniveau, sort);
+    }
+
+    private void validateYearRange(Integer uitgaveJaarVan, Integer uitgaveJaarTot) {
+        int currentYear = java.time.Year.now().getValue();
+
+        if (uitgaveJaarVan != null && uitgaveJaarVan < 1900) {
+            throw new InvalidYearRangeException("Jaar 'van' moet na 1900 liggen");
+        }
+
+        if (uitgaveJaarTot != null && uitgaveJaarTot < 1900) {
+            throw new InvalidYearRangeException("Jaar 'tot' moet na 1900 liggen");
+        }
+
+        if (uitgaveJaarVan != null && uitgaveJaarVan > currentYear) {
+            throw new InvalidYearRangeException("Jaar 'van' mag niet in de toekomst liggen");
+        }
+
+        if (uitgaveJaarTot != null && uitgaveJaarTot > currentYear) {
+            throw new InvalidYearRangeException("Jaar 'tot' mag niet in de toekomst liggen");
+        }
+
+        if (uitgaveJaarVan != null && uitgaveJaarTot != null && uitgaveJaarVan > uitgaveJaarTot) {
+            throw new InvalidYearRangeException("Jaar 'van' moet kleiner of gelijk zijn aan jaar 'tot'");
+        }
     }
 }

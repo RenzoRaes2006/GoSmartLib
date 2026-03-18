@@ -5,39 +5,113 @@
         </div>
 
         <div class="filter-section">
+            <!-- 1. Zoeken -->
             <label for="search-input">Zoekopdracht</label>
             <input id="search-input" type="text" placeholder="Titel, auteur of ISBN..."
                 [(ngModel)]="zoekTerm" (input)="updateFilters()" class="sidebar-input">
-            
-            <label for="genre-filter">Genre</label>
-            <select id="genre-filter" [(ngModel)]="selectedGenre" (change)="updateFilters()" class="sidebar-input">
-                <option [ngValue]="undefined" disabled hidden>Kies een genre...</option>
-                <option value="Fantasy">Fantasy</option>
-                <option value="Sciencefiction">Sciencefiction</option>
-                <option value="Horror">Horror</option>
-                <option value="Avontuur">Avontuur</option>
-                <option value="Thriller">Thriller</option>
-                <option value="Misdaad">Misdaad</option>
-                <option value="Mystery">Mystery</option>
-                <option value="Romantiek">Romantiek</option>
-                <option value="Historisch">Historisch</option>
-                <option value="Drama">Drama</option>
-                <option value="Humor">Humor</option>
-                <option value="Actie">Actie</option>
+
+            <!-- 2. Beschikbaarheid -->
+            <label>Beschikbaarheid</label>
+            <div class="radio-group">
+                <label class="radio-option">
+                    <input type="radio" name="beschikbaarheid" [value]="undefined" 
+                            [(ngModel)]="beschikbaarheid" (change)="updateFilters()">
+                    <span>Alle boeken</span>
+                </label>
+                <label class="radio-option">
+                    <input type="radio" name="beschikbaarheid" [value]="true" 
+                            [(ngModel)]="beschikbaarheid" (change)="updateFilters()">
+                    <span>Alleen beschikbaar</span>
+                </label>
+            </div>
+
+            <!-- 3. Genre -->
+            <label>Genre</label>
+            <div class="genre-filter">
+                <select [(ngModel)]="selectedHoofdGenre" (change)="onHoofdGenreChange()" class="sidebar-input">
+                    <option [ngValue]="undefined" disabled hidden>Kies een genre...</option>
+                    <option value="Fictie algemeen">Fictie algemeen</option>
+                    <option value="Literaire roman">Literaire roman</option>
+                    <option value="Spanning / thriller">Spanning / thriller</option>
+                    <option value="Detective / misdaad">Detective / misdaad</option>
+                    <option value="Fantasy">Fantasy</option>
+                    <option value="Sciencefiction">Sciencefiction</option>
+                    <option value="Dystopie">Dystopie</option>
+                    <option value="Historische roman">Historische roman</option>
+                    <option value="Romantiek">Romantiek</option>
+                    <option value="Coming-of-age">Coming-of-age</option>
+                    <option value="Avontuur">Avontuur</option>
+                    <option value="Oorlog & conflict">Oorlog & conflict</option>
+                    <option value="Horror">Horror</option>
+                    <option value="Humor">Humor</option>
+                    <option value="Graphic novel / strip">Graphic novel / strip</option>
+                    <option value="Poëzie">Poëzie</option>
+                    <option value="Non-fictie algemeen">Non-fictie algemeen</option>
+                </select>
+  
+                @if (selectedHoofdGenre() && getSubGenres(selectedHoofdGenre()).length > 0) {
+                <select [(ngModel)]="selectedGenre" (change)="updateFilters()" class="sidebar-input">
+                    <option [ngValue]="undefined" disabled hidden>Kies een subgenre...</option>
+                    @for (subGenre of getSubGenres(selectedHoofdGenre()); track subGenre) {
+                        <option [value]="subGenre">{{ subGenre }}</option>
+                    }
+                </select>
+                }
+            </div>
+
+            <!-- 4. Leesniveau -->
+            <label for="leesniveau-filter">Leesniveau</label>
+            <select id="leesniveau-filter" [(ngModel)]="leesniveau" (change)="updateFilters()" class="sidebar-input">
+                <option [ngValue]="undefined" disabled hidden>Kies een leesniveau...</option>
+                <option value="A (eenvoudig taalgebruik)">A (eenvoudig taalgebruik)</option>
+                <option value="B (gemiddeld taalgebruik)">B (gemiddeld taalgebruik)</option>
+                <option value="C (complex taalgebruik)">C (complex taalgebruik)</option>
+                <option value="D (literair niveau)">D (literair niveau)</option>
             </select>
 
+            <!-- 5. Beoordeling -->
+            <label>Beoordeling</label>
+            <div class="radio-group">
+                <label class="radio-option">
+                    <input type="radio" name="populariteit" [value]="undefined" 
+                            [(ngModel)]="populariteit" (change)="updateFilters()">
+                    <span>Alle boeken</span>
+                </label>
+                <label class="radio-option">
+                    <input type="radio" name="populariteit" [value]="1" 
+                           [(ngModel)]="populariteit" (change)="updateFilters()">
+                    <span>Best beoordeeld</span>
+                </label>
+            </div>
+
+            <!-- 6. Jaar (bereik) -->
+            <label>Jaar</label>
+            <div class="jaar-range">
+                <input type="number" placeholder="Van" [(ngModel)]="uitgaveJaarVan" 
+                    (input)="updateFilters()" class="sidebar-input"
+                    [class.input-error]="jaarError()">
+                <input type="number" placeholder="Tot" [(ngModel)]="uitgaveJaarTot" 
+                    (input)="updateFilters()" class="sidebar-input"
+                    [class.input-error]="jaarError()">
+            </div>
+            @if (jaarError()) {
+            <span class="error-text">{{ jaarError() }}</span>
+            }
+
+            <!-- 7. Weergave: sorteren -->
             <label for="sort-select">Sorteren op</label>
-            <select id="sort-select" [(ngModel)]="selectedSorteerOp" (change)="updateFilters()" class="sidebar-input">
-                <option [ngValue]="undefined" disabled hidden>Kies een sorteervolgorde...</option>
-                <option value="locatie">Locatie</option>
-                <option value="titel">Titel</option>
-                <option value="auteur">Auteur</option>
-                <option value="uitgaveJaar">Jaar</option>
-            </select>
-
-            <button (click)="opSorteerRichtingVerandering()" class="sidebar-input sort-direction-btn">
-                Richting: {{ selectedSorteerRichting() === 'ASC' ? 'Oplopend' : 'Aflopend' }}
-            </button>
+            <div class="sort-row">
+                <select id="sort-select" [(ngModel)]="selectedSorteerOp" (change)="updateFilters()" class="sidebar-input">
+                    <option [ngValue]="undefined" disabled hidden>Kies...</option>
+                    <option value="locatie">Locatie</option>
+                    <option value="titel">Titel</option>
+                    <option value="auteur">Auteur</option>
+                    <option value="uitgaveJaar">Jaar</option>
+                </select>
+                <button (click)="opSorteerRichtingVerandering()" class="sort-direction-btn">
+                    {{ selectedSorteerRichting() === 'ASC' ? '↑' : '↓' }}
+                </button>
+            </div>
         </div>
 
         <button class="btn-reset" (click)="resetFilters()">
@@ -45,6 +119,7 @@
         </button>
     </aside>
 
+    <!-- Boeken grid blijft ongewijzigd -->
     <div class="catalogus-container">
         <h3 class="result-count">
             {{ boekenlijst().length }} 

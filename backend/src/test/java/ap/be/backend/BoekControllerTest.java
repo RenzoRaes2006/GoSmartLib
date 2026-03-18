@@ -34,14 +34,15 @@ public class BoekControllerTest {
         // Given
         String term = "java";
         Sort sort = Sort.by(Sort.Direction.ASC, "locatie");
-        Mockito.when(boekRepository.filterBoeken(term, null, null, null, null, sort)).thenReturn(List.of(new Boek()));
+        Mockito.when(boekRepository.filterBoeken(term, null, null, null, null, null, null, null, term, term, sort))
+                .thenReturn(List.of(new Boek()));
 
         // When & Then
         mockMvc.perform(get("/api/boeken").param("zoekterm", term))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray());
 
-        Mockito.verify(boekRepository).filterBoeken(term, null, null, null, null, sort);
+        Mockito.verify(boekRepository).filterBoeken(term, null, null, null, null, null, null, null, term, term, sort);
     }
 
     @Test

@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.data.domain.Sort;
 
 import ap.be.backend.dto.BoekDTO;
 import ap.be.backend.entity.Boek;
@@ -23,7 +22,6 @@ import ap.be.backend.repository.BoekRepository;
 import ap.be.backend.service.BoekService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @CrossOrigin(origins = { "http://frontend.localhost", "http://localhost:4200" })
@@ -45,12 +43,23 @@ public class BoekController {
             @RequestParam(required = false) Integer minPagina,
             @RequestParam(required = false) Integer maxPagina,
             @RequestParam(required = false) String sorteerOp,
-            @RequestParam(required = false) String sorteerRichting) {
+            @RequestParam(required = false) String sorteerRichting,
+            @RequestParam(required = false) String beschikbaar,
+            @RequestParam(required = false) Integer uitgaveJaarVan,
+            @RequestParam(required = false) Integer uitgaveJaarTot,
+            @RequestParam(required = false) String populariteit,
+            @RequestParam(required = false) String leesniveau) {
 
-        Sort sort = Sort.by(Sort.Direction.fromString(sorteerRichting != null ? sorteerRichting : "ASC"),
-                sorteerOp != null ? sorteerOp : "id");
+        Sort sort;
+        if (sorteerOp != null && sorteerRichting != null) {
+            sort = Sort.by(Sort.Direction.fromString(sorteerRichting), sorteerOp);
+        } else {
+            sort = Sort.by(Sort.Direction.ASC, "id");
+        }
 
-        return boekRepository.filterBoeken(zoekterm, genre, uitgever, minPagina, maxPagina, sort);
+        return boekService.filterBoeken(zoekterm, genre, uitgever, minPagina, maxPagina,
+                beschikbaar != null ? Boolean.parseBoolean(beschikbaar) : null, uitgaveJaarVan, uitgaveJaarTot,
+                populariteit, leesniveau, sort);
     }
 
     @PostMapping("/api/boeken")
