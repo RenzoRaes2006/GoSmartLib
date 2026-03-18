@@ -88,11 +88,23 @@
                             <span class="reviewer-name">- Test Gebruiker</span>
                         </div>
                         <p class="review-content">{{ beoordeling.inhoud }}</p>
-                        <button class="rapporteer-btn" (click)="openRapporteerModal(beoordeling.id!)">Rapporteer</button>
+                        <!-- @if (!gerapporteerdeBeoordelingen.includes(beoordeling.id!)) {
+                        <button class="rapporteer-btn"
+                            (click)="openRapporteerModal(beoordeling.id!)">Rapporteer</button>
+                        } @else {
+                        <span class="gerapporteerd-label">Reeds gerapporteerd ✓</span>
+                        } -->
+
+                        @if (!beoordeling.gerapporteerd) {
+                        <button class="rapporteer-btn"
+                            (click)="openRapporteerModal(beoordeling.id!)">Rapporteer</button>
+                        } @else {
+                        <span class="gerapporteerd-label">Reeds gerapporteerd ✓</span>
+                        }
                     </div>
                     } @empty {
                     <p class="no-reviews">Er zijn nog geen reviews voor dit boek.</p>
-                    }       
+                    }
 
                     <div class="review-form-container">
                         <h3>Schrijf een review</h3>
@@ -159,7 +171,8 @@
         <h3>Rapporteer beoordeling</h3>
         <p class="modal-label">Waarom rapporteer je deze beoordeling?</p>
 
-        <textarea [(ngModel)]="rapporteerReden" rows="3" class="form-textarea" placeholder="Voer je reden in (verplicht)..."></textarea>
+        <textarea [(ngModel)]="rapporteerReden" rows="3" class="form-textarea"
+            placeholder="Voer je reden in (verplicht)..."></textarea>
 
         <div class="modal-actions">
             <button class="cancel-btn" (click)="sluitRapporteerModal()">Annuleren</button>

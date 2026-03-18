@@ -37,6 +37,9 @@ export class Detail implements OnInit {
   rapporteerModalOpen: boolean = false;
   rapporteerReden: string = '';
   geselecteerdeBeoordelingId: number | null = null;
+  gerapporteerdeBeoordelingen: number[] = [];
+
+  boekId: number = 0;
 
 
   ngOnInit(): void {
@@ -47,6 +50,7 @@ export class Detail implements OnInit {
 
     this.route.paramMap.subscribe((params) => {
       const boekId = Number(params.get('id'));
+      this.boekId = boekId;
 
       this.boekService.getBoekOpId(boekId).subscribe({
         next: (boek) => {
@@ -55,13 +59,7 @@ export class Detail implements OnInit {
         error: (err) => console.log('Iets mis gegaan met het krijgen van de boek details. ', err),
       });
 
-      this.beoordelingService.getBeoordelingenOpBoekId(boekId).subscribe({
-        next: (beoordelingen) => {
-          this.beoordelingen = beoordelingen;
-          this.updateBoekWaardering();
-        },
-        error: (err) => console.log('Iets mis gegaan met het krijgen van de beoordelingen. ', err),
-      });
+      this.laadBeoordelingVanBoek();
     });
 
     const gebruikerId = 1;
@@ -70,6 +68,16 @@ export class Detail implements OnInit {
         this.mappen = data;
       },
     });
+  }
+
+  laadBeoordelingVanBoek() {
+     this.beoordelingService.getBeoordelingenOpBoekId(this.boekId).subscribe({
+        next: (beoordelingen) => {
+          this.beoordelingen = beoordelingen;
+          this.updateBoekWaardering();
+        },
+        error: (err) => console.log('Iets mis gegaan met het krijgen van de beoordelingen. ', err),
+      });
   }
 
   updateBoekWaardering() {
@@ -135,14 +143,16 @@ export class Detail implements OnInit {
       boekId: this.boek?.id ?? 0,
       waardering: Number(raw.waardering),
       inhoud: raw.inhoud,
+      gerapporteerd: false,
     };
 
     this.beoordelingService.voegBeoordelingToe(beoordeling).subscribe({
       next: (response) => {
         this.form.reset();
         this.submissionError = '';
-        this.beoordelingen.push(response);
+        // this.beoordelingen.push(response); //
         this.updateBoekWaardering();
+        this.laadBeoordelingVanBoek();
       },
       error: (error) => {
         this.submissionError = 'Er ging iets mis bij het toevoegen. Probeer opnieuw.';
@@ -153,6 +163,14 @@ export class Detail implements OnInit {
   bevestigRapport() {
     this.beoordelingService.rapporteerBeoordeling(this.geselecteerdeBeoordelingId!, this.rapporteerReden).subscribe({
       next: () => {
+        this.gerapporteerdeBeoordelingen.push(this.geselecteerdeBeoordelingId!);
+
+        // Update de lokale lijst zodat de UI direct weerspiegelt dat deze gerapporteerd is
+        const beoordeling = this.beoordelingen.find(b => b.id === this.geselecteerdeBeoordelingId);
+        if (beoordeling) {
+          beoordeling.gerapporteerd = true;
+        }
+
         this.rapportMelding = 'Beoordeling succesvol gerapporteerd. Bedankt voor je feedback!';
 
         this.rapporteerModalOpen = false;
@@ -161,8 +179,12 @@ export class Detail implements OnInit {
 
         setTimeout(() => this.rapportMelding = '', 4000);
       },
-      error: () => {
-        this.rapportMelding = 'Er ging iets mis bij het rapporteren. Probeer opnieuw.';
+      error: (err) => {
+        if (err.status === 409 || err.status === 400) {
+           this.rapportMelding = 'Je hebt deze beoordeling al gerapporteerd.';
+        } else {
+           this.rapportMelding = 'Er ging iets mis bij het rapporteren. Probeer opnieuw.';
+        }
       },
     });
   }
@@ -170,6 +192,7 @@ export class Detail implements OnInit {
   openRapporteerModal(beoordelingId: number) {
     this.rapporteerModalOpen = true;
     this.geselecteerdeBeoordelingId = beoordelingId;
+    console.log('Beoordeling ID voor rapporteren: ', this.geselecteerdeBeoordelingId);
   }
 
   sluitRapporteerModal() {

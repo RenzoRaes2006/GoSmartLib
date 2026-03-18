@@ -7,4 +7,5 @@ export interface Beoordeling {
     boekId: number;
     waardering: number;
     inhoud: string;
+    gerapporteerd: boolean;
 }
