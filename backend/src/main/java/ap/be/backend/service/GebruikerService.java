@@ -104,6 +104,10 @@ public class GebruikerService {
         if (boek.getAantalExemplaren() <= 0) {
             return new LeenStatusResponse(false, "Boek is momenteel niet beschikbaar.");
         }
+        if (uitleningRepository.existsByGebruiker_GebruikerIDAndStatus(gebruikerId, "AANGEVRAAGD")) {
+            return new LeenStatusResponse(false,
+                    "Je hebt al een reservering geplaatst. Wacht tot de bibbeheerder deze heeft verwerkt!");
+        }
         // boek al geleend door gebruiker?
         if (uitleningRepository.existsByGebruiker_GebruikerIDAndBoek_IdAndIsIngeleverdFalse(gebruikerId, boekId)) {
             return new LeenStatusResponse(false, "Je hebt dit boek al geleend.");
@@ -146,5 +150,36 @@ public class GebruikerService {
         // Aanmaken en opslaan
         Uitlening nieuweUitlening = new Uitlening(gebruiker, boek, vandaag, inleverDatum);
         uitleningRepository.save(nieuweUitlening);
+    }
+
+    public List<Uitlening> getAlleAanvragen() {
+        return uitleningRepository.findByStatus("AANGEVRAAGD");
+    }
+
+    public void keurAanvraagGoed(Long uitleningId) {
+        Uitlening uitlening = uitleningRepository.findById(uitleningId)
+                .orElseThrow(() -> new IllegalArgumentException("Uitlening niet gevonden"));
+
+        uitlening.setStatus("GOEDGEKEURD");
+
+        LocalDate vandaag = LocalDate.now();
+        uitlening.setUitleenDatum(vandaag);
+        uitlening.setInleverDatum(vandaag.plusMonths(1));
+
+        uitleningRepository.save(uitlening);
+    }
+
+    public void weigerAanvraag(Long uitleningId) {
+        Uitlening uitlening = uitleningRepository.findById(uitleningId)
+                .orElseThrow(() -> new IllegalArgumentException("Uitlening niet gevonden"));
+
+        uitlening.setStatus("GEWEIGERD");
+        uitlening.setIngeleverd(true); // Zodat het niet meer meetelt voor zijn limiet van 3
+
+        Boek boek = uitlening.getBoek();
+        boek.setAantalExemplaren(boek.getAantalExemplaren() + 1);
+        boekRepository.save(boek);
+
+        uitleningRepository.save(uitlening);
     }
 }

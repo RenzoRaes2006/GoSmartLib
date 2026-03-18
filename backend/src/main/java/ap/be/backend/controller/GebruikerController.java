@@ -12,10 +12,12 @@ import ap.be.backend.repository.LeeslijstMapRepository;
 import ap.be.backend.service.GebruikerService;
 import ap.be.backend.dto.LeenStatusResponse;
 import ap.be.backend.entity.LeeslijstMap;
+import ap.be.backend.entity.Uitlening;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 
 @RestController
 @RequestMapping("/api/gebruiker")
@@ -83,4 +85,20 @@ public class GebruikerController {
         }
     }
 
+    @GetMapping("/aanvragen")
+    public ResponseEntity<List<Uitlening>> getAlleAanvragen() {
+        return ResponseEntity.ok(gebruikerService.getAlleAanvragen());
+    }
+
+    @PutMapping("/aanvragen/{uitleningId}/goedkeuren")
+    public ResponseEntity<String> keurGoed(@PathVariable Long uitleningId) {
+        gebruikerService.keurAanvraagGoed(uitleningId);
+        return ResponseEntity.ok("Aanvraag goedgekeurd. Uitleentermijn is gestart!");
+    }
+
+    @PutMapping("/aanvragen/{uitleningId}/weigeren")
+    public ResponseEntity<String> weiger(@PathVariable Long uitleningId) {
+        gebruikerService.weigerAanvraag(uitleningId);
+        return ResponseEntity.ok("Aanvraag geweigerd en boek is teruggezet in de voorraad.");
+    }
 }

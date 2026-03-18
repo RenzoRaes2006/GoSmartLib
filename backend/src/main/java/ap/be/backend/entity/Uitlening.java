@@ -32,14 +32,17 @@ public class Uitlening {
 
     private boolean isIngeleverd;
 
+    private String status;
+
     public Uitlening() {
     }
 
     public Uitlening(Gebruiker gebruiker, Boek boek, LocalDate uitleenDatum, LocalDate inleverDatum) {
         this.gebruiker = gebruiker;
         this.boek = boek;
-        this.uitleenDatum = uitleenDatum;
-        this.inleverDatum = inleverDatum;
+        this.status = "AANGEVRAAGD";
+        this.uitleenDatum = null;
+        this.inleverDatum = null;
         this.isIngeleverd = false;
     }
 }

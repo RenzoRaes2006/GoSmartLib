@@ -19,4 +19,9 @@ public interface UitleningRepository extends JpaRepository<Uitlening, Long> {
 
     // heeft dit boek al
     boolean existsByGebruiker_GebruikerIDAndBoek_IdAndIsIngeleverdFalse(Long gebruikerId, Long boekId);
+
+    // alle aanvragen ophalen
+    List<Uitlening> findByStatus(String status);
+
+    boolean existsByGebruiker_GebruikerIDAndStatus(Long gebruikerId, String status);
 }
