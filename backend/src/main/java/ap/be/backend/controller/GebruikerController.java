@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 
 @RestController
 @RequestMapping("/api/gebruiker")
-@CrossOrigin(origins = { "http://frontend.localhost", "http://localhost:4200", "http://frontend-sp09.cloud-ap.be" })
+// @CrossOrigin(origins = { "http://frontend.localhost", "http://localhost:4200", "http://frontend-sp09.cloud-ap.be" })
 public class GebruikerController {
     private final LeeslijstMapRepository leeslijstMapRepository;
     private final GebruikerService gebruikerService;

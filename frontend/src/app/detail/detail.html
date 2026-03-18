@@ -71,7 +71,13 @@
           </div>
 
           <div class="action-buttons">
-            <button type="button" class="primary-btn" (click)="voegToeAanReservering()">
+            <button
+              type="button"
+              class="primary-btn"
+              [disabled]="!magLenen"
+              [class.disabled-btn]="!magLenen"
+              (click)="voegToeAanReservering()"
+            >
               Voeg toe aan reserveringen
             </button>
 
@@ -111,6 +117,14 @@
                 <span class="reviewer-name">- Test Gebruiker</span>
               </div>
               <p class="review-content">{{ beoordeling.inhoud }}</p>
+
+              @if (!beoordeling.gerapporteerd) {
+                <button class="rapporteer-btn" (click)="openRapporteerModal(beoordeling.id!)">
+                  Rapporteer
+                </button>
+              } @else {
+                <span class="gerapporteerd-label">Reeds gerapporteerd ✓</span>
+              }
             </div>
           } @empty {
             <p class="no-reviews">Er zijn nog geen reviews voor dit boek.</p>
@@ -119,12 +133,7 @@
           <div class="review-form-container">
             <h3>Schrijf een review</h3>
             <form class="review-form" [formGroup]="form" (ngSubmit)="submitBeoordeling()">
-              <select
-                id="waardering"
-                name="waardering"
-                formControlName="waardering"
-                class="form-select"
-              >
+              <select id="waardering" formControlName="waardering" class="form-select">
                 <option value="" disabled selected>Kies een waardering...</option>
                 <option value="5">★★★★★</option>
                 <option value="4">★★★★☆</option>
@@ -134,7 +143,6 @@
               </select>
               <textarea
                 id="inhoud"
-                name="inhoud"
                 rows="3"
                 formControlName="inhoud"
                 class="form-textarea"
@@ -163,7 +171,6 @@
         </div>
       } @else {
         <h3>Toevoegen aan leeslijst</h3>
-
         <p class="modal-label">Kies een bestaande map:</p>
         <select #bestaandeMap class="modal-select">
           <option value="">-- Selecteer een map --</option>
@@ -171,10 +178,8 @@
             <option [value]="map.naam">{{ map.naam }}</option>
           }
         </select>
-
         <p class="modal-label">OF maak een nieuwe map:</p>
         <input #nieuweMap type="text" placeholder="Nieuwe map naam..." />
-
         <div class="modal-actions">
           <button class="cancel-btn" (click)="sluitModal()">Annuleren</button>
           <button
@@ -199,10 +204,7 @@
         </div>
       } @else {
         <h3>Boek Lenen</h3>
-        <p style="margin-bottom: 25px">
-          {{ succesMeldingLenen }}
-        </p>
-
+        <p style="margin-bottom: 25px">{{ succesMeldingLenen }}</p>
         <div class="modal-actions">
           <button class="cancel-btn" (click)="sluitLeenModal()">Annuleren</button>
           <button class="save-btn" style="background: #ea580c" (click)="voegToeAanReservering()">
@@ -211,5 +213,32 @@
         </div>
       }
     </div>
+  </div>
+}
+
+@if (rapporteerModalOpen) {
+  <div class="modal-overlay">
+    <div class="modal-box rapport-modal">
+      <h3>Rapporteer beoordeling</h3>
+      <p class="modal-label">Waarom rapporteer je deze beoordeling?</p>
+      <textarea
+        [(ngModel)]="rapporteerReden"
+        rows="3"
+        class="form-textarea"
+        placeholder="Voer je reden in (verplicht)..."
+      ></textarea>
+      <div class="modal-actions">
+        <button class="cancel-btn" (click)="sluitRapporteerModal()">Annuleren</button>
+        <button class="save-btn" [disabled]="!rapporteerReden.trim()" (click)="bevestigRapport()">
+          Verzenden
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (rapportMelding) {
+  <div class="toast-message">
+    <p>{{ rapportMelding }}</p>
   </div>
 }
