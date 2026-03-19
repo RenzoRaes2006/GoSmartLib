@@ -1,150 +1,244 @@
 <div class="page-container">
-    <a routerLink="/catalogus" class="back-link">← Terug naar overzicht</a>
+  <a routerLink="/catalogus" class="back-link">← Terug naar overzicht</a>
 
-    <div class="content-layout">
+  <div class="content-layout">
+    <div class="main-column">
+      <div class="top-row">
+        <div class="left-col">
+          <div class="image-container">
+            @if (boek?.aantalExemplaren && boek!.aantalExemplaren > 0) {
+              <span class="status-badge">Beschikbaar</span>
+            }
+            <img
+              [src]="
+                boek?.afbeelding ||
+                'https://bookshow.blurb.com/bookshow/cache/P11360640/md/cover_2.jpeg?access_key=675523b769268bce5b0b710b3d0e7841'
+              "
+              alt="Book Cover"
+              class="book-cover"
+            />
+          </div>
 
-        <div class="main-column">
-
-            <div class="top-row">
-                <div class="left-col">
-                    <div class="image-container">
-                        @if (boek?.aantalExemplaren && boek!.aantalExemplaren > 0) {
-                        <span class="status-badge">Beschikbaar</span>
-                        }
-                        <img [src]="boek?.afbeelding || 'https://bookshow.blurb.com/bookshow/cache/P11360640/md/cover_2.jpeg?access_key=675523b769268bce5b0b710b3d0e7841'" alt="Book Cover" class="book-cover">
-                    </div>
-
-                    <div class="tags-section">
-                        <span class="tags-label">Thema's</span>
-                        <div class="tags-list">
-                            @for (genre of boek?.genre; track $index) {
-                            <span class="tag">{{ genre }}</span>
-                            } @empty {
-                            <span class="tag">Geen thema's</span>
-                            }
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mid-col">
-                    <h1 class="book-title">{{ boek?.titel }}</h1>
-                    @if (beoordelingen.length > 0) {
-                    <div class="rating-container">
-                        <span class="rating-score">{{ boekWaardering }}</span>
-                        <div class="stars-outer">
-                            <div class="stars-inner" [style.width.%]="waarderingPrecentage"></div>
-                        </div>
-                        <span class="review-count">({{ beoordelingen.length }} reviews)</span>
-                    </div>
-                    }
-                    <p class="book-author">door {{ boek?.auteur }}</p>
-
-                    <div class="info-grid">
-                        <div class="info-item"><span class="info-label">Uitgever</span><span class="info-value">{{
-                                boek?.uitgever }}</span></div>
-                        <div class="info-item"><span class="info-label">Aantal pagina's</span><span
-                                class="info-value">{{ boek?.pagina }}</span></div>
-                        <div class="info-item"><span class="info-label">ISBN</span><span class="info-value">{{
-                                boek?.isbn }}</span></div>
-                        <div class="info-item"><span class="info-label">Uitgavejaar</span><span class="info-value">{{
-                                boek?.uitgaveJaar }}</span></div>
-                        <div class="info-item"><span class="info-label">Locatie</span><span class="info-value">{{
-                                boek?.locatie }}</span></div>
-                        <div class="info-item"><span class="info-label">Exemplaren</span><span class="info-value">{{
-                                boek?.aantalExemplaren }}</span></div>
-                    </div>
-
-                    <div class="action-buttons">
-                        <button type="button" class="primary-btn">Boek Lenen</button>
-                        <div class="secondary-actions">
-                            <button type="button" class="secondary-btn" (click)="voegToeAanFavorieten()">
-                                {{ isFavoriet ? '✅ Opgeslagen' : '♡ Favoriet' }}
-                            </button>
-                            <button type="button" class="secondary-btn" (click)="voegToeAanLeeslijst()">📖 Leeslijst</button>
-                        </div>
-                    </div>
-                </div>
+          <div class="tags-section">
+            <span class="tags-label">Thema's</span>
+            <div class="tags-list">
+              @for (genre of boek?.genre; track $index) {
+                <span class="tag">{{ genre }}</span>
+              } @empty {
+                <span class="tag">Geen thema's</span>
+              }
             </div>
-
-            <div class="description-box">
-                <p>{{ boek?.beschrijving }}</p>
-            </div>
-
+          </div>
         </div>
 
-        <div class="side-column">
-            <div class="reviews-section">
-                <h2 class="reviews-title">Reviews</h2>
-                <div class="reviews-container">
-                    <h3 class="reviews-subtitle">Leerling Reviews</h3>
-
-                    @for (beoordeling of beoordelingen; track $index) {
-                    <div class="review-item">
-                        <div class="review-header">
-                            <span class="review-rating">{{ '★'.repeat(beoordeling.waardering) + '☆'.repeat(5 -
-                                beoordeling.waardering) }}</span>
-                            <span class="reviewer-name">- Test Gebruiker</span>
-                        </div>
-                        <p class="review-content">{{ beoordeling.inhoud }}</p>
-                    </div>
-                    } @empty {
-                    <p class="no-reviews">Er zijn nog geen reviews voor dit boek.</p>
-                    }
-
-                    <div class="review-form-container">
-                        <h3>Schrijf een review</h3>
-                        <form class="review-form" [formGroup]="form" (ngSubmit)="submitBeoordeling()">
-                            <select id="waardering" name="waardering" formControlName="waardering" class="form-select">
-                                <option value="" disabled selected>Kies een waardering...</option>
-                                <option value="5">★★★★★</option>
-                                <option value="4">★★★★☆</option>
-                                <option value="3">★★★☆☆</option>
-                                <option value="2">★★☆☆☆</option>
-                                <option value="1">★☆☆☆☆</option>
-                            </select>
-                            <textarea id="inhoud" name="inhoud" rows="3" formControlName="inhoud" class="form-textarea"
-                                placeholder="Deel je mening over dit boek..."></textarea>
-                            <button type="submit" class="submit-btn">Verzenden</button>
-                            @if(submissionError){
-                            <div class="error-message">
-                                <p>{{ submissionError }}</p>
-                            </div>
-                            }
-                        </form>
-                    </div>
-                </div>
+        <div class="mid-col">
+          <h1 class="book-title">{{ boek?.titel }}</h1>
+          @if (beoordelingen.length > 0) {
+            <div class="rating-container">
+              <span class="rating-score">{{ boekWaardering }}</span>
+              <div class="stars-outer">
+                <div class="stars-inner" [style.width.%]="waarderingPrecentage"></div>
+              </div>
+              <span class="review-count">({{ beoordelingen.length }} reviews)</span>
             </div>
-        </div>
+          }
+          <p class="book-author">door {{ boek?.auteur }}</p>
 
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="info-label">Uitgever</span
+              ><span class="info-value">{{ boek?.uitgever }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Aantal pagina's</span
+              ><span class="info-value">{{ boek?.pagina }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">ISBN</span><span class="info-value">{{ boek?.isbn }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Uitgavejaar</span
+              ><span class="info-value">{{ boek?.uitgaveJaar }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Locatie</span
+              ><span class="info-value">{{ boek?.locatie }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Exemplaren</span
+              ><span class="info-value">{{ boek?.aantalExemplaren }}</span>
+            </div>
+          </div>
+
+          <div class="action-buttons">
+            <button
+              type="button"
+              class="primary-btn"
+              [disabled]="!magLenen"
+              [class.disabled-btn]="!magLenen"
+              (click)="voegToeAanReservering()"
+            >
+              Voeg toe aan reserveringen
+            </button>
+
+            @if (!magLenen) {
+              <p class="leen-reden-tekst">{{ leenReden }}</p>
+            }
+
+            <div class="secondary-actions">
+              <button type="button" class="secondary-btn" (click)="voegToeAanFavorieten()">
+                {{ isFavoriet ? '✅ Opgeslagen' : '♡ Favoriet' }}
+              </button>
+              <button type="button" class="secondary-btn" (click)="voegToeAanLeeslijst()">
+                Leeslijst
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="description-box">
+        <p>{{ boek?.beschrijving }}</p>
+      </div>
     </div>
+
+    <div class="side-column">
+      <div class="reviews-section">
+        <h2 class="reviews-title">Reviews</h2>
+        <div class="reviews-container">
+          <h3 class="reviews-subtitle">Leerling Reviews</h3>
+
+          @for (beoordeling of beoordelingen; track $index) {
+            <div class="review-item">
+              <div class="review-header">
+                <span class="review-rating">{{
+                  '★'.repeat(beoordeling.waardering) + '☆'.repeat(5 - beoordeling.waardering)
+                }}</span>
+                <span class="reviewer-name">- Test Gebruiker</span>
+              </div>
+              <p class="review-content">{{ beoordeling.inhoud }}</p>
+
+              @if (!beoordeling.gerapporteerd) {
+                <button class="rapporteer-btn" (click)="openRapporteerModal(beoordeling.id!)">
+                  Rapporteer
+                </button>
+              } @else {
+                <span class="gerapporteerd-label">Reeds gerapporteerd ✓</span>
+              }
+            </div>
+          } @empty {
+            <p class="no-reviews">Er zijn nog geen reviews voor dit boek.</p>
+          }
+
+          <div class="review-form-container">
+            <h3>Schrijf een review</h3>
+            <form class="review-form" [formGroup]="form" (ngSubmit)="submitBeoordeling()">
+              <select id="waardering" formControlName="waardering" class="form-select">
+                <option value="" disabled selected>Kies een waardering...</option>
+                <option value="5">★★★★★</option>
+                <option value="4">★★★★☆</option>
+                <option value="3">★★★☆☆</option>
+                <option value="2">★★☆☆☆</option>
+                <option value="1">★☆☆☆☆</option>
+              </select>
+              <textarea
+                id="inhoud"
+                rows="3"
+                formControlName="inhoud"
+                class="form-textarea"
+                placeholder="Deel je mening over dit boek..."
+              ></textarea>
+              <button type="submit" class="submit-btn">Verzenden</button>
+              @if (submissionError) {
+                <div class="error-message">
+                  <p>{{ submissionError }}</p>
+                </div>
+              }
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
-@if(isModalOpen) {
-<div class="modal-overlay">
+@if (isModalOpen) {
+  <div class="modal-overlay">
     <div class="modal-box">
-        @if (succesMeldingMap) {
-            <div class="success-state">
-                <h3>{{ succesMeldingMap }}</h3>
-            </div>
-        } @else {
-            <h3>Toevoegen aan leeslijst</h3>
-            
-            <p class="modal-label">Kies een bestaande map:</p>
-            <select #bestaandeMap class="modal-select">
-                <option value="">-- Selecteer een map --</option>
-                @for (map of mappen; track map.id) {
-                    <option [value]="map.naam">{{ map.naam }}</option>
-                }
-            </select>
-
-            <p class="modal-label">OF maak een nieuwe map:</p>
-            <input #nieuweMap type="text" placeholder="Nieuwe map naam...">
-            
-            <div class="modal-actions">
-                <button class="cancel-btn" (click)="sluitModal()">Annuleren</button>
-                <button class="save-btn" (click)="bevestigToevoegenAanMap(bestaandeMap.value, nieuweMap.value)">Opslaan</button>
-            </div>
-        }
+      @if (succesMeldingMap) {
+        <div class="success-state">
+          <h3>{{ succesMeldingMap }}</h3>
+        </div>
+      } @else {
+        <h3>Toevoegen aan leeslijst</h3>
+        <p class="modal-label">Kies een bestaande map:</p>
+        <select #bestaandeMap class="modal-select">
+          <option value="">-- Selecteer een map --</option>
+          @for (map of mappen; track map.id) {
+            <option [value]="map.naam">{{ map.naam }}</option>
+          }
+        </select>
+        <p class="modal-label">OF maak een nieuwe map:</p>
+        <input #nieuweMap type="text" placeholder="Nieuwe map naam..." />
+        <div class="modal-actions">
+          <button class="cancel-btn" (click)="sluitModal()">Annuleren</button>
+          <button
+            class="save-btn"
+            (click)="bevestigToevoegenAanMap(bestaandeMap.value, nieuweMap.value)"
+          >
+            Opslaan
+          </button>
+        </div>
+      }
     </div>
-</div>
+  </div>
+}
+
+@if (isLeenModalOpen) {
+  <div class="modal-overlay">
+    <div class="modal-box">
+      @if (succesMeldingLenen) {
+        <div class="success-state">
+          <h3>Succes!</h3>
+          <p>{{ succesMeldingLenen }}</p>
+        </div>
+      } @else {
+        <h3>Boek Lenen</h3>
+        <p style="margin-bottom: 25px">{{ succesMeldingLenen }}</p>
+        <div class="modal-actions">
+          <button class="cancel-btn" (click)="sluitLeenModal()">Annuleren</button>
+          <button class="save-btn" style="background: #ea580c" (click)="voegToeAanReservering()">
+            Bevestig Lening
+          </button>
+        </div>
+      }
+    </div>
+  </div>
+}
+
+@if (rapporteerModalOpen) {
+  <div class="modal-overlay">
+    <div class="modal-box rapport-modal">
+      <h3>Rapporteer beoordeling</h3>
+      <p class="modal-label">Waarom rapporteer je deze beoordeling?</p>
+      <textarea
+        [(ngModel)]="rapporteerReden"
+        rows="3"
+        class="form-textarea"
+        placeholder="Voer je reden in (verplicht)..."
+      ></textarea>
+      <div class="modal-actions">
+        <button class="cancel-btn" (click)="sluitRapporteerModal()">Annuleren</button>
+        <button class="save-btn" [disabled]="!rapporteerReden.trim()" (click)="bevestigRapport()">
+          Verzenden
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (rapportMelding) {
+  <div class="toast-message">
+    <p>{{ rapportMelding }}</p>
+  </div>
 }

@@ -24,7 +24,7 @@ import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PutMapping;
 
 @RestController
-@CrossOrigin(origins = { "http://frontend.localhost", "http://localhost:4200" })
+// @CrossOrigin(origins = { "http://frontend.localhost", "http://localhost:4200" })
 public class BoekController {
     private final BoekService boekService;
     private final BoekRepository boekRepository;
@@ -35,7 +35,7 @@ public class BoekController {
     }
 
     @GetMapping("/api/boeken")
-    @CrossOrigin(origins = "*", allowedHeaders = "*")
+    // @CrossOrigin(origins = "*", allowedHeaders = "*")
     public List<Boek> getAlleBoeken(@RequestParam(required = false) String zoekterm) {
         Sort sort = Sort.by(Sort.Direction.ASC, "locatie");
 
