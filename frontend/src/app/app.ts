@@ -1,7 +1,5 @@
-import { HttpClient } from '@angular/common/http';
-import { Component, inject, signal } from '@angular/core';
+import { Component} from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { HoofdPagina } from "./hoofd-pagina/hoofd-pagina";
 import { Navbar } from "./navbar/navbar";
 import { Footer } from "./footer/footer";
 
