@@ -17,13 +17,13 @@ export class HomePageLeerling implements OnInit {
   private leeslijstService = inject(LeeslijstService);
 
   // Gebruikersinfo & Gamification
-  naam = signal<string>('Emma');
+  naam = signal<string>('Jeroen');
   gebruikerId = 1; // Tijdelijk hardcoded, pas aan naar ingelogde gebruiker
 
-  gelezenBoeken = signal<number>(7);
+  gelezenBoeken = signal<number>(6);
   leesDoel = signal<number>(10);
 
-  // NIEUW: Variabelen voor de pop-up (Modal)
+  // Variabelen voor de pop-up (Modal)
   isEditModalOpen = signal<boolean>(false);
   nieuwLeesdoel = signal<number>(10);
 
@@ -31,19 +31,16 @@ export class HomePageLeerling implements OnInit {
   uitgelichteBoeken = signal<Boek[]>([]);
   leeslijsten = signal<any[]>([]);
 
-  // Dummy leningen
-  leningen = signal<any[]>([
-    { id: 101, titel: 'Java voor Dummies', resterendeDagen: 10 },
-    { id: 102, titel: 'Harry Potter en de Steen der Wijzen', resterendeDagen: 30 },
-    { id: 103, titel: 'Netwerken Basis', resterendeDagen: 2 }, // Dringend!
-  ]);
+  // Leningen uit de database
+  leningen = signal<any[]>([]);
 
-  // Automatisch sorteren van leningen
+  // Automatisch sorteren van leningen (minste dagen bovenaan)
   gesorteerdeLeningen = computed(() => {
     return [...this.leningen()].sort((a, b) => a.resterendeDagen - b.resterendeDagen);
   });
 
   ngOnInit(): void {
+    // 1. Haal populaire boeken op
     this.boekService.getPopulaireBoeken().subscribe({
       next: (data) => {
         this.uitgelichteBoeken.set(data.slice(0, 5));
@@ -51,12 +48,55 @@ export class HomePageLeerling implements OnInit {
       error: (err) => console.error('Kon uitgelichte boeken niet laden:', err)
     });
 
-    // 2. Haal mappen/leeslijsten op voor deze gebruiker (maximaal 3 voor op de homepage)
+    // 2. Haal mappen/leeslijsten op voor deze gebruiker
     this.leeslijstService.getMappenVanGebruiker(this.gebruikerId).subscribe({
       next: (mappen) => {
         this.leeslijsten.set(mappen.slice(0, 3));
       },
       error: (err) => console.error('Kon leeslijsten/mappen niet laden:', err)
+    });
+
+    // 3. Haal de actieve leningen op
+    this.haalLeningenOp();
+  }
+
+  haalLeningenOp() {
+    this.boekService.getActieveLeningen(this.gebruikerId).subscribe({
+      next: (data) => {
+        const verwerkteLeningen = data.map((uitlening) => {
+
+          // Check of de lening nog goedgekeurd moet worden
+          if (uitlening.status === 'AANGEVRAAGD' || !uitlening.inleverDatum) {
+            return {
+              id: uitlening.id,
+              titel: uitlening.boek.titel,
+              resterendeDagen: 999, // Zet ze helemaal onderaan in de sortering
+              isAanvraag: true
+            };
+          }
+
+          // Datum berekening voor goedgekeurde leningen
+          const inleverDatum = new Date(uitlening.inleverDatum);
+          const vandaag = new Date();
+
+          // Zet beide op middernacht om pure dagen te vergelijken
+          inleverDatum.setHours(0, 0, 0, 0);
+          vandaag.setHours(0, 0, 0, 0);
+
+          const verschilTijd = inleverDatum.getTime() - vandaag.getTime();
+          const verschilDagen = Math.ceil(verschilTijd / (1000 * 3600 * 24));
+
+          return {
+            id: uitlening.id,
+            titel: uitlening.boek.titel,
+            resterendeDagen: verschilDagen,
+            isAanvraag: false
+          };
+        });
+
+        this.leningen.set(verwerkteLeningen);
+      },
+      error: (err) => console.error('Kon actieve leningen niet ophalen:', err)
     });
   }
 
@@ -66,7 +106,7 @@ export class HomePageLeerling implements OnInit {
   }
 
   openEditModal() {
-    this.nieuwLeesdoel.set(this.leesDoel()); // Zet het invulveldje op het huidige doel
+    this.nieuwLeesdoel.set(this.leesDoel());
     this.isEditModalOpen.set(true);
   }
 
@@ -75,14 +115,20 @@ export class HomePageLeerling implements OnInit {
   }
 
   slaLeesdoelOp() {
-    // 1. Pas het visueel direct aan op de website
-    this.leesDoel.set(this.nieuwLeesdoel());
-    
-    // 2. Sluit de pop-up
-    this.isEditModalOpen.set(false);
+    // 1. Haal de ingetypte waarde op
+    let veiligDoel = this.nieuwLeesdoel();
 
-    // LATER: Hier sturen we het nieuwe getal (this.leesDoel()) naar je Spring Boot backend!
-    console.log("Nieuw leesdoel opgeslagen:", this.leesDoel());
+    // 2. Beveilig de grenzen (min 1, max 100)
+    if (veiligDoel < 1) {
+      veiligDoel = 1;
+    } else if (veiligDoel > 10) {
+      veiligDoel = 10; // Je kunt hier 10 veranderen in wat jij een logisch maximum vindt
+    }
+
+    // 3. Sla de veilige waarde op
+    this.leesDoel.set(veiligDoel);
+
+    // 4. Sluit de pop-up
+    this.isEditModalOpen.set(false);
   }
 }
-
