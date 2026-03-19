@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import ap.be.backend.repository.LeeslijstMapRepository;
@@ -21,7 +22,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 
 @RestController
 @RequestMapping("/api/gebruiker")
-// @CrossOrigin(origins = { "http://frontend.localhost", "http://localhost:4200", "http://frontend-sp09.cloud-ap.be" })
+// @CrossOrigin(origins = { "http://frontend.localhost",
+// "http://localhost:4200", "http://frontend-sp09.cloud-ap.be" })
 public class GebruikerController {
     private final LeeslijstMapRepository leeslijstMapRepository;
     private final GebruikerService gebruikerService;
@@ -42,9 +44,10 @@ public class GebruikerController {
     @PostMapping("/{gebruikerId}/mappen/{mapNaam}/boeken/{boekId}")
     public ResponseEntity<String> voegBoekToeAanLijst(@PathVariable Long gebruikerId,
             @PathVariable String mapNaam,
-            @PathVariable Long boekId) {
+            @PathVariable Long boekId,
+            @RequestParam(required = false, defaultValue = "📁") String emoji) {
         try {
-            gebruikerService.voegBoekToeAanMap(gebruikerId, mapNaam, boekId);
+            gebruikerService.voegBoekToeAanMap(gebruikerId, mapNaam, boekId, emoji); // 🚨 emoji hier toegevoegd!
             return ResponseEntity.ok("Boek succesvol toegevoegd aan map");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());

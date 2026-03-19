@@ -64,7 +64,7 @@ public class GebruikerService {
                 .orElseThrow(() -> new IllegalArgumentException("Gebruiker met ID " + id + " niet gevonden"));
     }
 
-    public void voegBoekToeAanMap(Long gebruikerId, String mapNaam, Long boekId) {
+    public void voegBoekToeAanMap(Long gebruikerId, String mapNaam, Long boekId, String emoji) {
         Gebruiker gebruiker = getGebruikerById(gebruikerId);
         Boek boek = boekRepository.findById(boekId)
                 .orElseThrow(() -> new IllegalArgumentException("Boek met ID " + boekId + " niet gevonden"));
@@ -72,6 +72,7 @@ public class GebruikerService {
         LeeslijstMap map = leeslijstMapRepository.findByGebruiker_GebruikerIDAndNaam(gebruikerId, mapNaam)
                 .orElseGet(() -> {
                     LeeslijstMap nieuweMap = new LeeslijstMap(mapNaam, gebruiker);
+                    nieuweMap.setEmoji(emoji);
                     return leeslijstMapRepository.save(nieuweMap);
                 });
 
