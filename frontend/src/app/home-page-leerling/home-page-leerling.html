@@ -85,7 +85,7 @@
 
           <div class="section-header">
             <h2>Jouw leeslijsten</h2>
-            <a [routerLink]="['/leeslijsten']" class="view-all-link">
+            <a [routerLink]="['/leeslijst' , 1]" class="view-all-link">
               Bekijk alle <span>&rarr;</span>
             </a>
           </div>
@@ -118,19 +118,26 @@
         <div class="uitleentermijnen-container">
           <h2>Uitleentermijnen</h2>
           <div class="scroll-list">
-            @for (lening of gesorteerdeLeningen(); track lening.id) {
-            <div class="lening-item" [class.urgent]="lening.resterendeDagen <= 3">
-              <div class="lening-titel-box">
-                <span class="book-icon">📘</span>
-                <span class="lening-titel">{{ lening.titel }}</span>
+            
+            @for (lening of leningen(); track lening.id) {
+              <div class="lening-item" [class.urgent]="lening.resterendeDagen <= 7 && !lening.isAanvraag">
+                <div class="lening-titel-box">
+                  <span class="book-icon">📘</span>
+                  <span class="lening-titel">{{ lening.titel }}</span>
+                </div>
+                
+                <div class="dagen-badge">
+                  @if (lening.isAanvraag) {
+                    <span>Wachtend ⏳</span>
+                  } @else {
+                    <span>{{ lening.resterendeDagen }} d</span>
+                  }
+                </div>
               </div>
-              <div class="dagen-badge">
-                {{ lening.resterendeDagen }} d
-              </div>
-            </div>
             } @empty {
-            <p class="empty-message">Je hebt momenteel geen actieve leningen.</p>
+              <p class="empty-message">Geen boeken geleend.</p>
             }
+
           </div>
         </div>
 
@@ -148,7 +155,7 @@
     <p>Hoeveel boeken daag jij jezelf uit om te lezen dit schooljaar?</p>
 
     <div class="input-group">
-      <input type="number" [(ngModel)]="nieuwLeesdoel" min="1" max="100" class="leesdoel-input">
+      <input type="number" [(ngModel)]="nieuwLeesdoel" min="1" max="10" class="leesdoel-input">
       <span class="input-suffix">boeken</span>
     </div>
 

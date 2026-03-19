@@ -70,4 +70,8 @@ export class BoekService {
       { responseType: 'text' },
     );
   }
+
+  getActieveLeningen(gebruikerId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiGebruikerUrl}/${gebruikerId}/leningen`);
+  }
 }

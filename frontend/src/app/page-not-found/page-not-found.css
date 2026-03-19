@@ -1,0 +1,145 @@
+/* =========================================
+   PAGE NOT FOUND (404) STYLES
+   ========================================= */
+
+/* De hoofdcontainer die de kaart centreert en de hoogte vult */
+.page-not-found-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* Vult de hele hoogte minus de hoogte van de navbar (64px) */
+    min-height: calc(100vh - 64px); 
+    background-color: #f0efe4; /* GO Beige achtergrond */
+    padding: 30px;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Consistente typografie */
+}
+
+/* De centrale kaart, gestijld zoals de welcome-banner-modern */
+.not-found-card {
+    background-color: #ffffff;
+    border-radius: 20px; /* Consistente afgeronde hoeken */
+    padding: 60px 40px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05); /* Zachte schaduw */
+    text-align: center;
+    max-width: 600px;
+    width: 100%;
+    border: 1px solid #e2dfd5; /* Subtiele rand zoals bij de leesdoel-box */
+    /* Een subtiel bordeauxrood accent bovenaan */
+    border-top: 5px solid #8c1b3f; 
+}
+
+/* Icon / Emoji area */
+.icon-area {
+    margin-bottom: 25px;
+}
+.icon-area .emoji {
+    font-size: 6rem; /* Lekker groot */
+    display: block;
+    line-height: 1;
+}
+
+/* De foutcode 404 (bordeauxrood en groot) */
+.error-code {
+    font-size: 8rem;
+    font-weight: 900;
+    color: #8c1b3f; /* Bordeauxrood */
+    margin: 0;
+    line-height: 1;
+    letter-spacing: -5px; /* Iets dichter op elkaar voor een modern effect */
+}
+
+/* De hoofdmelding (zwart, netjes) */
+.error-message {
+    font-size: 2.2rem;
+    color: #2d3748; /* Donkergrijs/Zwart text */
+    margin: 10px 0 20px 0;
+    font-weight: 700;
+}
+
+/* De beschrijving (grijs, goed leesbaar) */
+.error-description {
+    font-size: 1.1rem;
+    color: #718096; /* Grijs text */
+    line-height: 1.6;
+    margin-bottom: 45px;
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Container voor de actieknoppen */
+.actions {
+    display: flex;
+    justify-content: center;
+    gap: 20px; /* Ruimte tussen de knoppen */
+}
+
+/* === Basis knop styles (Hergebruik van .btn-ontdek vibe) === */
+.btn-primary {
+    background-color: #8c1b3f; /* Bordeauxrood */
+    color: #ffffff;
+    border: none;
+    padding: 14px 32px;
+    border-radius: 30px; /* Pill-vormige knop */
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(140, 27, 63, 0.3); /* Button schaduw */
+    display: inline-flex;
+    align-items: center;
+}
+
+.btn-primary:hover {
+    background-color: #6d1531; /* Donkerder bordeaux op hover */
+    transform: translateY(-3px); /* Hover lift-effect */
+    box-shadow: 0 6px 20px rgba(140, 27, 63, 0.4);
+}
+
+/* === Secundaire knop (Hollow variant) === */
+.btn-secondary {
+    background-color: #ffffff;
+    color: #8c1b3f; /* Bordeauxrood text */
+    border: 2px solid #8c1b3f; /* Bordeauxrode rand */
+    padding: 12px 30px; /* Iets minder padding om de rand te compenseren */
+    border-radius: 30px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+}
+
+.btn-secondary:hover {
+    background-color: #fff1f5; /* Heel licht bordeauxrode achtergrond op hover */
+    border-color: #6d1531;
+    color: #6d1531;
+}
+
+/* =========================================
+   RESPONSIVITEIT
+   ========================================= */
+@media (max-width: 600px) {
+    .not-found-card {
+        padding: 40px 20px;
+    }
+    .icon-area .emoji { font-size: 4.5rem; }
+    .error-code { font-size: 5rem; }
+    .error-message { font-size: 1.6rem; }
+    .error-description { font-size: 1rem; margin-bottom: 35px; }
+    
+    /* Op mobiel de knoppen onder elkaar zetten */
+    .actions {
+        flex-direction: column;
+        gap: 15px;
+    }
+    .btn-primary, .btn-secondary {
+        width: 100%;
+        justify-content: center;
+        box-sizing: border-box;
+    }
+}
