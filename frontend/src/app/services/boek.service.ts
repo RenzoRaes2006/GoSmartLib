@@ -13,7 +13,11 @@ export class BoekService {
   // private apiUrl = this.gebruikTraefik
   //   ? 'http://frontend.localhost/api/boeken'
   //   : 'http://localhost:8081/api/boeken';
-  private apiUrl = '/api/boeken';
+  // private apiUrl = '/api/boeken';
+
+  private apiUrl = window.location.hostname === 'localhost'
+    ? 'http://localhost:8081/api/boeken'
+    : '/api/boeken';
 
 private http = inject(HttpClient);
 
@@ -43,5 +47,8 @@ private http = inject(HttpClient);
   }
   getBoekenPaged(page: number, size: number): Observable<PageResponse<Boek>> {
     return this.http.get<PageResponse<Boek>>(`${this.apiUrl}/paged?page=${page}&size=${size}`);
+  }
+  getPopulaireBoeken() {
+    return this.http.get<Boek[]>(`${this.apiUrl}/top/populair`);
   }
 }

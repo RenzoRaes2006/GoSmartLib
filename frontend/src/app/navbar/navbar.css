@@ -12,8 +12,7 @@
   z-index: 1000;
 }
 
-.nav-left,
-.nav-right {
+.nav-left,.nav-right {
   display: flex;
   align-items: center;
 }
@@ -31,8 +30,14 @@
   text-decoration: none;
 }
 
-.logo-text { font-size: 18px; color: #333; }
-.logo-text strong { color: #4a90e2; }
+.logo-text { 
+  font-size: 18px; 
+  color: #333; 
+}
+
+.logo-text strong { 
+  color: #5C0120; 
+}
 
 .scan-btn {
   background: white;
@@ -40,7 +45,7 @@
   border-radius: 5px;
   padding: 5px 8px;
   cursor: pointer;
-  color: #ff8c00; /* Oranje zoals in screenshot */
+  color: #ff8c00;
 }
 
 .nav-right {

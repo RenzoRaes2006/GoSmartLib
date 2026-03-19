@@ -1,0 +1,57 @@
+/* De volledige footer balk */
+.go-footer {
+  background-color: #f2efe9;
+  padding: 50px 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
+  margin-top: 60px;
+}
+
+.footer-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  gap: 30px;
+}
+
+.footer-column {
+  flex: 1;
+  min-width: 250px;
+}
+
+.footer-column h3 {
+  font-size: 1.2rem;
+  color: #3b4754;
+  margin-bottom: 20px;
+  font-weight: 700;
+}
+
+.footer-column p {
+  margin: 5px 0;
+  line-height: 1.6;
+  font-size: 0.95rem;
+}
+
+.footer-column ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-column ul li {
+  margin-bottom: 10px;
+}
+
+.accent-link {
+  color: #8e1537;
+  text-decoration: none;
+  font-weight: 500;
+  transition: opacity 0.2s, text-decoration 0.2s;
+}
+
+.accent-link:hover {
+  text-decoration: underline;
+  opacity: 0.8;
+}

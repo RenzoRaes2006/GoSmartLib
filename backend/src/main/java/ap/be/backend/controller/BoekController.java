@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.data.domain.Sort;
 
 import ap.be.backend.dto.BoekDTO;
 import ap.be.backend.entity.Boek;
@@ -23,7 +22,6 @@ import ap.be.backend.repository.BoekRepository;
 import ap.be.backend.service.BoekService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @CrossOrigin(origins = { "http://frontend.localhost", "http://localhost:4200" })
@@ -91,6 +89,12 @@ public class BoekController {
     public Page<Boek> getBoekenPaged(@RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size) {
         return boekRepository.findAll(PageRequest.of(page, size, Sort.by("titel").ascending()));
+    }
+
+    @GetMapping("/api/boeken/top/populair")
+    public ResponseEntity<List<Boek>> getPopulaireBoeken() {
+        List<Boek> populaireBoeken = boekService.getPopulaireBoeken();
+        return ResponseEntity.ok(populaireBoeken);
     }
 
 }

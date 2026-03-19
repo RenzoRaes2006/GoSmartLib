@@ -6,7 +6,9 @@ import { Beoordeling } from '../models/review.model';
   providedIn: 'root',
 })
 export class ReviewService {
-  private apiUrl = '/api';
+private apiUrl = window.location.hostname === 'localhost'
+    ? 'http://localhost:8081/api'
+    : '/api';
 
   constructor(private http: HttpClient) {}
 

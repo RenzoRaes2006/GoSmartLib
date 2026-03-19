@@ -1,7 +1,9 @@
 package ap.be.backend.service;
 
+import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import ap.be.backend.dto.BoekDTO;
@@ -71,5 +73,9 @@ public class BoekService {
 
     public Boek getBoekByIsbn(String isbn) {
         return boekRepository.findByIsbn(isbn.trim()).orElse(null);
+    }
+
+    public List<Boek> getPopulaireBoeken() {
+        return boekRepository.findTop5PopulaireBoeken();
     }
 }
