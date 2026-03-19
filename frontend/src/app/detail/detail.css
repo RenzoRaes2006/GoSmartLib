@@ -510,3 +510,92 @@
     font-family: inherit;
 }
 .nieuwe-map-input:focus { outline: none; border-color: #8c1b3f; }
+/* Update je knoppen naar de Bordeaux kleuren */
+.primary-btn { 
+    width: 100%; 
+    background: #8c1b3f; /* Bordeaux */
+    border: none; 
+    color: #ffffff; 
+    padding: 14px 20px; 
+    border-radius: 8px; 
+    font-size: 1.1rem;
+    font-weight: 600; 
+    cursor: pointer; 
+    text-align: center; 
+    transition: all 0.3s ease;
+}
+
+.primary-btn:hover:not(:disabled) {
+    background: #6d1531;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(140, 27, 63, 0.3);
+}
+
+/* Modals en pop-ups */
+.modal-box {
+    background: white;
+    padding: 30px;
+    border-radius: 16px;
+    width: 400px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    border-top: 5px solid #8c1b3f; /* Bordeaux randje bovenaan */
+    text-align: center;
+}
+
+.modal-box h3 { color: #8c1b3f; margin-top: 0; }
+
+.save-btn { background: #8c1b3f; color: white; }
+.save-btn:hover { background: #6d1531; }
+
+.cancel-btn { background: #f0efe4; color: #4a5568; } /* Beige annuleer knop */
+.cancel-btn:hover { background: #e2dfd5; }
+
+/* 🚨 EMOJI PICKER STYLING */
+.emoji-picker-container {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 25px;
+}
+
+.emoji-grid {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.emoji-btn {
+    background: white;
+    border: 2px solid transparent;
+    border-radius: 50%;
+    font-size: 1.5rem;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.emoji-btn:hover { transform: scale(1.1); }
+
+.emoji-btn.selected {
+    border-color: #8c1b3f;
+    background: #f0efe4; /* Beige highlight */
+    transform: scale(1.1);
+}
+
+.nieuwe-map-input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: inherit;
+}
+.nieuwe-map-input:focus { outline: none; border-color: #8c1b3f; }

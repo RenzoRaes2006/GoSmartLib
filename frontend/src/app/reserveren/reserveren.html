@@ -1,7 +1,7 @@
 <div class="reserveren-container">
   <a routerLink="/catalogus" class="back-link">← Terug naar catalogus</a>
 
-  <h1 class="page-title">Mijn Reserveringsaanvraag</h1>
+  <h1 class="page-title">Mijn uitleningsaanvragen</h1>
 
   @if (statusMelding) {
     <div class="alert-box" [class.success]="isSucces" [class.error]="!isSucces">
@@ -11,7 +11,7 @@
 
   <div class="layout-grid">
     <div class="mandje-sectie">
-      <h2 class="sectie-titel">Geselecteerde Boeken ({{ boekenInMandje.length }}/3)</h2>
+      <h2 class="sectie-titel">Geselecteerde boeken ({{ boekenInMandje.length }}/3)</h2>
 
       @if (boekenInMandje.length === 0 && !isSucces) {
         <div class="leeg-mandje">
@@ -48,7 +48,7 @@
 
     <div class="actie-sectie">
       <div class="bevestig-box">
-        <h2 class="sectie-titel">Aanvraag Bevestigen</h2>
+        <h2 class="sectie-titel">Aanvraag bevestigen</h2>
         <p class="subtitle">Klik op de knop om je reservering naar de bibbeheerder te sturen.</p>
 
         <div class="info-lijst">

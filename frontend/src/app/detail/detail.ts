@@ -38,7 +38,6 @@ export class Detail implements OnInit {
   succesMeldingMap: string = '';
   mappen: any[] = [];
 
-  // 🚨 NIEUW: De emoji picker logica
   beschikbareEmojis = ['📚', '🎓', '🧠', '💡', '🎨', '🌍', '🔥', '❤️'];
   selectedEmoji = '📚';
 
@@ -87,7 +86,6 @@ export class Detail implements OnInit {
     const gebruikerId = 1;
     this.leeslijstService.getMappenVanGebruiker(gebruikerId).subscribe({
       next: (data) => {
-        // 🚨 FIX: We filteren de "Favorieten" map er direct uit!
         this.mappen = data.filter((map) => map.naam.toLowerCase() !== 'favorieten');
       },
     });
@@ -116,7 +114,6 @@ export class Detail implements OnInit {
   voegToeAanFavorieten() {
     if (!this.boek || this.isFavoriet) return;
     const gebruikerId = 1;
-    // 🚨 FIX: De timeout is weg. Zodra je klikt, blijft hij op Opgeslagen staan!
     this.leeslijstService
       .voegBoekToeAanMap(gebruikerId, 'Favorieten', this.boek.id!, '⭐')
       .subscribe({
@@ -129,7 +126,7 @@ export class Detail implements OnInit {
   voegToeAanLeeslijst() {
     if (!this.boek) return;
     this.isModalOpen = true;
-    this.selectedEmoji = '📚'; // Reset de emoji als je de modal opent
+    this.selectedEmoji = '📚';
   }
 
   sluitModal() {
@@ -142,7 +139,6 @@ export class Detail implements OnInit {
 
     if (doelMap && doelMap !== '') {
       const gebruikerId = 1;
-      // Stuur de geselecteerde emoji mee!
       this.leeslijstService
         .voegBoekToeAanMap(gebruikerId, doelMap, this.boek!.id!, this.selectedEmoji)
         .subscribe({

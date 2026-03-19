@@ -78,7 +78,7 @@
               [class.disabled-btn]="!magLenen"
               (click)="voegToeAanReservering()"
             >
-              Voeg toe aan reserveringen
+              Voeg toe aan leningen
             </button>
 
             @if (!magLenen) {
@@ -181,7 +181,7 @@
         <select #bestaandeMap class="modal-select">
           <option value="">-- Selecteer een map --</option>
           @for (map of mappen; track map.id) {
-            <option [value]="map.naam">{{ map.emoji }} {{ map.naam }}</option>
+            <option [value]="map.naam">{{ map.emoji || '📁' }} {{ map.naam }}</option>
           }
         </select>
 
@@ -215,6 +215,7 @@
     </div>
   </div>
 }
+
 @if (isLeenModalOpen) {
   <div class="modal-overlay">
     <div class="modal-box">
