@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { RouterOutlet, Router } from '@angular/router';
 import { HoofdPagina } from "./hoofd-pagina/hoofd-pagina";
 import { Navbar } from "./navbar/navbar";
 import { Footer } from "./footer/footer";
@@ -12,6 +12,11 @@ import { Footer } from "./footer/footer";
   styleUrl: './app.css',
 })
 export class App {
+  private router = inject(Router);
+
+  toonFooter() {
+    return !this.router.url.startsWith('/catalogus');
+  }
   // http = inject(HttpClient);
   // status = 'Wacht op input...';
 

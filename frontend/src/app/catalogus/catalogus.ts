@@ -1,8 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, signal } from '@angular/core';
 import { Boek } from '../models/Boek';
 import { BoekService } from '../services/boek.service';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink, NavigationStart } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { filter } from 'rxjs/operators';
 import { FilterOptions } from '../models/FilterOptions';
 import { FormsModule } from '@angular/forms';
 
@@ -13,7 +15,7 @@ import { FormsModule } from '@angular/forms';
   styleUrl: './catalogus.css',
   standalone: true,
 })
-export class Catalogus implements OnInit {
+export class Catalogus implements OnInit, OnDestroy {
   // State variabelen
   boekenlijst = signal<Boek[]>([]);
   zoekTerm = signal<string>('');
@@ -36,6 +38,21 @@ export class Catalogus implements OnInit {
   private readonly FILTERS_KEYS = 'catalogus_filters';
 
   private boekService = inject(BoekService);
+  private router = inject(Router);
+
+  // Abonneer op router events om filters te wissen bij navigatie naar andere pagina's dan details
+  private navSub: Subscription = this.router.events
+    .pipe(filter((e) => e instanceof NavigationStart))
+    .subscribe((e) => {
+      const url = (e as NavigationStart).url;
+      if (!url.startsWith('/details/')) {
+        sessionStorage.removeItem(this.FILTERS_KEYS);
+      }
+    });
+
+  ngOnDestroy(): void {
+    this.navSub.unsubscribe();
+  }
 
   // Genre hiërarchie
   genreHiërarchie = {
