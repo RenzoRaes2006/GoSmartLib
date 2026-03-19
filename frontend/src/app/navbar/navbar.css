@@ -166,3 +166,37 @@
     .navbar { padding: 0 16px; }
     .nav-link span:not(.icon) { display: none; } 
 }
+
+.a11y-btn {
+    background: transparent;
+    border: 1px solid #cbd5e1;
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: inherit; /* Belangrijk: knop verandert ook mee met het font! */
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.a11y-btn:hover {
+    background-color: #f1f5f9;
+    color: #0f172a;
+    border-color: #94a3b8;
+}
+
+/* Stijl als het dyslexie font actief is */
+.a11y-btn.actief {
+    background-color: #e0f2fe; /* Zacht blauwe achtergrond */
+    color: #00529F; /* GO! Blauw */
+    border-color: #00529F;
+    box-shadow: 0 0 0 1px #00529F; /* Extra dikke randweergave */
+}
+
+@media (max-width: 768px) {
+    .a11y-btn .text { display: none; } /* Verberg tekst op mobiel, toon alleen het oog-icoon */
+}

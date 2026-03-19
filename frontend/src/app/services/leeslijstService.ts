@@ -12,9 +12,9 @@ export class LeeslijstService {
 
   constructor(private http: HttpClient) {}
 
-  voegBoekToeAanMap(gebruikerId: number, mapNaam: string, boekId: number) {
+  voegBoekToeAanMap(gebruikerId: number, mapNaam: string, boekId: number, emoji: string = '📁') {
     return this.http.post(
-      `${this.apiUrl}/${gebruikerId}/mappen/${mapNaam}/boeken/${boekId}`,
+      `${this.apiUrl}/${gebruikerId}/mappen/${mapNaam}/boeken/${boekId}?emoji=${emoji}`,
       {},
       { responseType: 'text' },
     );

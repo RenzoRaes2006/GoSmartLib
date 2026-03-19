@@ -1,253 +1,291 @@
 <div class="beheer-topbar">
-    <div class="mode-selector">
-        <button type="button" (click)="setMode('wijzigen')" [class.active]="mode === 'wijzigen'">
-            Boek Beheren
-        </button>
-        <button type="button" (click)="setMode('toevoegen')" [class.active]="mode === 'toevoegen'">
-            Boek Toevoegen
-        </button>
-    </div>
-    <button type="button" class="verlaat-button" routerLink="/">Verlaten</button>
+  <div class="mode-selector">
+    <button type="button" (click)="setMode('wijzigen')" [class.active]="mode === 'wijzigen'">
+      Boek beheren
+    </button>
+    <button type="button" (click)="setMode('toevoegen')" [class.active]="mode === 'toevoegen'">
+      Boek toevoegen
+    </button>
+  </div>
+  <button type="button" class="verlaat-button" routerLink="/">Verlaten</button>
 </div>
 
 <div class="isbn-zoek-boek">
-    <button type="button" (click)="toggleIsbnZoek()">
-        {{ toonIsbnZoek ? 'Verberg ISBN Zoekveld' : 'Zoek op ISBN' }}
-    </button>
+  <button type="button" (click)="toggleIsbnZoek()">
+    {{ toonIsbnZoek ? 'Verberg ISBN Zoekveld' : 'Zoek op ISBN' }}
+  </button>
 
-    <div *ngIf="toonIsbnZoek">
-        <label for="zoekIsbn">ISBN:</label>
-        <input id="zoekIsbn" type="text" [value]="zoekIsbn" (input)="zoekIsbn = $any($event.target).value.slice(0, 13)" placeholder="9789012345678 of 0747532699" maxlength="13"/>
-        <button type="button" (click)="zoekBoekOpIsbn()" [disabled]="zoekIsbn.length !== 10 && zoekIsbn.length !== 13">
-            Zoek
-        </button>
-        <small *ngIf="zoekMessage" class="zoek-melding">{{ zoekMessage }}</small>
-    </div>
+  <div *ngIf="toonIsbnZoek">
+    <label for="zoekIsbn">ISBN:</label>
+    <input
+      id="zoekIsbn"
+      type="text"
+      [value]="zoekIsbn"
+      (input)="zoekIsbn = $any($event.target).value.slice(0, 13)"
+      placeholder="9789012345678 of 0747532699"
+      maxlength="13"
+    />
+    <button
+      type="button"
+      (click)="zoekBoekOpIsbn()"
+      [disabled]="zoekIsbn.length !== 10 && zoekIsbn.length !== 13"
+    >
+      Zoek
+    </button>
+    <small *ngIf="zoekMessage" class="zoek-melding">{{ zoekMessage }}</small>
+  </div>
 </div>
 
 <!-- Boeken Overzicht voor Beheren -->
-<div *ngIf="mode === 'wijzigen' && !boekGevonden && (boeknOverzicht.length > 0 || isLoadingBoeken)" class="boeken-overzicht">
-    <h3>Beschikbare Boeken</h3>
-    
-    <!-- Ladingindicator -->
-    <div *ngIf="isLoadingBoeken" class="loading-spinner">
-        Boeken laden...
-    </div>
+<div
+  *ngIf="mode === 'wijzigen' && !boekGevonden && (boeknOverzicht.length > 0 || isLoadingBoeken)"
+  class="boeken-overzicht"
+>
+  <h3>Beschikbare boeken</h3>
 
-    <!-- Error als boeken niet laden -->
-    <div *ngIf="!isLoadingBoeken && boeknOverzicht.length === 0" class="boeken-overzicht-empty">
-        <strong>Geen boeken gevonden.</strong> Controleer of de backend API draait.
-    </div>
+  <!-- Ladingindicator -->
+  <div *ngIf="isLoadingBoeken" class="loading-spinner">Boeken laden...</div>
 
-    <!-- Tabel met Boeken -->
-    <table *ngIf="!isLoadingBoeken && boeknOverzicht.length > 0">
-        <thead>
-            <tr>
-                <th>Titel</th>
-                <th>Auteur</th>
-                <th>ISBN</th>
-                <th>Genre</th>
-                <th>Actie</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr *ngFor="let boek of boeknOverzicht">
-                <td>{{ boek.titel }}</td>
-                <td>{{ boek.auteur }}</td>
-                <td>{{ boek.isbn }}</td>
-                <td>{{ boek.genre.join(', ') }}</td>
-                <td>
-                    <button 
-                        type="button" 
-                        class="action-button action-button-wijzig"
-                        (click)="selecteerBoekUitLijst(boek, 'wijzig')">
-                        Wijzig
-                    </button>
-                    <button 
-                        type="button" 
-                        class="action-button action-button-verwijder"
-                        (click)="selecteerBoekUitLijst(boek, 'verwijder')">
-                        Verwijder
-                    </button>
-                </td>
-            </tr>
-        </tbody>
-    </table>
+  <!-- Error als boeken niet laden -->
+  <div *ngIf="!isLoadingBoeken && boeknOverzicht.length === 0" class="boeken-overzicht-empty">
+    <strong>Geen boeken gevonden.</strong> Controleer of de backend API draait.
+  </div>
 
-    <!-- Paginatie Controls -->
-    <div class="pagination-controls">
-        <button 
-            type="button" 
-            class="pagination-button"
-            (click)="gaNaarVorigePagina()"
-            [disabled]="currentPage === 0">
-            ← Vorige
-        </button>
-        
-        <span class="page-info">
-            Pagina {{ currentPage + 1 }} van {{ totaalPages }}
-        </span>
-        
-        <button 
-            type="button" 
-            class="pagination-button"
-            (click)="gaNaarVolgendePagina()"
-            [disabled]="currentPage + 1 >= totaalPages">
-            Volgende →
-        </button>
-    </div>
+  <!-- Tabel met Boeken -->
+  <table *ngIf="!isLoadingBoeken && boeknOverzicht.length > 0">
+    <thead>
+      <tr>
+        <th>Titel</th>
+        <th>Auteur</th>
+        <th>ISBN</th>
+        <th>Genre</th>
+        <th>Actie</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let boek of boeknOverzicht">
+        <td>{{ boek.titel }}</td>
+        <td>{{ boek.auteur }}</td>
+        <td>{{ boek.isbn }}</td>
+        <td>{{ boek.genre.join(', ') }}</td>
+        <td>
+          <button
+            type="button"
+            class="action-button action-button-wijzig"
+            (click)="selecteerBoekUitLijst(boek, 'wijzig')"
+          >
+            Wijzig
+          </button>
+          <button
+            type="button"
+            class="action-button action-button-verwijder"
+            (click)="selecteerBoekUitLijst(boek, 'verwijder')"
+          >
+            Verwijder
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Paginatie Controls -->
+  <div class="pagination-controls">
+    <button
+      type="button"
+      class="pagination-button"
+      (click)="gaNaarVorigePagina()"
+      [disabled]="currentPage === 0"
+    >
+      ← Vorige
+    </button>
+
+    <span class="page-info"> Pagina {{ currentPage + 1 }} van {{ totaalPages }} </span>
+
+    <button
+      type="button"
+      class="pagination-button"
+      (click)="gaNaarVolgendePagina()"
+      [disabled]="currentPage + 1 >= totaalPages"
+    >
+      Volgende →
+    </button>
+  </div>
 </div>
 
 <form [formGroup]="boekForm" (ngSubmit)="onSubmit()" *ngIf="mode === 'toevoegen' || boekGevonden">
-    <div>
-        <label for="titel">Titel:</label>
-        <input id="titel" formControlName="titel" />
-        <div *ngIf="boekForm.get('titel')?.invalid && boekForm.get('titel')?.touched">
-        <small *ngIf="boekForm.get('titel')?.errors?.['required']">Titel is verplicht.</small>
-        <small *ngIf="boekForm.get('titel')?.errors?.['minlength']">Titel moet minimaal 2 tekens bevatten.</small>
-        </div>
+  <div>
+    <label for="titel">Titel:</label>
+    <input id="titel" formControlName="titel" />
+    <div *ngIf="boekForm.get('titel')?.invalid && boekForm.get('titel')?.touched">
+      <small *ngIf="boekForm.get('titel')?.errors?.['required']">Titel is verplicht.</small>
+      <small *ngIf="boekForm.get('titel')?.errors?.['minlength']"
+        >Titel moet minimaal 2 tekens bevatten.</small
+      >
     </div>
+  </div>
 
-    <div>
-        <label for="auteur">Auteur:</label>
-        <input id="auteur" formControlName="auteur" />
-        <div *ngIf="boekForm.get('auteur')?.invalid && boekForm.get('auteur')?.touched">
-        <small *ngIf="boekForm.get('auteur')?.errors?.['required']">Auteur is verplicht.</small>
-        <small *ngIf="boekForm.get('auteur')?.errors?.['minlength']">Auteur moet minimaal 2 tekens bevatten.</small>
-        </div>
+  <div>
+    <label for="auteur">Auteur:</label>
+    <input id="auteur" formControlName="auteur" />
+    <div *ngIf="boekForm.get('auteur')?.invalid && boekForm.get('auteur')?.touched">
+      <small *ngIf="boekForm.get('auteur')?.errors?.['required']">Auteur is verplicht.</small>
+      <small *ngIf="boekForm.get('auteur')?.errors?.['minlength']"
+        >Auteur moet minimaal 2 tekens bevatten.</small
+      >
     </div>
+  </div>
 
-    <div>
-        <label for="isbn">ISBN:</label>
-        <div style="display: flex; gap: 10px;">
-            <input 
-                id="isbn" 
-                type="text" 
-                formControlName="isbn"
-                (input)="onIsbnInput($event)"
-                placeholder="9789012345678"
-                maxlength="13"
-            />
-            <button type="button" (click)="genereerIsbn()">Genereer ISBN</button>
-        </div>
-        <div *ngIf="boekForm.get('isbn')?.invalid && boekForm.get('isbn')?.touched">
-            <small *ngIf="boekForm.get('isbn')?.errors?.['required']">ISBN is verplicht.</small>
-            <small *ngIf="boekForm.get('isbn')?.errors?.['isbn']">{{ boekForm.get('isbn')?.errors?.['isbn'] }}</small>
-        </div>
+  <div>
+    <label for="isbn">ISBN:</label>
+    <div style="display: flex; gap: 10px">
+      <input
+        id="isbn"
+        type="text"
+        formControlName="isbn"
+        (input)="onIsbnInput($event)"
+        placeholder="9789012345678"
+        maxlength="13"
+      />
+      <button type="button" (click)="genereerIsbn()">Genereer ISBN</button>
     </div>
+    <div *ngIf="boekForm.get('isbn')?.invalid && boekForm.get('isbn')?.touched">
+      <small *ngIf="boekForm.get('isbn')?.errors?.['required']">ISBN is verplicht.</small>
+      <small *ngIf="boekForm.get('isbn')?.errors?.['isbn']">{{
+        boekForm.get('isbn')?.errors?.['isbn']
+      }}</small>
+    </div>
+  </div>
 
-    <div>
-        <label for="uitgever">Uitgever:</label>
-        <input id="uitgever" formControlName="uitgever" />
-        <div *ngIf="boekForm.get('uitgever')?.invalid && boekForm.get('uitgever')?.touched">
-        <small *ngIf="boekForm.get('uitgever')?.errors?.['required']">Uitgever is verplicht.</small>
-        <small *ngIf="boekForm.get('uitgever')?.errors?.['minlength']">Uitgever moet minimaal 2 tekens bevatten.</small>
-        </div>
+  <div>
+    <label for="uitgever">Uitgever:</label>
+    <input id="uitgever" formControlName="uitgever" />
+    <div *ngIf="boekForm.get('uitgever')?.invalid && boekForm.get('uitgever')?.touched">
+      <small *ngIf="boekForm.get('uitgever')?.errors?.['required']">Uitgever is verplicht.</small>
+      <small *ngIf="boekForm.get('uitgever')?.errors?.['minlength']"
+        >Uitgever moet minimaal 2 tekens bevatten.</small
+      >
     </div>
+  </div>
 
-    <div>
-        <label for="uitgaveJaar">Uitgavejaar:</label>
-        <input id="uitgaveJaar" formControlName="uitgaveJaar" />
-        <div *ngIf="boekForm.get('uitgaveJaar')?.invalid && boekForm.get('uitgaveJaar')?.touched">
-        <small *ngIf="boekForm.get('uitgaveJaar')?.errors?.['required']">Uitgavejaar is verplicht.</small>
-        <small *ngIf="boekForm.get('uitgaveJaar')?.errors?.['pattern']">Uitgavejaar moet een geldig jaar zijn (bijv. 2023).</small>
-        </div>
+  <div>
+    <label for="uitgaveJaar">Uitgavejaar:</label>
+    <input id="uitgaveJaar" formControlName="uitgaveJaar" />
+    <div *ngIf="boekForm.get('uitgaveJaar')?.invalid && boekForm.get('uitgaveJaar')?.touched">
+      <small *ngIf="boekForm.get('uitgaveJaar')?.errors?.['required']"
+        >Uitgavejaar is verplicht.</small
+      >
+      <small *ngIf="boekForm.get('uitgaveJaar')?.errors?.['pattern']"
+        >Uitgavejaar moet een geldig jaar zijn (bijv. 2023).</small
+      >
     </div>
+  </div>
 
-    <div>
-        <label for="pagina">Aantal Pagina's:</label>
-        <input id="pagina" formControlName="pagina" />
-        <div *ngIf="boekForm.get('pagina')?.invalid && boekForm.get('pagina')?.touched">
-        <small *ngIf="boekForm.get('pagina')?.errors?.['required']">Aantal pagina's is verplicht.</small>
-        <small *ngIf="boekForm.get('pagina')?.errors?.['min']">Aantal pagina's moet minimaal 1 zijn.</small>
-        </div>
+  <div>
+    <label for="pagina">Aantal pagina's:</label>
+    <input id="pagina" formControlName="pagina" />
+    <div *ngIf="boekForm.get('pagina')?.invalid && boekForm.get('pagina')?.touched">
+      <small *ngIf="boekForm.get('pagina')?.errors?.['required']"
+        >Aantal pagina's is verplicht.</small
+      >
+      <small *ngIf="boekForm.get('pagina')?.errors?.['min']"
+        >Aantal pagina's moet minimaal 1 zijn.</small
+      >
     </div>
+  </div>
 
-    <div>
-        <label for="genre">Genre (kommagescheiden):</label>
-        <input id="genre" formControlName="genre" placeholder="Fantasy, Mystery, Science Fiction" />
-        <div *ngIf="boekForm.get('genre')?.invalid && boekForm.get('genre')?.touched">
-        <small *ngIf="boekForm.get('genre')?.errors?.['required']">Genre is verplicht.</small>
-        <small *ngIf="boekForm.get('genre')?.errors?.['minlength']">Genre moet minimaal 2 tekens bevatten.</small>
-        </div>
+  <div>
+    <label for="genre">Genre (kommagescheiden):</label>
+    <input id="genre" formControlName="genre" placeholder="Fantasy, Mystery, Science Fiction" />
+    <div *ngIf="boekForm.get('genre')?.invalid && boekForm.get('genre')?.touched">
+      <small *ngIf="boekForm.get('genre')?.errors?.['required']">Genre is verplicht.</small>
+      <small *ngIf="boekForm.get('genre')?.errors?.['minlength']"
+        >Genre moet minimaal 2 tekens bevatten.</small
+      >
     </div>
+  </div>
 
-    <div>
-        <label for="beschrijving">Beschrijving:</label>
-        <textarea id="beschrijving" formControlName="beschrijving"></textarea>
-        <div *ngIf="boekForm.get('beschrijving')?.invalid && boekForm.get('beschrijving')?.touched">
-        <small *ngIf="boekForm.get('beschrijving')?.errors?.['required']">Beschrijving is verplicht.</small>
-        </div>
+  <div>
+    <label for="beschrijving">Beschrijving:</label>
+    <textarea id="beschrijving" formControlName="beschrijving"></textarea>
+    <div *ngIf="boekForm.get('beschrijving')?.invalid && boekForm.get('beschrijving')?.touched">
+      <small *ngIf="boekForm.get('beschrijving')?.errors?.['required']"
+        >Beschrijving is verplicht.</small
+      >
     </div>
+  </div>
 
-    <div>
-        <label for="aantalExemplaren">Aantal exemplaren:</label>
-        <input id="aantalExemplaren" formControlName="aantalExemplaren" />
-        <div *ngIf="boekForm.get('aantalExemplaren')?.invalid && boekForm.get('aantalExemplaren')?.touched">
-        <small *ngIf="boekForm.get('aantalExemplaren')?.errors?.['required']">Aantal exemplaren is verplicht.</small>
-        <small *ngIf="boekForm.get('aantalExemplaren')?.errors?.['min']">Aantal exemplaren moet minimaal 1 zijn.</small>
-        </div>
+  <div>
+    <label for="aantalExemplaren">Aantal exemplaren:</label>
+    <input id="aantalExemplaren" formControlName="aantalExemplaren" />
+    <div
+      *ngIf="boekForm.get('aantalExemplaren')?.invalid && boekForm.get('aantalExemplaren')?.touched"
+    >
+      <small *ngIf="boekForm.get('aantalExemplaren')?.errors?.['required']"
+        >Aantal exemplaren is verplicht.</small
+      >
+      <small *ngIf="boekForm.get('aantalExemplaren')?.errors?.['min']"
+        >Aantal exemplaren moet minimaal 1 zijn.</small
+      >
     </div>
+  </div>
 
-    <div>
-        <label for="locatie">Locatie:</label>
-        <input id="locatie" formControlName="locatie" />
-        <div *ngIf="boekForm.get('locatie')?.invalid && boekForm.get('locatie')?.touched">
-        <small *ngIf="boekForm.get('locatie')?.errors?.['required']">Locatie is verplicht.</small>
-        </div>
+  <div>
+    <label for="locatie">Locatie:</label>
+    <input id="locatie" formControlName="locatie" />
+    <div *ngIf="boekForm.get('locatie')?.invalid && boekForm.get('locatie')?.touched">
+      <small *ngIf="boekForm.get('locatie')?.errors?.['required']">Locatie is verplicht.</small>
     </div>
+  </div>
 
-    <div>
-        <label for="afbeelding">Afbeelding URL:</label>
-        <input id="afbeelding" formControlName="afbeelding" />
-    </div>
-    
-    <div class="form-actions">
-        <button type="submit" [disabled]="boekForm.invalid || (mode !== 'toevoegen' && !boekGevonden)">
-            {{ mode === 'toevoegen' ? 'Boek Toevoegen' : 'Wijzigingen Opslaan' }}
-        </button>
-        <button
-            type="button"
-            class="delete-button"
-            *ngIf="mode === 'wijzigen' && boekGevonden"
-            (click)="openVerwijderModal()">
-            Verwijder
-        </button>
-        <button type="button" (click)="resetForm()" class="reset-button">
-            {{ mode === 'toevoegen' ? 'Clear' : 'Annuleren' }}
-        </button>
-    </div>
+  <div>
+    <label for="afbeelding">Afbeelding URL:</label>
+    <input id="afbeelding" formControlName="afbeelding" />
+  </div>
+
+  <div class="form-actions">
+    <button type="submit" [disabled]="boekForm.invalid || (mode !== 'toevoegen' && !boekGevonden)">
+      {{ mode === 'toevoegen' ? 'Boek Toevoegen' : 'Wijzigingen Opslaan' }}
+    </button>
+    <button
+      type="button"
+      class="delete-button"
+      *ngIf="mode === 'wijzigen' && boekGevonden"
+      (click)="openVerwijderModal()"
+    >
+      Verwijder
+    </button>
+    <button type="button" (click)="resetForm()" class="reset-button">
+      {{ mode === 'toevoegen' ? 'Clear' : 'Annuleren' }}
+    </button>
+  </div>
 </form>
 
 <div class="message-container error-message" *ngIf="errorMessage">
-    {{ errorMessage }}
+  {{ errorMessage }}
 </div>
 
 <div class="message-container success-message" *ngIf="successMessage">
-    {{ successMessage }}
+  {{ successMessage }}
 </div>
 
 <!-- Custom Delete Confirmation Modal -->
 <div class="modal-overlay" *ngIf="toonVerwijderModal" (click)="sluitVerwijderModal()">
-    <div class="modal-content" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-            <h3>Boek Verwijderen</h3>
-        </div>
-        <div class="modal-body">
-            <p>Weet je zeker dat je dit boek wilt verwijderen?</p>
-            <p class="boek-info" *ngIf="naarTeWijzigenBoek">
-                <strong>{{ naarTeWijzigenBoek.titel }}</strong> door {{ naarTeWijzigenBoek.auteur }}
-            </p>
-            <p class="warning-text">Deze actie kan niet ongedaan worden gemaakt.</p>
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="btn-annuleren" (click)="sluitVerwijderModal()">
-                Annuleren
-            </button>
-            <button type="button" class="btn-verwijderen" (click)="bevestigVerwijderen()">
-                Verwijderen
-            </button>
-        </div>
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Boek Verwijderen</h3>
     </div>
+    <div class="modal-body">
+      <p>Weet je zeker dat je dit boek wilt verwijderen?</p>
+      <p class="boek-info" *ngIf="naarTeWijzigenBoek">
+        <strong>{{ naarTeWijzigenBoek.titel }}</strong> door {{ naarTeWijzigenBoek.auteur }}
+      </p>
+      <p class="warning-text">Deze actie kan niet ongedaan worden gemaakt.</p>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn-annuleren" (click)="sluitVerwijderModal()">Annuleren</button>
+      <button type="button" class="btn-verwijderen" (click)="bevestigVerwijderen()">
+        Verwijderen
+      </button>
+    </div>
+  </div>
 </div>
-

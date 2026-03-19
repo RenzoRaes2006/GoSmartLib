@@ -1,7 +1,38 @@
 /* You can add global styles to this file, and also import other style files */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+
+body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    color: #333; /* Standaard donkergrijze tekst (leest fijner dan pikzwart) */
+    margin: 0;
+    padding: 0;
+}
+
+/* 🚨 BELANGRIJK: Knoppen en invulvelden luisteren van nature niet naar de body. 
+   Met dit trucje dwingen we ze om het lettertype over te nemen! */
+button, input, textarea, select {
+    font-family: inherit;
+}
 
 :root {
   --c-bordeaux: #8c1b3f;
   --c-wit: #ffffff;
   --c-beige: #f2efe9;
 }
+@font-face {
+    font-family: 'OpenDyslexic';
+    src: url('https://cdn.jsdelivr.net/npm/opendyslexic@3.0.0/compiled/OpenDyslexic-Regular.woff2') format('woff2'),
+         url('https://cdn.jsdelivr.net/npm/opendyslexic@3.0.0/compiled/OpenDyslexic-Regular.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+
+body.dyslexia-mode,
+body.dyslexia-mode * {
+    font-family: 'OpenDyslexic', sans-serif !important;
+    letter-spacing: 0.5px !important; 
+    line-height: 1.6 !important; }
+

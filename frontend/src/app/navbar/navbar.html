@@ -9,17 +9,23 @@
 
   <div class="nav-right">
     <a routerLink="/reserveren" class="nav-cart-link">
-      <span class="icon">🛒</span> Mandje
+      <span class="icon">🛒</span>
       @if (aantalInMandje > 0) {
         <span class="cart-badge">{{ aantalInMandje }}</span>
       }
     </a>
+    <button
+      class="a11y-btn"
+      [class.actief]="isDyslexieActief"
+      (click)="toggleDyslexie()"
+      title="Toegankelijkheid: Dyslexie lettertype"
+    >
+      <span class="text">{{ isDyslexieActief ? 'Standaard' : 'Dyslexie' }} font</span>
+    </button>
 
     <div class="divider"></div>
 
-    <a [routerLink]="['/leeslijst', 1]" class="nav-link">
-      <span class="icon">🤍</span> Mijn Lijsten
-    </a>
+    <a [routerLink]="['/leeslijst', 1]" class="nav-link"> Mijn lijsten </a>
 
     <a routerLink="/profiel" class="nav-link"> <span class="icon">👤</span> Profiel </a>
 

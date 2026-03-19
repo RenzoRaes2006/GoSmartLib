@@ -38,6 +38,10 @@ export class Detail implements OnInit {
   succesMeldingMap: string = '';
   mappen: any[] = [];
 
+  // 🚨 NIEUW: De emoji picker logica
+  beschikbareEmojis = ['📚', '🎓', '🧠', '💡', '🎨', '🌍', '🔥', '❤️'];
+  selectedEmoji = '📚';
+
   magLenen: boolean = false;
   leenReden: string = 'Status ophalen...';
   isLeenModalOpen: boolean = false;
@@ -76,16 +80,15 @@ export class Detail implements OnInit {
             error: () => (this.leenReden = 'Kon uitleen status niet ophalen.'),
           });
         },
-        error: (err) => console.log('Iets mis gegaan met het krijgen van de boek details. ', err),
       });
-
       this.laadBeoordelingVanBoek();
     });
 
     const gebruikerId = 1;
     this.leeslijstService.getMappenVanGebruiker(gebruikerId).subscribe({
       next: (data) => {
-        this.mappen = data;
+        // 🚨 FIX: We filteren de "Favorieten" map er direct uit!
+        this.mappen = data.filter((map) => map.naam.toLowerCase() !== 'favorieten');
       },
     });
   }
@@ -96,7 +99,6 @@ export class Detail implements OnInit {
         this.beoordelingen = beoordelingen;
         this.updateBoekWaardering();
       },
-      error: (err) => console.log('Iets mis gegaan met het krijgen van de beoordelingen. ', err),
     });
   }
 
@@ -106,26 +108,28 @@ export class Detail implements OnInit {
         (sum, beoordeling) => sum + beoordeling.waardering,
         0,
       );
-      const gemiddelde = totaleWaardering / this.beoordelingen.length;
-      this.boekWaardering = Number(gemiddelde.toFixed(1));
+      this.boekWaardering = Number((totaleWaardering / this.beoordelingen.length).toFixed(1));
       this.waarderingPrecentage = (this.boekWaardering / 5) * 100;
     }
   }
 
   voegToeAanFavorieten() {
-    if (!this.boek) return;
+    if (!this.boek || this.isFavoriet) return;
     const gebruikerId = 1;
-    this.leeslijstService.voegBoekToeAanMap(gebruikerId, 'Favorieten', this.boek.id!).subscribe({
-      next: () => {
-        this.isFavoriet = true;
-        setTimeout(() => (this.isFavoriet = false), 3000);
-      },
-    });
+    // 🚨 FIX: De timeout is weg. Zodra je klikt, blijft hij op Opgeslagen staan!
+    this.leeslijstService
+      .voegBoekToeAanMap(gebruikerId, 'Favorieten', this.boek.id!, '⭐')
+      .subscribe({
+        next: () => {
+          this.isFavoriet = true;
+        },
+      });
   }
 
   voegToeAanLeeslijst() {
     if (!this.boek) return;
     this.isModalOpen = true;
+    this.selectedEmoji = '📚'; // Reset de emoji als je de modal opent
   }
 
   sluitModal() {
@@ -138,23 +142,25 @@ export class Detail implements OnInit {
 
     if (doelMap && doelMap !== '') {
       const gebruikerId = 1;
-      this.leeslijstService.voegBoekToeAanMap(gebruikerId, doelMap, this.boek!.id!).subscribe({
-        next: () => {
-          this.succesMeldingMap = `Boek toegevoegd aan '${doelMap}'!`;
-          this.leeslijstService
-            .getMappenVanGebruiker(gebruikerId)
-            .subscribe((data) => (this.mappen = data));
-          setTimeout(() => this.sluitModal(), 1500);
-        },
-        error: () => (this.succesMeldingMap = 'Er ging iets mis...'),
-      });
+      // Stuur de geselecteerde emoji mee!
+      this.leeslijstService
+        .voegBoekToeAanMap(gebruikerId, doelMap, this.boek!.id!, this.selectedEmoji)
+        .subscribe({
+          next: () => {
+            this.succesMeldingMap = `Boek toegevoegd aan '${doelMap}'!`;
+            this.leeslijstService.getMappenVanGebruiker(gebruikerId).subscribe((data) => {
+              this.mappen = data.filter((map) => map.naam.toLowerCase() !== 'favorieten');
+            });
+            setTimeout(() => this.sluitModal(), 1500);
+          },
+          error: () => (this.succesMeldingMap = 'Er ging iets mis...'),
+        });
     }
   }
 
   submitBeoordeling() {
     if (this.form.invalid) {
-      this.submissionError =
-        'Vul alle verplichte velden in en zorg dat je commentaar niet langer is dan 500 karakters.';
+      this.submissionError = 'Vul alle verplichte velden in (max 500 karakters).';
       return;
     }
     const raw = this.form.value;
@@ -170,19 +176,13 @@ export class Detail implements OnInit {
       next: () => {
         this.form.reset();
         this.submissionError = '';
-        this.updateBoekWaardering();
         this.laadBeoordelingVanBoek();
-      },
-      error: () => {
-        this.submissionError = 'Er ging iets mis bij het toevoegen. Probeer opnieuw.';
       },
     });
   }
 
   openLeenModal() {
-    if (this.magLenen) {
-      this.isLeenModalOpen = true;
-    }
+    if (this.magLenen) this.isLeenModalOpen = true;
   }
 
   sluitLeenModal() {
@@ -192,15 +192,11 @@ export class Detail implements OnInit {
 
   voegToeAanReservering() {
     if (!this.boek) return;
-
     const resultaat = this.leenMandjeService.voegBoekToe(this.boek);
-
-    if (resultaat === 'Succes') {
-      this.succesMeldingLenen = `'${this.boek.titel}' is toegevoegd aan je reserveringen!`;
-    } else {
-      this.succesMeldingLenen = resultaat;
-    }
-
+    this.succesMeldingLenen =
+      resultaat === 'Succes'
+        ? `'${this.boek.titel}' is toegevoegd aan je reserveringen!`
+        : resultaat;
     this.isLeenModalOpen = true;
     setTimeout(() => this.sluitLeenModal(), 2500);
   }
@@ -210,28 +206,14 @@ export class Detail implements OnInit {
       .rapporteerBeoordeling(this.geselecteerdeBeoordelingId!, this.rapporteerReden)
       .subscribe({
         next: () => {
-          this.gerapporteerdeBeoordelingen.push(this.geselecteerdeBeoordelingId!);
-
           const beoordeling = this.beoordelingen.find(
             (b) => b.id === this.geselecteerdeBeoordelingId,
           );
-          if (beoordeling) {
-            beoordeling.gerapporteerd = true;
-          }
+          if (beoordeling) beoordeling.gerapporteerd = true;
 
-          this.rapportMelding = 'Beoordeling succesvol gerapporteerd. Bedankt voor je feedback!';
-          this.rapporteerModalOpen = false;
-          this.geselecteerdeBeoordelingId = null;
-          this.rapporteerReden = '';
-
+          this.rapportMelding = 'Beoordeling succesvol gerapporteerd.';
+          this.sluitRapporteerModal();
           setTimeout(() => (this.rapportMelding = ''), 4000);
-        },
-        error: (err) => {
-          if (err.status === 409 || err.status === 400) {
-            this.rapportMelding = 'Je hebt deze beoordeling al gerapporteerd.';
-          } else {
-            this.rapportMelding = 'Er ging iets mis bij het rapporteren. Probeer opnieuw.';
-          }
         },
       });
   }
@@ -243,8 +225,6 @@ export class Detail implements OnInit {
 
   sluitRapporteerModal() {
     this.rapporteerModalOpen = false;
-    this.geselecteerdeBeoordelingId = null;
     this.rapporteerReden = '';
-    this.rapportMelding = '';
   }
 }
