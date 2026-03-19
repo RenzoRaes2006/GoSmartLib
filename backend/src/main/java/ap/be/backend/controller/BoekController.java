@@ -38,7 +38,7 @@ public class BoekController {
     @CrossOrigin(origins = "*", allowedHeaders = "*")
     public List<Boek> getAlleBoeken(
             @RequestParam(required = false) String zoekterm,
-            @RequestParam(required = false) String genre,
+            @RequestParam(required = false) List<String> genre,
             @RequestParam(required = false) String uitgever,
             @RequestParam(required = false) Integer minPagina,
             @RequestParam(required = false) Integer maxPagina,

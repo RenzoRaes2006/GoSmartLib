@@ -78,12 +78,13 @@ public class BoekService {
         return boekRepository.findByIsbn(isbn.trim()).orElse(null);
     }
 
-    public List<Boek> filterBoeken(String zoekterm, String genre, String uitgever, Integer minPagina, Integer maxPagina,
+    public List<Boek> filterBoeken(String zoekterm, List<String> genres, String uitgever, Integer minPagina, Integer maxPagina,
             Boolean beschikbaarheid, Integer uitgaveJaarVan, Integer uitgaveJaarTot,
             String populariteit, String leesniveau,
             Sort sort) {
         validateYearRange(uitgaveJaarVan, uitgaveJaarTot);
-        return boekRepository.filterBoeken(zoekterm, genre, uitgever, minPagina, maxPagina, beschikbaarheid,
+        List<String> genresParam = (genres == null || genres.isEmpty()) ? null : genres;
+        return boekRepository.filterBoeken(zoekterm, genresParam, uitgever, minPagina, maxPagina, beschikbaarheid,
                 uitgaveJaarVan, uitgaveJaarTot, populariteit, leesniveau, sort);
     }
 

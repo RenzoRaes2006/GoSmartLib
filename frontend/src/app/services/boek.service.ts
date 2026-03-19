@@ -31,7 +31,12 @@ export class BoekService {
   getBoekenGefilterd(filters: FilterOptions): Observable<Boek[]> {
     let params = new HttpParams();
 
+    if (filters.genres?.length) {
+      filters.genres.forEach(g => params = params.append('genre', g));
+    }
+
     Object.entries(filters).forEach(([key, value]) => {
+      if (key === 'genres') return;
       if (value !== undefined && value !== null && value !== '') {
         const paramKey = key === 'beschikbaarheid' ? 'beschikbaar' : key;
         params = params.set(paramKey, value.toString());

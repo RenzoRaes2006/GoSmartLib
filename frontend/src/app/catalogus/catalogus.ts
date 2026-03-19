@@ -14,6 +14,7 @@ import { FormsModule } from '@angular/forms';
   standalone: true,
 })
 export class Catalogus implements OnInit {
+  // State variabelen
   boekenlijst = signal<Boek[]>([]);
   zoekTerm = signal<string>('');
   filters = signal<FilterOptions>({});
@@ -31,19 +32,21 @@ export class Catalogus implements OnInit {
   selectedHoofdGenre = signal<string>('');
   jaarError = signal<string>('');
 
+  // Key voor sessionStorage
   private readonly FILTERS_KEYS = 'catalogus_filters';
 
   private boekService = inject(BoekService);
 
+  // Genre hiërarchie
   genreHiërarchie = {
     'Non-fictie algemeen': [
       'Biografie / autobiografie',
-      'Wetenschap & technologie',
       'Filosofie',
-      'Maatschappij & politiek',
-      'Psychologie',
       'Geschiedenis',
       'Kunst & cultuur',
+      'Maatschappij & politiek',
+      'Psychologie',
+      'Wetenschap & technologie',
     ],
     'Fictie algemeen': [],
     'Literaire roman': [],
@@ -62,12 +65,16 @@ export class Catalogus implements OnInit {
     Poëzie: [],
   };
 
+  // Lifecycle hook
+  // Bij het initialiseren van de component, probeer opgeslagen filters te laden of laad alle boeken
   ngOnInit(): void {
     const stored = sessionStorage.getItem(this.FILTERS_KEYS);
     if (stored) {
       try {
+        // Parse de opgeslagen filters
         const filters = JSON.parse(stored);
 
+        // Herstel de signalen met de opgeslagen waarden
         this.zoekTerm.set(filters.zoekTerm || '');
         this.selectedGenre.set(filters.selectedGenre);
         this.selectedUitgever.set(filters.selectedUitgever);
@@ -91,6 +98,7 @@ export class Catalogus implements OnInit {
     this.laadBoeken();
   }
 
+  // Methode om boeken te laden, optioneel gefilterd op een zoekterm
   private laadBoeken(term?: string): void {
     this.boekService.getBoeken(term).subscribe({
       next: (data) => {
@@ -105,6 +113,7 @@ export class Catalogus implements OnInit {
     this.laadBoeken(term);
   }
 
+  // Methode om filters bij te werken en boeken opnieuw te laden op basis van de nieuwe filters
   updateFilters(): void {
     const huidigeJaar = new Date().getFullYear();
     const jaarVan = this.uitgaveJaarVan();
@@ -125,9 +134,18 @@ export class Catalogus implements OnInit {
       return;
     }
 
+    // Bouw genres-array: subgenre > hoofdgenre + alle subgenres > geen filter
+    const subGenres = this.getSubGenres(this.selectedHoofdGenre());
+    const genres = this.selectedGenre()?.trim()
+      ? [this.selectedGenre()!.trim()]
+      : this.selectedHoofdGenre()
+        ? [this.selectedHoofdGenre(), ...subGenres]
+        : undefined;
+
+    // Bouw het filterobject op basis van de huidige waarden van de signalen
     const filterOptions: FilterOptions = {
       zoekterm: this.zoekTerm()?.trim() || undefined,
-      genre: this.selectedGenre()?.trim() || this.selectedHoofdGenre(),
+      genres,
       uitgever: this.selectedUitgever()?.trim() || undefined,
       minPagina: this.minPagina(),
       maxPagina: this.maxPagina(),
@@ -140,9 +158,11 @@ export class Catalogus implements OnInit {
       leesniveau: this.leesniveau(),
     };
 
+    // Update de filters in de state en laad de gefilterde boeken
     this.filters.set(filterOptions);
     this.laadGefilterdeBoeken();
 
+    // Sla de huidige filters op in sessionStorage zodat ze behouden blijven bij navigatie
     const huidigeFilters = {
       zoekTerm: this.zoekTerm(),
       selectedGenre: this.selectedGenre(),
@@ -159,6 +179,7 @@ export class Catalogus implements OnInit {
       selectedHoofdGenre: this.selectedHoofdGenre(),
     };
 
+    // Sla de filters op als JSON-string in sessionStorage
     sessionStorage.setItem(this.FILTERS_KEYS, JSON.stringify(huidigeFilters));
   }
 
@@ -167,6 +188,7 @@ export class Catalogus implements OnInit {
     this.updateFilters();
   }
 
+  // Methode om gefilterde boeken te laden op basis van de huidige filters
   private laadGefilterdeBoeken(): void {
     this.boekService.getBoekenGefilterd(this.filters()).subscribe({
       next: (data) => {
@@ -176,6 +198,7 @@ export class Catalogus implements OnInit {
     });
   }
 
+  // Methode om de hoofdgenres op te halen, deze kunnen worden gebruikt in een dropdown of selectielijst
   getHoofdGenres(): string[] {
     return [
       'Fictie algemeen',
@@ -198,10 +221,12 @@ export class Catalogus implements OnInit {
     ];
   }
 
+  // Methode om subgenres op te halen op basis van het geselecteerde hoofdgenre, deze kunnen worden gebruikt in een dropdown of selectielijst
   getSubGenres(hoofdGenre: string): string[] {
     return this.genreHiërarchie[hoofdGenre as keyof typeof this.genreHiërarchie] || [];
   }
 
+  // Methode die wordt aangeroepen wanneer het hoofdgenre verandert, deze reset het geselecteerde subgenre en werkt de filters bij
   onHoofdGenreChange(): void {
     this.selectedGenre.set(undefined);
     this.updateFilters();

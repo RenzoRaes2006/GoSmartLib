@@ -13,11 +13,11 @@ import ap.be.backend.entity.Boek;
 public interface BoekRepository extends JpaRepository<Boek, Long> {
         Optional<Boek> findByIsbn(String isbn);
 
-        @Query("SELECT b FROM Boek b WHERE " +
+        @Query("SELECT DISTINCT b FROM Boek b LEFT JOIN b.genre g WHERE " +
                         "(:zoekterm IS NULL OR LOWER(b.titel) LIKE LOWER(CONCAT('%', :zoekterm, '%')) OR " +
                         "LOWER(b.auteur) LIKE LOWER(CONCAT('%', :zoekterm, '%')) OR " +
                         "b.isbn LIKE CONCAT('%', :zoekterm, '%')) AND " +
-                        "(:genre IS NULL OR :genre MEMBER OF b.genre) AND " +
+                        "(:genres IS NULL OR g IN :genres) AND " +
                         "(:uitgever IS NULL OR LOWER(b.uitgever) LIKE LOWER(CONCAT('%', :uitgever, '%'))) AND " +
                         "(:minPagina IS NULL OR b.pagina >= :minPagina) AND " +
                         "(:maxPagina IS NULL OR b.pagina <= :maxPagina) AND " +
@@ -27,11 +27,10 @@ public interface BoekRepository extends JpaRepository<Boek, Long> {
                         "(:uitgaveJaarVan IS NULL OR b.uitgaveJaar >= :uitgaveJaarVan) AND " +
                         "(:uitgaveJaarTot IS NULL OR b.uitgaveJaar <= :uitgaveJaarTot) AND " +
                         "(:populariteit IS NULL OR " +
-                        "  (:populariteit = '1' AND (SELECT AVG(be.waardering) FROM Beoordeling be WHERE be.boek.id = b.id) >= 4)) AND "
-                        +
+                        "  (:populariteit = '1' AND (SELECT AVG(be.waardering) FROM Beoordeling be WHERE be.boek.id = b.id) >= 4)) AND " +
                         "(:leesniveau IS NULL OR b.leesniveau = :leesniveau)")
         List<Boek> filterBoeken(@Param("zoekterm") String zoekterm,
-                        @Param("genre") String genre,
+                        @Param("genres") List<String> genres,
                         @Param("uitgever") String uitgever,
                         @Param("minPagina") Integer minPagina,
                         @Param("maxPagina") Integer maxPagina,
