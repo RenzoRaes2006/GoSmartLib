@@ -1,0 +1,81 @@
+<div class="reserveren-container">
+  <a routerLink="/catalogus" class="back-link">← Terug naar catalogus</a>
+
+  <h1 class="page-title">Mijn Reserveringsaanvraag</h1>
+
+  @if (statusMelding) {
+    <div class="alert-box" [class.success]="isSucces" [class.error]="!isSucces">
+      {{ statusMelding }}
+    </div>
+  }
+
+  <div class="layout-grid">
+    <div class="mandje-sectie">
+      <h2 class="sectie-titel">Geselecteerde Boeken ({{ boekenInMandje.length }}/3)</h2>
+
+      @if (boekenInMandje.length === 0 && !isSucces) {
+        <div class="leeg-mandje">
+          <span class="icon">🛒</span>
+          <p>Je hebt nog geen boeken in je mandje zitten.</p>
+          <a routerLink="/catalogus" class="btn-primary">Zoek boeken</a>
+        </div>
+      }
+
+      <div class="boeken-lijst">
+        @for (boek of boekenInMandje; track boek.id) {
+          <div class="boek-card">
+            <img
+              [src]="boek.afbeelding"
+              alt="Cover"
+              class="boek-cover clickable"
+              [routerLink]="['/catalogus', boek.id]"
+            />
+
+            <div class="boek-info">
+              <h3 class="boek-titel-link" [routerLink]="['/catalogus', boek.id]">
+                {{ boek.titel }}
+              </h3>
+              <p class="boek-auteur">{{ boek.auteur }}</p>
+            </div>
+
+            <button class="btn-delete" (click)="verwijderBoek(boek.id!)" [disabled]="isBezig">
+              ✕ Verwijder
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+
+    <div class="actie-sectie">
+      <div class="bevestig-box">
+        <h2 class="sectie-titel">Aanvraag Bevestigen</h2>
+        <p class="subtitle">Klik op de knop om je reservering naar de bibbeheerder te sturen.</p>
+
+        <div class="info-lijst">
+          <div class="info-rij">
+            <span>Aantal boeken:</span>
+            <strong>{{ boekenInMandje.length }}</strong>
+          </div>
+          <div class="info-rij">
+            <span>Uitleentermijn:</span>
+            <strong>1 maand</strong>
+          </div>
+          <div class="info-rij">
+            <span>Status:</span>
+            <strong style="color: #00529f">Aanvraag</strong>
+          </div>
+        </div>
+
+        <hr class="divider-line" />
+
+        <button
+          class="btn-bevestig"
+          [disabled]="isBezig || boekenInMandje.length === 0 || isSucces"
+          (click)="bevestigReservering()"
+        >
+          {{ isBezig ? 'Bezig met versturen...' : 'Stuur naar Bibbeheerder' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

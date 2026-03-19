@@ -5,10 +5,10 @@ import { Injectable } from '@angular/core';
   providedIn: 'root',
 })
 export class LeeslijstService {
-  private apiUrl = window.location.hostname.includes('cloud-ap.be')
-    ? 'http://frontend-sp09.cloud-ap.be/api/gebruiker' // De LIVE pipeline URL
-    : 'http://localhost:8081/api/gebruiker';
-  //private apiUrl = 'http://frontend.localhost/api/gebruiker';
+  private apiUrl =
+    window.location.hostname === 'localhost'
+      ? 'http://localhost:8081/api/gebruiker'
+      : '/api/gebruiker';
 
   constructor(private http: HttpClient) {}
 

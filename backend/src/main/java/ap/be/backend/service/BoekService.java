@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import ap.be.backend.dto.BoekDTO;
@@ -78,7 +79,8 @@ public class BoekService {
         return boekRepository.findByIsbn(isbn.trim()).orElse(null);
     }
 
-    public List<Boek> filterBoeken(String zoekterm, List<String> genres, String uitgever, Integer minPagina, Integer maxPagina,
+    public List<Boek> filterBoeken(String zoekterm, List<String> genres, String uitgever, Integer minPagina,
+            Integer maxPagina,
             Boolean beschikbaarheid, Integer uitgaveJaarVan, Integer uitgaveJaarTot,
             String populariteit, String leesniveau,
             Sort sort) {
@@ -110,5 +112,9 @@ public class BoekService {
         if (uitgaveJaarVan != null && uitgaveJaarTot != null && uitgaveJaarVan > uitgaveJaarTot) {
             throw new InvalidYearRangeException("Jaar 'van' moet kleiner of gelijk zijn aan jaar 'tot'");
         }
+    }
+
+    public List<Boek> getPopulaireBoeken() {
+        return boekRepository.findTop5PopulaireBoeken();
     }
 }

@@ -34,7 +34,11 @@ public class GlobalExceptionHandler {
     // wordt gegooid, bijvoorbeeld bij validatiefouten in de invoer
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<String> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Ongeldige invoer: " + ex.getMessage());
+        String errorMessage = ex.getBindingResult().getFieldErrors().get(0).getDefaultMessage(); // Haal de foutmelding
+                                                                                                 // van het eerste veld
+                                                                                                 // dat een
+                                                                                                 // validatiefout heeft
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Ongeldige invoer: " + errorMessage);
     }
 
     // handel alle andere uitzonderingen die niet specifiek zijn afgevangen door de
@@ -50,6 +54,25 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InvalidYearRangeException.class)
     public ResponseEntity<String> handleInvalidYearRange(InvalidYearRangeException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+    }
+
+    // handel situaties af waarbij een specifiek boek niet gevonden kan worden
+    @ExceptionHandler(BoekNotFoundException.class)
+    public ResponseEntity<String> handleBoekNotFound(BoekNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
+
+    // Vangt standaard ongeldige argumenten af
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<String> handleIllegalArgument(IllegalArgumentException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+    }
+
+    // Vangt de DuplicateReportException af wanneer een gebruiker een beoordeling
+    // dubbel rapporteert
+    @ExceptionHandler(DuplicateReportException.class)
+    public ResponseEntity<String> handleDuplicateReport(DuplicateReportException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
     }
 
 }

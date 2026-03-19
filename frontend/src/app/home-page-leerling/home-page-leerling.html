@@ -1,0 +1,161 @@
+<div class="page-wrapper">
+
+  <section class="full-width-section bg-white border-line">
+    <div class="inner-container">
+
+      <section class="welcome-banner-modern">
+
+        <div class="welcome-content">
+          <img src="https://go-antwerpen.be/wp-content/uploads/2021/11/logo_go_antwerpen.svg" alt="GO! Antwerpen Logo"
+            class="go-logo">
+
+          <div class="welcome-text">
+            <h1>Welkom terug, {{ naam() }}! 👋</h1>
+            <p>Klaar voor je volgende lees avontuur?</p>
+          </div>
+
+          <div class="goal-wrapper">
+            
+            <div class="reading-goal">
+              <div class="goal-text">
+                <span>Jouw leesdoel dit jaar</span>
+                <strong>{{ gelezenBoeken() }} / {{ leesDoel() }} boeken</strong>
+              </div>
+              <div class="progress-bar-bg">
+                <div class="progress-bar-fill" [style.width.%]="progressPercentage"></div>
+              </div>
+            </div>
+
+            <div class="edit-goal-btn-container">
+              <button class="edit-goal-btn round-btn" (click)="openEditModal()" title="Leesdoel aanpassen">
+                ✏️
+              </button>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="welcome-image">
+          <img
+            src="https://media.istockphoto.com/id/949118068/nl/foto/boeken.jpg?s=612x612&w=0&k=20&c=6HMYmcLmWtM18uiKNXllWZlLBBeOwM9k7SjSC1cwz8U="
+            alt="Stapel boeken">
+        </div>
+
+      </section>
+
+    </div>
+  </section>
+
+  <section class="full-width-section bg-beige border-line">
+    <div class="inner-container">
+
+      <section class="featured-section">
+        <h2>Uitgelicht in jouw school</h2>
+
+        <div class="uitgelicht-grid">
+          @for (boek of uitgelichteBoeken(); track boek.id) {
+          <div class="boek-card" [routerLink]="['/details', boek.id]">
+            <img [src]="boek.afbeelding" [alt]="boek.titel">
+            <div class="boek-info">
+              <h4>{{ boek.titel }}</h4>
+              <p>{{ boek.auteur }}</p>
+            </div>
+          </div>
+          } @empty {
+          <p class="empty-message">Er zijn momenteel geen uitgelichte boeken beschikbaar.</p>
+          }
+        </div>
+
+        <div class="catalogus-btn-container">
+          <button class="btn-ontdek" [routerLink]="['/catalogus']">
+            Ontdek de volledige bibliotheek! 📚
+          </button>
+        </div>
+      </section>
+
+    </div>
+  </section>
+
+  <section class="full-width-section bg-white">
+    <div class="inner-container">
+
+      <section class="bottom-split">
+
+        <div class="leeslijsten-container">
+
+          <div class="section-header">
+            <h2>Jouw leeslijsten</h2>
+            <a [routerLink]="['/leeslijsten']" class="view-all-link">
+              Bekijk alle <span>&rarr;</span>
+            </a>
+          </div>
+
+          <div class="lijsten-grid">
+            @for (lijst of leeslijsten(); track $index) {
+            <div class="lijst-tile">
+
+              @if (lijst.boeken && lijst.boeken.length > 0) {
+              <img
+                [src]="lijst.boeken[lijst.boeken.length - 1].afbeelding || 'https://bookshow.blurb.com/bookshow/cache/P11360640/md/cover_2.jpeg?access_key=675523b769268bce5b0b710b3d0e7841'"
+                alt="Cover" class="lijst-cover-img">
+              } @else if (lijst.naam === 'Favorieten') {
+              <span class="lijst-icon">⭐</span>
+              } @else {
+              <span class="lijst-icon">📁</span>
+              }
+
+              <h3>{{ lijst.naam }}</h3>
+              <p>{{ lijst.boeken ? lijst.boeken.length : 0 }} boeken</p>
+            </div>
+            } @empty {
+            <div class="empty-state">
+              <p>Je hebt nog geen mappen aangemaakt.</p>
+            </div>
+            }
+          </div>
+        </div>
+
+        <div class="uitleentermijnen-container">
+          <h2>Uitleentermijnen</h2>
+          <div class="scroll-list">
+            @for (lening of gesorteerdeLeningen(); track lening.id) {
+            <div class="lening-item" [class.urgent]="lening.resterendeDagen <= 3">
+              <div class="lening-titel-box">
+                <span class="book-icon">📘</span>
+                <span class="lening-titel">{{ lening.titel }}</span>
+              </div>
+              <div class="dagen-badge">
+                {{ lening.resterendeDagen }} d
+              </div>
+            </div>
+            } @empty {
+            <p class="empty-message">Je hebt momenteel geen actieve leningen.</p>
+            }
+          </div>
+        </div>
+
+      </section>
+
+    </div>
+  </section>
+
+</div>
+
+@if (isEditModalOpen()) {
+<div class="modal-overlay" (click)="sluitEditModal()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <h3>Pas je leesdoel aan 🎯</h3>
+    <p>Hoeveel boeken daag jij jezelf uit om te lezen dit schooljaar?</p>
+
+    <div class="input-group">
+      <input type="number" [(ngModel)]="nieuwLeesdoel" min="1" max="100" class="leesdoel-input">
+      <span class="input-suffix">boeken</span>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-cancel" (click)="sluitEditModal()">Annuleren</button>
+      <button class="btn-save" (click)="slaLeesdoelOp()">Opslaan</button>
+    </div>
+  </div>
+</div>
+}
