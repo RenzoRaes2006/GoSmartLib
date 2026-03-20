@@ -34,7 +34,10 @@ public class GlobalExceptionHandler {
     // wordt gegooid, bijvoorbeeld bij validatiefouten in de invoer
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<String> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        String errorMessage = ex.getBindingResult().getFieldErrors().get(0).getDefaultMessage(); // Haal de foutmelding van het eerste veld dat een validatiefout heeft
+        String errorMessage = ex.getBindingResult().getFieldErrors().get(0).getDefaultMessage(); // Haal de foutmelding
+                                                                                                 // van het eerste veld
+                                                                                                 // dat een
+                                                                                                 // validatiefout heeft
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Ongeldige invoer: " + errorMessage);
     }
 
@@ -46,6 +49,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleGenericException(Exception ex) {
         ex.printStackTrace();
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Er is een fout opgetreden");
+    }
+
+    @ExceptionHandler(InvalidYearRangeException.class)
+    public ResponseEntity<String> handleInvalidYearRange(InvalidYearRangeException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }
 
     // handel situaties af waarbij een specifiek boek niet gevonden kan worden
@@ -60,7 +68,8 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }
 
-    // Vangt de DuplicateReportException af wanneer een gebruiker een beoordeling dubbel rapporteert
+    // Vangt de DuplicateReportException af wanneer een gebruiker een beoordeling
+    // dubbel rapporteert
     @ExceptionHandler(DuplicateReportException.class)
     public ResponseEntity<String> handleDuplicateReport(DuplicateReportException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());

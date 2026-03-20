@@ -53,6 +53,12 @@ public class Boek {
     @Column
     private String locatie;
 
+    @Column
+    private String populariteit;
+
+    @Column
+    private String leesniveau;
+
     @OneToMany(mappedBy = "boek", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Beoordeling> beoordelingen;
 

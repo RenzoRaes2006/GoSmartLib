@@ -11,4 +11,5 @@ export interface Boek {
   isbn: string;
   aantalExemplaren: number;
   locatie: string;
+  leesniveau?: string;
 }

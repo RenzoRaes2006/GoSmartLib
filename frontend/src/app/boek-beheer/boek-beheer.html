@@ -36,22 +36,18 @@
   </div>
 </div>
 
-<!-- Boeken Overzicht voor Beheren -->
 <div
   *ngIf="mode === 'wijzigen' && !boekGevonden && (boeknOverzicht.length > 0 || isLoadingBoeken)"
   class="boeken-overzicht"
 >
   <h3>Beschikbare boeken</h3>
 
-  <!-- Ladingindicator -->
   <div *ngIf="isLoadingBoeken" class="loading-spinner">Boeken laden...</div>
 
-  <!-- Error als boeken niet laden -->
   <div *ngIf="!isLoadingBoeken && boeknOverzicht.length === 0" class="boeken-overzicht-empty">
     <strong>Geen boeken gevonden.</strong> Controleer of de backend API draait.
   </div>
 
-  <!-- Tabel met Boeken -->
   <table *ngIf="!isLoadingBoeken && boeknOverzicht.length > 0">
     <thead>
       <tr>
@@ -88,7 +84,6 @@
     </tbody>
   </table>
 
-  <!-- Paginatie Controls -->
   <div class="pagination-controls">
     <button
       type="button"
@@ -193,14 +188,27 @@
     </div>
   </div>
 
-  <div>
-    <label for="genre">Genre (kommagescheiden):</label>
-    <input id="genre" formControlName="genre" placeholder="Fantasy, Mystery, Science Fiction" />
-    <div *ngIf="boekForm.get('genre')?.invalid && boekForm.get('genre')?.touched">
-      <small *ngIf="boekForm.get('genre')?.errors?.['required']">Genre is verplicht.</small>
-      <small *ngIf="boekForm.get('genre')?.errors?.['minlength']"
-        >Genre moet minimaal 2 tekens bevatten.</small
-      >
+  <div class="genre-leesniveau-row">
+    <div>
+      <label for="genre">Genre (kommagescheiden):</label>
+      <input id="genre" formControlName="genre" placeholder="Fantasy, Mystery, Science Fiction" />
+      <div *ngIf="boekForm.get('genre')?.invalid && boekForm.get('genre')?.touched">
+        <small *ngIf="boekForm.get('genre')?.errors?.['required']">Genre is verplicht.</small>
+        <small *ngIf="boekForm.get('genre')?.errors?.['minlength']"
+          >Genre moet minimaal 2 tekens bevatten.</small
+        >
+      </div>
+    </div>
+
+    <div>
+      <label for="leesniveau">Leesniveau:</label>
+      <select id="leesniveau" formControlName="leesniveau">
+        <option [ngValue]="undefined" disabled hidden>Kies een leesniveau...</option>
+        <option value="A (eenvoudig taalgebruik)">A (eenvoudig taalgebruik)</option>
+        <option value="B (gemiddeld taalgebruik)">B (gemiddeld taalgebruik)</option>
+        <option value="C (complex taalgebruik)">C (complex taalgebruik)</option>
+        <option value="D (literair niveau)">D (literair niveau)</option>
+      </select>
     </div>
   </div>
 
@@ -268,7 +276,6 @@
   {{ successMessage }}
 </div>
 
-<!-- Custom Delete Confirmation Modal -->
 <div class="modal-overlay" *ngIf="toonVerwijderModal" (click)="sluitVerwijderModal()">
   <div class="modal-content" (click)="$event.stopPropagation()">
     <div class="modal-header">

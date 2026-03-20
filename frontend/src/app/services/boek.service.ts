@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { Boek } from '../models/Boek';
 import { NieuwBoek } from '../models/NieuwBoek';
 import { PageResponse } from '../models/PageResponse';
+import { FilterOptions } from '../models/FilterOptions';
 
 @Injectable({
   providedIn: 'root',
@@ -25,6 +26,24 @@ export class BoekService {
     if (zoekterm && zoekterm.trim() !== '') {
       params = params.set('zoekterm', zoekterm);
     }
+
+    return this.http.get<Boek[]>(this.apiUrl, { params });
+  }
+
+  getBoekenGefilterd(filters: FilterOptions): Observable<Boek[]> {
+    let params = new HttpParams();
+
+    if (filters.genres?.length) {
+      filters.genres.forEach((g) => (params = params.append('genre', g)));
+    }
+
+    Object.entries(filters).forEach(([key, value]) => {
+      if (key === 'genres') return;
+      if (value !== undefined && value !== null && value !== '') {
+        const paramKey = key === 'beschikbaarheid' ? 'beschikbaar' : key;
+        params = params.set(paramKey, value.toString());
+      }
+    });
 
     return this.http.get<Boek[]>(this.apiUrl, { params });
   }
@@ -69,5 +88,9 @@ export class BoekService {
       {},
       { responseType: 'text' },
     );
+  }
+
+  getActieveLeningen(gebruikerId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiGebruikerUrl}/${gebruikerId}/leningen`);
   }
 }

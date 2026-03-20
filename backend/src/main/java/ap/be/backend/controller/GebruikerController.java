@@ -104,4 +104,9 @@ public class GebruikerController {
         gebruikerService.weigerAanvraag(uitleningId);
         return ResponseEntity.ok("Aanvraag geweigerd en boek is teruggezet in de voorraad.");
     }
+
+    @GetMapping("/{gebruikerId}/leningen")
+    public ResponseEntity<List<Uitlening>> getActieveLeningen(@PathVariable Long gebruikerId) {
+        return ResponseEntity.ok(gebruikerService.getActieveLeningenVanGebruiker(gebruikerId));
+    }
 }

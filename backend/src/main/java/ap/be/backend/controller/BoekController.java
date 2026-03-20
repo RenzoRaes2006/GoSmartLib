@@ -24,7 +24,8 @@ import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PutMapping;
 
 @RestController
-// @CrossOrigin(origins = { "http://frontend.localhost", "http://localhost:4200" })
+// @CrossOrigin(origins = { "http://frontend.localhost", "http://localhost:4200"
+// })
 public class BoekController {
     private final BoekService boekService;
     private final BoekRepository boekRepository;
@@ -35,15 +36,31 @@ public class BoekController {
     }
 
     @GetMapping("/api/boeken")
-    // @CrossOrigin(origins = "*", allowedHeaders = "*")
-    public List<Boek> getAlleBoeken(@RequestParam(required = false) String zoekterm) {
-        Sort sort = Sort.by(Sort.Direction.ASC, "locatie");
+    @CrossOrigin(origins = "*", allowedHeaders = "*")
+    public List<Boek> getAlleBoeken(
+            @RequestParam(required = false) String zoekterm,
+            @RequestParam(required = false) List<String> genre,
+            @RequestParam(required = false) String uitgever,
+            @RequestParam(required = false) Integer minPagina,
+            @RequestParam(required = false) Integer maxPagina,
+            @RequestParam(required = false) String sorteerOp,
+            @RequestParam(required = false) String sorteerRichting,
+            @RequestParam(required = false) String beschikbaar,
+            @RequestParam(required = false) Integer uitgaveJaarVan,
+            @RequestParam(required = false) Integer uitgaveJaarTot,
+            @RequestParam(required = false) String populariteit,
+            @RequestParam(required = false) String leesniveau) {
 
-        if (zoekterm != null && !zoekterm.isEmpty()) {
-            return boekRepository.searchBoeken(zoekterm, sort);
+        Sort sort;
+        if (sorteerOp != null && sorteerRichting != null) {
+            sort = Sort.by(Sort.Direction.fromString(sorteerRichting), sorteerOp);
+        } else {
+            sort = Sort.by(Sort.Direction.ASC, "id");
         }
 
-        return boekRepository.findAll(sort);
+        return boekService.filterBoeken(zoekterm, genre, uitgever, minPagina, maxPagina,
+                beschikbaar != null ? Boolean.parseBoolean(beschikbaar) : null, uitgaveJaarVan, uitgaveJaarTot,
+                populariteit, leesniveau, sort);
     }
 
     @PostMapping("/api/boeken")

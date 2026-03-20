@@ -183,4 +183,8 @@ public class GebruikerService {
 
         uitleningRepository.save(uitlening);
     }
+
+    public List<Uitlening> getActieveLeningenVanGebruiker(Long gebruikerId) {
+        return uitleningRepository.findByGebruiker_GebruikerIDAndIsIngeleverdFalse(gebruikerId);
+    }
 }

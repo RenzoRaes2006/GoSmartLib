@@ -1,9 +1,7 @@
-import { HttpClient } from '@angular/common/http';
-import { Component, inject, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
-import { HoofdPagina } from "./hoofd-pagina/hoofd-pagina";
-import { Navbar } from "./navbar/navbar";
-import { Footer } from "./footer/footer";
+import { Component, inject } from '@angular/core';
+import { Router, RouterOutlet } from '@angular/router';
+import { Navbar } from './navbar/navbar';
+import { Footer } from './footer/footer';
 
 @Component({
   selector: 'app-root',
@@ -12,11 +10,16 @@ import { Footer } from "./footer/footer";
   styleUrl: './app.css',
 })
 export class App {
+  private router = inject(Router);
+
+  toonFooter() {
+    return !this.router.url.startsWith('/catalogus');
+  }
   // http = inject(HttpClient);
   // status = 'Wacht op input...';
 
   // saveData(ingevoerdeNaam: string) {
-    
+
   //   // this.http.post('http://frontend.localhost/api/save', { naam: ingevoerdeNaam }).subscribe({
   //    this.http.post('http://frontend.localhost/api/save', { naam: ingevoerdeNaam }).subscribe({
   //     next: (result) => (this.status = 'Gelukt! Opgeslagen in MySQL.'),
