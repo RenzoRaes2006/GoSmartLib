@@ -18,11 +18,12 @@ public class Beoordeling {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
-    // relaties voor later, we hebben geen user en book entities
-    // @ManyToOne
-    // @JoinColumn(name = "user_id", nullable = false)
-    @Column(name = "user_id", nullable = false)
-    long gebruikerId;
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    Gebruiker gebruiker;
+
+    @Column(name = "is_anonymous", nullable = false)
+    private boolean isAnoniem;
 
     @ManyToOne
     @JoinColumn(name = "book_id", nullable = false)
@@ -38,8 +39,8 @@ public class Beoordeling {
     public Beoordeling() {
     }
 
-    public Beoordeling(long gebruikerId, Boek boek, int waardering, String content) {
-        this.gebruikerId = gebruikerId;
+    public Beoordeling(Gebruiker gebruiker, Boek boek, int waardering, String content) {
+        this.gebruiker = gebruiker;
         this.boek = boek;
         this.waardering = waardering;
         this.inhoud = content;
@@ -49,8 +50,8 @@ public class Beoordeling {
         return id;
     }
 
-    public Long getGebruikerId() {
-        return gebruikerId;
+    public Gebruiker getGebruiker() {
+        return gebruiker;
     }
 
     public Boek getBoek() {
@@ -69,8 +70,8 @@ public class Beoordeling {
         this.id = id;
     }
 
-    public void setGebruikerId(long gebruikerId) {
-        this.gebruikerId = gebruikerId;
+    public void setGebruiker(Gebruiker gebruiker) {
+        this.gebruiker = gebruiker;
     }
 
     public void setBoek(Boek boek) {
@@ -85,11 +86,22 @@ public class Beoordeling {
         this.inhoud = content;
     }
 
+    public boolean isAnoniem() {
+        return isAnoniem;
+    }
+
+    public void setAnoniem(boolean isAnoniem) {
+        this.isAnoniem = isAnoniem;
+    }
+
+
+
     @Override
     public String toString() {
         return "Review{" +
                 "id=" + id +
-                ", userId=" + gebruikerId +
+                ", userId=" + gebruiker.getId() +
+                ", isAnonymous=" + isAnoniem +
                 ", boek=" + boek +
                 ", waardering=" + waardering +
                 ", content='" + inhoud + '\'' +

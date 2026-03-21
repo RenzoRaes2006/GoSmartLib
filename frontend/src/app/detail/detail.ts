@@ -46,6 +46,7 @@ export class Detail implements OnInit {
     this.form = this.fb.group({
       waardering: ['', [Validators.required]],
       inhoud: ['', [Validators.required, Validators.maxLength(500)]],
+      isAnoniem: [false],
     });
 
     this.route.paramMap.subscribe((params) => {
@@ -71,13 +72,13 @@ export class Detail implements OnInit {
   }
 
   laadBeoordelingVanBoek() {
-     this.beoordelingService.getBeoordelingenOpBoekId(this.boekId).subscribe({
-        next: (beoordelingen) => {
-          this.beoordelingen = beoordelingen;
-          this.updateBoekWaardering();
-        },
-        error: (err) => console.log('Iets mis gegaan met het krijgen van de beoordelingen. ', err),
-      });
+    this.beoordelingService.getBeoordelingenOpBoekId(this.boekId).subscribe({
+      next: (beoordelingen) => {
+        this.beoordelingen = beoordelingen;
+        this.updateBoekWaardering();
+      },
+      error: (err) => console.log('Iets mis gegaan met het krijgen van de beoordelingen. ', err),
+    });
   }
 
   updateBoekWaardering() {
@@ -139,10 +140,12 @@ export class Detail implements OnInit {
     }
     const raw = this.form.value;
     const beoordeling: Omit<Beoordeling, 'id'> = {
-      gebruikerId: 1,
+      // Backend bepaalt de effectieve weergavenaam op basis van gebruiker + anoniem-vlag.
+      gebruikerNaam: '',
       boekId: this.boek?.id ?? 0,
       waardering: Number(raw.waardering),
       inhoud: raw.inhoud,
+      isAnoniem: raw.isAnoniem,
       gerapporteerd: false,
     };
 
@@ -156,6 +159,7 @@ export class Detail implements OnInit {
       },
       error: (error) => {
         this.submissionError = 'Er ging iets mis bij het toevoegen. Probeer opnieuw.';
+        console.error('Fout bij toevoegen beoordeling: ', error.message);
       },
     });
   }
@@ -180,11 +184,9 @@ export class Detail implements OnInit {
         setTimeout(() => this.rapportMelding = '', 4000);
       },
       error: (err) => {
-        if (err.status === 409 || err.status === 400) {
-           this.rapportMelding = 'Je hebt deze beoordeling al gerapporteerd.';
-        } else {
-           this.rapportMelding = 'Er ging iets mis bij het rapporteren. Probeer opnieuw.';
-        }
+
+        this.rapportMelding = 'Er ging iets mis bij het rapporteren. Probeer opnieuw.';
+        setTimeout(() => this.rapportMelding = '', 4000);
       },
     });
   }

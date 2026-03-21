@@ -85,15 +85,9 @@
                         <div class="review-header">
                             <span class="review-rating">{{ '★'.repeat(beoordeling.waardering) + '☆'.repeat(5 -
                                 beoordeling.waardering) }}</span>
-                            <span class="reviewer-name">- Test Gebruiker</span>
+                            <span class="reviewer-name">- {{ beoordeling.gebruikerNaam }}</span>
                         </div>
                         <p class="review-content">{{ beoordeling.inhoud }}</p>
-                        <!-- @if (!gerapporteerdeBeoordelingen.includes(beoordeling.id!)) {
-                        <button class="rapporteer-btn"
-                            (click)="openRapporteerModal(beoordeling.id!)">Rapporteer</button>
-                        } @else {
-                        <span class="gerapporteerd-label">Reeds gerapporteerd ✓</span>
-                        } -->
 
                         @if (!beoordeling.gerapporteerd) {
                         <button class="rapporteer-btn"
@@ -119,6 +113,13 @@
                             </select>
                             <textarea id="inhoud" name="inhoud" rows="3" formControlName="inhoud" class="form-textarea"
                                 placeholder="Deel je mening over dit boek..."></textarea>
+
+                            <!-- Checkbox sectie -->
+                            <label>
+                                <input type="checkbox" formControlName="isAnoniem">
+                                Plaats deze review anoniem
+                            </label>
+
                             <button type="submit" class="submit-btn">Verzenden</button>
                             @if(submissionError){
                             <div class="error-message">
