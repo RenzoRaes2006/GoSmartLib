@@ -1,21 +1,43 @@
 <nav class="navbar">
   <div class="nav-left">
-    <div class="logo">
-        <a [routerLink]="['/']">
-          <span class="logo-text"><strong>GO</strong>SmartLib</span>
-        </a>
-    </div>
+    <a routerLink="/" class="logo-link">
+      <div class="go-badge">GO!</div>
+      <span class="logo-text">SmartLib</span>
+    </a>
   </div>
 
   <div class="nav-right">
-    <a [routerLink]="['/leeslijst',1]" class="nav-link">
-      <i class="heart-icon"></i> Mijn Lijsten
+    <button
+      class="dyslexia-toggle"
+      [class.active]="isDyslexieActief"
+      (click)="toggleDyslexie()"
+      title="Zet dyslexie lettertype aan/uit"
+    >
+      <span class="toggle-text">Dyslexie font</span>
+      <div class="switch-track">
+        <div class="switch-knob"></div>
+      </div>
+    </button>
+
+    <div class="divider"></div>
+
+    <a [routerLink]="['/leeslijst', 1]" class="nav-link">
+      <span class="text-label">Mijn lijsten</span>
     </a>
-    <a [routerLink]="['/profiel']" class="nav-link">
-      <i class="user-icon"></i> Profiel
+
+    <a routerLink="/reserveren" class="nav-link cart-link">
+      <span class="icon">🛒</span>
+      @if (aantalInMandje > 0) {
+        <span class="cart-badge">{{ aantalInMandje }}</span>
+      }
     </a>
-    <button class="logout-btn">
-      <i class="exit-icon">➔</i>
+
+    <a routerLink="/profiel" class="nav-icon-btn" title="Mijn Profiel">
+      <span class="icon">👤</span>
+    </a>
+
+    <button class="nav-icon-btn logout-btn" title="Uitloggen">
+      <span class="icon">➜]</span>
     </button>
   </div>
 </nav>

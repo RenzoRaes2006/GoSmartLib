@@ -1,53 +1,56 @@
 <div class="reading-list-container">
+  @if (!geselecteerdeMap) {
+    <h1>Mijn leeslijsten</h1>
 
-    @if (!geselecteerdeMap) {
-        <h1>Mijn Leeslijsten</h1>
+    <div class="album-grid">
+      @for (map of mappen; track map.id) {
+        <div class="album-card cursor-pointer" (click)="openMap(map)">
+          <div class="album-cover">
+            <div class="cover-emoji">
+              {{ map.emoji || (map.naam === 'Favorieten' ? '⭐' : '📁') }}
+            </div>
 
-        <div class="album-grid">
-            @for (map of mappen; track map.id) {
-                <div class="album-card cursor-pointer" (click)="openMap(map)">
-                 
-                    <div class="album-cover">
-                        @if (map.boeken && map.boeken.length > 0) {
-                            <img [src]="map.boeken[map.boeken.length - 1].afbeelding || 'https://bookshow.blurb.com/bookshow/cache/P11360640/md/cover_2.jpeg?access_key=675523b769268bce5b0b710b3d0e7841'" alt="Cover" class="cover-image">
-                        } @else if (map.naam === 'Favorieten') {
-                            <div class="empty-cover">⭐</div> 
-                        } @else {
-                            <div class="empty-cover">📁</div> 
-                        }
-                    </div>
-
-                    <div class="album-title">{{ map.naam }}</div>
-                </div>
-            }
+            <div class="cover-title">{{ map.naam }}</div>
+          </div>
         </div>
+      }
+    </div>
+  } @else {
+    <div class="header-section">
+      <button class="back-btn" (click)="terugNaarOverzicht()">← Terug naar Mappen</button>
+      <h1>{{ geselecteerdeMap.naam }}</h1>
+    </div>
+
+    @if (geselecteerdeMap.boeken.length === 0) {
+      <p style="color: #666; margin-top: 20px">Je hebt nog geen boeken in deze map staan.</p>
     }
 
-    @else {
-        <div class="header-section">
-            <button class="back-btn" (click)="terugNaarOverzicht()">← Terug naar Mappen</button>
-            <h1>{{ geselecteerdeMap.naam }}</h1>
+    <div class="album-grid">
+      @for (boek of geselecteerdeMap.boeken; track boek.id) {
+        <div class="album-card relative">
+          <button
+            class="delete-btn"
+            (click)="verwijderBoek(boek.id, $event)"
+            title="Verwijder uit map"
+          >
+            ✕
+          </button>
+
+          <a [routerLink]="['/details', boek.id]" class="book-link">
+            <div class="album-cover hover-effect">
+              <img
+                [src]="
+                  boek.afbeelding ||
+                  'https://bookshow.blurb.com/bookshow/cache/P11360640/md/cover_2.jpeg?access_key=675523b769268bce5b0b710b3d0e7841'
+                "
+                alt="Cover"
+                class="cover-image"
+              />
+            </div>
+            <div class="album-title">{{ boek.titel }}</div>
+          </a>
         </div>
-
-        @if (geselecteerdeMap.boeken.length === 0) {
-            <p style="color: #666; margin-top: 20px;">Je hebt nog geen boeken in deze map staan.</p>
-        }
-
-        <div class="album-grid">
-            @for (boek of geselecteerdeMap.boeken; track boek.id) {
-                <div class="album-card relative">
-                    
-                    <button class="delete-btn" (click)="verwijderBoek(boek.id, $event)" title="Verwijder uit map">✕</button>
-
-                    <a [routerLink]="['/details', boek.id]" class="book-link">
-                        <div class="album-cover hover-effect">
-                            <img [src]="boek.afbeelding || 'https://bookshow.blurb.com/bookshow/cache/P11360640/md/cover_2.jpeg?access_key=675523b769268bce5b0b710b3d0e7841'" alt="Cover" class="cover-image">
-                        </div>
-                        <div class="album-title">{{ boek.titel }}</div>
-                    </a>
-                    
-                </div>
-            }
-        </div>
-    }
+      }
+    </div>
+  }
 </div>

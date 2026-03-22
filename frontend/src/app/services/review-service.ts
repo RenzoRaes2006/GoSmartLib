@@ -6,17 +6,9 @@ import { Beoordeling } from '../models/review.model';
   providedIn: 'root',
 })
 export class ReviewService {
-  // private readonly gebruikTraefik = false; // Zet op true als je Traefik gebruikt, anders false
-  // private apiUrl = this.gebruikTraefik
-  //   ? 'http://frontend.localhost/api/boeken'
-  //   : 'http://localhost:8081/api/boeken';
-  // private apiUrl = '/api';
+  private apiUrl = window.location.hostname === 'localhost' ? 'http://localhost:8081/api' : '/api';
 
-  private apiUrl = window.location.hostname === 'localhost'
-    ? 'http://localhost:8081/api'
-    : '/api';
-
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
   getBeoordelingenOpBoekId(bookId: number) {
     return this.http.get<Beoordeling[]>(`${this.apiUrl}/books/${bookId}/reviews`);
@@ -27,6 +19,6 @@ export class ReviewService {
   }
 
   rapporteerBeoordeling(id: number, reden: string) {
-    return this.http.post(`${this.apiUrl}/reviews/${id}/report`, reden);
+    return this.http.post(`${this.apiUrl}/reviews/${id}/report`, { reden });
   }
 }

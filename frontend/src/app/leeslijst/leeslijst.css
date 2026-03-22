@@ -6,15 +6,14 @@
 }
 
 h1 {
-    color: #1a3a5a;
+    color: #8c1b3f;
     margin-bottom: 30px;
 }
 
 /* De Grid layout voor de albums (naast elkaar) */
 .album-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 30px;
+grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));gap: 50px;    margin-top: 20px;
 }
 
 /* 1 Los album/boek kaartje */
@@ -24,40 +23,59 @@ h1 {
     width: 100%;
 }
 
-/* De afbeelding container (zorgt voor mooi formaat) */
 .album-cover {
     width: 100%;
-    aspect-ratio: 2 / 3; /* Zorgt dat boeken altijd de perfecte boek-verhouding hebben */
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    background-color: #f4f4f4;
+    /* 4/5 verhouding is iets moderner voor tegels dan de traditionele 2/3 boekvorm */
+    aspect-ratio: 4 / 5; 
+    border-radius: 16px; /* Zelfde afronding als op je homepagina */
+    background-color: #f0efe4; /* De GO! Beige achtergrond */
+    border: 1px solid #e2dfd5; /* Subtiele rand */
+    border-bottom: 5px solid #8c1b3f; /* De kenmerkende Bordeauxrode onderkant! */
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03); /* Zachte, moderne schaduw */
+    
+    /* Zorgt dat alles perfect in het MIDDEN staat */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    text-align: center;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
-.cover-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover; /* Belangrijk: Zorgt dat de foto de ruimte netjes vult zonder te stretchen */
+.album-cover:hover {
+    transform: translateY(-5px); /* Zweef-effect net als op de homepagina */
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
 }
 
-/* Voor de lege favorieten map */
+.cover-emoji {
+    font-size: 4.5rem; /* Lekker groot in het midden */
+    margin-bottom: 15px; /* Beetje ademruimte tussen de emoji en de titel */
+    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+    transition: transform 0.2s ease;
+}
+
+/* Een leuk klein detail: de emoji "popt" ietsje groter als je er met je muis over gaat */
+.album-cover:hover .cover-emoji {
+    transform: scale(1.1);
+}
+
+.cover-title {
+    color: #8c1b3f; /* Het GO! Bordeaux rood */
+    font-size: 1.25rem;
+    font-weight: 700;
+    line-height: 1.3;
+    max-width: 100%;
+    word-wrap: break-word; /* Voorkomt dat hele lange namen uit de kaart breken */
+}
+
+/* Zorg dat de lege variant voor de mappen óók in het midden staat */
 .empty-cover {
-    width: 100%;
-    height: 100%;
+    font-size: 4.5rem;
+    color: #cbd5e1;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 5rem;
-    color: #ddd;
-}
-
-/* De tekst onder de foto */
-.album-title {
-    margin-top: 12px;
-    font-size: 16px;
-    color: #1a3a5a;
-    font-weight: bold;
-    text-decoration: none;
 }
 
 /* Interacties */
@@ -76,7 +94,7 @@ h1 {
 .delete-btn {
     position: absolute;
     top: -10px;
-    right: -10px;
+    right: -50px;
     background: white;
     border: 2px solid #ff4d4d;
     border-radius: 50%;
@@ -89,3 +107,25 @@ h1 {
     z-index: 10;
 }
 .delete-btn:hover { background: #ff4d4d; color: white; }
+
+.cover-image {
+    /* We halen de absolute positie weg en maken hem een normaal formaat */
+    width: auto; 
+    height: 100%; 
+    max-height: 500px; /* Zorgt dat het boek nooit gigantisch wordt */
+    object-fit: contain; /* Belangrijk: snijdt NIKS af, houdt de perfecte boek-verhouding! */
+    margin: 0 auto; /* Zet het boek mooi in het midden */
+    border-radius: 4px; /* Subtiel rond hoekje voor het boek zelf */
+    box-shadow: 4px 4px 12px rgba(0,0,0,0.15); /* Realistische schaduw, alsof het boek op de tegel ligt */
+    transition: transform 0.2s ease;
+}
+/* De titel onder het boek (Bordeauxrood en in het midden) */
+.album-title {
+    display: block !important; 
+    text-align: center; 
+    color: #8c1b3f; /* Het GO! Bordeauxrood */
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin-top: 15px; 
+    width: 100%;
+}

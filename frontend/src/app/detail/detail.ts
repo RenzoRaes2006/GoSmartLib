@@ -1,11 +1,18 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, FormsModule, NgModel, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  FormsModule,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { RouterLink, ActivatedRoute } from '@angular/router';
 import { BoekService } from '../services/boek.service';
 import { Boek } from '../models/Boek';
 import { ReviewService } from '../services/review-service';
 import { Beoordeling } from '../models/review.model';
 import { LeeslijstService } from '../services/leeslijstService';
+import { LeenMandjeService } from '../services/leen-mandje.service';
 
 @Component({
   selector: 'app-detail',
@@ -19,6 +26,7 @@ export class Detail implements OnInit {
   fb = inject(FormBuilder);
   route = inject(ActivatedRoute);
   leeslijstService = inject(LeeslijstService);
+  leenMandjeService = inject(LeenMandjeService);
 
   boek: Boek | null = null;
   form!: FormGroup;
@@ -30,6 +38,14 @@ export class Detail implements OnInit {
   succesMeldingMap: string = '';
   mappen: any[] = [];
 
+  // Vriend's toevoegingen
+  beschikbareEmojis = ['📚', '🎓', '🧠', '💡', '🎨', '🌍', '🔥', '❤️'];
+  selectedEmoji = '📚';
+  magLenen: boolean = false;
+  leenReden: string = 'Status ophalen...';
+  isLeenModalOpen: boolean = false;
+  succesMeldingLenen: string = '';
+
   boekWaardering: number = 0;
   waarderingPrecentage: number = 0;
 
@@ -40,7 +56,6 @@ export class Detail implements OnInit {
   gerapporteerdeBeoordelingen: number[] = [];
 
   boekId: number = 0;
-
 
   ngOnInit(): void {
     this.form = this.fb.group({
@@ -56,17 +71,26 @@ export class Detail implements OnInit {
       this.boekService.getBoekOpId(boekId).subscribe({
         next: (boek) => {
           this.boek = boek;
+          // Vriend's toevoeging: check leen status
+          const gebruikerId = 1;
+          this.boekService.checkLeenStatus(gebruikerId, boekId).subscribe({
+            next: (status) => {
+              this.magLenen = status.magLenen;
+              this.leenReden = status.reden;
+            },
+            error: () => (this.leenReden = 'Kon uitleen status niet ophalen.'),
+          });
         },
-        error: (err) => console.log('Iets mis gegaan met het krijgen van de boek details. ', err),
+        error: (err) => console.log('Iets mis gegaan met het krijgen van de boek details. ', err), // Jouw error handling teruggezet
       });
-
       this.laadBeoordelingVanBoek();
     });
 
     const gebruikerId = 1;
     this.leeslijstService.getMappenVanGebruiker(gebruikerId).subscribe({
       next: (data) => {
-        this.mappen = data;
+        // Vriend's toevoeging: filter Favorieten eruit
+        this.mappen = data.filter((map) => map.naam.toLowerCase() !== 'favorieten');
       },
     });
   }
@@ -77,6 +101,7 @@ export class Detail implements OnInit {
         this.beoordelingen = beoordelingen;
         this.updateBoekWaardering();
       },
+      // Jouw error handling hersteld!
       error: (err) => console.log('Iets mis gegaan met het krijgen van de beoordelingen. ', err),
     });
   }
@@ -87,26 +112,31 @@ export class Detail implements OnInit {
         (sum, beoordeling) => sum + beoordeling.waardering,
         0,
       );
-      const gemiddelde = totaleWaardering / this.beoordelingen.length;
-      this.boekWaardering = Number(gemiddelde.toFixed(1));
+      // Vriend's kortere berekening
+      this.boekWaardering = Number((totaleWaardering / this.beoordelingen.length).toFixed(1));
       this.waarderingPrecentage = (this.boekWaardering / 5) * 100;
     }
   }
 
   voegToeAanFavorieten() {
-    if (!this.boek) return;
+    if (!this.boek || this.isFavoriet) return;
     const gebruikerId = 1;
-    this.leeslijstService.voegBoekToeAanMap(gebruikerId, 'Favorieten', this.boek.id!).subscribe({
-      next: () => {
-        this.isFavoriet = true;
-        setTimeout(() => (this.isFavoriet = false), 3000);
-      },
-    });
+    // Vriend's toevoeging: emoji meegeven
+    this.leeslijstService
+      .voegBoekToeAanMap(gebruikerId, 'Favorieten', this.boek.id!, '⭐')
+      .subscribe({
+        next: () => {
+          this.isFavoriet = true;
+          // Jouw timeout teruggezet
+          setTimeout(() => (this.isFavoriet = false), 3000);
+        },
+      });
   }
 
   voegToeAanLeeslijst() {
     if (!this.boek) return;
     this.isModalOpen = true;
+    this.selectedEmoji = '📚';
   }
 
   sluitModal() {
@@ -119,28 +149,28 @@ export class Detail implements OnInit {
 
     if (doelMap && doelMap !== '') {
       const gebruikerId = 1;
-      this.leeslijstService.voegBoekToeAanMap(gebruikerId, doelMap, this.boek!.id!).subscribe({
-        next: () => {
-          this.succesMeldingMap = `Boek toegevoegd aan '${doelMap}'!`;
-          this.leeslijstService
-            .getMappenVanGebruiker(gebruikerId)
-            .subscribe((data) => (this.mappen = data));
-          setTimeout(() => this.sluitModal(), 1500);
-        },
-        error: () => (this.succesMeldingMap = 'Er ging iets mis...'),
-      });
+      this.leeslijstService
+        .voegBoekToeAanMap(gebruikerId, doelMap, this.boek!.id!, this.selectedEmoji)
+        .subscribe({
+          next: () => {
+            this.succesMeldingMap = `Boek toegevoegd aan '${doelMap}'!`;
+            this.leeslijstService.getMappenVanGebruiker(gebruikerId).subscribe((data) => {
+              this.mappen = data.filter((map) => map.naam.toLowerCase() !== 'favorieten');
+            });
+            setTimeout(() => this.sluitModal(), 1500);
+          },
+          error: () => (this.succesMeldingMap = 'Er ging iets mis...'),
+        });
     }
   }
 
   submitBeoordeling() {
     if (this.form.invalid) {
-      this.submissionError =
-        'Vul alle verplichte velden in en zorg dat je commentaar niet langer is dan 500 karakters.';
+      this.submissionError = 'Vul alle verplichte velden in (max 500 karakters).';
       return;
     }
     const raw = this.form.value;
     const beoordeling: Omit<Beoordeling, 'id'> = {
-      // Backend bepaalt de effectieve weergavenaam op basis van gebruiker + anoniem-vlag.
       gebruikerNaam: '',
       boekId: this.boek?.id ?? 0,
       waardering: Number(raw.waardering),
@@ -150,13 +180,12 @@ export class Detail implements OnInit {
     };
 
     this.beoordelingService.voegBeoordelingToe(beoordeling).subscribe({
-      next: (response) => {
+      next: () => {
         this.form.reset();
         this.submissionError = '';
-        // this.beoordelingen.push(response); //
-        this.updateBoekWaardering();
         this.laadBeoordelingVanBoek();
       },
+      // Jouw error handling hersteld!
       error: (error) => {
         this.submissionError = 'Er ging iets mis bij het toevoegen. Probeer opnieuw.';
         console.error('Fout bij toevoegen beoordeling: ', error.message);
@@ -164,6 +193,7 @@ export class Detail implements OnInit {
     });
   }
 
+  // Jouw ongewijzigde functie hersteld!
   bevestigRapport() {
     this.beoordelingService.rapporteerBeoordeling(this.geselecteerdeBeoordelingId!, this.rapporteerReden).subscribe({
       next: () => {
@@ -176,7 +206,6 @@ export class Detail implements OnInit {
         }
 
         this.rapportMelding = 'Beoordeling succesvol gerapporteerd. Bedankt voor je feedback!';
-
         this.rapporteerModalOpen = false;
         this.geselecteerdeBeoordelingId = null;
         this.rapporteerReden = '';
@@ -184,7 +213,6 @@ export class Detail implements OnInit {
         setTimeout(() => this.rapportMelding = '', 4000);
       },
       error: (err) => {
-
         this.rapportMelding = 'Er ging iets mis bij het rapporteren. Probeer opnieuw.';
         setTimeout(() => this.rapportMelding = '', 4000);
       },
@@ -194,13 +222,31 @@ export class Detail implements OnInit {
   openRapporteerModal(beoordelingId: number) {
     this.rapporteerModalOpen = true;
     this.geselecteerdeBeoordelingId = beoordelingId;
-    console.log('Beoordeling ID voor rapporteren: ', this.geselecteerdeBeoordelingId);
   }
 
   sluitRapporteerModal() {
     this.rapporteerModalOpen = false;
-    this.geselecteerdeBeoordelingId = null;
     this.rapporteerReden = '';
-    this.rapportMelding = '';
+  }
+
+  // --- Vriend's functies hieronder ---
+  openLeenModal() {
+    if (this.magLenen) this.isLeenModalOpen = true;
+  }
+
+  sluitLeenModal() {
+    this.isLeenModalOpen = false;
+    this.succesMeldingLenen = '';
+  }
+
+  voegToeAanReservering() {
+    if (!this.boek) return;
+    const resultaat = this.leenMandjeService.voegBoekToe(this.boek);
+    this.succesMeldingLenen =
+      resultaat === 'Succes'
+        ? `'${this.boek.titel}' is toegevoegd aan je reserveringen!`
+        : resultaat;
+    this.isLeenModalOpen = true;
+    setTimeout(() => this.sluitLeenModal(), 2500);
   }
 }

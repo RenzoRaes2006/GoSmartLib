@@ -6,7 +6,7 @@
 :host {
     display: block;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    color: #2d3748; /* Aangepast naar donkergrijze thema-kleur */
+    color: #2d3748;
     max-width: 1600px;
     margin: 0 auto;
     padding: 20px 15px;
@@ -22,7 +22,7 @@
     align-items: center;
     gap: 5px;
     margin-bottom: 20px;
-    color: #8c1b3f; /* Aangepast naar bordeauxrood */
+    color: #8c1b3f;
     text-decoration: none;
     font-size: 14px;
     font-weight: 600;
@@ -34,7 +34,6 @@
     text-decoration: underline;
 }
 
-/* Container voor de actieknoppen onder de foto */
 .action-buttons {
     display: flex;
     gap: 10px;
@@ -61,7 +60,7 @@
     position: relative;
     border-radius: 12px;
     overflow: hidden;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08); /* Aangepast naar thema schaduw */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
     width: min(72vw, 280px);
     aspect-ratio: 2 / 3;
     margin: 0 auto;
@@ -76,12 +75,11 @@
     object-fit: cover;
 }
 
-/* Badge styling gebaseerd op je screenshot */
 .status-badge {
     position: absolute;
     top: 10px;
     right: 10px;
-    background: #48bb78; /* Standaard groen (Beschikbaar) */
+    background: #48bb78;
     color: #ffffff;
     padding: 4px 12px;
     border-radius: 20px;
@@ -90,7 +88,6 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* Optionele class voor als een boek is uitgeleend (zoals de rode in je screenshot) */
 .status-badge.uitgeleend {
     background: #f56565;
 }
@@ -99,14 +96,14 @@
 .book-title {
     font-size: 24px;
     margin: 0;
-    color: #2d3748; /* Donkergrijze titel */
+    color: #2d3748;
     text-align: center;
     transition: all 0.3s ease;
 }
 
 .book-author {
     font-size: 14px;
-    color: #718096; /* Secundaire grijze tekst */
+    color: #718096;
     margin: 0;
     text-align: center;
     transition: all 0.3s ease;
@@ -123,7 +120,7 @@
 
 .rating-score {
     font-weight: bold;
-    color: #8c1b3f; /* Bordeauxrood */
+    color: #8c1b3f;
     font-size: 18px;
 }
 
@@ -133,7 +130,7 @@
     font-family: serif;
     font-size: 22px;
     letter-spacing: 2px;
-    color: #e2dfd5; /* Beige achtergrond sterren */
+    color: #e2dfd5;
 }
 
 .stars-inner {
@@ -143,7 +140,7 @@
     white-space: nowrap;
     overflow: hidden;
     width: 0;
-    color: #fbbf24; /* Geel/Goud voor de sterren zelf is vaak het mooist, maar je kan ook #8c1b3f doen */
+    color: #fbbf24;
 }
 
 .stars-outer::before, .stars-inner::before {
@@ -155,16 +152,16 @@
     font-size: 13px;
 }
 
-/* 5. Info Grid & Thema's (Witte kaarten stijl) */
+/* 5. Info Grid & Thema's */
 .info-grid {
     display: grid;
     grid-template-columns: 1fr;
     gap: 16px;
-    background: #ffffff; /* Wit zoals de kaarten */
-    border: 1px solid #e2dfd5; /* Beige rand */
+    background: #ffffff;
+    border: 1px solid #e2dfd5;
     border-radius: 12px;
     padding: 20px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05); /* Lichte schaduw */
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
     transition: all 0.4s ease-in-out;
 }
 
@@ -210,7 +207,7 @@
     border: none; 
     color: #ffffff; 
     padding: 14px 32px; 
-    border-radius: 30px; /* Mooie afgeronde knoppen zoals .btn-ontdek */
+    border-radius: 30px; 
     font-weight: 600; 
     font-size: 1.05rem;
     cursor: pointer; 
@@ -219,7 +216,7 @@
     box-shadow: 0 4px 15px rgba(140, 27, 63, 0.3);
 }
 
-.primary-btn:hover {
+.primary-btn:hover:not(:disabled) {
     background-color: #6d1531;
     transform: translateY(-3px);
     box-shadow: 0 6px 20px rgba(140, 27, 63, 0.4);
@@ -268,7 +265,7 @@
 }
 
 .review-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
-.review-rating { color: #8c1b3f; font-size: 14px; } /* Sterren rood gemaakt */
+.review-rating { color: #8c1b3f; font-size: 14px; } 
 
 /* Moderne Formulier Styling */
 .form-textarea, .form-select {
@@ -279,7 +276,7 @@
     font-family: inherit;
     font-size: 14px;
     transition: all 0.2s ease;
-    background-color: #f7fafc; /* Lichtgrijze achtergrond voor inputs */
+    background-color: #f7fafc; 
     color: #2d3748;
 }
 
@@ -331,14 +328,14 @@
 .modal-box {
     background: white;
     padding: 30px;
-    border-radius: 12px;
+    border-radius: 16px;
     width: 400px;
     box-shadow: 0 10px 25px rgba(0,0,0,0.3);
     text-align: center;
-    border-top: 4px solid #8c1b3f; /* Subtiel detail bovenaan de modal */
+    border-top: 4px solid #8c1b3f; 
 }
 
-.modal-box h3 { color: #2d3748; margin-top: 0;}
+.modal-box h3 { color: #8c1b3f; margin-top: 0;}
 
 .modal-box input {
     width: 90%;
@@ -375,6 +372,7 @@
 .modal-select {
     width: 90%; padding: 12px; margin-bottom: 15px; border: 1px solid #e2dfd5; border-radius: 8px; font-size: 16px; font-family: inherit; background-color: #f7fafc;
 }
+
 .modal-label { text-align: left; margin-left: 5%; margin-bottom: 5px; font-weight: bold; font-size: 14px; color: #4a5568; display: block; }
 
 /* ==========================================================================
@@ -392,7 +390,7 @@
 .rapporteer-btn {
     background: transparent;
     border: none;
-    color: #f56565; /* Rood voor rapporteren */
+    color: #f56565; 
     font-size: 12px;
     font-weight: 600;
     cursor: pointer;
@@ -410,7 +408,7 @@
 }
 
 .rapport-modal h3 {
-    color: #e53e3e; /* Rode titel voor waarschuwing in modal */
+    color: #e53e3e; 
 }
 
 .rapport-modal .form-textarea {
@@ -424,12 +422,11 @@
     opacity: 0.7;
 }
 
-/* Toast Melding (Pop-up rechtsonder) */
 .toast-message {
     position: fixed;
     bottom: 30px;
     right: 30px;
-    background-color: #48bb78; /* Groen voor succes (komt overeen met badge) */
+    background-color: #48bb78; 
     color: white;
     padding: 16px 24px;
     border-radius: 8px;
@@ -439,9 +436,7 @@
     animation: slideUpFade 0.4s ease-out forwards;
 }
 
-.toast-message p {
-    margin: 0;
-}
+.toast-message p { margin: 0; }
 
 @keyframes slideUpFade {
     from { opacity: 0; transform: translateY(20px); }
@@ -460,11 +455,85 @@
 
 .error-message p { margin: 0; }
 
+/* ==========================================================================
+   LEEN STYLING
+   ========================================================================== */
+.primary-btn:disabled, .disabled-btn {
+    background: #f3f4f6 !important;
+    border: 1px solid #d1d5db !important;
+    color: #9ca3af !important;
+    cursor: not-allowed !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+.leen-reden-tekst {
+    color: #ef4444; 
+    font-size: 13px;
+    margin: 0 0 10px 0;
+    text-align: center;
+    font-weight: 500;
+}
+
+/* ==========================================================================
+   EMOJI PICKER STYLING
+   ========================================================================== */
+.emoji-picker-container {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 25px;
+}
+
+.emoji-grid {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.emoji-btn {
+    background: white;
+    border: 2px solid transparent;
+    border-radius: 50%;
+    font-size: 1.5rem;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.emoji-btn:hover { transform: scale(1.1); }
+
+.emoji-btn.selected {
+    border-color: #8c1b3f;
+    background: #f0efe4; 
+    transform: scale(1.1);
+}
+
+.nieuwe-map-input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: inherit;
+}
+
+.nieuwe-map-input:focus { 
+    outline: none; 
+    border-color: #8c1b3f; 
+}
+
 /* 8. Responsiviteit */
 @media (max-width: 480px) {
-    .image-container {
-        width: min(84vw, 320px);
-    }
+    .image-container { width: min(84vw, 320px); }
 }
 
 @media (min-width: 768px) {
@@ -474,7 +543,6 @@
         gap: 30px;
         align-items: start;
     }
-
     .image-container { margin: 0; width: 100%; max-width: 300px; }
     .book-title, .book-author, .rating-container { text-align: left; justify-content: flex-start; }
     .info-grid { grid-template-columns: 1fr 1fr; }

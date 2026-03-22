@@ -1,0 +1,564 @@
+/* =========================================
+   VOLLEDIGE BREEDTE LAYOUT & BASIS KLEUREN
+   ========================================= */
+.page-wrapper {
+  width: 100%;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.full-width-section {
+  width: 100%;
+  padding: 50px 20px;
+}
+
+.inner-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+
+.bg-white {
+  background-color: #ffffff;
+}
+
+.bg-beige {
+  background-color: #f0efe4; /* Beige achtergrond */
+}
+
+h2 {
+  color: #2d3748;
+  font-size: 1.4rem;
+  margin-bottom: 20px;
+}
+
+/* =========================================
+   SECTIE 1: Welkom banner
+   ========================================= */
+.welcome-banner-modern {
+  background-color: #f0efe4; 
+  border-radius: 20px;
+  display: flex;
+  overflow: hidden; 
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+  margin-bottom: 20px;
+}
+
+.welcome-content {
+  flex: 1; 
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 15px; 
+}
+
+/* Het GO! logo */
+.go-logo {
+  height: 60px;
+  width: auto;
+  object-fit: contain;
+  margin-bottom: 10px;
+}
+
+.welcome-text h1 { 
+  margin: 0; 
+  font-size: 2.4rem; 
+  color: #8c1b3f; 
+}
+
+.welcome-text p { 
+  margin: 5px 0 0 0; 
+  font-size: 1.1rem; 
+  color: #555;
+}
+
+/* =========================================
+   LEESDOEL WIDGET & POTLOOD KNOP
+   ========================================= */
+.goal-wrapper {
+  display: flex;
+  align-items: center; /* Zorgt dat de kleine knop mooi in het midden zweeft */
+  gap: 15px; 
+  margin-top: 10px;
+}
+
+/* De leesdoel widget zelf */
+.reading-goal {
+  background: #ffffff; 
+  padding: 18px 25px;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 350px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+  border: 1px solid #e2dfd5;
+  display: flex;
+  flex-direction: column;
+  justify-content: center; 
+}
+
+.goal-text {
+  display: flex;
+  justify-content: space-between; /* Drukt de teksten uit elkaar */
+  width: 100%; /* Zorgt dat de tekst niet aan elkaar plakt */
+  gap: 10px;
+  margin-bottom: 10px;
+  font-size: 0.95rem;
+  color: #333;
+}
+
+.progress-bar-bg {
+  height: 12px; 
+  background: #e0e0e0;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: #8c1b3f; 
+  border-radius: 10px;
+  transition: width 1s ease-in-out;
+}
+
+/* De kleine ronde potlood knop (zoals op de foto!) */
+.edit-goal-btn.round-btn {
+  background: #ffffff; 
+  border: 1px solid #e2dfd5;
+  color: #4a5568;
+  cursor: pointer;
+  padding: 0;
+  
+  /* Vaste, kleine grootte voor een perfect rondje */
+  width: 38px; 
+  height: 38px; 
+  border-radius: 50%; 
+  
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.1rem; 
+  transition: background 0.2s, border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  flex-shrink: 0; 
+}
+
+.edit-goal-btn.round-btn:hover {
+  background: #f7f7f7;
+  border-color: #d1c9b3;
+  transform: translateY(-2px); 
+  box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+}
+
+/* De afbeelding aan de rechterkant */
+.welcome-image {
+  flex: 1;
+  min-width: 300px; 
+}
+
+.welcome-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; 
+  border-left: 4px solid #8c1b3f; 
+}
+
+/* =========================================
+   SECTIE 2: Uitgelichte boeken (5 kolommen)
+   ========================================= */
+.featured-section { width: 100%; }
+
+.uitgelicht-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr); 
+  gap: 20px;
+  width: 100%; 
+}
+
+.boek-card {
+  width: 100%; 
+  background: #ffffff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08); 
+  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+}
+
+.boek-card:hover { 
+  transform: translateY(-5px) rotate(1deg);
+  box-shadow: 0 8px 15px rgba(0,0,0,0.15);
+}
+
+.boek-card img { 
+  width: 100%; 
+  height: 250px; 
+  object-fit: cover; 
+}
+
+.boek-info { 
+  padding: 15px; 
+  flex-grow: 1; 
+}
+
+.boek-info h4 { 
+  margin: 0; 
+  font-size: 1rem; 
+  color: #1a202c; 
+  white-space: nowrap; 
+  overflow: hidden; 
+  text-overflow: ellipsis; 
+}
+
+.boek-info p { 
+  margin: 5px 0 0 0; 
+  font-size: 0.85rem; 
+  color: #718096; 
+}
+
+.empty-message { color: #718096; font-style: italic; }
+
+.catalogus-btn-container {
+  display: flex;
+  justify-content: center; 
+  margin-top: 40px; 
+}
+
+.btn-ontdek {
+  background-color: #8c1b3f; 
+  color: #ffffff;
+  border: none;
+  padding: 14px 32px;
+  border-radius: 30px; 
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(140, 27, 63, 0.3); 
+}
+
+.btn-ontdek:hover {
+  background-color: #6d1531; 
+  transform: translateY(-3px); 
+  box-shadow: 0 6px 20px rgba(140, 27, 63, 0.4);
+}
+
+/* =========================================
+   SECTIE 3: Leeslijsten & uitleentermijnen
+   ========================================= */
+.bottom-split {
+  display: grid;
+  grid-template-columns: 3fr 2fr; 
+  gap: 30px;
+}
+
+.leeslijsten-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.section-header h2 {
+  margin-bottom: 0;
+}
+
+.view-all-link {
+  color: #8c1b3f; 
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: color 0.2s, transform 0.2s;
+}
+
+.view-all-link:hover {
+  color: #6d1531;
+}
+
+.view-all-link:hover span {
+  transform: translateX(4px);
+}
+
+.lijsten-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 15px;
+}
+
+.lijst-tile {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  border-bottom: 4px solid #8c1b3f; 
+  cursor: pointer;
+  transition: transform 0.2s;
+  border-left: 1px solid #f0efe4;
+  border-top: 1px solid #f0efe4;
+  border-right: 1px solid #f0efe4;
+}
+
+.lijst-tile:hover { 
+  transform: translateY(-3px); 
+}
+
+.lijst-icon { 
+  font-size: 2.5rem; 
+  display: block; 
+  margin-bottom: 10px; 
+}
+
+.lijst-cover-img {
+  width: 50px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 4px;
+  margin: 0 auto 10px auto;
+  display: block;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.lijst-tile h3 { 
+  margin: 0; 
+  font-size: 1rem; 
+  color: #2d3748; 
+}
+
+.lijst-tile p { 
+  margin: 5px 0 0 0; 
+  font-size: 0.8rem; 
+  color: #a0aec0; 
+}
+
+.uitleentermijnen-container {
+  background: #ffffff;
+  border-radius: 16px; 
+  padding: 20px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #f0efe4;
+}
+
+.uitleentermijnen-container h2 {
+  margin-bottom: 15px;
+}
+
+.scroll-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 250px; 
+  overflow-y: auto; 
+  padding-right: 10px;
+}
+
+.scroll-list::-webkit-scrollbar { width: 6px; }
+.scroll-list::-webkit-scrollbar-track { background: #f0efe4; border-radius: 10px; }
+.scroll-list::-webkit-scrollbar-thumb { background: #d0cbb8; border-radius: 10px; }
+
+.lening-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f7fafc;
+  padding: 12px 15px;
+  border-radius: 8px;
+  border-left: 4px solid #48bb78; 
+}
+
+.lening-item.urgent {
+  background: #fff5f5;
+  border-left: 4px solid #f56565; 
+}
+
+.lening-item.urgent .dagen-badge {
+  background: #f56565;
+  color: #ffffff;
+}
+
+.lening-titel-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  overflow: hidden;
+}
+
+.lening-titel {
+  font-weight: 600;
+  color: #2d3748;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 180px;
+}
+
+.dagen-badge {
+  background: #f0efe4;
+  color: #4a5568;
+  padding: 4px 8px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+/* =========================================
+   POP-UP MODAL VOOR LEESDOEL
+   ========================================= */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(45, 55, 72, 0.6); 
+  backdrop-filter: blur(4px); 
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; 
+}
+
+.modal-box {
+  background: #ffffff;
+  padding: 30px;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  border-top: 5px solid #8c1b3f; 
+  text-align: center;
+  animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes popIn {
+  0% { transform: scale(0.8); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.modal-box h3 {
+  margin: 0 0 10px 0;
+  color: #8c1b3f;
+  font-size: 1.5rem;
+}
+
+.modal-box p {
+  color: #718096;
+  font-size: 0.95rem;
+  margin-bottom: 25px;
+}
+
+.input-group {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 30px;
+}
+
+.leesdoel-input {
+  width: 80px;
+  padding: 10px;
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-align: center;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  color: #2d3748;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.leesdoel-input:focus {
+  border-color: #8c1b3f;
+}
+
+.input-suffix {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #4a5568;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+.btn-cancel {
+  flex: 1;
+  background: #edf2f7;
+  color: #4a5568;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-cancel:hover {
+  background: #e2e8f0;
+}
+
+.btn-save {
+  flex: 1;
+  background: #8c1b3f;
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.btn-save:hover {
+  background: #6d1531;
+  transform: translateY(-2px);
+}
+
+/* =========================================
+   RESPONSIVITEIT
+   ========================================= */
+@media (max-width: 1000px) {
+  .uitgelicht-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (max-width: 800px) {
+  .bottom-split { grid-template-columns: 1fr; }
+  
+  .welcome-banner-modern {
+    flex-direction: column-reverse; 
+  }
+  
+  .welcome-image img {
+    height: 200px;
+    border-left: none;
+  }
+  
+  .welcome-content {
+    padding: 30px 20px;
+  }
+}
+
+@media (max-width: 600px) {
+  .uitgelicht-grid { grid-template-columns: repeat(2, 1fr); }
+  
+  /* Zorgt dat op mobiel de knop en de leesdoel balk nog netjes naast of onder elkaar passen */
+  .goal-wrapper {
+    flex-direction: row; 
+    align-items: center; /* Aangepast naar center voor mobiel */
+  }
+} 

@@ -1,72 +1,219 @@
+/* =========================================
+   NAVBAR BASIS STRUCTURE
+   ========================================= */
 .navbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 24px;
-  background-color: white;
-  border-bottom: 1px solid #eef2f7;
-  height: 42px;
-  box-sizing: border-box;
-  position: sticky;
-  top: 0;
-  z-index: 1000;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 40px;
+    background-color: rgba(255, 255, 255, 0.95); 
+    backdrop-filter: blur(10px); 
+    -webkit-backdrop-filter: blur(10px);
+    height: 75px; 
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 4px 25px rgba(0, 0, 0, 0.04); 
+    border-bottom: 1px solid #f0efe4; /* Zachte beige rand */
+    font-family: 'Inter', 'Segoe UI', sans-serif;
 }
 
-.nav-left,
-.nav-right {
-  display: flex;
-  align-items: center;
+.nav-left, .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 15px;
 }
 
-.logo {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
+/* =========================================
+   LOGO STYLING
+   ========================================= */
+.logo-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    transition: transform 0.2s ease;
 }
 
-.logo a {
-  display: flex;
-  align-items: center;
-  text-decoration: none;
+.logo-link:hover {
+    transform: translateY(-1px);
 }
 
-.logo-text { font-size: 18px; color: #333; }
-.logo-text strong { color: #4a90e2; }
-
-.scan-btn {
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  padding: 5px 8px;
-  cursor: pointer;
-  color: #ff8c00; /* Oranje zoals in screenshot */
+.go-badge {
+    background-color: #8c1b3f; /* Bordeaux rood */
+    color: white;
+    font-weight: 900;
+    font-size: 1.1rem;
+    padding: 6px 10px;
+    border-radius: 6px;
+    letter-spacing: 1px;
+    box-shadow: 0 2px 8px rgba(140, 27, 63, 0.3);
 }
 
-.nav-right {
-  display: flex;
-  gap: 18px;
-  align-items: center;
+.logo-text { 
+    font-size: 1.4rem; 
+    color: #1a202c;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+}
+
+/* =========================================
+   DYSLEXIE TOGGLE SWITCH (Nieuw!)
+   ========================================= */
+.dyslexia-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 5px 10px;
+    font-family: inherit;
+}
+
+.toggle-text {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #4a5568;
+    transition: color 0.2s;
+}
+
+.switch-track {
+    width: 44px;
+    height: 24px;
+    background-color: #cbd5e1;
+    border-radius: 30px;
+    position: relative;
+    transition: background-color 0.3s ease;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.switch-knob {
+    width: 18px;
+    height: 18px;
+    background-color: white;
+    border-radius: 50%;
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+/* Als Dyslexie actief is */
+.dyslexia-toggle.active .switch-track {
+    background-color: #8c1b3f; /* Bordeaux aan-kleur */
+}
+
+.dyslexia-toggle.active .switch-knob {
+    transform: translateX(20px);
+}
+
+.dyslexia-toggle.active .toggle-text {
+    color: #8c1b3f;
+}
+
+/* =========================================
+   NAVIGATIE LINKS & KNOPPEN
+   ========================================= */
+.divider {
+    width: 2px;
+    height: 30px;
+    background-color: #f0efe4;
+    margin: 0 5px;
+    border-radius: 2px;
 }
 
 .nav-link {
-  text-decoration: none;
-  color: #666;
-  font-size: 13px;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  line-height: 1;
+    text-decoration: none;
+    color: #4a5568;
+    font-size: 0.95rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: 30px; /* Mooie ronde pill-vorm */
+    transition: all 0.2s ease;
 }
 
-.logout-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: none;
-  border: none;
-  color: #ff8c00;
-  cursor: pointer;
-  font-size: 18px;
-  line-height: 1;
+.nav-link .icon { font-size: 1.1rem; }
+
+.nav-link:hover {
+    color: #8c1b3f; 
+    background-color: #f0efe4; /* Zachte beige achtergrond */
+    transform: translateY(-1px);
+}
+
+/* Alleen-icoon knoppen (Profiel & Uitloggen) */
+.nav-icon-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 1px solid #e2e8f0;
+    color: #4a5568;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%; /* Perfect rond */
+    cursor: pointer;
+    font-size: 1.2rem;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.nav-icon-btn:hover {
+    background-color: #f0efe4;
+    border-color: #d1cbb8;
+    color: #8c1b3f;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.logout-btn:hover {
+    background-color: #fff5f5;
+    border-color: #feb2b2;
+    color: #e53e3e;
+}
+
+.cart-link {
+    position: relative;
+    border: 1px solid #e2e8f0;
+}
+
+.cart-link:hover {
+    border-color: #8c1b3f;
+}
+
+.cart-badge {
+    position: absolute;
+    top: -5px;       
+    right: -5px;     
+    background-color: #e53e3e; /* Signaal rood voor notificaties */
+    color: white;
+    border-radius: 50%;
+    font-size: 0.75rem;
+    font-weight: 800;
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 3px 6px rgba(229, 62, 62, 0.4);
+    border: 2px solid white; 
+    animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes popIn {
+    0% { transform: scale(0); }
+    80% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+
+@media (max-width: 900px) {
+    .navbar { padding: 0 20px; }
+    .nav-link .text-label { display: none; } /* Verberg tekst, houd iconen op kleine schermen */
+    .nav-link { padding: 10px; border-radius: 50%; width: 42px; justify-content: center; }
+    .toggle-text { display: none; }
 }

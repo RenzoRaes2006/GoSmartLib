@@ -10,4 +10,5 @@ export interface NieuwBoek {
   aantalExemplaren: string;
   locatie: string;
   afbeelding: string;
+  leesniveau?: string;
 }

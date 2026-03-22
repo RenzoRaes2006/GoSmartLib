@@ -1,0 +1,182 @@
+.reserveren-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    font-family: 'Inter', system-ui, sans-serif;
+}
+
+.back-link {
+    color: #64748b;
+    text-decoration: none;
+    font-weight: 600;
+    margin-bottom: 20px;
+    display: inline-block;
+}
+.back-link:hover { color: var(--c-bordeaux); }
+
+.page-title {
+    color: var(--c-bordeaux);
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 30px;
+}
+
+/* Gedeelde styling */
+.layout-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 40px;
+}
+
+h2 { font-size: 1.25rem; color: var(--c-bordeaux); margin-top: 0; }
+.subtitle { color: #64748b; font-size: 0.9rem; margin-bottom: 15px; }
+
+/* Linker sectie (Boekenlijst) */
+.boeken-lijst {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.boek-card {
+    display: flex;
+    align-items: center;
+    background: var(--c-wit);
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    border: 1px solid var(--c-beige);
+    gap: 20px;
+}
+
+.boek-cover {
+    width: 60px;
+    height: 90px;
+    object-fit: cover;
+    border-radius: 6px;
+    background: var(--c-beige);
+}
+
+.boek-info { flex: 1; }
+.boek-info h3 { margin: 0 0 5px 0; font-size: 1.1rem; color: var(--c-bordeaux); }
+.boek-info p { margin: 0; color: #64748b; font-size: 0.9rem; }
+
+.btn-delete {
+    background: none;
+    border: none;
+    color: #ef4444;
+    cursor: pointer;
+    font-weight: bold;
+    padding: 8px 12px;
+    border-radius: 8px;
+    transition: background 0.2s;
+}
+.btn-delete:hover:not(:disabled) { background: #fee2e2; }
+
+/* Leeg mandje */
+.leeg-mandje {
+    text-align: center;
+    padding: 60px 20px;
+    background: var(--c-beige);
+    border-radius: 16px;
+    border: 2px dashed #cbd5e1;
+}
+.leeg-mandje .icon { font-size: 3rem; display: block; margin-bottom: 15px; }
+.btn-primary {
+    background: var(--c-bordeaux);
+    color: var(--c-wit);
+    padding: 12px 24px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    display: inline-block;
+    margin-top: 15px;
+}
+
+/* Rechter sectie (Acties) */
+.actie-sectie {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.identity-box, .bevestig-box {
+    background: var(--c-beige);
+    padding: 25px;
+    border-radius: 16px;
+    border: 1px solid var(--c-beige);
+}
+
+.form-select {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    font-size: 1rem;
+    font-family: inherit;
+}
+
+.btn-bevestig {
+    width: 100%;
+    background: var(--c-bordeaux);
+    color: var(--c-wit);
+    border: none;
+    padding: 16px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-bevestig:hover:not(:disabled) { 
+    background: var(--c-bordeaux); 
+    filter: brightness(90%);
+    transform: translateY(-2px); 
+}
+.btn-bevestig:disabled { background: #cbd5e1; cursor: not-allowed; }
+
+.alert-box {
+    padding: 15px 20px;
+    border-radius: 8px;
+    margin-bottom: 25px;
+    font-weight: 600;
+}
+.alert-box.success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+.alert-box.error { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+
+@media (max-width: 768px) {
+    .layout-grid { grid-template-columns: 1fr; }
+}
+
+.sectie-titel {
+    font-size: 1.25rem;
+    color: #1e293b;
+    margin-bottom: 20px;
+    font-weight: 700;
+}
+
+.info-lijst {
+    margin: 20px 0;
+}
+
+.info-rij {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    font-size: 0.95rem;
+    color: #475569;
+}
+
+.divider-line {
+    border: 0;
+    border-top: 1px solid #e2e8f0;
+    margin: 20px 0;
+}
+
+@media (min-width: 768px) {
+    .actie-sectie {
+        position: sticky;
+        top: 100px; 
+    }
+}

@@ -1,63 +1,275 @@
+/* =====================
+   Catalogus — stijl passend bij homepagina
+   Accentkleur: #8c1b3f | Beige: #f0efe4
+   Font: Segoe UI (zelfde als homepagina)
+   ===================== */
+
+:host {
+  display: block;
+  background-color: #f0efe4;
+}
+
 .main-layout {
   display: flex;
   gap: 30px;
-  padding: 30px;
-  background-color: #f8fbff;
+  padding: 16px 20px;
   min-height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  box-sizing: border-box;
+  background-color: #f0efe4;
 }
+
+/* =====================
+   SIDEBAR
+   ===================== */
 
 .sidebar {
   width: 260px;
-  background: white;
-  padding: 24px;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  height: fit-content;
-  position: sticky;
-  top: 70px;
+  flex-shrink: 0;
+  background: #ffffff;
+  padding: 12px 16px;
+  border-radius: 16px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  position: fixed;
+  top: 80px;
+  border: 1px solid #e2dfd5;
+}
+
+.sidebar-header {
+  padding-bottom: 10px;
+  border-bottom: 2px solid #8c1b3f; /* accentlijn */
 }
 
 .sidebar-title {
-  font-size: 18px;
+  font-size: 1.2rem;
   margin: 0;
-  color: #2c3e50;
+  color: #2d3748; /* zelfde als h2 homepagina */
 }
 
 .filter-section {
-  margin: 20px 0;
+  margin: 10px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
-.filter-section label {
+.filter-section > label {
   display: block;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: bold;
-  margin-bottom: 8px;
-  color: #7f8c8d;
+  margin-top: 8px;
+  margin-bottom: 2px;
+  color: #8c1b3f; /* accentkleur voor labels */
   text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+.filter-section > label:first-child {
+  margin-top: 0;
+}
+
+/* Radio-opties op 1 lijn (overschrijft het bovenstaande) */
+.filter-section .radio-option {
+  text-transform: none;
+  letter-spacing: normal;
+  font-weight: normal;
 }
 
 .sidebar-input {
   width: 100%;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
+  padding: 7px 10px;
+  border: 1px solid #e2dfd5;
+  border-radius: 10px;
   font-size: 14px;
   box-sizing: border-box;
+  background-color: #fff;
+  color: #2d3748;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
+.sidebar-input:focus {
+  outline: none;
+  border-color: #8c1b3f;
+  box-shadow: 0 0 0 3px rgba(140, 27, 63, 0.1);
+}
+
+/* Reset knop */
 .btn-reset {
   width: 100%;
-  padding: 8px;
+  padding: 7px;
   background: none;
-  border: 1px solid #eee;
-  border-radius: 6px;
+  border: 1px solid #e2dfd5;
+  border-radius: 10px;
   cursor: pointer;
-  color: #666;
+  color: #718096;
+  font-size: 13px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
 }
+
+.btn-reset:hover {
+  background: #f0efe4;
+  color: #8c1b3f;
+  border-color: #8c1b3f;
+}
+
+/* =====================
+   RADIO GROEPEN
+   ===================== */
+
+.radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0px;
+}
+
+.radio-option {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.radio-option input[type="radio"] {
+  margin: 0;              /* reset browser margin */
+  width: 16px;
+  height: 16px;
+  accent-color: #8c1b3f;
+  flex-shrink: 0;
+}
+
+.radio-option:hover {
+  background-color: #f0efe4;
+}
+
+.radio-option span {
+  font-size: 13px;
+  font-family: inherit;
+  color: #718096;
+  line-height: 1.3;       /* i.p.v. 1 voor betere visuele centering */
+  display: block;
+}
+
+.radio-option input[type="radio"]:checked + span {
+  color: #8c1b3f;
+  font-weight: 600;
+}
+
+.radio-option:has(input:checked) {
+  background-color: rgba(140, 27, 63, 0.06);
+}
+
+/* =====================
+   GENRE FILTER
+   ===================== */
+
+.genre-filter {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.genre-filter select {
+  width: 100%;
+}
+
+/* =====================
+   JAAR BEREIK
+   ===================== */
+
+.jaar-range {
+  display: flex;
+  gap: 8px;
+}
+
+.jaar-range .sidebar-input {
+  width: 50%;
+}
+
+/* Verwijder pijlen van number inputs */
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* =====================
+   JAAR ERROR
+   ===================== */
+
+.input-error {
+  border-color: #e53e3e !important;
+  box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.1) !important;
+}
+
+.error-text {
+  font-size: 11px;
+  color: #e53e3e;
+  margin-top: 2px;
+}
+
+/* =====================
+   SORTEER RIJ
+   ===================== */
+
+.sort-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.sort-row .sidebar-input {
+  flex: 1;
+}
+
+.sort-direction-btn {
+  width: 42px;
+  flex-shrink: 0;
+  padding: 7px;
+  font-size: 16px;
+  margin-top: 0;
+  background: #f0efe4;
+  border: 1px solid #e2dfd5;
+  border-radius: 10px;
+  color: #8c1b3f;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s;
+  font-family: inherit;
+}
+
+.sort-direction-btn:hover {
+  background: #e2dfd5;
+  border-color: #8c1b3f;
+}
+
+/* =====================
+   CATALOGUS CONTAINER
+   ===================== */
 
 .catalogus-container {
   flex: 1;
+  min-width: 0;
+  margin-left: 290px;
 }
+
+.result-count {
+  font-size: 14px;
+  color: #718096;
+  margin: 0 0 20px 0;
+  font-weight: normal;
+}
+
+/* =====================
+   BOEKEN GRID
+   ===================== */
 
 .boeken-grid {
   display: grid;
@@ -65,16 +277,25 @@
   gap: 20px;
 }
 
+/* =====================
+   BOEK KAART — zelfde stijl als homepagina
+   ===================== */
+
 .boek-card {
-  background: white;
-  border-radius: 10px;
+  background: #ffffff;
+  border-radius: 12px;
   overflow: hidden;
-  border: 1px solid #eee;
-  transition: transform 0.2s;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e2dfd5;
+  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
 }
 
 .boek-card:hover {
-  transform: translateY(-5px);
+  transform: translateY(-5px) rotate(1deg); /* zelfde als homepagina */
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
 }
 
 .image-container {
@@ -92,87 +313,96 @@
   position: absolute;
   top: 10px;
   right: 10px;
-  padding: 4px 8px;
-  border-radius: 4px;
+  padding: 4px 10px;
+  border-radius: 20px; /* meer afgerond, zelfde als dagen-badge homepagina */
   font-size: 11px;
+  font-weight: bold;
   color: white;
 }
 
 .status-badge.beschikbaar {
-  background: #27ae60;
+  background: #48bb78; /* zelfde groen als lening-item homepagina */
 }
 
 .status-badge.uitgeleend {
-  background: #e74c3c;
+  background: #f56565; /* zelfde rood als urgent homepagina */
 }
 
 .boek-info {
   padding: 15px;
+  flex-grow: 1;
 }
 
 .titel {
-  margin: 0;
-  font-size: 15px;
-  color: #333;
+  margin: 0 0 4px 0;
+  font-size: 1rem;
+  color: #1a202c;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .auteur {
-  font-size: 13px;
-  color: #777;
+  margin: 0 0 8px 0;
+  font-size: 0.85rem;
+  color: #718096;
+}
+
+.genres {
+  margin: 0 0 8px 0;
+  font-size: 12px;
+  color: #a0aec0;
 }
 
 .locatie-badge {
+  margin: 0;
   font-size: 12px;
-}
-
-.locatie-badge {
-  font-size: 12px;
-  color: #4a90e2;
+  color: #8c1b3f; /* accentkleur */
   font-weight: bold;
 }
 
-/* Styling voor de pop-up */
-.modal-overlay {
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.6);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
+.no-results {
+  color: #718096;
+  font-size: 14px;
+  font-style: italic; /* zelfde als empty-message homepagina */
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 40px 0;
 }
 
-.modal-box {
-    background: white;
-    padding: 25px;
-    border-radius: 10px;
-    width: 350px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    text-align: center;
+/* =====================
+   RESPONSIVE
+   ===================== */
+
+@media (max-width: 1000px) {
+  .boeken-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
-.modal-box input {
-    width: 90%;
-    padding: 10px;
-    margin: 15px 0;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+@media (max-width: 800px) {
+  .main-layout {
+    flex-direction: column;
+    padding: 20px;
+  }
+
+  .sidebar {
+    width: 100%;
+    position: static;
+  }
+
+  .catalogus-container {
+    margin-left: 0;
+  }
+
+  .boeken-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
-.modal-actions {
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
+@media (max-width: 500px) {
+  .boeken-grid {
+    grid-template-columns: 1fr;
+  }
 }
-
-.modal-actions button {
-    flex: 1;
-    padding: 10px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-}
-
-.cancel-btn { background: #eee; color: #333; }
-.save-btn { background: #1a3a5a; color: white; }
