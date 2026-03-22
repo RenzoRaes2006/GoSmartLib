@@ -34,7 +34,7 @@ public class BoekControllerTest {
         // Given
         String term = "java";
         Sort sort = Sort.by(Sort.Direction.ASC, "locatie");
-        Mockito.when(boekRepository.filterBoeken(term, null, null, null, null, null, null, null, term, term, sort))
+        Mockito.when(boekRepository.filterBoeken(term, null, null, null, null, null, null, null, term, sort))
                 .thenReturn(List.of(new Boek()));
 
         // When & Then
@@ -42,7 +42,7 @@ public class BoekControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray());
 
-        Mockito.verify(boekRepository).filterBoeken(term, null, null, null, null, null, null, null, term, term, sort);
+        Mockito.verify(boekRepository).filterBoeken(term, null, null, null, null, null, null, null, term, sort);
     }
 
     @Test

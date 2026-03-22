@@ -13,6 +13,7 @@ import { BoekService } from '../services/boek.service';
 import { NieuwBoek } from '../models/NieuwBoek';
 import { GoogleBookService } from '../services/googleBook.service';
 import { Boek } from '../models/Boek';
+import { FilterOptions } from '../models/FilterOptions';
 
 @Component({
   selector: 'app-boek-beheer',
@@ -27,7 +28,7 @@ export class BoekBeheer implements OnInit {
   errorMessage: string = '';
   successMessage: string = '';
   toonIsbnZoek: boolean = false;
-  zoekIsbn: string = '';
+  zoekTerm: string = '';
   zoekMessage: string = '';
   // Mode management
   mode: 'toevoegen' | 'wijzigen' = 'wijzigen';
@@ -43,6 +44,8 @@ export class BoekBeheer implements OnInit {
   pageSize: number = 6;
   totaalPages: number = 0;
   isLoadingBoeken: boolean = false;
+  // Debounce timer voor live zoeken
+  private zoekDebounceTimer: any = null;
 
   // Constructor met dependency injection en formulieropbouw
   constructor(
@@ -128,7 +131,7 @@ export class BoekBeheer implements OnInit {
   // Zet de ISBN zoekmodus aan/uit
   toggleIsbnZoek() {
     this.toonIsbnZoek = !this.toonIsbnZoek;
-    this.zoekIsbn = '';
+    this.zoekTerm = '';
     this.zoekMessage = '';
   }
 
@@ -155,50 +158,27 @@ export class BoekBeheer implements OnInit {
   }
 
   // Zoek een boek op ISBN via Google Books API
-  zoekBoekOpIsbn() {
-    if (!this.zoekIsbn || (this.zoekIsbn.length !== 10 && this.zoekIsbn.length !== 13)) {
+  zoekBoekOp() {
+    if (!this.zoekTerm || (this.zoekTerm.length !== 10 && this.zoekTerm.length !== 13)) {
       this.zoekMessage = 'Voer een geldig ISBN in (10 of 13 cijfers).';
       return;
     }
 
     this.zoekMessage = 'Boek zoeken...';
 
-    if (this.mode === 'toevoegen') {
-      this.googleBookService.zoekOpIsbn(this.zoekIsbn).subscribe({
-        next: (boekData) => {
-          if (boekData) {
-            this.boekForm.patchValue(boekData);
-            this.boekForm.updateValueAndValidity();
-            this.zoekMessage = 'Boek gevonden! vul de overige velden aan.';
-            setTimeout(() => (this.toonIsbnZoek = false), 3000);
-          } else {
-            this.zoekMessage = 'Geen boek gevonden met dit ISBN.';
-          }
-        },
-        error: () => {
-          this.zoekMessage = 'Fout bij het zoeken naar het boek.';
-        },
-      });
-      return;
-    }
-
-    // In wijzig/verwijdermodus zoeken we altijd in de eigen database,
-    // zodat we ook id, aantalExemplaren en locatie correct krijgen.
-    this.boekService.getBoekOpIsbn(this.zoekIsbn).subscribe({
+    this.googleBookService.zoekOpIsbn(this.zoekTerm).subscribe({
       next: (boekData) => {
-        this.naarTeWijzigenBoek = boekData;
-        this.boekForm.patchValue(this.mapBoekNaarFormValue(boekData));
-        this.boekForm.updateValueAndValidity();
-        this.boekGevonden = true;
-        this.boekForm.enable();
-
-        this.zoekMessage = 'Boek gevonden!';
-        setTimeout(() => (this.toonIsbnZoek = false), 3000);
+        if (boekData) {
+          this.boekForm.patchValue(boekData);
+          this.boekForm.updateValueAndValidity();
+          this.zoekMessage = 'Boek gevonden! vul de overige velden aan.';
+          setTimeout(() => (this.toonIsbnZoek = false), 3000);
+        } else {
+          this.zoekMessage = 'Geen boek gevonden met dit ISBN.';
+        }
       },
       error: () => {
-        this.zoekMessage = 'Geen boek gevonden met dit ISBN.';
-        this.boekGevonden = false;
-        this.naarTeWijzigenBoek = null;
+        this.zoekMessage = 'Fout bij het zoeken naar het boek.';
       },
     });
   }
@@ -208,9 +188,12 @@ export class BoekBeheer implements OnInit {
     this.boekForm.reset();
     this.errorMessage = '';
     this.successMessage = '';
-    this.toonIsbnZoek = false;
     this.boekGevonden = false;
     this.naarTeWijzigenBoek = null;
+
+    if (this.mode === 'toevoegen') {
+      this.toonIsbnZoek = false;
+    }
   }
 
   setMode(newMode: 'toevoegen' | 'wijzigen') {
@@ -382,6 +365,39 @@ export class BoekBeheer implements OnInit {
         this.isLoadingBoeken = false;
       },
     });
+  }
+
+  // Live zoeken: filter de boekenlijst terwijl de gebruiker typt
+  onZoekTermInput(value: string) {
+    this.zoekTerm = value;
+
+    if (this.zoekDebounceTimer) {
+      clearTimeout(this.zoekDebounceTimer);
+    }
+
+    this.zoekDebounceTimer = setTimeout(() => {
+      if (this.mode === 'wijzigen') {
+        if (this.zoekTerm.trim().length === 0) {
+          // Geen zoekterm: toon de normale gepagineerde lijst
+          this.laadBoekenPagina(0);
+        } else {
+          // Zoek en toon resultaten in de lijst
+          this.isLoadingBoeken = true;
+          const filters: FilterOptions = { zoekterm: this.zoekTerm };
+          this.boekService.getBeheerBoekenGefilterd(filters).subscribe({
+            next: (data) => {
+              this.boeknOverzicht = data;
+              this.currentPage = 0;
+              this.totaalPages = 1;
+              this.isLoadingBoeken = false;
+            },
+            error: () => {
+              this.isLoadingBoeken = false;
+            },
+          });
+        }
+      }
+    }, 300);
   }
 
   gaNaarVolgendePagina() {

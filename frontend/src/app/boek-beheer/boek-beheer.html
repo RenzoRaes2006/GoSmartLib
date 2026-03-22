@@ -12,26 +12,42 @@
 
 <div class="isbn-zoek-boek">
   <button type="button" (click)="toggleIsbnZoek()">
-    {{ toonIsbnZoek ? 'Verberg ISBN Zoekveld' : 'Zoek op ISBN' }}
+    {{ toonIsbnZoek ? 'Verberg zoekveld' : mode === 'toevoegen' ? 'Zoek op ISBN' : 'Zoek boek' }}
   </button>
 
   <div *ngIf="toonIsbnZoek">
-    <label for="zoekIsbn">ISBN:</label>
-    <input
-      id="zoekIsbn"
-      type="text"
-      [value]="zoekIsbn"
-      (input)="zoekIsbn = $any($event.target).value.slice(0, 13)"
-      placeholder="9789012345678 of 0747532699"
-      maxlength="13"
-    />
-    <button
-      type="button"
-      (click)="zoekBoekOpIsbn()"
-      [disabled]="zoekIsbn.length !== 10 && zoekIsbn.length !== 13"
-    >
-      Zoek
-    </button>
+    <!-- Toevoegen: zoek op ISBN -->
+    <ng-container *ngIf="mode === 'toevoegen'">
+      <label for="zoekIsbn">ISBN:</label>
+      <input
+        id="zoekIsbn"
+        type="text"
+        [value]="zoekTerm"
+        (input)="zoekTerm = $any($event.target).value.replace('[^0-9]', '').slice(0, 13)"
+        placeholder="9789012345678 of 0747532699"
+        maxlength="13"
+      />
+      <button
+        type="button"
+        (click)="zoekBoekOp()"
+        [disabled]="zoekTerm.length !== 10 && zoekTerm.length !== 13"
+      >
+        Zoek
+      </button>
+    </ng-container>
+
+    <!-- Wijzigen: zoek op titel, auteur of ISBN -->
+    <ng-container *ngIf="mode === 'wijzigen'">
+      <label for="zoekIsbn">Zoek op titel, auteur of ISBN:</label>
+      <input
+        id="zoekIsbn"
+        type="text"
+        [value]="zoekTerm"
+        (input)="onZoekTermInput($any($event.target).value)"
+        placeholder="Typ een titel, auteur of ISBN"
+      />
+    </ng-container>
+
     <small *ngIf="zoekMessage" class="zoek-melding">{{ zoekMessage }}</small>
   </div>
 </div>

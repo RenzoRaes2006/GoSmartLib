@@ -61,5 +61,12 @@ public class BeoordelingService {
 
         Beoordeling beoordeling = BeoordelingMapper.toEntity(dto, boek, gebruiker); // TODO: Vervang null met daadwerkelijke Gebruiker object op basis van dto.gebruikerId()
         beoordelingRepository.save(beoordeling);
+
+        double gemiddelde = beoordelingRepository.findByBoekId(boek.getId()).stream()
+                .mapToInt(Beoordeling::getWaardering)
+                .average()
+                .orElse(0.0);
+        boek.setPopulariteit(gemiddelde);
+        boekRepository.save(boek);
     }
 }

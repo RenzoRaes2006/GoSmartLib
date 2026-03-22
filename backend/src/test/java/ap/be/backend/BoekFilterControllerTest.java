@@ -25,174 +25,176 @@ import ap.be.backend.service.BoekService;
 @WebMvcTest(BoekController.class)
 public class BoekFilterControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+        @Autowired
+        private MockMvc mockMvc;
 
-    @MockBean
-    private BoekService boekService;
+        @MockBean
+        private BoekService boekService;
 
-    @MockBean
-    private BoekRepository boekRepository;
+        @MockBean
+        private BoekRepository boekRepository;
 
-    // --- GEEN PARAMETERS ---
+        // --- GEEN PARAMETERS ---
 
-    @Test
-    void givenGeenParameters_whenGetAlleBoeken_thenStatus200EnLegeArray() throws Exception {
-        // Given
-        when(boekService.filterBoeken(any(), any(), any(), any(), any(),
-                any(), any(), any(), any(), any(), any()))
-                .thenReturn(List.of());
+        @Test
+        void givenGeenParameters_whenGetAlleBoeken_thenStatus200EnLegeArray() throws Exception {
+                // Given
+                when(boekService.filterBoeken(any(), any(), any(), any(), any(),
+                                any(), any(), any(), any(), any()))
+                                .thenReturn(List.of());
 
-        // When & Then
-        mockMvc.perform(get("/api/boeken"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray());
-    }
+                // When & Then
+                mockMvc.perform(get("/api/boeken"))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$").isArray());
+        }
 
-    // --- ZOEKTERM ---
+        // --- ZOEKTERM ---
 
-    @Test
-    void givenZoekterm_whenGetAlleBoeken_thenZoektermWordtDoorgegevenAanService() throws Exception {
-        // Given
-        Boek boek = new Boek("De Alchemist", "Paulo Coelho");
-        when(boekService.filterBoeken(eq("alchemist"), any(), any(), any(), any(),
-                any(), any(), any(), any(), any(), any()))
-                .thenReturn(List.of(boek));
+        @Test
+        void givenZoekterm_whenGetAlleBoeken_thenZoektermWordtDoorgegevenAanService() throws Exception {
+                // Given
+                Boek boek = new Boek("De Alchemist", "Paulo Coelho");
+                when(boekService.filterBoeken(eq("alchemist"), any(), any(), any(), any(),
+                                any(), any(), any(), any(), any()))
+                                .thenReturn(List.of(boek));
 
-        // When & Then
-        mockMvc.perform(get("/api/boeken").param("zoekterm", "alchemist"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].titel").value("De Alchemist"));
+                // When & Then
+                mockMvc.perform(get("/api/boeken").param("zoekterm", "alchemist"))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$[0].titel").value("De Alchemist"));
 
-        verify(boekService).filterBoeken(eq("alchemist"), any(), any(), any(), any(),
-                any(), any(), any(), any(), any(), any());
-    }
+                verify(boekService).filterBoeken(eq("alchemist"), any(), any(), any(), any(),
+                                any(), any(), any(), any(), any());
+        }
 
-    // --- GENRE PARAMETER ---
+        // --- GENRE PARAMETER ---
 
-    @Test
-    void givenEnkelGenreParam_whenGetAlleBoeken_thenGenreWordtAlsLijstDoorgegevenAanService() throws Exception {
-        // Given
-        when(boekService.filterBoeken(any(), eq(List.of("Filosofie")), any(), any(), any(),
-                any(), any(), any(), any(), any(), any()))
-                .thenReturn(List.of(new Boek("Socrates", "Plato")));
+        @Test
+        void givenEnkelGenreParam_whenGetAlleBoeken_thenGenreWordtAlsLijstDoorgegevenAanService() throws Exception {
+                // Given
+                when(boekService.filterBoeken(any(), eq(List.of("Filosofie")), any(), any(), any(),
+                                any(), any(), any(), any(), any()))
+                                .thenReturn(List.of(new Boek("Socrates", "Plato")));
 
-        // When & Then
-        mockMvc.perform(get("/api/boeken").param("genre", "Filosofie"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray());
+                // When & Then
+                mockMvc.perform(get("/api/boeken").param("genre", "Filosofie"))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$").isArray());
 
-        verify(boekService).filterBoeken(any(), eq(List.of("Filosofie")), any(), any(), any(),
-                any(), any(), any(), any(), any(), any());
-    }
+                verify(boekService).filterBoeken(any(), eq(List.of("Filosofie")), any(), any(), any(),
+                                any(), any(), any(), any(), any());
+        }
 
-    @Test
-    void givenMeerdereGenreParams_whenGetAlleBoeken_thenAlleGenresWordenVerzameldInLijst() throws Exception {
-        // Given - frontend stuurt ?genre=Non-fictie+algemeen&genre=Filosofie&genre=Psychologie
-        List<String> verwachteGenres = List.of("Non-fictie algemeen", "Filosofie", "Psychologie");
-        when(boekService.filterBoeken(any(), eq(verwachteGenres), any(), any(), any(),
-                any(), any(), any(), any(), any(), any()))
-                .thenReturn(List.of(new Boek("Sapiens", "Harari")));
+        @Test
+        void givenMeerdereGenreParams_whenGetAlleBoeken_thenAlleGenresWordenVerzameldInLijst() throws Exception {
+                // Given - frontend stuurt
+                // ?genre=Non-fictie+algemeen&genre=Filosofie&genre=Psychologie
+                List<String> verwachteGenres = List.of("Non-fictie algemeen", "Filosofie", "Psychologie");
+                when(boekService.filterBoeken(any(), eq(verwachteGenres), any(), any(), any(),
+                                any(), any(), any(), any(), any()))
+                                .thenReturn(List.of(new Boek("Sapiens", "Harari")));
 
-        // When & Then
-        mockMvc.perform(get("/api/boeken")
-                        .param("genre", "Non-fictie algemeen")
-                        .param("genre", "Filosofie")
-                        .param("genre", "Psychologie"))
-                .andExpect(status().isOk());
+                // When & Then
+                mockMvc.perform(get("/api/boeken")
+                                .param("genre", "Non-fictie algemeen")
+                                .param("genre", "Filosofie")
+                                .param("genre", "Psychologie"))
+                                .andExpect(status().isOk());
 
-        verify(boekService).filterBoeken(any(), eq(verwachteGenres), any(), any(), any(),
-                any(), any(), any(), any(), any(), any());
-    }
+                verify(boekService).filterBoeken(any(), eq(verwachteGenres), any(), any(), any(),
+                                any(), any(), any(), any(), any());
+        }
 
-    // --- LEESNIVEAU ---
+        // --- LEESNIVEAU ---
 
-    @Test
-    void givenLeesniveauParam_whenGetAlleBoeken_thenLeesniveauWordtDoorgegevenAanService() throws Exception {
-        // Given
-        Boek boek = new Boek("Eenvoudig Boek", "Auteur");
-        boek.setLeesniveau("A (eenvoudig taalgebruik)");
-        when(boekService.filterBoeken(any(), any(), any(), any(), any(),
-                any(), any(), any(), any(), eq("A (eenvoudig taalgebruik)"), any()))
-                .thenReturn(List.of(boek));
+        @Test
+        void givenLeesniveauParam_whenGetAlleBoeken_thenLeesniveauWordtDoorgegevenAanService() throws Exception {
+                // Given
+                Boek boek = new Boek("Eenvoudig Boek", "Auteur");
+                boek.setLeesniveau("A (eenvoudig taalgebruik)");
+                when(boekService.filterBoeken(any(), any(), any(), any(), any(),
+                                any(), any(), any(), any(), eq("A (eenvoudig taalgebruik)"), any()))
+                                .thenReturn(List.of(boek));
 
-        // When & Then
-        mockMvc.perform(get("/api/boeken").param("leesniveau", "A (eenvoudig taalgebruik)"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].leesniveau").value("A (eenvoudig taalgebruik)"));
+                // When & Then
+                mockMvc.perform(get("/api/boeken").param("leesniveau", "A (eenvoudig taalgebruik)"))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$[0].leesniveau").value("A (eenvoudig taalgebruik)"));
 
-        verify(boekService).filterBoeken(any(), any(), any(), any(), any(),
-                any(), any(), any(), any(), eq("A (eenvoudig taalgebruik)"), any());
-    }
+                verify(boekService).filterBoeken(any(), any(), any(), any(), any(),
+                                any(), any(), any(), any(), eq("A (eenvoudig taalgebruik)"), any());
+        }
 
-    // --- BESCHIKBAARHEID ---
+        // --- BESCHIKBAARHEID ---
 
-    @Test
-    void givenBeschikbaarTrueParam_whenGetAlleBoeken_thenBeschikbaarheidWordtAlsBooleanDoorgegevenAanService() throws Exception {
-        // Given
-        when(boekService.filterBoeken(any(), any(), any(), any(), any(),
-                eq(true), any(), any(), any(), any(), any()))
-                .thenReturn(List.of(new Boek("Beschikbaar Boek", "Auteur")));
+        @Test
+        void givenBeschikbaarTrueParam_whenGetAlleBoeken_thenBeschikbaarheidWordtAlsBooleanDoorgegevenAanService()
+                        throws Exception {
+                // Given
+                when(boekService.filterBoeken(any(), any(), any(), any(), any(),
+                                eq(true), any(), any(), any(), any(), any()))
+                                .thenReturn(List.of(new Boek("Beschikbaar Boek", "Auteur")));
 
-        // When & Then
-        mockMvc.perform(get("/api/boeken").param("beschikbaar", "true"))
-                .andExpect(status().isOk());
+                // When & Then
+                mockMvc.perform(get("/api/boeken").param("beschikbaar", "true"))
+                                .andExpect(status().isOk());
 
-        verify(boekService).filterBoeken(any(), any(), any(), any(), any(),
-                eq(true), any(), any(), any(), any(), any());
-    }
+                verify(boekService).filterBoeken(any(), any(), any(), any(), any(),
+                                eq(true), any(), any(), any(), any(), any());
+        }
 
-    @Test
-    void givenBeschikbaarAfwezig_whenGetAlleBoeken_thenBeschikbaarheidIsNullInService() throws Exception {
-        // Given
-        when(boekService.filterBoeken(any(), any(), any(), any(), any(),
-                isNull(), any(), any(), any(), any(), any()))
-                .thenReturn(List.of());
+        @Test
+        void givenBeschikbaarAfwezig_whenGetAlleBoeken_thenBeschikbaarheidIsNullInService() throws Exception {
+                // Given
+                when(boekService.filterBoeken(any(), any(), any(), any(), any(),
+                                isNull(), any(), any(), any(), any(), any()))
+                                .thenReturn(List.of());
 
-        // When & Then
-        mockMvc.perform(get("/api/boeken"))
-                .andExpect(status().isOk());
+                // When & Then
+                mockMvc.perform(get("/api/boeken"))
+                                .andExpect(status().isOk());
 
-        verify(boekService).filterBoeken(any(), any(), any(), any(), any(),
-                isNull(), any(), any(), any(), any(), any());
-    }
+                verify(boekService).filterBoeken(any(), any(), any(), any(), any(),
+                                isNull(), any(), any(), any(), any(), any());
+        }
 
-    // --- SORTEREN ---
+        // --- SORTEREN ---
 
-    @Test
-    void givenSorteerOpEnRichting_whenGetAlleBoeken_thenSortWordtJuistMeegegeven() throws Exception {
-        // Given
-        Sort verwachtSort = Sort.by(Sort.Direction.DESC, "titel");
-        when(boekService.filterBoeken(any(), any(), any(), any(), any(),
-                any(), any(), any(), any(), any(), eq(verwachtSort)))
-                .thenReturn(List.of());
+        @Test
+        void givenSorteerOpEnRichting_whenGetAlleBoeken_thenSortWordtJuistMeegegeven() throws Exception {
+                // Given
+                Sort verwachtSort = Sort.by(Sort.Direction.DESC, "titel");
+                when(boekService.filterBoeken(any(), any(), any(), any(), any(),
+                                any(), any(), any(), any(), any(), eq(verwachtSort)))
+                                .thenReturn(List.of());
 
-        // When & Then
-        mockMvc.perform(get("/api/boeken")
-                        .param("sorteerOp", "titel")
-                        .param("sorteerRichting", "DESC"))
-                .andExpect(status().isOk());
+                // When & Then
+                mockMvc.perform(get("/api/boeken")
+                                .param("sorteerOp", "titel")
+                                .param("sorteerRichting", "DESC"))
+                                .andExpect(status().isOk());
 
-        verify(boekService).filterBoeken(any(), any(), any(), any(), any(),
-                any(), any(), any(), any(), any(), eq(verwachtSort));
-    }
+                verify(boekService).filterBoeken(any(), any(), any(), any(), any(),
+                                any(), any(), any(), any(), any(), eq(verwachtSort));
+        }
 
-    // --- PAGINABEREIK ---
+        // --- PAGINABEREIK ---
 
-    @Test
-    void givenMinEnMaxPagina_whenGetAlleBoeken_thenPaginaFiltersWordenDoorgegevenAanService() throws Exception {
-        // Given
-        when(boekService.filterBoeken(any(), any(), any(), eq(100), eq(300),
-                any(), any(), any(), any(), any(), any()))
-                .thenReturn(List.of(new Boek("Kort Boek", "Auteur")));
+        @Test
+        void givenMinEnMaxPagina_whenGetAlleBoeken_thenPaginaFiltersWordenDoorgegevenAanService() throws Exception {
+                // Given
+                when(boekService.filterBoeken(any(), any(), any(), eq(100), eq(300),
+                                any(), any(), any(), any(), any(), any()))
+                                .thenReturn(List.of(new Boek("Kort Boek", "Auteur")));
 
-        // When & Then
-        mockMvc.perform(get("/api/boeken")
-                        .param("minPagina", "100")
-                        .param("maxPagina", "300"))
-                .andExpect(status().isOk());
+                // When & Then
+                mockMvc.perform(get("/api/boeken")
+                                .param("minPagina", "100")
+                                .param("maxPagina", "300"))
+                                .andExpect(status().isOk());
 
-        verify(boekService).filterBoeken(any(), any(), any(), eq(100), eq(300),
-                any(), any(), any(), any(), any(), any());
-    }
+                verify(boekService).filterBoeken(any(), any(), any(), eq(100), eq(300),
+                                any(), any(), any(), any(), any(), any());
+        }
 }

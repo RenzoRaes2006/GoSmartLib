@@ -22,6 +22,6 @@ public record BoekDTO(
         @JsonProperty("aantalExemplaren") @Min(value = 0, message = "Aantal exemplaren mag niet leeg zijn") int aantalExemplaren,
         @JsonProperty("locatie") @NotBlank(message = "Locatie mag niet leeg zijn") String locatie,
         @JsonProperty("afbeelding") String afbeelding,
-        @JsonProperty("populariteit") String populariteit,
+        @JsonProperty("populariteit") Double populariteit,
         @JsonProperty("leesniveau") String leesniveau) {
 }

@@ -84,7 +84,7 @@ class BoekRepositoryTest {
 
         // When
         List<Boek> result = boekRepository.filterBoeken("java", null, null, null, null, null, null, null, "java",
-                null, sort);
+                null);
 
         // Then
         assertThat(result).hasSize(1);
@@ -103,7 +103,7 @@ class BoekRepositoryTest {
 
         // When
         List<Boek> result = boekRepository.filterBoeken("Bloch", null, null, null, null, null, null, null, "Bloch",
-                null, sort);
+                null);
 
         // Then
         assertThat(result).isNotEmpty();

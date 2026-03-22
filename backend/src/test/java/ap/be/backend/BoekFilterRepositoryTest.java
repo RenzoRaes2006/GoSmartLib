@@ -33,10 +33,11 @@ public class BoekFilterRepositoryTest {
         filosofieBoek.setGenre(List.of("Filosofie"));
         boekRepository.save(filosofieBoek);
 
-        // When - filter op ["Non-fictie algemeen", "Filosofie"] (hoofdgenre + subgenres)
+        // When - filter op ["Non-fictie algemeen", "Filosofie"] (hoofdgenre +
+        // subgenres)
         List<String> genres = List.of("Non-fictie algemeen", "Filosofie", "Psychologie", "Geschiedenis");
         List<Boek> resultaat = boekRepository.filterBoeken(null, genres, null, null, null,
-                null, null, null, null, null, defaultSort);
+                null, null, null, null, null);
 
         // Then - het filosofieboek moet zichtbaar zijn
         List<String> titels = resultaat.stream().map(Boek::getTitel).toList();
@@ -54,7 +55,7 @@ public class BoekFilterRepositoryTest {
 
         // When
         List<Boek> resultaat = boekRepository.filterBoeken(null, List.of("Non-fictie algemeen"),
-                null, null, null, null, null, null, null, null, defaultSort);
+                null, null, null, null, null, null, null, null);
 
         // Then
         List<String> titels = resultaat.stream().map(Boek::getTitel).toList();
@@ -72,7 +73,7 @@ public class BoekFilterRepositoryTest {
 
         // When - filter op Filosofie, niet op Thriller
         List<Boek> resultaat = boekRepository.filterBoeken(null, List.of("Filosofie"),
-                null, null, null, null, null, null, null, null, defaultSort);
+                null, null, null, null, null, null, null, null);
 
         // Then
         List<String> titels = resultaat.stream().map(Boek::getTitel).toList();
@@ -94,7 +95,7 @@ public class BoekFilterRepositoryTest {
 
         // When
         List<Boek> resultaat = boekRepository.filterBoeken(null, List.of("Filosofie", "Psychologie"),
-                null, null, null, null, null, null, null, null, defaultSort);
+                null, null, null, null, null, null, null, null);
 
         // Then - beide boeken worden getoond
         List<String> titels = resultaat.stream().map(Boek::getTitel).toList();
@@ -118,7 +119,7 @@ public class BoekFilterRepositoryTest {
 
         // When
         List<Boek> resultaat = boekRepository.filterBoeken(null, null, null, null, null,
-                null, null, null, null, "A (eenvoudig taalgebruik)", defaultSort);
+                null, null, null, null, defaultSort);
 
         // Then
         List<String> titels = resultaat.stream().map(Boek::getTitel).toList();
@@ -143,7 +144,7 @@ public class BoekFilterRepositoryTest {
 
         // When
         List<Boek> resultaat = boekRepository.filterBoeken(null, null, null, null, null,
-                true, null, null, null, null, defaultSort);
+                true, null, null, null, null);
 
         // Then
         List<String> titels = resultaat.stream().map(Boek::getTitel).toList();
@@ -164,7 +165,7 @@ public class BoekFilterRepositoryTest {
 
         // When
         List<Boek> resultaat = boekRepository.filterBoeken(uniekwoord, null, null, null, null,
-                null, null, null, null, null, defaultSort);
+                null, null, null, null, null);
 
         // Then
         assertThat(resultaat).isNotEmpty();
@@ -189,7 +190,7 @@ public class BoekFilterRepositoryTest {
 
         // When - filter op zoekterm + genre Roman
         List<Boek> resultaat = boekRepository.filterBoeken(uniekwoord, List.of("Roman"),
-                null, null, null, null, null, null, null, null, defaultSort);
+                null, null, null, null, null, null, null, null);
 
         // Then - alleen het Roman-boek
         List<String> titels = resultaat.stream().map(Boek::getTitel).toList();

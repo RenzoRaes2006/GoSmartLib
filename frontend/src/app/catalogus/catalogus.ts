@@ -29,7 +29,6 @@ export class Catalogus implements OnInit, OnDestroy {
   beschikbaarheid = signal<boolean | undefined>(undefined);
   uitgaveJaarVan = signal<number | undefined>(undefined);
   uitgaveJaarTot = signal<number | undefined>(undefined);
-  populariteit = signal<number | undefined>(undefined);
   leesniveau = signal<string | undefined>(undefined);
   selectedHoofdGenre = signal<string>('');
   jaarError = signal<string>('');
@@ -102,7 +101,6 @@ export class Catalogus implements OnInit, OnDestroy {
         this.beschikbaarheid.set(filters.beschikbaarheid);
         this.uitgaveJaarVan.set(filters.uitgaveJaarVan);
         this.uitgaveJaarTot.set(filters.uitgaveJaarTot);
-        this.populariteit.set(filters.populariteit);
         this.leesniveau.set(filters.leesniveau);
         this.selectedHoofdGenre.set(filters.selectedHoofdGenre || '');
 
@@ -171,7 +169,6 @@ export class Catalogus implements OnInit, OnDestroy {
       beschikbaarheid: this.beschikbaarheid() === true ? 'true' : undefined,
       uitgaveJaarVan: this.uitgaveJaarVan(),
       uitgaveJaarTot: this.uitgaveJaarTot(),
-      populariteit: this.populariteit(),
       leesniveau: this.leesniveau(),
     };
 
@@ -191,7 +188,6 @@ export class Catalogus implements OnInit, OnDestroy {
       beschikbaarheid: this.beschikbaarheid(),
       uitgaveJaarVan: this.uitgaveJaarVan(),
       uitgaveJaarTot: this.uitgaveJaarTot(),
-      populariteit: this.populariteit(),
       leesniveau: this.leesniveau(),
       selectedHoofdGenre: this.selectedHoofdGenre(),
     };
@@ -260,7 +256,6 @@ export class Catalogus implements OnInit, OnDestroy {
     this.beschikbaarheid.set(undefined);
     this.uitgaveJaarVan.set(undefined);
     this.uitgaveJaarTot.set(undefined);
-    this.populariteit.set(undefined);
     this.leesniveau.set(undefined);
     this.selectedHoofdGenre.set('');
     sessionStorage.removeItem(this.FILTERS_KEYS);
