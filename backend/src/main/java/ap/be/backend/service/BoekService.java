@@ -126,9 +126,4 @@ public class BoekService {
         return boekRepository.findTop5PopulaireBoeken();
     }
 
-    public Object filterBoeken(String any, List<String> any2, String any3, Integer any4, Integer any5, Boolean any6,
-            Integer any7, Integer any8, String any9, String eq, Object any10) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'filterBoeken'");
-    }
 }

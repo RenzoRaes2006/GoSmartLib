@@ -114,7 +114,7 @@ public class BoekFilterControllerTest {
                 Boek boek = new Boek("Eenvoudig Boek", "Auteur");
                 boek.setLeesniveau("A (eenvoudig taalgebruik)");
                 when(boekService.filterBoeken(any(), any(), any(), any(), any(),
-                                any(), any(), any(), any(), eq("A (eenvoudig taalgebruik)"), any()))
+                                any(), any(), any(), eq("A (eenvoudig taalgebruik)"), any()))
                                 .thenReturn(List.of(boek));
 
                 // When & Then
@@ -123,7 +123,7 @@ public class BoekFilterControllerTest {
                                 .andExpect(jsonPath("$[0].leesniveau").value("A (eenvoudig taalgebruik)"));
 
                 verify(boekService).filterBoeken(any(), any(), any(), any(), any(),
-                                any(), any(), any(), any(), eq("A (eenvoudig taalgebruik)"), any());
+                                any(), any(), any(), eq("A (eenvoudig taalgebruik)"), any());
         }
 
         // --- BESCHIKBAARHEID ---
@@ -133,7 +133,7 @@ public class BoekFilterControllerTest {
                         throws Exception {
                 // Given
                 when(boekService.filterBoeken(any(), any(), any(), any(), any(),
-                                eq(true), any(), any(), any(), any(), any()))
+                                eq(true), any(), any(), any(), any()))
                                 .thenReturn(List.of(new Boek("Beschikbaar Boek", "Auteur")));
 
                 // When & Then
@@ -141,14 +141,14 @@ public class BoekFilterControllerTest {
                                 .andExpect(status().isOk());
 
                 verify(boekService).filterBoeken(any(), any(), any(), any(), any(),
-                                eq(true), any(), any(), any(), any(), any());
+                                eq(true), any(), any(), any(), any());
         }
 
         @Test
         void givenBeschikbaarAfwezig_whenGetAlleBoeken_thenBeschikbaarheidIsNullInService() throws Exception {
                 // Given
                 when(boekService.filterBoeken(any(), any(), any(), any(), any(),
-                                isNull(), any(), any(), any(), any(), any()))
+                                isNull(), any(), any(), any(), any()))
                                 .thenReturn(List.of());
 
                 // When & Then
@@ -156,7 +156,7 @@ public class BoekFilterControllerTest {
                                 .andExpect(status().isOk());
 
                 verify(boekService).filterBoeken(any(), any(), any(), any(), any(),
-                                isNull(), any(), any(), any(), any(), any());
+                                isNull(), any(), any(), any(), any());
         }
 
         // --- SORTEREN ---
@@ -166,7 +166,7 @@ public class BoekFilterControllerTest {
                 // Given
                 Sort verwachtSort = Sort.by(Sort.Direction.DESC, "titel");
                 when(boekService.filterBoeken(any(), any(), any(), any(), any(),
-                                any(), any(), any(), any(), any(), eq(verwachtSort)))
+                                any(), any(), any(), any(), eq(verwachtSort)))
                                 .thenReturn(List.of());
 
                 // When & Then
@@ -176,7 +176,72 @@ public class BoekFilterControllerTest {
                                 .andExpect(status().isOk());
 
                 verify(boekService).filterBoeken(any(), any(), any(), any(), any(),
-                                any(), any(), any(), any(), any(), eq(verwachtSort));
+                                any(), any(), any(), any(), eq(verwachtSort));
+        }
+
+        // --- BOEKBEHEER ZOEKEN (alleen zoekterm, rest null) ---
+
+        @Test
+        void givenZoektermOpAuteur_whenGetAlleBoeken_thenGeeftMatchendeBoeken() throws Exception {
+                // Given - boekbeheer zoekt op auteur
+                Boek boek = new Boek("De Alchemist", "Paulo Coelho");
+                when(boekService.filterBoeken(eq("coelho"), any(), any(), any(), any(),
+                                any(), any(), any(), any(), any()))
+                                .thenReturn(List.of(boek));
+
+                // When & Then
+                mockMvc.perform(get("/api/boeken").param("zoekterm", "coelho"))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$[0].auteur").value("Paulo Coelho"));
+
+                verify(boekService).filterBoeken(eq("coelho"), any(), any(), any(), any(),
+                                any(), any(), any(), any(), any());
+        }
+
+        @Test
+        void givenZoektermOpIsbn_whenGetAlleBoeken_thenGeeftMatchendeBoeken() throws Exception {
+                // Given - boekbeheer zoekt op ISBN
+                Boek boek = new Boek("Clean Code", "Robert Martin");
+                boek.setIsbn("9780132350884");
+                when(boekService.filterBoeken(eq("9780132350884"), any(), any(), any(), any(),
+                                any(), any(), any(), any(), any()))
+                                .thenReturn(List.of(boek));
+
+                // When & Then
+                mockMvc.perform(get("/api/boeken").param("zoekterm", "9780132350884"))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$[0].isbn").value("9780132350884"));
+        }
+
+        @Test
+        void givenZoektermZonderResultaat_whenGetAlleBoeken_thenGeeftLegeArray() throws Exception {
+                // Given - zoekterm zonder match
+                when(boekService.filterBoeken(eq("xyzbestaatnietzzzz"), any(), any(), any(), any(),
+                                any(), any(), any(), any(), any()))
+                                .thenReturn(List.of());
+
+                // When & Then
+                mockMvc.perform(get("/api/boeken").param("zoekterm", "xyzbestaatnietzzzz"))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$").isArray())
+                                .andExpect(jsonPath("$.length()").value(0));
+        }
+
+        @Test
+        void givenZoektermMetMeerdereMatches_whenGetAlleBoeken_thenGeeftAlleMatchendeBoeken() throws Exception {
+                // Given - zoekterm "java" matcht meerdere boeken
+                Boek boek1 = new Boek("Effective Java", "Joshua Bloch");
+                Boek boek2 = new Boek("Java Concurrency", "Brian Goetz");
+                when(boekService.filterBoeken(eq("java"), any(), any(), any(), any(),
+                                any(), any(), any(), any(), any()))
+                                .thenReturn(List.of(boek1, boek2));
+
+                // When & Then
+                mockMvc.perform(get("/api/boeken").param("zoekterm", "java"))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.length()").value(2))
+                                .andExpect(jsonPath("$[0].titel").value("Effective Java"))
+                                .andExpect(jsonPath("$[1].titel").value("Java Concurrency"));
         }
 
         // --- PAGINABEREIK ---
@@ -185,7 +250,7 @@ public class BoekFilterControllerTest {
         void givenMinEnMaxPagina_whenGetAlleBoeken_thenPaginaFiltersWordenDoorgegevenAanService() throws Exception {
                 // Given
                 when(boekService.filterBoeken(any(), any(), any(), eq(100), eq(300),
-                                any(), any(), any(), any(), any(), any()))
+                                any(), any(), any(), any(), any()))
                                 .thenReturn(List.of(new Boek("Kort Boek", "Auteur")));
 
                 // When & Then
@@ -195,6 +260,6 @@ public class BoekFilterControllerTest {
                                 .andExpect(status().isOk());
 
                 verify(boekService).filterBoeken(any(), any(), any(), eq(100), eq(300),
-                                any(), any(), any(), any(), any(), any());
+                                any(), any(), any(), any(), any());
         }
 }
