@@ -19,6 +19,11 @@ public class BoekSeed implements CommandLineRunner {
 
     String[] locaties = { "GO! Spectrumschool", "GO! muzische basisschool K’DO", "GO! basisschool VONK!",
             "GO! lyceum Antwerpen", "MaGO! Antwerpen" };
+    String[] genres = { "Non-fictie algemeen", "Fictie algemeen", "Literaire roman", "Spanning / thriller",
+            "Detective / misdaad", "Fantasy", "Dystopie", "Historische roman", "Romantiek", "Coming-of-age",
+            "Avontuur", "Oorlog & conflict", "Horror", "Humor", "Graphic novel / strip", "Poëzie",
+            "Biografie / autobiografie", "Filosofie", "Geschiedenis", "Kunst & cultuur",
+            "Maatschappij & politiek", "Psychologie", "Wetenschap & technologie" };
     Random random = new Random();
 
     // Spring injecteert de repository automatisch via de constructor
@@ -52,12 +57,13 @@ public class BoekSeed implements CommandLineRunner {
                     Integer pages = (Integer) volumeInfo.get("pageCount");
                     nieuwBoek.setPagina(pages != null ? pages : 0);
 
-                    // Genres/Categories (DIT ONTBRAK NOG)
-                    List<String> categories = (List<String>) volumeInfo.get("categories");
-                    if (categories != null && !categories.isEmpty()) {
-                        nieuwBoek.setGenre(categories);
+                    // Genres: wijs 1-2 random genres toe uit de vaste lijst
+                    String genre1 = genres[random.nextInt(genres.length)];
+                    String genre2 = genres[random.nextInt(genres.length)];
+                    if (genre1.equals(genre2)) {
+                        nieuwBoek.setGenre(List.of(genre1));
                     } else {
-                        nieuwBoek.setGenre(List.of("Algemeen")); // Fallback als er geen genre is
+                        nieuwBoek.setGenre(List.of(genre1, genre2));
                     }
 
                     // Afbeelding

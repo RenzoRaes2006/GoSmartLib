@@ -55,6 +55,17 @@ export class Catalogus implements OnInit, OnDestroy {
 
   // Genre hiërarchie
   genreHiërarchie = {
+    Avontuur: [],
+    'Coming-of-age': [],
+    'Detective / misdaad': [],
+    Dystopie: [],
+    Fantasy: [],
+    'Fictie algemeen': [],
+    'Graphic novel / strip': [],
+    'Historische roman': [],
+    Horror: [],
+    Humor: [],
+    'Literaire roman': [],
     'Non-fictie algemeen': [
       'Biografie / autobiografie',
       'Filosofie',
@@ -64,21 +75,10 @@ export class Catalogus implements OnInit, OnDestroy {
       'Psychologie',
       'Wetenschap & technologie',
     ],
-    'Fictie algemeen': [],
-    'Literaire roman': [],
-    'Spanning / thriller': [],
-    'Detective / misdaad': [],
-    Fantasy: [],
-    Dystopie: [],
-    'Historische roman': [],
-    Romantiek: [],
-    'Coming-of-age': [],
-    Avontuur: [],
     'Oorlog & conflict': [],
-    Horror: [],
-    Humor: [],
-    'Graphic novel / strip': [],
     Poëzie: [],
+    Romantiek: [],
+    'Spanning / thriller': [],
   };
 
   // Lifecycle hook

@@ -7,6 +7,10 @@
       Boek toevoegen
     </button>
   </div>
+  <div class="topbar-messages">
+    <div class="message-container error-message" *ngIf="errorMessage">{{ errorMessage }}</div>
+    <div class="message-container success-message" *ngIf="successMessage">{{ successMessage }}</div>
+  </div>
   <button type="button" class="verlaat-button" routerLink="/">Verlaten</button>
 </div>
 
@@ -206,20 +210,37 @@
 
   <div class="genre-leesniveau-row">
     <div>
-      <label for="genre">Genre (kommagescheiden):</label>
-      <input id="genre" formControlName="genre" placeholder="Fantasy, Mystery, Science Fiction" />
+      <label>Genre:</label>
+      <input type="hidden" formControlName="genre" />
+      <div class="genre-dropdown-row">
+        <select [(ngModel)]="selectedHoofdGenre" [ngModelOptions]="{standalone: true}" (change)="selectedSubGenre = ''">
+          <option value="">Kies een genre</option>
+          <option *ngFor="let genre of hoofdGenres" [value]="genre">{{ genre }}</option>
+        </select>
+        <select *ngIf="selectedHoofdGenre && getSubGenres(selectedHoofdGenre).length > 0"
+          [(ngModel)]="selectedSubGenre" [ngModelOptions]="{standalone: true}">
+          <option value="">Kies subgenre</option>
+          <option *ngFor="let sub of getSubGenres(selectedHoofdGenre)" [value]="sub">{{ sub }}</option>
+        </select>
+        <button type="button" class="genre-toevoegen-btn" (click)="voegGenreToe()" [disabled]="!selectedHoofdGenre">
+          +
+        </button>
+      </div>
+      <div class="genre-tags" *ngIf="geselecteerdeGenres.length > 0">
+        <span class="genre-tag" *ngFor="let genre of geselecteerdeGenres">
+          {{ genre }}
+          <button type="button" (click)="verwijderGenre(genre)">&times;</button>
+        </span>
+      </div>
       <div *ngIf="boekForm.get('genre')?.invalid && boekForm.get('genre')?.touched">
         <small *ngIf="boekForm.get('genre')?.errors?.['required']">Genre is verplicht.</small>
-        <small *ngIf="boekForm.get('genre')?.errors?.['minlength']"
-          >Genre moet minimaal 2 tekens bevatten.</small
-        >
       </div>
     </div>
 
     <div>
       <label for="leesniveau">Leesniveau:</label>
       <select id="leesniveau" formControlName="leesniveau">
-        <option [ngValue]="undefined" disabled hidden>Kies een leesniveau...</option>
+        <option value="">Geen leesniveau</option>
         <option value="A (eenvoudig taalgebruik)">A (eenvoudig taalgebruik)</option>
         <option value="B (gemiddeld taalgebruik)">B (gemiddeld taalgebruik)</option>
         <option value="C (complex taalgebruik)">C (complex taalgebruik)</option>
@@ -283,14 +304,6 @@
     </button>
   </div>
 </form>
-
-<div class="message-container error-message" *ngIf="errorMessage">
-  {{ errorMessage }}
-</div>
-
-<div class="message-container success-message" *ngIf="successMessage">
-  {{ successMessage }}
-</div>
 
 <div class="modal-overlay" *ngIf="toonVerwijderModal" (click)="sluitVerwijderModal()">
   <div class="modal-content" (click)="$event.stopPropagation()">

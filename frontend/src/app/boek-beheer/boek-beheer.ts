@@ -47,6 +47,38 @@ export class BoekBeheer implements OnInit {
   // Debounce timer voor live zoeken
   private zoekDebounceTimer: any = null;
 
+  // Genre dropdown
+  genreHiërarchie: Record<string, string[]> = {
+    Avontuur: [],
+    'Coming-of-age': [],
+    'Detective / misdaad': [],
+    Dystopie: [],
+    Fantasy: [],
+    'Fictie algemeen': [],
+    'Graphic novel / strip': [],
+    'Historische roman': [],
+    Horror: [],
+    Humor: [],
+    'Literaire roman': [],
+    'Non-fictie algemeen': [
+      'Biografie / autobiografie',
+      'Filosofie',
+      'Geschiedenis',
+      'Kunst & cultuur',
+      'Maatschappij & politiek',
+      'Psychologie',
+      'Wetenschap & technologie',
+    ],
+    'Oorlog & conflict': [],
+    Poëzie: [],
+    Romantiek: [],
+    'Spanning / thriller': [],
+  };
+  selectedHoofdGenre: string = '';
+  selectedSubGenre: string = '';
+  geselecteerdeGenres: string[] = [];
+  hoofdGenres = Object.keys(this.genreHiërarchie);
+
   // Constructor met dependency injection en formulieropbouw
   constructor(
     private fb: FormBuilder,
@@ -173,6 +205,14 @@ export class BoekBeheer implements OnInit {
       next: (boekData) => {
         if (boekData) {
           this.boekForm.patchValue(boekData);
+          // Populeer genre tags vanuit de Google Books data
+          if (boekData.genre && typeof boekData.genre === 'string') {
+            this.geselecteerdeGenres = boekData.genre
+              .split(',')
+              .map((g: string) => g.trim())
+              .filter((g: string) => g.length > 0);
+            this.updateGenreFormControl();
+          }
           this.boekForm.updateValueAndValidity();
           this.zoekMessage = 'Boek gevonden! vul de overige velden aan.';
           setTimeout(() => (this.toonIsbnZoek = false), 3000);
@@ -193,6 +233,9 @@ export class BoekBeheer implements OnInit {
     this.successMessage = '';
     this.boekGevonden = false;
     this.naarTeWijzigenBoek = null;
+    this.geselecteerdeGenres = [];
+    this.selectedHoofdGenre = '';
+    this.selectedSubGenre = '';
 
     if (this.mode === 'toevoegen') {
       this.toonIsbnZoek = false;
@@ -424,10 +467,40 @@ export class BoekBeheer implements OnInit {
       this.openVerwijderModal();
     } else {
       this.naarTeWijzigenBoek = boek;
+      // Populeer geselecteerde genres vanuit het boek
+      this.geselecteerdeGenres = Array.isArray(boek.genre) ? [...boek.genre] : [];
+      this.updateGenreFormControl();
       // Formulier tonen voor wijzigen
       this.boekForm.patchValue(this.mapBoekNaarFormValue(boek));
       this.boekGevonden = true;
       this.boekForm.enable();
     }
+  }
+
+  // Genre dropdown methodes
+  getSubGenres(hoofdGenre: string): string[] {
+    return this.genreHiërarchie[hoofdGenre] || [];
+  }
+
+  voegGenreToe() {
+    const genre = this.selectedSubGenre || this.selectedHoofdGenre;
+    if (genre && !this.geselecteerdeGenres.includes(genre)) {
+      this.geselecteerdeGenres.push(genre);
+      this.updateGenreFormControl();
+    }
+    this.selectedHoofdGenre = '';
+    this.selectedSubGenre = '';
+  }
+
+  verwijderGenre(genre: string) {
+    this.geselecteerdeGenres = this.geselecteerdeGenres.filter((g) => g !== genre);
+    this.updateGenreFormControl();
+  }
+
+  private updateGenreFormControl() {
+    const value = this.geselecteerdeGenres.join(', ');
+    this.boekForm.patchValue({ genre: value });
+    this.boekForm.get('genre')?.markAsDirty();
+    this.boekForm.get('genre')?.updateValueAndValidity();
   }
 }
