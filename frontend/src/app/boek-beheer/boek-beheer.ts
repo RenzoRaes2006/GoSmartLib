@@ -57,6 +57,7 @@ export class BoekBeheer implements OnInit {
       titel: ['', [Validators.required, Validators.minLength(2)]],
       auteur: ['', [Validators.required, Validators.minLength(2)]],
       isbn: ['', [Validators.required, this.isbnValidator]],
+      //isbn: ['', [Validators.required, Validators.pattern(/^GO\d{11}$/)]], // nieuwe validatie voor "GO" nummers
       uitgever: ['', [Validators.required, Validators.minLength(2)]],
       uitgaveJaar: ['', [Validators.required, Validators.pattern(/^\d{4}$/)]],
       pagina: ['', [Validators.required, Validators.pattern(/^\d+$/)]],
@@ -76,26 +77,44 @@ export class BoekBeheer implements OnInit {
     }
   }
 
+// ik gebruik deze ook niet meer omdat ik problemen had met de isbn-validator in combinatie met het nieuwe "GO" nummer systeem.
   // Custom ISBN validator - accepteert ISBN-10 en ISBN-13
   isbnValidator = (control: AbstractControl): ValidationErrors | null => {
     const value = control.value;
     if (!value) return null;
 
     // Check of het 10 of 13 cijfers zijn
-    if (/^\d{10}$/.test(value) || /^\d{13}$/.test(value)) {
+    if (/^\d{10}$/.test(value) || /^\d{13}$/.test(value) || /^GO\d{11}$/.test(value)) {
       return null;
     }
     return { isbn: 'ISBN moet 10 of 13 cijfers zijn' };
   };
 
-  // Genereer ISBN-13
+  // oude methode
+  // // Genereer ISBN-13
+  // genereerIsbn(): void {
+  //   const prefix = '978';
+  //   const landcode = '90';
+  //   const basis12 = `${prefix}${landcode}${this.randomCijfers(7)}`;
+  //   const isbn = `${basis12}${BoekBeheer.berekenIsbn13CheckDigit(basis12)}`;
+
+  //   this.boekForm.patchValue({ isbn });
+  //   this.boekForm.get('isbn')?.markAsDirty();
+  //   this.boekForm.get('isbn')?.markAsTouched();
+  //   this.boekForm.get('isbn')?.updateValueAndValidity();
+  // }
+
+  // Nieuwe, vereenvoudigde functie om een "GO" nummer te genereren
   genereerIsbn(): void {
-    const prefix = '978';
-    const landcode = '90';
-    const basis12 = `${prefix}${landcode}${this.randomCijfers(7)}`;
-    const isbn = `${basis12}${BoekBeheer.berekenIsbn13CheckDigit(basis12)}`;
+    const willekeurigeCijfers = this.randomCijfers(11);
+
+    const isbn = `GO${willekeurigeCijfers}`;
+
+    console.log('Gegenereerde ISBN:', isbn);
 
     this.boekForm.patchValue({ isbn });
+
+    // Dit zorgt ervoor dat Angular de input herkent als ingevuld en de nieuwe isbnValidator aanroept
     this.boekForm.get('isbn')?.markAsDirty();
     this.boekForm.get('isbn')?.markAsTouched();
     this.boekForm.get('isbn')?.updateValueAndValidity();
