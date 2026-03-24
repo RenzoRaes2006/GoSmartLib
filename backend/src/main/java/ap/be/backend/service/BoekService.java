@@ -23,7 +23,6 @@ public class BoekService {
     }
 
     public Boek addBoek(BoekDTO boekDTO) {
-        // Trim ISBN to avoid whitespace issues
         String trimmedIsbn = boekDTO.isbn().trim();
 
         if (boekRepository.findByIsbn(trimmedIsbn).isPresent()) {

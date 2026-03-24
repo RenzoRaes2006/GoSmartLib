@@ -1,74 +1,72 @@
 <div class="beheer-topbar">
   <div class="mode-selector">
-    <button type="button" (click)="setMode('wijzigen')" [class.active]="mode === 'wijzigen'">
+    <button type="button" (click)="setMode('wijzigen')" [class.active]="mode() === 'wijzigen'">
       Boek beheren
     </button>
-    <button type="button" (click)="setMode('toevoegen')" [class.active]="mode === 'toevoegen'">
+    <button type="button" (click)="setMode('toevoegen')" [class.active]="mode() === 'toevoegen'">
       Boek toevoegen
     </button>
   </div>
   <div class="topbar-messages">
-    <div class="message-container error-message" *ngIf="errorMessage">{{ errorMessage }}</div>
-    <div class="message-container success-message" *ngIf="successMessage">{{ successMessage }}</div>
+    <div class="message-container error-message" *ngIf="errorMessage()">{{ errorMessage() }}</div>
+    <div class="message-container success-message" *ngIf="successMessage()">{{ successMessage() }}</div>
   </div>
   <button type="button" class="verlaat-button" routerLink="/">Verlaten</button>
 </div>
 
 <div class="isbn-zoek-boek">
   <button type="button" (click)="toggleIsbnZoek()">
-    {{ toonIsbnZoek ? 'Verberg zoekveld' : mode === 'toevoegen' ? 'Zoek op ISBN' : 'Zoek boek' }}
+    {{ toonIsbnZoek() ? 'Verberg zoekveld' : mode() === 'toevoegen' ? 'Zoek op ISBN' : 'Zoek boek' }}
   </button>
 
-  <div *ngIf="toonIsbnZoek">
-    <!-- Toevoegen: zoek op ISBN -->
-    <ng-container *ngIf="mode === 'toevoegen'">
+  <div *ngIf="toonIsbnZoek()">
+    <ng-container *ngIf="mode() === 'toevoegen'">
       <label for="zoekIsbn">ISBN:</label>
       <input
         id="zoekIsbn"
         type="text"
-        [value]="zoekTerm"
-        (input)="zoekTerm = $any($event.target).value.replace('[^0-9]', '').slice(0, 13)"
+        [value]="zoekTerm()"
+        (input)="zoekTerm.set($any($event.target).value.replace('[^0-9]', '').slice(0, 13))"
         placeholder="9789012345678 of 0747532699"
         maxlength="13"
       />
       <button
         type="button"
         (click)="zoekBoekOp()"
-        [disabled]="zoekTerm.length !== 10 && zoekTerm.length !== 13"
+        [disabled]="zoekTerm().length !== 10 && zoekTerm().length !== 13"
       >
         Zoek
       </button>
     </ng-container>
 
-    <!-- Wijzigen: zoek op titel, auteur of ISBN -->
-    <ng-container *ngIf="mode === 'wijzigen'">
+    <ng-container *ngIf="mode() === 'wijzigen'">
       <label for="zoekIsbn">Zoek op titel, auteur of ISBN:</label>
       <input
         id="zoekIsbn"
         type="text"
-        [value]="zoekTerm"
+        [value]="zoekTerm()"
         (input)="onZoekTermInput($any($event.target).value)"
         placeholder="Typ een titel, auteur of ISBN"
       />
     </ng-container>
 
-    <small *ngIf="zoekMessage" class="zoek-melding">{{ zoekMessage }}</small>
+    <small *ngIf="zoekMessage()" class="zoek-melding">{{ zoekMessage() }}</small>
   </div>
 </div>
 
 <div
-  *ngIf="mode === 'wijzigen' && !boekGevonden && (boeknOverzicht.length > 0 || isLoadingBoeken)"
+  *ngIf="mode() === 'wijzigen' && !boekGevonden() && (boeknOverzicht().length > 0 || isLoadingBoeken())"
   class="boeken-overzicht"
 >
   <h3>Beschikbare boeken</h3>
 
-  <div *ngIf="isLoadingBoeken" class="loading-spinner">Boeken laden...</div>
+  <div *ngIf="isLoadingBoeken()" class="loading-spinner">Boeken laden...</div>
 
-  <div *ngIf="!isLoadingBoeken && boeknOverzicht.length === 0" class="boeken-overzicht-empty">
+  <div *ngIf="!isLoadingBoeken() && boeknOverzicht().length === 0" class="boeken-overzicht-empty">
     <strong>Geen boeken gevonden.</strong> Controleer of de backend API draait.
   </div>
 
-  <table *ngIf="!isLoadingBoeken && boeknOverzicht.length > 0">
+  <table *ngIf="!isLoadingBoeken() && boeknOverzicht().length > 0">
     <thead>
       <tr>
         <th>Titel</th>
@@ -79,7 +77,7 @@
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let boek of boeknOverzicht">
+      <tr *ngFor="let boek of boeknOverzicht()">
         <td>{{ boek.titel }}</td>
         <td>{{ boek.auteur }}</td>
         <td>{{ boek.isbn }}</td>
@@ -109,25 +107,25 @@
       type="button"
       class="pagination-button"
       (click)="gaNaarVorigePagina()"
-      [disabled]="currentPage === 0"
+      [disabled]="currentPage() === 0"
     >
       ← Vorige
     </button>
 
-    <span class="page-info"> Pagina {{ currentPage + 1 }} van {{ totaalPages }} </span>
+    <span class="page-info"> Pagina {{ currentPage() + 1 }} van {{ totaalPages() }} </span>
 
     <button
       type="button"
       class="pagination-button"
       (click)="gaNaarVolgendePagina()"
-      [disabled]="currentPage + 1 >= totaalPages"
+      [disabled]="currentPage() + 1 >= totaalPages()"
     >
       Volgende →
     </button>
   </div>
 </div>
 
-<form [formGroup]="boekForm" (ngSubmit)="onSubmit()" *ngIf="mode === 'toevoegen' || boekGevonden">
+<form [formGroup]="boekForm" (ngSubmit)="onSubmit()" *ngIf="mode() === 'toevoegen' || boekGevonden()">
   <div>
     <label for="titel">Titel:</label>
     <input id="titel" formControlName="titel" />
@@ -213,21 +211,36 @@
       <label>Genre:</label>
       <input type="hidden" formControlName="genre" />
       <div class="genre-dropdown-row">
-        <select [(ngModel)]="selectedHoofdGenre" [ngModelOptions]="{standalone: true}" (change)="selectedSubGenre = ''">
+        <select
+          [ngModel]="selectedHoofdGenre()"
+          (ngModelChange)="selectedHoofdGenre.set($event); selectedSubGenre.set('')"
+          [ngModelOptions]="{ standalone: true }"
+        >
           <option value="">Kies een genre</option>
           <option *ngFor="let genre of hoofdGenres" [value]="genre">{{ genre }}</option>
         </select>
-        <select *ngIf="selectedHoofdGenre && getSubGenres(selectedHoofdGenre).length > 0"
-          [(ngModel)]="selectedSubGenre" [ngModelOptions]="{standalone: true}">
+        <select
+          *ngIf="selectedHoofdGenre() && getSubGenres(selectedHoofdGenre()).length > 0"
+          [ngModel]="selectedSubGenre()"
+          (ngModelChange)="selectedSubGenre.set($event)"
+          [ngModelOptions]="{ standalone: true }"
+        >
           <option value="">Kies subgenre</option>
-          <option *ngFor="let sub of getSubGenres(selectedHoofdGenre)" [value]="sub">{{ sub }}</option>
+          <option *ngFor="let sub of getSubGenres(selectedHoofdGenre())" [value]="sub">
+            {{ sub }}
+          </option>
         </select>
-        <button type="button" class="genre-toevoegen-btn" (click)="voegGenreToe()" [disabled]="!selectedHoofdGenre">
+        <button
+          type="button"
+          class="genre-toevoegen-btn"
+          (click)="voegGenreToe()"
+          [disabled]="!selectedHoofdGenre()"
+        >
           +
         </button>
       </div>
-      <div class="genre-tags" *ngIf="geselecteerdeGenres.length > 0">
-        <span class="genre-tag" *ngFor="let genre of geselecteerdeGenres">
+      <div class="genre-tags" *ngIf="geselecteerdeGenres().length > 0">
+        <span class="genre-tag" *ngFor="let genre of geselecteerdeGenres()">
           {{ genre }}
           <button type="button" (click)="verwijderGenre(genre)">&times;</button>
         </span>
@@ -288,32 +301,32 @@
   </div>
 
   <div class="form-actions">
-    <button type="submit" [disabled]="boekForm.invalid || (mode !== 'toevoegen' && !boekGevonden)">
-      {{ mode === 'toevoegen' ? 'Boek Toevoegen' : 'Wijzigingen Opslaan' }}
+    <button type="submit" [disabled]="boekForm.invalid || (mode() !== 'toevoegen' && !boekGevonden())">
+      {{ mode() === 'toevoegen' ? 'Boek Toevoegen' : 'Wijzigingen Opslaan' }}
     </button>
     <button
       type="button"
       class="delete-button"
-      *ngIf="mode === 'wijzigen' && boekGevonden"
+      *ngIf="mode() === 'wijzigen' && boekGevonden()"
       (click)="openVerwijderModal()"
     >
       Verwijder
     </button>
     <button type="button" (click)="resetForm()" class="reset-button">
-      {{ mode === 'toevoegen' ? 'Clear' : 'Annuleren' }}
+      {{ mode() === 'toevoegen' ? 'Clear' : 'Annuleren' }}
     </button>
   </div>
 </form>
 
-<div class="modal-overlay" *ngIf="toonVerwijderModal" (click)="sluitVerwijderModal()">
+<div class="modal-overlay" *ngIf="toonVerwijderModal()" (click)="sluitVerwijderModal()">
   <div class="modal-content" (click)="$event.stopPropagation()">
     <div class="modal-header">
       <h3>Boek Verwijderen</h3>
     </div>
     <div class="modal-body">
       <p>Weet je zeker dat je dit boek wilt verwijderen?</p>
-      <p class="boek-info" *ngIf="naarTeWijzigenBoek">
-        <strong>{{ naarTeWijzigenBoek.titel }}</strong> door {{ naarTeWijzigenBoek.auteur }}
+      <p class="boek-info" *ngIf="naarTeWijzigenBoek()">
+        <strong>{{ naarTeWijzigenBoek()!.titel }}</strong> door {{ naarTeWijzigenBoek()!.auteur }}
       </p>
       <p class="warning-text">Deze actie kan niet ongedaan worden gemaakt.</p>
     </div>

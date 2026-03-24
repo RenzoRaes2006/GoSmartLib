@@ -52,7 +52,6 @@ export class BoekService {
     return this.http.get<Boek>(`${this.apiUrl}/${id}`);
   }
 
-  // zoeken via zoekterm in beheer, waarbij we ook kunnen filteren op titel, auteur of isbn, omdat we al weten dat het boek bestaat en we willen de details ophalen voor wijziging
   getBeheerBoekenGefilterd(filters: FilterOptions): Observable<Boek[]> {
     let params = new HttpParams();
 

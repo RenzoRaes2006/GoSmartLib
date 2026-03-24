@@ -81,7 +81,6 @@ export class Catalogus implements OnInit, OnDestroy {
     'Spanning / thriller': [],
   };
 
-  // Lifecycle hook
   // Bij het initialiseren van de component, probeer opgeslagen filters te laden of laad alle boeken
   ngOnInit(): void {
     const stored = sessionStorage.getItem(this.FILTERS_KEYS);

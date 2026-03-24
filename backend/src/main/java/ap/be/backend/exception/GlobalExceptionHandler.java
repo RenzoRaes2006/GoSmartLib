@@ -10,17 +10,11 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    // handel specifieke uitzondering voor ISBN al bestaand
-    // Deze handler wordt getriggerd wanneer een IsbnAlreadyExistsException wordt
-    // gegooid
     @ExceptionHandler(IsbnAlreadyExistsException.class)
     public ResponseEntity<String> handleIsbnAlreadyExists(IsbnAlreadyExistsException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
     }
 
-    // handel database constraint violations, zoals unieke beperkingen op ISBN
-    // Deze handler wordt getriggerd wanneer een DataIntegrityViolationException
-    // wordt gegooid, bijvoorbeeld bij een unieke beperking op ISBN
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<String> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
         if (ex.getMessage() != null && ex.getMessage().toLowerCase().contains("isbn")) {
@@ -29,22 +23,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Database constraint violation");
     }
 
-    // handel validatie fouten, zoals ontbrekende of onjuiste velden in de invoer
-    // Deze handler wordt getriggerd wanneer een MethodArgumentNotValidException
-    // wordt gegooid, bijvoorbeeld bij validatiefouten in de invoer
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<String> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        String errorMessage = ex.getBindingResult().getFieldErrors().get(0).getDefaultMessage(); // Haal de foutmelding
-                                                                                                 // van het eerste veld
-                                                                                                 // dat een
-                                                                                                 // validatiefout heeft
+        String errorMessage = ex.getBindingResult().getFieldErrors().get(0).getDefaultMessage();
+
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Ongeldige invoer: " + errorMessage);
     }
 
-    // handel alle andere uitzonderingen die niet specifiek zijn afgevangen door de
-    // bovenstaande handlers
-    // Deze handler wordt getriggerd voor alle andere uitzonderingen die niet
-    // specifiek zijn af
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleGenericException(Exception ex) {
         ex.printStackTrace();
@@ -56,20 +41,16 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }
 
-    // handel situaties af waarbij een specifiek boek niet gevonden kan worden
     @ExceptionHandler(BoekNotFoundException.class)
     public ResponseEntity<String> handleBoekNotFound(BoekNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
 
-    // Vangt standaard ongeldige argumenten af
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<String> handleIllegalArgument(IllegalArgumentException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }
 
-    // Vangt de DuplicateReportException af wanneer een gebruiker een beoordeling
-    // dubbel rapporteert
     @ExceptionHandler(DuplicateReportException.class)
     public ResponseEntity<String> handleDuplicateReport(DuplicateReportException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
