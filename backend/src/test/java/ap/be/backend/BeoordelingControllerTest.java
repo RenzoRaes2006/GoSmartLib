@@ -47,9 +47,8 @@ public class BeoordelingControllerTest {
 
     @BeforeEach
     void setUp() {
-        // boolean 'false' toegevoegd aan het einde van de DTOs voor de gerapporteerd status
-        testDto = new BeoordelingDTO(BEOORDELING_ID, 1L, BOEK_ID, 5, "Prachtig boek!", false);
-        fouteDto = new BeoordelingDTO(null, 1L, BOEK_ID, 9, "Te hoge score", false); 
+        testDto = new BeoordelingDTO(BEOORDELING_ID, "Test Gebruiker", BOEK_ID, 5, "Prachtig boek!", false, false);
+        fouteDto = new BeoordelingDTO(null, "Test Gebruiker", BOEK_ID, 9, "Te hoge score", false, false); 
     }
 
     @Test
@@ -61,7 +60,9 @@ public class BeoordelingControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$[0].inhoud").value("Prachtig boek!"))
                 .andExpect(jsonPath("$[0].waardering").value(5))
-                .andExpect(jsonPath("$[0].gerapporteerd").value(false)); // Nieuwe check toegevoegd
+                .andExpect(jsonPath("$[0].gebruikerNaam").value("Test Gebruiker"))
+                .andExpect(jsonPath("$[0].isAnoniem").value(false))
+                .andExpect(jsonPath("$[0].gerapporteerd").value(false));
     }
 
     @Test

@@ -3,7 +3,6 @@ package ap.be.backend.repository;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -27,9 +26,6 @@ public interface BoekRepository extends JpaRepository<Boek, Long> {
                         "  (:beschikbaar = false AND b.aantalExemplaren = 0)) AND " +
                         "(:uitgaveJaarVan IS NULL OR b.uitgaveJaar >= :uitgaveJaarVan) AND " +
                         "(:uitgaveJaarTot IS NULL OR b.uitgaveJaar <= :uitgaveJaarTot) AND " +
-                        "(:populariteit IS NULL OR " +
-                        "  (:populariteit = '1' AND (SELECT AVG(be.waardering) FROM Beoordeling be WHERE be.boek.id = b.id) >= 4)) AND "
-                        +
                         "(:leesniveau IS NULL OR b.leesniveau = :leesniveau)")
         List<Boek> filterBoeken(@Param("zoekterm") String zoekterm,
                         @Param("genres") List<String> genres,
@@ -39,7 +35,6 @@ public interface BoekRepository extends JpaRepository<Boek, Long> {
                         @Param("beschikbaar") Boolean beschikbaar,
                         @Param("uitgaveJaarVan") Integer uitgaveJaarVan,
                         @Param("uitgaveJaarTot") Integer uitgaveJaarTot,
-                        @Param("populariteit") String populariteit,
                         @Param("leesniveau") String leesniveau,
                         Sort sort);
 

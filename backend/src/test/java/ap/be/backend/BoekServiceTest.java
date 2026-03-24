@@ -2,6 +2,7 @@ package ap.be.backend;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -19,6 +20,10 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 
 import ap.be.backend.dto.BoekDTO;
 import ap.be.backend.entity.Boek;
@@ -183,5 +188,105 @@ public class BoekServiceTest {
         assertNull(result);
         verify(boekRepository, times(1)).findById(boekId);
         verify(boekRepository, never()).save(org.mockito.ArgumentMatchers.any(Boek.class));
+    }
+
+    // --- GET BOEK BY ISBN ---
+
+    @Test
+    void givenBestaandIsbn_whenGetBoekByIsbn_thenGeeftBoekTerug() {
+        // Given
+        Boek boek = new Boek("Clean Code", "Robert Martin");
+        boek.setIsbn("9780132350884");
+        when(boekRepository.findByIsbn("9780132350884")).thenReturn(Optional.of(boek));
+
+        // When
+        Boek result = boekService.getBoekByIsbn("9780132350884");
+
+        // Then
+        assertNotNull(result);
+        assertEquals("9780132350884", result.getIsbn());
+        assertEquals("Clean Code", result.getTitel());
+        verify(boekRepository, times(1)).findByIsbn("9780132350884");
+    }
+
+    @Test
+    void givenNietBestaandIsbn_whenGetBoekByIsbn_thenGeeftNullTerug() {
+        // Given
+        when(boekRepository.findByIsbn("0000000000000")).thenReturn(Optional.empty());
+
+        // When
+        Boek result = boekService.getBoekByIsbn("0000000000000");
+
+        // Then
+        assertNull(result);
+        verify(boekRepository, times(1)).findByIsbn("0000000000000");
+    }
+
+    @Test
+    void givenIsbnMetSpaties_whenGetBoekByIsbn_thenTrimsEnZoekt() {
+        // Given - ISBN met leading/trailing spaties
+        Boek boek = new Boek("Test Boek", "Auteur");
+        boek.setIsbn("9781234567890");
+        when(boekRepository.findByIsbn("9781234567890")).thenReturn(Optional.of(boek));
+
+        // When
+        Boek result = boekService.getBoekByIsbn(" 9781234567890 ");
+
+        // Then
+        assertNotNull(result);
+        assertEquals("9781234567890", result.getIsbn());
+    }
+
+    // --- GET BOEKEN PAGED ---
+
+    @Test
+    void givenBoeken_whenGetBoekenPaged_thenGeeftPaginaTerug() {
+        // Given
+        Boek boek1 = new Boek("Boek A", "Auteur A");
+        Boek boek2 = new Boek("Boek B", "Auteur B");
+        PageRequest pageRequest = PageRequest.of(0, 6, Sort.by("titel").ascending());
+        Page<Boek> verwacht = new PageImpl<>(List.of(boek1, boek2), pageRequest, 2);
+        when(boekRepository.findAll(pageRequest)).thenReturn(verwacht);
+
+        // When
+        Page<Boek> result = boekService.getBoekenPaged(0, 6);
+
+        // Then
+        assertEquals(2, result.getTotalElements());
+        assertEquals("Boek A", result.getContent().get(0).getTitel());
+        assertEquals("Boek B", result.getContent().get(1).getTitel());
+        verify(boekRepository, times(1)).findAll(pageRequest);
+    }
+
+    @Test
+    void givenGeenBoeken_whenGetBoekenPaged_thenGeeftLegePaginaTerug() {
+        // Given
+        PageRequest pageRequest = PageRequest.of(0, 6, Sort.by("titel").ascending());
+        Page<Boek> verwacht = new PageImpl<>(List.of(), pageRequest, 0);
+        when(boekRepository.findAll(pageRequest)).thenReturn(verwacht);
+
+        // When
+        Page<Boek> result = boekService.getBoekenPaged(0, 6);
+
+        // Then
+        assertEquals(0, result.getTotalElements());
+        assertTrue(result.getContent().isEmpty());
+    }
+
+    @Test
+    void givenTweedePagina_whenGetBoekenPaged_thenGeeftJuistePaginaTerug() {
+        // Given - pagina 1 (tweede pagina, 0-indexed)
+        Boek boek = new Boek("Boek C", "Auteur C");
+        PageRequest pageRequest = PageRequest.of(1, 6, Sort.by("titel").ascending());
+        Page<Boek> verwacht = new PageImpl<>(List.of(boek), pageRequest, 7);
+        when(boekRepository.findAll(pageRequest)).thenReturn(verwacht);
+
+        // When
+        Page<Boek> result = boekService.getBoekenPaged(1, 6);
+
+        // Then
+        assertEquals(7, result.getTotalElements());
+        assertEquals(1, result.getContent().size());
+        assertEquals(1, result.getNumber());
     }
 }

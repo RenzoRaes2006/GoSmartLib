@@ -6,7 +6,7 @@
 :host {
     display: block;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    color: #333;
+    color: #2d3748;
     max-width: 1600px;
     margin: 0 auto;
     padding: 20px 15px;
@@ -18,14 +18,19 @@
 }
 
 .back-link {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
     margin-bottom: 20px;
-    color: #666;
+    color: #8c1b3f;
     text-decoration: none;
     font-size: 14px;
+    font-weight: 600;
+    transition: color 0.2s, transform 0.2s;
 }
 
 .back-link:hover {
+    color: #6d1531;
     text-decoration: underline;
 }
 
@@ -53,13 +58,14 @@
 /* 3. Afbeelding & Badges */
 .image-container {
     position: relative;
-    border-radius: 8px;
+    border-radius: 12px;
     overflow: hidden;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
     width: min(72vw, 280px);
     aspect-ratio: 2 / 3;
     margin: 0 auto;
     transition: all 0.3s ease;
+    background: #ffffff;
 }
 
 .book-cover {
@@ -73,27 +79,31 @@
     position: absolute;
     top: 10px;
     right: 10px;
-    background: white;
-    color: #333;
-    padding: 4px 10px;
-    border-radius: 12px;
+    background: #48bb78;
+    color: #ffffff;
+    padding: 4px 12px;
+    border-radius: 20px;
     font-size: 12px;
-    font-weight: 600;
+    font-weight: bold;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* 4. Titel & Amazon-stijl Rating */
+.status-badge.uitgeleend {
+    background: #f56565;
+}
+
+/* 4. Titel & Rating */
 .book-title {
     font-size: 24px;
     margin: 0;
-    color: #333;
+    color: #2d3748;
     text-align: center;
     transition: all 0.3s ease;
 }
 
 .book-author {
     font-size: 14px;
-    color: #555;
+    color: #718096;
     margin: 0;
     text-align: center;
     transition: all 0.3s ease;
@@ -110,7 +120,7 @@
 
 .rating-score {
     font-weight: bold;
-    color: #f97316;
+    color: #8c1b3f;
     font-size: 18px;
 }
 
@@ -120,7 +130,7 @@
     font-family: serif;
     font-size: 22px;
     letter-spacing: 2px;
-    color: #e0e0e0;
+    color: #e2dfd5;
 }
 
 .stars-inner {
@@ -138,7 +148,7 @@
 }
 
 .review-count {
-    color: #666;
+    color: #718096;
     font-size: 13px;
 }
 
@@ -147,82 +157,142 @@
     display: grid;
     grid-template-columns: 1fr;
     gap: 16px;
-    border: 1px solid #e0e0e0;
+    background: #ffffff;
+    border: 1px solid #e2dfd5;
     border-radius: 12px;
     padding: 20px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
     transition: all 0.4s ease-in-out;
 }
 
 .info-item { display: flex; flex-direction: column; gap: 4px; }
-.info-label { font-size: 12px; color: #666; }
-.info-value { font-size: 14px; color: #111; }
+.info-label { font-size: 12px; color: #718096; }
+.info-value { font-size: 14px; color: #2d3748; font-weight: 500; }
 
-.tags-label { font-size: 12px; color: #666; display: block; margin-bottom: 8px; }
+.tags-label { font-size: 12px; color: #718096; display: block; margin-bottom: 8px; }
 .tags-list { display: flex; flex-wrap: wrap; gap: 8px; }
-.tag { font-size: 12px; border: 1px solid #10b981; color: #10b981; padding: 4px 12px; border-radius: 16px; }
+
+.tag { 
+    font-size: 12px; 
+    border: 1px solid #8c1b3f; 
+    color: #8c1b3f; 
+    padding: 4px 12px; 
+    border-radius: 16px; 
+    background-color: transparent;
+}
 
 /* 6. Beschrijving & Acties */
 .description-box {
-    border: 1px solid #fed7aa;
+    background: #ffffff;
+    border: 1px solid #e2dfd5;
     border-radius: 12px;
     padding: 16px;
     font-size: 14px;
-    line-height: 1.5;
-    color: #444;
+    line-height: 1.6;
+    color: #4a5568;
     max-height: 180px;
     overflow-y: auto;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.02);
 }
 
 .description-box::-webkit-scrollbar { width: 8px; }
-.description-box::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 8px; }
-.description-box::-webkit-scrollbar-thumb { background: #fed7aa; border-radius: 8px; }
+.description-box::-webkit-scrollbar-track { background: #f0efe4; border-radius: 8px; }
+.description-box::-webkit-scrollbar-thumb { background: #d0cbb8; border-radius: 8px; }
 
 .action-buttons { display: flex; flex-direction: column; gap: 12px; }
-.primary-btn { width: 100%; background: #fff; border: 1px solid #fed7aa; color: #ea580c; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer; text-align: center; }
+
+.primary-btn { 
+    width: 100%; 
+    background-color: #8c1b3f; 
+    border: none; 
+    color: #ffffff; 
+    padding: 14px 32px; 
+    border-radius: 30px; 
+    font-weight: 600; 
+    font-size: 1.05rem;
+    cursor: pointer; 
+    text-align: center; 
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(140, 27, 63, 0.3);
+}
+
+.primary-btn:hover:not(:disabled) {
+    background-color: #6d1531;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(140, 27, 63, 0.4);
+}
+
 .secondary-actions { display: flex; flex-direction: column; gap: 12px; }
-.secondary-btn { flex: 1; background: white; border: 1px solid #e0e0e0; color: #333; padding: 10px; border-radius: 8px; cursor: pointer; text-align: center; }
+
+.secondary-btn { 
+    flex: 1; 
+    background: #ffffff; 
+    border: 1px solid #e2dfd5; 
+    color: #2d3748; 
+    padding: 12px; 
+    border-radius: 30px; 
+    cursor: pointer; 
+    text-align: center; 
+    font-weight: 600;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+}
+
+.secondary-btn:hover {
+    background: #f0efe4;
+    border-color: #d0cbb8;
+}
 
 /* 7. Reviews Sectie */
 .reviews-container {
-    border: 1px solid #c7d2fe;
+    background: #ffffff;
+    border: 1px solid #e2dfd5;
     border-radius: 12px;
     padding: 24px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
 }
 
 .review-item {
-    border-bottom: 1px solid #e0e0e0;
+    border-bottom: 1px solid #f0efe4;
     padding-bottom: 16px;
     margin-bottom: 16px;
 }
 
+.review-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
 .review-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
-.review-rating { color: #f97316; font-size: 14px; }
+.review-rating { color: #8c1b3f; font-size: 14px; } 
 
 /* Moderne Formulier Styling */
 .form-textarea, .form-select {
     width: 100%;
-    border: 1px solid #e2e8f0;
+    border: 1px solid #e2dfd5;
     border-radius: 8px;
     padding: 12px;
     font-family: inherit;
     font-size: 14px;
     transition: all 0.2s ease;
-    background-color: #f8fafc;
+    background-color: #f7fafc; 
+    color: #2d3748;
 }
 
 .form-textarea:focus, .form-select:focus {
     outline: none;
-    border-color: #a78bfa;
-    background-color: white;
-    box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.1);
+    border-color: #8c1b3f;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(140, 27, 63, 0.1);
 }
 
 .form-textarea { min-height: 100px; resize: vertical; margin-top: 8px; }
 
-/* Paarse Verzendknop */
+/* Bordeaux Verzendknop */
 .submit-btn {
     align-self: flex-start;
-    background: #a78bfa;
+    background: #8c1b3f;
     color: white;
     border: none;
     padding: 10px 24px;
@@ -231,14 +301,14 @@
     cursor: pointer;
     font-size: 14px;
     transition: all 0.2s ease;
-    box-shadow: 0 2px 4px rgba(167, 139, 250, 0.2);
+    box-shadow: 0 2px 4px rgba(140, 27, 63, 0.2);
     margin-top: 8px;
 }
 
 .submit-btn:hover {
-    background: #8b5cf6;
+    background: #6d1531;
     transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(167, 139, 250, 0.3);
+    box-shadow: 0 4px 8px rgba(140, 27, 63, 0.3);
 }
 
 /* Modals */
@@ -258,17 +328,20 @@
 .modal-box {
     background: white;
     padding: 30px;
-    border-radius: 12px;
+    border-radius: 16px;
     width: 400px;
     box-shadow: 0 10px 25px rgba(0,0,0,0.3);
     text-align: center;
+    border-top: 4px solid #8c1b3f; 
 }
+
+.modal-box h3 { color: #8c1b3f; margin-top: 0;}
 
 .modal-box input {
     width: 90%;
     padding: 12px;
     margin: 20px 0;
-    border: 1px solid #ccc;
+    border: 1px solid #e2dfd5;
     border-radius: 8px;
     font-size: 16px;
 }
@@ -287,24 +360,37 @@
     cursor: pointer;
     font-weight: bold;
     font-size: 14px;
+    transition: all 0.2s ease;
 }
 
-.cancel-btn { background: #e0e0e0; color: #333; }
-.save-btn { background: #1a3a5a; color: white; }
+.cancel-btn { background: #f0efe4; color: #4a5568; }
+.cancel-btn:hover { background: #e2dfd5; }
+
+.save-btn { background: #8c1b3f; color: white; }
+.save-btn:hover { background: #6d1531; }
 
 .modal-select {
-    width: 90%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; font-family: inherit;
+    width: 90%; padding: 12px; margin-bottom: 15px; border: 1px solid #e2dfd5; border-radius: 8px; font-size: 16px; font-family: inherit; background-color: #f7fafc;
 }
-.modal-label { text-align: left; margin-left: 5%; margin-bottom: 5px; font-weight: bold; font-size: 14px; color: #555; }
+
+.modal-label { text-align: left; margin-left: 5%; margin-bottom: 5px; font-weight: bold; font-size: 14px; color: #4a5568; display: block; }
 
 /* ==========================================================================
    NIEUWE STYLING: Rapporteren, Modals en Meldingen
    ========================================================================== */
 
+.gerapporteerd-label {
+    font-size: 12px;
+    color: #a0aec0;
+    font-style: italic;
+    margin-top: 8px;
+    display: inline-block;
+}
+
 .rapporteer-btn {
     background: transparent;
     border: none;
-    color: #dc2626; 
+    color: #f56565; 
     font-size: 12px;
     font-weight: 600;
     cursor: pointer;
@@ -317,19 +403,12 @@
     gap: 4px;
 }
 
-.rapporteer-btn:hover { background-color: #fee2e2; }
-
-.gerapporteerd-label {
-    font-size: 12px;
-    color: #94a3b8;
-    font-style: italic;
-    margin-top: 8px;
-    display: inline-block;
+.rapporteer-btn:hover {
+    background-color: #fff5f5;
 }
 
 .rapport-modal h3 {
-    color: #dc2626; 
-    margin-top: 0;
+    color: #e53e3e; 
 }
 
 .rapport-modal .form-textarea {
@@ -338,7 +417,7 @@
 }
 
 .save-btn:disabled {
-    background: #94a3b8; 
+    background: #a0aec0;
     cursor: not-allowed;
     opacity: 0.7;
 }
@@ -347,11 +426,11 @@
     position: fixed;
     bottom: 30px;
     right: 30px;
-    background-color: #10b981; 
+    background-color: #48bb78; 
     color: white;
     padding: 16px 24px;
     border-radius: 8px;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
     z-index: 10000;
     font-weight: 600;
     animation: slideUpFade 0.4s ease-out forwards;
@@ -365,18 +444,20 @@
 }
 
 .error-message {
-    background-color: #fee2e2;
-    color: #dc2626;
+    background-color: #fff5f5;
+    color: #e53e3e;
     padding: 10px;
     border-radius: 6px;
     font-size: 13px;
     margin-top: 10px;
-    border: 1px solid #fca5a5;
+    border: 1px solid #feb2b2;
 }
 
 .error-message p { margin: 0; }
 
-/* LEEN STYLING */
+/* ==========================================================================
+   LEEN STYLING
+   ========================================================================== */
 .primary-btn:disabled, .disabled-btn {
     background: #f3f4f6 !important;
     border: 1px solid #d1d5db !important;
@@ -392,6 +473,62 @@
     margin: 0 0 10px 0;
     text-align: center;
     font-weight: 500;
+}
+
+/* ==========================================================================
+   EMOJI PICKER STYLING
+   ========================================================================== */
+.emoji-picker-container {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 25px;
+}
+
+.emoji-grid {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.emoji-btn {
+    background: white;
+    border: 2px solid transparent;
+    border-radius: 50%;
+    font-size: 1.5rem;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.emoji-btn:hover { transform: scale(1.1); }
+
+.emoji-btn.selected {
+    border-color: #8c1b3f;
+    background: #f0efe4; 
+    transform: scale(1.1);
+}
+
+.nieuwe-map-input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: inherit;
+}
+
+.nieuwe-map-input:focus { 
+    outline: none; 
+    border-color: #8c1b3f; 
 }
 
 /* 8. Responsiviteit */
@@ -420,182 +557,3 @@
         align-items: start;
     }
 }
-
-/* Update je knoppen naar de Bordeaux kleuren */
-.primary-btn { 
-    width: 100%; 
-    background: #8c1b3f; /* Bordeaux */
-    border: none; 
-    color: #ffffff; 
-    padding: 14px 20px; 
-    border-radius: 8px; 
-    font-size: 1.1rem;
-    font-weight: 600; 
-    cursor: pointer; 
-    text-align: center; 
-    transition: all 0.3s ease;
-}
-
-.primary-btn:hover:not(:disabled) {
-    background: #6d1531;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(140, 27, 63, 0.3);
-}
-
-/* Modals en pop-ups */
-.modal-box {
-    background: white;
-    padding: 30px;
-    border-radius: 16px;
-    width: 400px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-    border-top: 5px solid #8c1b3f; /* Bordeaux randje bovenaan */
-    text-align: center;
-}
-
-.modal-box h3 { color: #8c1b3f; margin-top: 0; }
-
-.save-btn { background: #8c1b3f; color: white; }
-.save-btn:hover { background: #6d1531; }
-
-.cancel-btn { background: #f0efe4; color: #4a5568; } /* Beige annuleer knop */
-.cancel-btn:hover { background: #e2dfd5; }
-
-/* 🚨 EMOJI PICKER STYLING */
-.emoji-picker-container {
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 15px;
-    margin-bottom: 25px;
-}
-
-.emoji-grid {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-    margin-bottom: 15px;
-    flex-wrap: wrap;
-}
-
-.emoji-btn {
-    background: white;
-    border: 2px solid transparent;
-    border-radius: 50%;
-    font-size: 1.5rem;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
-
-.emoji-btn:hover { transform: scale(1.1); }
-
-.emoji-btn.selected {
-    border-color: #8c1b3f;
-    background: #f0efe4; /* Beige highlight */
-    transform: scale(1.1);
-}
-
-.nieuwe-map-input {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #cbd5e1;
-    border-radius: 8px;
-    font-size: 1rem;
-    font-family: inherit;
-}
-.nieuwe-map-input:focus { outline: none; border-color: #8c1b3f; }
-/* Update je knoppen naar de Bordeaux kleuren */
-.primary-btn { 
-    width: 100%; 
-    background: #8c1b3f; /* Bordeaux */
-    border: none; 
-    color: #ffffff; 
-    padding: 14px 20px; 
-    border-radius: 8px; 
-    font-size: 1.1rem;
-    font-weight: 600; 
-    cursor: pointer; 
-    text-align: center; 
-    transition: all 0.3s ease;
-}
-
-.primary-btn:hover:not(:disabled) {
-    background: #6d1531;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(140, 27, 63, 0.3);
-}
-
-/* Modals en pop-ups */
-.modal-box {
-    background: white;
-    padding: 30px;
-    border-radius: 16px;
-    width: 400px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-    border-top: 5px solid #8c1b3f; /* Bordeaux randje bovenaan */
-    text-align: center;
-}
-
-.modal-box h3 { color: #8c1b3f; margin-top: 0; }
-
-.save-btn { background: #8c1b3f; color: white; }
-.save-btn:hover { background: #6d1531; }
-
-.cancel-btn { background: #f0efe4; color: #4a5568; } /* Beige annuleer knop */
-.cancel-btn:hover { background: #e2dfd5; }
-
-/* 🚨 EMOJI PICKER STYLING */
-.emoji-picker-container {
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 15px;
-    margin-bottom: 25px;
-}
-
-.emoji-grid {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-    margin-bottom: 15px;
-    flex-wrap: wrap;
-}
-
-.emoji-btn {
-    background: white;
-    border: 2px solid transparent;
-    border-radius: 50%;
-    font-size: 1.5rem;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
-
-.emoji-btn:hover { transform: scale(1.1); }
-
-.emoji-btn.selected {
-    border-color: #8c1b3f;
-    background: #f0efe4; /* Beige highlight */
-    transform: scale(1.1);
-}
-
-.nieuwe-map-input {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #cbd5e1;
-    border-radius: 8px;
-    font-size: 1rem;
-    font-family: inherit;
-}
-.nieuwe-map-input:focus { outline: none; border-color: #8c1b3f; }

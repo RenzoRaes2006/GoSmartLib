@@ -23,9 +23,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import ap.be.backend.dto.BeoordelingDTO;
 import ap.be.backend.entity.Beoordeling;
 import ap.be.backend.entity.Boek;
+import ap.be.backend.entity.Gebruiker;
 import ap.be.backend.exception.BoekNotFoundException;
 import ap.be.backend.repository.BeoordelingRepository;
 import ap.be.backend.repository.BoekRepository;
+import ap.be.backend.repository.GebruikerRepository;
 import ap.be.backend.repository.GerapporteerdeBeoordelingRepository;
 import ap.be.backend.service.BeoordelingService;
 
@@ -41,11 +43,15 @@ public class BeoordelingServiceTest {
     @Mock
     private GerapporteerdeBeoordelingRepository gerapporteerdeBeoordelingRepository;
 
+    @Mock
+    private GebruikerRepository gebruikerRepository;
+
     @InjectMocks
     private BeoordelingService beoordelingService;
 
     private Boek testBoek;
     private Beoordeling testBeoordeling;
+    private Gebruiker testGebruiker;
     private BeoordelingDTO testDto;
     private final Long BOEK_ID = 1L;
 
@@ -54,15 +60,21 @@ public class BeoordelingServiceTest {
         testBoek = new Boek();
         testBoek.setId(BOEK_ID);
 
+        testGebruiker = new Gebruiker();
+        testGebruiker.setId(1L);
+        // testGebruiker.setNaam("Test Gebruiker"); // Optioneel: voeg toe als je entiteit dit toestaat
+
         testBeoordeling = new Beoordeling();
         testBeoordeling.setId(10L);
-        testBeoordeling.setGebruikerId(1L);
+        testBeoordeling.setGebruiker(testGebruiker); // Nu geven we het object mee i.p.v. alleen ID
         testBeoordeling.setBoek(testBoek);
         testBeoordeling.setWaardering(5);
         testBeoordeling.setInhoud("Geweldig boek!");
+        testBeoordeling.setAnoniem(false);
 
-        // Boolean false toegevoegd aan het einde
-        testDto = new BeoordelingDTO(10L, 2L, BOEK_ID, 5, "Geweldig boek!", false);
+        // Update deze constructor naar jouw exacte BeoordelingDTO velden 
+        // (bijv: id, gebruikerId, gebruikersnaam, boekId, waardering, inhoud, isAnoniem, gerapporteerd)
+        testDto = new BeoordelingDTO(10L, "Test Gebruiker", BOEK_ID, 5, "Geweldig boek!", false, false);
     }
 
     // =========================================================================
@@ -78,7 +90,6 @@ public class BeoordelingServiceTest {
         });
 
         assertEquals("Boek met id " + BOEK_ID + " niet gevonden", exception.getMessage());
-        
         verify(beoordelingRepository, never()).findByBoekId(BOEK_ID);
     }
 
@@ -97,7 +108,6 @@ public class BeoordelingServiceTest {
     void givenBoekBestaatMetBeoordelingen_whenGetBeoordelingenOpBoekId_thenReturnsBeoordelingDTOList() {
         when(boekRepository.existsById(BOEK_ID)).thenReturn(true);
         when(beoordelingRepository.findByBoekId(BOEK_ID)).thenReturn(List.of(testBeoordeling));
-        // Mock de nieuwe repository check
         when(gerapporteerdeBeoordelingRepository.existsByBeoordelingIdAndGebruiker_GebruikerID(10L, 1L))
                 .thenReturn(true);
 
@@ -105,7 +115,7 @@ public class BeoordelingServiceTest {
 
         assertEquals(1, result.size());
         assertEquals("Geweldig boek!", result.get(0).inhoud()); 
-        assertTrue(result.get(0).gerapporteerd()); // Check of boolean correct is gemapt
+        assertTrue(result.get(0).gerapporteerd()); 
         verify(beoordelingRepository, times(1)).findByBoekId(BOEK_ID);
     }
 
@@ -122,13 +132,28 @@ public class BeoordelingServiceTest {
         });
 
         assertEquals("Kan beoordeling niet opslaan: Boek met id " + testDto.boekId() + " is niet gevonden.", exception.getMessage());
-        
         verify(beoordelingRepository, never()).save(any(Beoordeling.class));
     }
 
     @Test
-    void givenGeldigeDataEnBestaandBoek_whenBeoordelingOpslaan_thenSavesBeoordeling() {
+    void givenBoekBestaatMaarGebruikerNiet_whenBeoordelingOpslaan_thenThrowsRuntimeException() {
         when(boekRepository.findById(testDto.boekId())).thenReturn(Optional.of(testBoek));
+        // We mocken de repository zodat hij de tijdelijke gebruiker (ID 1) niet kan vinden
+        when(gebruikerRepository.findById(1L)).thenReturn(Optional.empty());
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            beoordelingService.beoordelingOpslaan(testDto);
+        });
+
+        assertEquals("Gebruiker niet gevonden met id: 1", exception.getMessage());
+        verify(beoordelingRepository, never()).save(any(Beoordeling.class));
+    }
+
+    @Test
+    void givenGeldigeDataEnBestaandBoekEnGebruiker_whenBeoordelingOpslaan_thenSavesBeoordeling() {
+        when(boekRepository.findById(testDto.boekId())).thenReturn(Optional.of(testBoek));
+        // We mocken de repository zodat hij succesvol de Gebruiker teruggeeft
+        when(gebruikerRepository.findById(1L)).thenReturn(Optional.of(testGebruiker));
 
         beoordelingService.beoordelingOpslaan(testDto);
 

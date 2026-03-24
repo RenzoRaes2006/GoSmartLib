@@ -2,8 +2,11 @@
   <a routerLink="/catalogus" class="back-link">← Terug naar overzicht</a>
 
   <div class="content-layout">
+    
     <div class="main-column">
       <div class="top-row">
+        
+        <!-- Linker kolom: Cover & Tags -->
         <div class="left-col">
           <div class="image-container">
             @if (boek?.aantalExemplaren && boek!.aantalExemplaren > 0) {
@@ -31,6 +34,7 @@
           </div>
         </div>
 
+        <!-- Middelste kolom: Vriend's code (Titel, Lenen, Info Grid) -->
         <div class="mid-col">
           <h1 class="book-title">{{ boek?.titel }}</h1>
           @if (beoordelingen.length > 0) {
@@ -46,31 +50,25 @@
 
           <div class="info-grid">
             <div class="info-item">
-              <span class="info-label">Uitgever</span
-              ><span class="info-value">{{ boek?.uitgever }}</span>
+              <span class="info-label">Uitgever</span><span class="info-value">{{ boek?.uitgever }}</span>
             </div>
             <div class="info-item">
-              <span class="info-label">Aantal pagina's</span
-              ><span class="info-value">{{ boek?.pagina }}</span>
+              <span class="info-label">Aantal pagina's</span><span class="info-value">{{ boek?.pagina }}</span>
             </div>
             <div class="info-item">
               <span class="info-label">ISBN</span><span class="info-value">{{ boek?.isbn }}</span>
             </div>
             <div class="info-item">
-              <span class="info-label">Uitgavejaar</span
-              ><span class="info-value">{{ boek?.uitgaveJaar }}</span>
+              <span class="info-label">Uitgavejaar</span><span class="info-value">{{ boek?.uitgaveJaar }}</span>
             </div>
             <div class="info-item">
-              <span class="info-label">Locatie</span
-              ><span class="info-value">{{ boek?.locatie }}</span>
+              <span class="info-label">Locatie</span><span class="info-value">{{ boek?.locatie }}</span>
             </div>
             <div class="info-item">
-              <span class="info-label">Exemplaren</span
-              ><span class="info-value">{{ boek?.aantalExemplaren }}</span>
+              <span class="info-label">Exemplaren</span><span class="info-value">{{ boek?.aantalExemplaren }}</span>
             </div>
             <div class="info-item">
-              <span class="info-label">Leesniveau</span
-              ><span class="info-value">{{ boek?.leesniveau }}</span>
+              <span class="info-label">Leesniveau</span><span class="info-value">{{ boek?.leesniveau }}</span>
             </div>
           </div>
 
@@ -111,26 +109,23 @@
       </div>
     </div>
 
+    <!-- Rechter kolom: JOUW code (Dynamische namen, isAnoniem checkbox & rapporteer logic) -->
     <div class="side-column">
       <div class="reviews-section">
         <h2 class="reviews-title">Reviews</h2>
         <div class="reviews-container">
-          <h3 class="reviews-subtitle">Leerling reviews</h3>
+          <h3 class="reviews-subtitle">Leerling Reviews</h3>
 
           @for (beoordeling of beoordelingen; track $index) {
             <div class="review-item">
               <div class="review-header">
-                <span class="review-rating">{{
-                  '★'.repeat(beoordeling.waardering) + '☆'.repeat(5 - beoordeling.waardering)
-                }}</span>
-                <span class="reviewer-name">- Test gebruiker</span>
+                <span class="review-rating">{{ '★'.repeat(beoordeling.waardering) + '☆'.repeat(5 - beoordeling.waardering) }}</span>
+                <span class="reviewer-name">- {{ beoordeling.gebruikerNaam }}</span>
               </div>
               <p class="review-content">{{ beoordeling.inhoud }}</p>
 
               @if (!beoordeling.gerapporteerd) {
-                <button class="rapporteer-btn" (click)="openRapporteerModal(beoordeling.id!)">
-                  Rapporteer
-                </button>
+                <button class="rapporteer-btn" (click)="openRapporteerModal(beoordeling.id!)">Rapporteer</button>
               } @else {
                 <span class="gerapporteerd-label">Reeds gerapporteerd ✓</span>
               }
@@ -142,7 +137,7 @@
           <div class="review-form-container">
             <h3>Schrijf een review</h3>
             <form class="review-form" [formGroup]="form" (ngSubmit)="submitBeoordeling()">
-              <select id="waardering" formControlName="waardering" class="form-select">
+              <select id="waardering" name="waardering" formControlName="waardering" class="form-select">
                 <option value="" disabled selected>Kies een waardering...</option>
                 <option value="5">★★★★★</option>
                 <option value="4">★★★★☆</option>
@@ -150,15 +145,18 @@
                 <option value="2">★★☆☆☆</option>
                 <option value="1">★☆☆☆☆</option>
               </select>
-              <textarea
-                id="inhoud"
-                rows="3"
-                formControlName="inhoud"
-                class="form-textarea"
-                placeholder="Deel je mening over dit boek..."
-              ></textarea>
+              
+              <textarea id="inhoud" name="inhoud" rows="3" formControlName="inhoud" class="form-textarea" placeholder="Deel je mening over dit boek..."></textarea>
+
+              <!-- Jouw Checkbox sectie behouden -->
+              <label style="display: block; margin-top: 10px; margin-bottom: 10px; font-size: 14px;">
+                <input type="checkbox" formControlName="isAnoniem">
+                Plaats deze review anoniem
+              </label>
+
               <button type="submit" class="submit-btn">Verzenden</button>
-              @if (submissionError) {
+              
+              @if(submissionError){
                 <div class="error-message">
                   <p>{{ submissionError }}</p>
                 </div>
@@ -171,6 +169,9 @@
   </div>
 </div>
 
+<!-- ================= MODALS (Vriend + Jij samengevoegd) ================= -->
+
+<!-- Leeslijst Modal (Met Vriend's Emojis) -->
 @if (isModalOpen) {
   <div class="modal-overlay">
     <div class="modal-box">
@@ -203,23 +204,19 @@
               </button>
             }
           </div>
-          <input #nieuweMap type="text" placeholder="Nieuwe map naam..." class="nieuwe-map-input" />
+          <input #nieuweMap type="text" placeholder="Nieuwe map naam..." class="nieuwe-map-input" style="width: 100%; margin-top: 10px; padding: 12px; border: 1px solid #e2dfd5; border-radius: 8px;" />
         </div>
 
-        <div class="modal-actions">
+        <div class="modal-actions" style="margin-top: 20px;">
           <button class="cancel-btn" (click)="sluitModal()">Annuleren</button>
-          <button
-            class="save-btn"
-            (click)="bevestigToevoegenAanMap(bestaandeMap.value, nieuweMap.value)"
-          >
-            Opslaan
-          </button>
+          <button class="save-btn" (click)="bevestigToevoegenAanMap(bestaandeMap.value, nieuweMap.value)">Opslaan</button>
         </div>
       }
     </div>
   </div>
 }
 
+<!-- Leen Modal (Nieuw van je vriend) -->
 @if (isLeenModalOpen) {
   <div class="modal-overlay">
     <div class="modal-box">
@@ -242,6 +239,7 @@
   </div>
 }
 
+<!-- Rapporteer Modal (Jouw code) -->
 @if (rapporteerModalOpen) {
   <div class="modal-overlay">
     <div class="modal-box rapport-modal">
@@ -263,6 +261,7 @@
   </div>
 }
 
+<!-- Toast Melding (Jouw code) -->
 @if (rapportMelding) {
   <div class="toast-message">
     <p>{{ rapportMelding }}</p>

@@ -1,160 +1,192 @@
 <div class="main-layout">
-    <aside class="sidebar">
-        <div class="sidebar-header">
-            <h2 class="sidebar-title">Filters</h2>
-        </div>
-
-        <div class="filter-section">
-            <!-- 1. Zoeken -->
-            <label for="search-input">Zoekopdracht</label>
-            <input id="search-input" type="text" placeholder="Titel, auteur of ISBN..."
-                [(ngModel)]="zoekTerm" (input)="updateFilters()" class="sidebar-input">
-
-            <!-- 2. Beschikbaarheid -->
-            <label>Beschikbaarheid</label>
-            <div class="radio-group">
-                <label class="radio-option">
-                    <input type="radio" name="beschikbaarheid" [value]="undefined" 
-                            [(ngModel)]="beschikbaarheid" (change)="updateFilters()">
-                    <span>Alle boeken</span>
-                </label>
-                <label class="radio-option">
-                    <input type="radio" name="beschikbaarheid" [value]="true" 
-                            [(ngModel)]="beschikbaarheid" (change)="updateFilters()">
-                    <span>Alleen beschikbaar</span>
-                </label>
-            </div>
-
-            <!-- 3. Genre -->
-            <label>Genre</label>
-            <div class="genre-filter">
-                <select [(ngModel)]="selectedHoofdGenre" (change)="onHoofdGenreChange()" class="sidebar-input">
-                    <option value="">Alle genres</option>
-                    <option value="Avontuur">Avontuur</option>
-                    <option value="Coming-of-age">Coming-of-age</option>
-                    <option value="Detective / misdaad">Detective / misdaad</option>
-                    <option value="Dystopie">Dystopie</option>
-                    <option value="Fantasy">Fantasy</option>
-                    <option value="Fictie algemeen">Fictie algemeen</option>
-                    <option value="Graphic novel / strip">Graphic novel / strip</option>
-                    <option value="Historische roman">Historische roman</option>
-                    <option value="Horror">Horror</option>
-                    <option value="Humor">Humor</option>
-                    <option value="Literaire roman">Literaire roman</option>
-                    <option value="Non-fictie algemeen">Non-fictie algemeen</option>
-                    <option value="Oorlog & conflict">Oorlog & conflict</option>
-                    <option value="Poëzie">Poëzie</option>
-                    <option value="Romantiek">Romantiek</option>
-                    <option value="Sciencefiction">Sciencefiction</option>
-                    <option value="Spanning / thriller">Spanning / thriller</option>
-                </select>
-  
-                @if (selectedHoofdGenre() && getSubGenres(selectedHoofdGenre()).length > 0) {
-                <select [(ngModel)]="selectedGenre" (change)="updateFilters()" class="sidebar-input">
-                    <option [ngValue]="undefined">Alle subgenres</option>
-                    @for (subGenre of getSubGenres(selectedHoofdGenre()); track subGenre) {
-                        <option [value]="subGenre">{{ subGenre }}</option>
-                    }
-                </select>
-                }
-            </div>
-
-            <!-- 4. Leesniveau -->
-            <label for="leesniveau-filter">Leesniveau</label>
-            <select id="leesniveau-filter" [(ngModel)]="leesniveau" (change)="updateFilters()" class="sidebar-input">
-                <option [ngValue]="undefined">Alle leesniveaus</option>
-                <option value="A (eenvoudig taalgebruik)">A (eenvoudig taalgebruik)</option>
-                <option value="B (gemiddeld taalgebruik)">B (gemiddeld taalgebruik)</option>
-                <option value="C (complex taalgebruik)">C (complex taalgebruik)</option>
-                <option value="D (literair niveau)">D (literair niveau)</option>
-            </select>
-
-            <!-- 5. Beoordeling -->
-            <label>Beoordeling</label>
-            <div class="radio-group">
-                <label class="radio-option">
-                    <input type="radio" name="populariteit" [value]="undefined" 
-                            [(ngModel)]="populariteit" (change)="updateFilters()">
-                    <span>Alle boeken</span>
-                </label>
-                <label class="radio-option">
-                    <input type="radio" name="populariteit" [value]="1" 
-                           [(ngModel)]="populariteit" (change)="updateFilters()">
-                    <span>Best beoordeeld</span>
-                </label>
-            </div>
-
-            <!-- 6. Jaar (bereik) -->
-            <label>Jaar</label>
-            <div class="jaar-range">
-                <input type="number" placeholder="Van" [(ngModel)]="uitgaveJaarVan" 
-                    (input)="updateFilters()" class="sidebar-input"
-                    [class.input-error]="jaarError()">
-                <input type="number" placeholder="Tot" [(ngModel)]="uitgaveJaarTot" 
-                    (input)="updateFilters()" class="sidebar-input"
-                    [class.input-error]="jaarError()">
-            </div>
-            @if (jaarError()) {
-            <span class="error-text">{{ jaarError() }}</span>
-            }
-
-            <!-- 7. Weergave: sorteren -->
-            <label for="sort-select">Sorteren op</label>
-            <div class="sort-row">
-                <select id="sort-select" [(ngModel)]="selectedSorteerOp" (change)="updateFilters()" class="sidebar-input">
-                    <option [ngValue]="undefined">Geen sortering</option>
-                    <option value="locatie">Locatie</option>
-                    <option value="titel">Titel</option>
-                    <option value="auteur">Auteur</option>
-                    <option value="uitgaveJaar">Jaar</option>
-                </select>
-                <button (click)="opSorteerRichtingVerandering()" class="sort-direction-btn">
-                    {{ selectedSorteerRichting() === 'ASC' ? '↑' : '↓' }}
-                </button>
-            </div>
-        </div>
-
-        <button class="btn-reset" (click)="resetFilters()">
-            Filters wissen
-        </button>
-    </aside>
-
-    <!-- Boeken grid blijft ongewijzigd -->
-    <div class="catalogus-container">
-        <h3 class="result-count">
-            {{ boekenlijst().length }} 
-            {{ boekenlijst().length === 1 ? 'resultaat': 'resultaten' }}
-        </h3>
-
-        <div class="boeken-grid">
-            @for (boek of boekenlijst(); track boek.id) {
-            <div class="boek-card" [routerLink]="['/details', boek.id]">
-                <div class="image-container">
-                    <span class="status-badge" [class.beschikbaar]="boek.aantalExemplaren !== 0"
-                        [class.uitgeleend]="boek.aantalExemplaren === 0">
-                        {{ boek.aantalExemplaren !== 0 ? 'Beschikbaar' : 'Uitgeleend' }}
-                    </span>
-                    <img [src]="boek.afbeelding || 'https://bookshow.blurb.com/bookshow/cache/P11360640/md/cover_2.jpeg?access_key=675523b769268bce5b0b710b3d0e7841'" alt="Cover">
-                </div>
-
-                <div class="boek-info">
-                    <h4 class="titel">{{ boek.titel }}</h4>
-                    <p class="auteur">{{ boek.auteur }}</p>
-
-                    <p class="genres">
-                        @for (g of boek.genre; track g; let last = $last) {
-                        <small>{{ g }}{{ !last ? ' • ' : '' }}</small>
-                        } @empty {
-                        <small>Geen genres</small>
-                        }
-                    </p>
-
-                    <p class="locatie-badge">{{ boek.locatie }}</p>
-                </div>
-            </div>
-            } @empty {
-            <p class="no-results">Geen boeken gevonden voor deze zoekopdracht.</p>
-            }
-        </div>
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h2 class="sidebar-title">Filters</h2>
     </div>
+
+    <div class="filter-section">
+      <!-- 1. Zoeken -->
+      <label for="search-input">Zoekopdracht</label>
+      <input
+        id="search-input"
+        type="text"
+        placeholder="Titel, auteur of ISBN..."
+        [(ngModel)]="zoekTerm"
+        (input)="updateFilters()"
+        class="sidebar-input"
+      />
+
+      <!-- 2. Beschikbaarheid -->
+      <label>Beschikbaarheid</label>
+      <div class="radio-group">
+        <label class="radio-option">
+          <input
+            type="radio"
+            name="beschikbaarheid"
+            [value]="undefined"
+            [(ngModel)]="beschikbaarheid"
+            (change)="updateFilters()"
+          />
+          <span>Alle boeken</span>
+        </label>
+        <label class="radio-option">
+          <input
+            type="radio"
+            name="beschikbaarheid"
+            [value]="true"
+            [(ngModel)]="beschikbaarheid"
+            (change)="updateFilters()"
+          />
+          <span>Alleen beschikbaar</span>
+        </label>
+      </div>
+
+      <!-- 3. Genre -->
+      <label>Genre</label>
+      <div class="genre-filter">
+        <select
+          [(ngModel)]="selectedHoofdGenre"
+          (change)="onHoofdGenreChange()"
+          class="sidebar-input"
+        >
+          <option value="">Alle genres</option>
+          <option value="Avontuur">Avontuur</option>
+          <option value="Coming-of-age">Coming-of-age</option>
+          <option value="Detective / misdaad">Detective / misdaad</option>
+          <option value="Dystopie">Dystopie</option>
+          <option value="Fantasy">Fantasy</option>
+          <option value="Fictie algemeen">Fictie algemeen</option>
+          <option value="Graphic novel / strip">Graphic novel / strip</option>
+          <option value="Historische roman">Historische roman</option>
+          <option value="Horror">Horror</option>
+          <option value="Humor">Humor</option>
+          <option value="Literaire roman">Literaire roman</option>
+          <option value="Non-fictie algemeen">Non-fictie algemeen</option>
+          <option value="Oorlog & conflict">Oorlog & conflict</option>
+          <option value="Poëzie">Poëzie</option>
+          <option value="Romantiek">Romantiek</option>
+          <option value="Sciencefiction">Sciencefiction</option>
+          <option value="Spanning / thriller">Spanning / thriller</option>
+        </select>
+
+        @if (selectedHoofdGenre() && getSubGenres(selectedHoofdGenre()).length > 0) {
+          <select [(ngModel)]="selectedGenre" (change)="updateFilters()" class="sidebar-input">
+            <option [ngValue]="undefined">Alle subgenres</option>
+            @for (subGenre of getSubGenres(selectedHoofdGenre()); track subGenre) {
+              <option [value]="subGenre">{{ subGenre }}</option>
+            }
+          </select>
+        }
+      </div>
+
+      <!-- 4. Leesniveau -->
+      <label for="leesniveau-filter">Leesniveau</label>
+      <select
+        id="leesniveau-filter"
+        [(ngModel)]="leesniveau"
+        (change)="updateFilters()"
+        class="sidebar-input"
+      >
+        <option [ngValue]="undefined">Alle leesniveaus</option>
+        <option value="A (eenvoudig taalgebruik)">A (eenvoudig taalgebruik)</option>
+        <option value="B (gemiddeld taalgebruik)">B (gemiddeld taalgebruik)</option>
+        <option value="C (complex taalgebruik)">C (complex taalgebruik)</option>
+        <option value="D (literair niveau)">D (literair niveau)</option>
+      </select>
+
+      <!-- 6. Jaar (bereik) -->
+      <label>Jaar</label>
+      <div class="jaar-range">
+        <input
+          type="number"
+          placeholder="Van"
+          [(ngModel)]="uitgaveJaarVan"
+          (input)="updateFilters()"
+          class="sidebar-input"
+          [class.input-error]="jaarError()"
+        />
+        <input
+          type="number"
+          placeholder="Tot"
+          [(ngModel)]="uitgaveJaarTot"
+          (input)="updateFilters()"
+          class="sidebar-input"
+          [class.input-error]="jaarError()"
+        />
+      </div>
+      @if (jaarError()) {
+        <span class="error-text">{{ jaarError() }}</span>
+      }
+
+      <!-- 7. Weergave: sorteren -->
+      <label for="sort-select">Sorteren op</label>
+      <div class="sort-row">
+        <select
+          id="sort-select"
+          [(ngModel)]="selectedSorteerOp"
+          (change)="updateFilters()"
+          class="sidebar-input"
+        >
+          <option [ngValue]="undefined">Geen sortering</option>
+          <option value="populariteit">Populariteit</option>
+          <option value="titel">Titel</option>
+          <option value="auteur">Auteur</option>
+          <option value="uitgaveJaar">Jaar</option>
+        </select>
+        <button (click)="opSorteerRichtingVerandering()" class="sort-direction-btn">
+          {{ selectedSorteerRichting() === 'ASC' ? '↑' : '↓' }}
+        </button>
+      </div>
+    </div>
+
+    <button class="btn-reset" (click)="resetFilters()">Filters wissen</button>
+  </aside>
+
+  <!-- Boeken grid blijft ongewijzigd -->
+  <div class="catalogus-container">
+    <h3 class="result-count">
+      {{ boekenlijst().length }}
+      {{ boekenlijst().length === 1 ? 'resultaat' : 'resultaten' }}
+    </h3>
+
+    <div class="boeken-grid">
+      @for (boek of boekenlijst(); track boek.id) {
+        <div class="boek-card" [routerLink]="['/details', boek.id]">
+          <div class="image-container">
+            <span
+              class="status-badge"
+              [class.beschikbaar]="boek.aantalExemplaren !== 0"
+              [class.uitgeleend]="boek.aantalExemplaren === 0"
+            >
+              {{ boek.aantalExemplaren !== 0 ? 'Beschikbaar' : 'Uitgeleend' }}
+            </span>
+            <img
+              [src]="
+                boek.afbeelding ||
+                'https://bookshow.blurb.com/bookshow/cache/P11360640/md/cover_2.jpeg?access_key=675523b769268bce5b0b710b3d0e7841'
+              "
+              alt="Cover"
+            />
+          </div>
+
+          <div class="boek-info">
+            <h4 class="titel">{{ boek.titel }}</h4>
+            <p class="auteur">{{ boek.auteur }}</p>
+
+            <p class="genres">
+              @for (g of boek.genre; track g; let last = $last) {
+                <small>{{ g }}{{ !last ? ' • ' : '' }}</small>
+              } @empty {
+                <small>Geen genres</small>
+              }
+            </p>
+
+            <p class="locatie-badge">{{ boek.locatie }}</p>
+          </div>
+        </div>
+      } @empty {
+        <p class="no-results">Geen boeken gevonden voor deze zoekopdracht.</p>
+      }
+    </div>
+  </div>
 </div>

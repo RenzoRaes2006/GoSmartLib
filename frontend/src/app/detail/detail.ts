@@ -38,9 +38,9 @@ export class Detail implements OnInit {
   succesMeldingMap: string = '';
   mappen: any[] = [];
 
+  // Vriend's toevoegingen
   beschikbareEmojis = ['📚', '🎓', '🧠', '💡', '🎨', '🌍', '🔥', '❤️'];
   selectedEmoji = '📚';
-
   magLenen: boolean = false;
   leenReden: string = 'Status ophalen...';
   isLeenModalOpen: boolean = false;
@@ -61,6 +61,7 @@ export class Detail implements OnInit {
     this.form = this.fb.group({
       waardering: ['', [Validators.required]],
       inhoud: ['', [Validators.required, Validators.maxLength(500)]],
+      isAnoniem: [false],
     });
 
     this.route.paramMap.subscribe((params) => {
@@ -70,6 +71,7 @@ export class Detail implements OnInit {
       this.boekService.getBoekOpId(boekId).subscribe({
         next: (boek) => {
           this.boek = boek;
+          // Vriend's toevoeging: check leen status
           const gebruikerId = 1;
           this.boekService.checkLeenStatus(gebruikerId, boekId).subscribe({
             next: (status) => {
@@ -79,6 +81,7 @@ export class Detail implements OnInit {
             error: () => (this.leenReden = 'Kon uitleen status niet ophalen.'),
           });
         },
+        error: (err) => console.log('Iets mis gegaan met het krijgen van de boek details. ', err), // Jouw error handling teruggezet
       });
       this.laadBeoordelingVanBoek();
     });
@@ -86,6 +89,7 @@ export class Detail implements OnInit {
     const gebruikerId = 1;
     this.leeslijstService.getMappenVanGebruiker(gebruikerId).subscribe({
       next: (data) => {
+        // Vriend's toevoeging: filter Favorieten eruit
         this.mappen = data.filter((map) => map.naam.toLowerCase() !== 'favorieten');
       },
     });
@@ -97,6 +101,8 @@ export class Detail implements OnInit {
         this.beoordelingen = beoordelingen;
         this.updateBoekWaardering();
       },
+      // Jouw error handling hersteld!
+      error: (err) => console.log('Iets mis gegaan met het krijgen van de beoordelingen. ', err),
     });
   }
 
@@ -106,6 +112,7 @@ export class Detail implements OnInit {
         (sum, beoordeling) => sum + beoordeling.waardering,
         0,
       );
+      // Vriend's kortere berekening
       this.boekWaardering = Number((totaleWaardering / this.beoordelingen.length).toFixed(1));
       this.waarderingPrecentage = (this.boekWaardering / 5) * 100;
     }
@@ -114,11 +121,14 @@ export class Detail implements OnInit {
   voegToeAanFavorieten() {
     if (!this.boek || this.isFavoriet) return;
     const gebruikerId = 1;
+    // Vriend's toevoeging: emoji meegeven
     this.leeslijstService
       .voegBoekToeAanMap(gebruikerId, 'Favorieten', this.boek.id!, '⭐')
       .subscribe({
         next: () => {
           this.isFavoriet = true;
+          // Jouw timeout teruggezet
+          setTimeout(() => (this.isFavoriet = false), 3000);
         },
       });
   }
@@ -161,10 +171,11 @@ export class Detail implements OnInit {
     }
     const raw = this.form.value;
     const beoordeling: Omit<Beoordeling, 'id'> = {
-      gebruikerId: 1,
+      gebruikerNaam: '',
       boekId: this.boek?.id ?? 0,
       waardering: Number(raw.waardering),
       inhoud: raw.inhoud,
+      isAnoniem: raw.isAnoniem,
       gerapporteerd: false,
     };
 
@@ -174,9 +185,51 @@ export class Detail implements OnInit {
         this.submissionError = '';
         this.laadBeoordelingVanBoek();
       },
+      // Jouw error handling hersteld!
+      error: (error) => {
+        this.submissionError = 'Er ging iets mis bij het toevoegen. Probeer opnieuw.';
+        console.error('Fout bij toevoegen beoordeling: ', error.message);
+      },
     });
   }
 
+  // Jouw ongewijzigde functie hersteld!
+  bevestigRapport() {
+    this.beoordelingService.rapporteerBeoordeling(this.geselecteerdeBeoordelingId!, this.rapporteerReden).subscribe({
+      next: () => {
+        this.gerapporteerdeBeoordelingen.push(this.geselecteerdeBeoordelingId!);
+
+        // Update de lokale lijst zodat de UI direct weerspiegelt dat deze gerapporteerd is
+        const beoordeling = this.beoordelingen.find(b => b.id === this.geselecteerdeBeoordelingId);
+        if (beoordeling) {
+          beoordeling.gerapporteerd = true;
+        }
+
+        this.rapportMelding = 'Beoordeling succesvol gerapporteerd. Bedankt voor je feedback!';
+        this.rapporteerModalOpen = false;
+        this.geselecteerdeBeoordelingId = null;
+        this.rapporteerReden = '';
+
+        setTimeout(() => this.rapportMelding = '', 4000);
+      },
+      error: (err) => {
+        this.rapportMelding = 'Er ging iets mis bij het rapporteren. Probeer opnieuw.';
+        setTimeout(() => this.rapportMelding = '', 4000);
+      },
+    });
+  }
+
+  openRapporteerModal(beoordelingId: number) {
+    this.rapporteerModalOpen = true;
+    this.geselecteerdeBeoordelingId = beoordelingId;
+  }
+
+  sluitRapporteerModal() {
+    this.rapporteerModalOpen = false;
+    this.rapporteerReden = '';
+  }
+
+  // --- Vriend's functies hieronder ---
   openLeenModal() {
     if (this.magLenen) this.isLeenModalOpen = true;
   }
@@ -195,32 +248,5 @@ export class Detail implements OnInit {
         : resultaat;
     this.isLeenModalOpen = true;
     setTimeout(() => this.sluitLeenModal(), 2500);
-  }
-
-  bevestigRapport() {
-    this.beoordelingService
-      .rapporteerBeoordeling(this.geselecteerdeBeoordelingId!, this.rapporteerReden)
-      .subscribe({
-        next: () => {
-          const beoordeling = this.beoordelingen.find(
-            (b) => b.id === this.geselecteerdeBeoordelingId,
-          );
-          if (beoordeling) beoordeling.gerapporteerd = true;
-
-          this.rapportMelding = 'Beoordeling succesvol gerapporteerd.';
-          this.sluitRapporteerModal();
-          setTimeout(() => (this.rapportMelding = ''), 4000);
-        },
-      });
-  }
-
-  openRapporteerModal(beoordelingId: number) {
-    this.rapporteerModalOpen = true;
-    this.geselecteerdeBeoordelingId = beoordelingId;
-  }
-
-  sluitRapporteerModal() {
-    this.rapporteerModalOpen = false;
-    this.rapporteerReden = '';
   }
 }

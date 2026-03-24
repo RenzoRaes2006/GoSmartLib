@@ -18,7 +18,7 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "Gebruikers")
-public class Gebruiker {
+public class    Gebruiker {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long gebruikerID;
@@ -97,5 +97,13 @@ public class Gebruiker {
 
     public void setSchoolId(long schoolId) {
         this.SchoolId = schoolId;
+    }
+
+    public long getId() {
+        return gebruikerID;
+    }
+
+    public void setId(long id) {
+        this.gebruikerID = id;
     }
 }

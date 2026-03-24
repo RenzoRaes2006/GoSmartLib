@@ -29,7 +29,6 @@ export class Catalogus implements OnInit, OnDestroy {
   beschikbaarheid = signal<boolean | undefined>(undefined);
   uitgaveJaarVan = signal<number | undefined>(undefined);
   uitgaveJaarTot = signal<number | undefined>(undefined);
-  populariteit = signal<number | undefined>(undefined);
   leesniveau = signal<string | undefined>(undefined);
   selectedHoofdGenre = signal<string>('');
   jaarError = signal<string>('');
@@ -56,6 +55,17 @@ export class Catalogus implements OnInit, OnDestroy {
 
   // Genre hiërarchie
   genreHiërarchie = {
+    Avontuur: [],
+    'Coming-of-age': [],
+    'Detective / misdaad': [],
+    Dystopie: [],
+    Fantasy: [],
+    'Fictie algemeen': [],
+    'Graphic novel / strip': [],
+    'Historische roman': [],
+    Horror: [],
+    Humor: [],
+    'Literaire roman': [],
     'Non-fictie algemeen': [
       'Biografie / autobiografie',
       'Filosofie',
@@ -65,24 +75,12 @@ export class Catalogus implements OnInit, OnDestroy {
       'Psychologie',
       'Wetenschap & technologie',
     ],
-    'Fictie algemeen': [],
-    'Literaire roman': [],
-    'Spanning / thriller': [],
-    'Detective / misdaad': [],
-    Fantasy: [],
-    Dystopie: [],
-    'Historische roman': [],
-    Romantiek: [],
-    'Coming-of-age': [],
-    Avontuur: [],
     'Oorlog & conflict': [],
-    Horror: [],
-    Humor: [],
-    'Graphic novel / strip': [],
     Poëzie: [],
+    Romantiek: [],
+    'Spanning / thriller': [],
   };
 
-  // Lifecycle hook
   // Bij het initialiseren van de component, probeer opgeslagen filters te laden of laad alle boeken
   ngOnInit(): void {
     const stored = sessionStorage.getItem(this.FILTERS_KEYS);
@@ -102,7 +100,6 @@ export class Catalogus implements OnInit, OnDestroy {
         this.beschikbaarheid.set(filters.beschikbaarheid);
         this.uitgaveJaarVan.set(filters.uitgaveJaarVan);
         this.uitgaveJaarTot.set(filters.uitgaveJaarTot);
-        this.populariteit.set(filters.populariteit);
         this.leesniveau.set(filters.leesniveau);
         this.selectedHoofdGenre.set(filters.selectedHoofdGenre || '');
 
@@ -171,7 +168,6 @@ export class Catalogus implements OnInit, OnDestroy {
       beschikbaarheid: this.beschikbaarheid() === true ? 'true' : undefined,
       uitgaveJaarVan: this.uitgaveJaarVan(),
       uitgaveJaarTot: this.uitgaveJaarTot(),
-      populariteit: this.populariteit(),
       leesniveau: this.leesniveau(),
     };
 
@@ -191,7 +187,6 @@ export class Catalogus implements OnInit, OnDestroy {
       beschikbaarheid: this.beschikbaarheid(),
       uitgaveJaarVan: this.uitgaveJaarVan(),
       uitgaveJaarTot: this.uitgaveJaarTot(),
-      populariteit: this.populariteit(),
       leesniveau: this.leesniveau(),
       selectedHoofdGenre: this.selectedHoofdGenre(),
     };
@@ -260,7 +255,6 @@ export class Catalogus implements OnInit, OnDestroy {
     this.beschikbaarheid.set(undefined);
     this.uitgaveJaarVan.set(undefined);
     this.uitgaveJaarTot.set(undefined);
-    this.populariteit.set(undefined);
     this.leesniveau.set(undefined);
     this.selectedHoofdGenre.set('');
     sessionStorage.removeItem(this.FILTERS_KEYS);
