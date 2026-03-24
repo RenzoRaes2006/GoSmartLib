@@ -3,8 +3,9 @@ package ap.be.backend.service;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import ap.be.backend.dto.BoekDTO;
@@ -22,7 +23,6 @@ public class BoekService {
     }
 
     public Boek addBoek(BoekDTO boekDTO) {
-        // Trim ISBN to avoid whitespace issues
         String trimmedIsbn = boekDTO.isbn().trim();
 
         if (boekRepository.findByIsbn(trimmedIsbn).isPresent()) {
@@ -81,13 +81,12 @@ public class BoekService {
 
     public List<Boek> filterBoeken(String zoekterm, List<String> genres, String uitgever, Integer minPagina,
             Integer maxPagina,
-            Boolean beschikbaarheid, Integer uitgaveJaarVan, Integer uitgaveJaarTot,
-            String populariteit, String leesniveau,
+            Boolean beschikbaarheid, Integer uitgaveJaarVan, Integer uitgaveJaarTot, String leesniveau,
             Sort sort) {
         validateYearRange(uitgaveJaarVan, uitgaveJaarTot);
         List<String> genresParam = (genres == null || genres.isEmpty()) ? null : genres;
         return boekRepository.filterBoeken(zoekterm, genresParam, uitgever, minPagina, maxPagina, beschikbaarheid,
-                uitgaveJaarVan, uitgaveJaarTot, populariteit, leesniveau, sort);
+                uitgaveJaarVan, uitgaveJaarTot, leesniveau, sort);
     }
 
     private void validateYearRange(Integer uitgaveJaarVan, Integer uitgaveJaarTot) {
@@ -114,7 +113,16 @@ public class BoekService {
         }
     }
 
+    public Boek getBoekById(Long id) {
+        return boekRepository.findById(id).orElse(null);
+    }
+
+    public Page<Boek> getBoekenPaged(int page, int size) {
+        return boekRepository.findAll(PageRequest.of(page, size, Sort.by("titel").ascending()));
+    }
+
     public List<Boek> getPopulaireBoeken() {
         return boekRepository.findTop5PopulaireBoeken();
     }
+
 }

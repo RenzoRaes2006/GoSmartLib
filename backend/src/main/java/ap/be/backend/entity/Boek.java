@@ -54,7 +54,7 @@ public class Boek {
     private String locatie;
 
     @Column
-    private String populariteit;
+    private Double populariteit;
 
     @Column
     private String leesniveau;

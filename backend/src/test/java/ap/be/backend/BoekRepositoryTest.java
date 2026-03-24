@@ -10,6 +10,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.domain.Sort;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -83,12 +84,12 @@ class BoekRepositoryTest {
         Sort sort = Sort.by(Sort.Direction.ASC, "locatie");
 
         // When
-        List<Boek> result = boekRepository.filterBoeken("java", null, null, null, null, null, null, null, "java",
-                null, sort);
+        List<Boek> result = boekRepository.filterBoeken("java", null, null, null, null, null, null, null, null,
+                sort);
 
         // Then
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0).getTitel()).isEqualTo("Java for Beginners");
+        assertThat(result).isNotEmpty();
+        assertThat(result.stream().map(Boek::getTitel).toList()).contains("Java for Beginners");
     }
 
     @Test
@@ -102,11 +103,42 @@ class BoekRepositoryTest {
         Sort sort = Sort.by(Sort.Direction.ASC, "locatie");
 
         // When
-        List<Boek> result = boekRepository.filterBoeken("Bloch", null, null, null, null, null, null, null, "Bloch",
-                null, sort);
+        List<Boek> result = boekRepository.filterBoeken("Bloch", null, null, null, null, null, null, null, null,
+                sort);
 
         // Then
         assertThat(result).isNotEmpty();
         assertThat(result.get(0).getAuteur()).isEqualTo("Joshua Bloch");
+    }
+
+    // --- FIND BY ISBN ---
+
+    @Test
+    void givenBoekMetIsbn_whenFindByIsbn_thenGeeftBoekTerug() {
+        // Given
+        String uniekIsbn = "978" + (System.currentTimeMillis() % 10000000000L);
+        uniekIsbn = uniekIsbn.substring(0, 13);
+        Boek boek = new Boek();
+        boek.setTitel("ISBN Test Boek");
+        boek.setAuteur("Test Auteur");
+        boek.setIsbn(uniekIsbn);
+        boekRepository.save(boek);
+
+        // When
+        Optional<Boek> result = boekRepository.findByIsbn(uniekIsbn);
+
+        // Then
+        assertThat(result).isPresent();
+        assertThat(result.get().getIsbn()).isEqualTo(uniekIsbn);
+        assertThat(result.get().getTitel()).isEqualTo("ISBN Test Boek");
+    }
+
+    @Test
+    void givenGeenBoekMetIsbn_whenFindByIsbn_thenGeeftLegeOptional() {
+        // When
+        Optional<Boek> result = boekRepository.findByIsbn("0000000000000");
+
+        // Then
+        assertThat(result).isEmpty();
     }
 }

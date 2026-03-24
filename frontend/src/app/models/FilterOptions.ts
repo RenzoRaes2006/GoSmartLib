@@ -10,6 +10,5 @@ export interface FilterOptions {
   beschikbaarheid?: string;
   uitgaveJaarVan?: number;
   uitgaveJaarTot?: number;
-  populariteit?: number;
   leesniveau?: string;
 }

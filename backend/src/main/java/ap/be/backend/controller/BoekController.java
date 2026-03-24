@@ -3,8 +3,6 @@ package ap.be.backend.controller;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -18,21 +16,19 @@ import org.springframework.web.bind.annotation.RestController;
 
 import ap.be.backend.dto.BoekDTO;
 import ap.be.backend.entity.Boek;
-import ap.be.backend.repository.BoekRepository;
 import ap.be.backend.service.BoekService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.data.domain.Sort;
 
 @RestController
 // @CrossOrigin(origins = { "http://frontend.localhost", "http://localhost:4200"
 // })
 public class BoekController {
     private final BoekService boekService;
-    private final BoekRepository boekRepository;
 
-    public BoekController(BoekService boekService, BoekRepository boekRepository) {
+    public BoekController(BoekService boekService) {
         this.boekService = boekService;
-        this.boekRepository = boekRepository;
     }
 
     @GetMapping("/api/boeken")
@@ -48,7 +44,6 @@ public class BoekController {
             @RequestParam(required = false) String beschikbaar,
             @RequestParam(required = false) Integer uitgaveJaarVan,
             @RequestParam(required = false) Integer uitgaveJaarTot,
-            @RequestParam(required = false) String populariteit,
             @RequestParam(required = false) String leesniveau) {
 
         Sort sort;
@@ -60,7 +55,7 @@ public class BoekController {
 
         return boekService.filterBoeken(zoekterm, genre, uitgever, minPagina, maxPagina,
                 beschikbaar != null ? Boolean.parseBoolean(beschikbaar) : null, uitgaveJaarVan, uitgaveJaarTot,
-                populariteit, leesniveau, sort);
+                leesniveau, sort);
     }
 
     @PostMapping("/api/boeken")
@@ -71,8 +66,7 @@ public class BoekController {
 
     @GetMapping("/api/boeken/{id}")
     public Boek getBoekById(@PathVariable("id") Long id) {
-        return boekRepository.findById(id).orElse(null);
-
+        return boekService.getBoekById(id);
     }
 
     @GetMapping("/api/boeken/isbn/{isbn}")
@@ -105,7 +99,7 @@ public class BoekController {
     @GetMapping("/api/boeken/paged")
     public Page<Boek> getBoekenPaged(@RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size) {
-        return boekRepository.findAll(PageRequest.of(page, size, Sort.by("titel").ascending()));
+        return boekService.getBoekenPaged(page, size);
     }
 
     @GetMapping("/api/boeken/top/populair")
