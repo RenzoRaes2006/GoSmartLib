@@ -13,7 +13,7 @@ export class App {
   private router = inject(Router);
 
   toonFooter() {
-    return !this.router.url.startsWith('/catalogus');
+    return !this.router.url.startsWith('/catalogus') && !this.router.url.startsWith('/details');
   }
   // http = inject(HttpClient);
   // status = 'Wacht op input...';

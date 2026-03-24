@@ -1,5 +1,5 @@
 <div class="page-container">
-  <a routerLink="/catalogus" class="back-link">← Terug naar overzicht</a>
+  <a routerLink="/catalogus" class="back-link">← Terug naar catalogus</a>
 
   <div class="content-layout">
     
@@ -23,7 +23,7 @@
           </div>
 
           <div class="tags-section">
-            <span class="tags-label">Thema's</span>
+            <span class="tags-label">Genres</span>
             <div class="tags-list">
               @for (genre of boek?.genre; track $index) {
                 <span class="tag">{{ genre }}</span>
@@ -137,14 +137,18 @@
           <div class="review-form-container">
             <h3>Schrijf een review</h3>
             <form class="review-form" [formGroup]="form" (ngSubmit)="submitBeoordeling()">
-              <select id="waardering" name="waardering" formControlName="waardering" class="form-select">
-                <option value="" disabled selected>Kies een waardering...</option>
-                <option value="5">★★★★★</option>
-                <option value="4">★★★★☆</option>
-                <option value="3">★★★☆☆</option>
-                <option value="2">★★☆☆☆</option>
-                <option value="1">★☆☆☆☆</option>
-              </select>
+              <div class="star-rating-input">
+                <input type="radio" id="star5" formControlName="waardering" value="5" />
+                <label for="star5" title="5 sterren">★</label>
+                <input type="radio" id="star4" formControlName="waardering" value="4" />
+                <label for="star4" title="4 sterren">★</label>
+                <input type="radio" id="star3" formControlName="waardering" value="3" />
+                <label for="star3" title="3 sterren">★</label>
+                <input type="radio" id="star2" formControlName="waardering" value="2" />
+                <label for="star2" title="2 sterren">★</label>
+                <input type="radio" id="star1" formControlName="waardering" value="1" />
+                <label for="star1" title="1 ster">★</label>
+              </div>
               
               <textarea id="inhoud" name="inhoud" rows="3" formControlName="inhoud" class="form-textarea" placeholder="Deel je mening over dit boek..."></textarea>
 
