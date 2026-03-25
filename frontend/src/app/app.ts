@@ -13,20 +13,6 @@ export class App {
   private router = inject(Router);
 
   toonFooter() {
-    return !this.router.url.startsWith('/catalogus') && !this.router.url.startsWith('/boek-beheer');
+    return !this.router.url.startsWith('/catalogus') && !this.router.url.startsWith('/details');
   }
-  // http = inject(HttpClient);
-  // status = 'Wacht op input...';
-
-  // saveData(ingevoerdeNaam: string) {
-
-  //   // this.http.post('http://frontend.localhost/api/save', { naam: ingevoerdeNaam }).subscribe({
-  //    this.http.post('http://frontend.localhost/api/save', { naam: ingevoerdeNaam }).subscribe({
-  //     next: (result) => (this.status = 'Gelukt! Opgeslagen in MySQL.'),
-  //     error: (err) => {
-  //       this.status = 'Fout bij opslaan!';
-  //       console.log(err);
-  //     },
-  //   });
-  // }
 }
