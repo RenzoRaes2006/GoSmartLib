@@ -52,8 +52,10 @@ export class Detail implements OnInit {
   rapportMelding: string = '';
   rapporteerModalOpen: boolean = false;
   rapporteerReden: string = '';
+  geselecteerdeReden: string = '';
   geselecteerdeBeoordelingId: number | null = null;
   gerapporteerdeBeoordelingen: number[] = [];
+
 
   boekId: number = 0;
 
@@ -192,9 +194,10 @@ export class Detail implements OnInit {
       },
     });
   }
-
   // Jouw ongewijzigde functie hersteld!
   bevestigRapport() {
+    const reden: string = this.geselecteerdeReden === 'Anders' ? this.rapporteerReden : this.geselecteerdeReden;
+
     this.beoordelingService.rapporteerBeoordeling(this.geselecteerdeBeoordelingId!, this.rapporteerReden).subscribe({
       next: () => {
         this.gerapporteerdeBeoordelingen.push(this.geselecteerdeBeoordelingId!);
