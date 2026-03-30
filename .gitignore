@@ -1,0 +1,8 @@
+# Prevent accidental root npm artifacts from showing up in git status
+/node_modules/
+
+# NPM logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
