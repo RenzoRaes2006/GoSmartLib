@@ -13,6 +13,7 @@ import ap.be.backend.entity.Boek;
 import ap.be.backend.exception.InvalidYearRangeException;
 import ap.be.backend.exception.IsbnAlreadyExistsException;
 import ap.be.backend.repository.BoekRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class BoekService {
@@ -67,6 +68,7 @@ public class BoekService {
         return boekRepository.save(boek);
     }
 
+    @Transactional
     public boolean deleteBoek(Long id) {
         if (boekRepository.existsById(id)) {
             boekRepository.deleteById(id);

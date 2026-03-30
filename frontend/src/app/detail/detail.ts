@@ -196,30 +196,40 @@ export class Detail implements OnInit {
   }
   // Jouw ongewijzigde functie hersteld!
   bevestigRapport() {
+<<<<<<< HEAD
     const reden: string = this.geselecteerdeReden === 'Anders' ? this.rapporteerReden : this.geselecteerdeReden;
 
     this.beoordelingService.rapporteerBeoordeling(this.geselecteerdeBeoordelingId!, this.rapporteerReden).subscribe({
       next: () => {
         this.gerapporteerdeBeoordelingen.push(this.geselecteerdeBeoordelingId!);
+=======
+    this.beoordelingService
+      .rapporteerBeoordeling(this.geselecteerdeBeoordelingId!, this.rapporteerReden)
+      .subscribe({
+        next: () => {
+          this.gerapporteerdeBeoordelingen.push(this.geselecteerdeBeoordelingId!);
+>>>>>>> 78c201e8220ffa6bd2cc6e057e84670aa413b16e
 
-        // Update de lokale lijst zodat de UI direct weerspiegelt dat deze gerapporteerd is
-        const beoordeling = this.beoordelingen.find(b => b.id === this.geselecteerdeBeoordelingId);
-        if (beoordeling) {
-          beoordeling.gerapporteerd = true;
-        }
+          // Update de lokale lijst zodat de UI direct weerspiegelt dat deze gerapporteerd is
+          const beoordeling = this.beoordelingen.find(
+            (b) => b.id === this.geselecteerdeBeoordelingId,
+          );
+          if (beoordeling) {
+            beoordeling.gerapporteerd = true;
+          }
 
-        this.rapportMelding = 'Beoordeling succesvol gerapporteerd. Bedankt voor je feedback!';
-        this.rapporteerModalOpen = false;
-        this.geselecteerdeBeoordelingId = null;
-        this.rapporteerReden = '';
+          this.rapportMelding = 'Beoordeling succesvol gerapporteerd. Bedankt voor je feedback!';
+          this.rapporteerModalOpen = false;
+          this.geselecteerdeBeoordelingId = null;
+          this.rapporteerReden = '';
 
-        setTimeout(() => this.rapportMelding = '', 4000);
-      },
-      error: (err) => {
-        this.rapportMelding = 'Er ging iets mis bij het rapporteren. Probeer opnieuw.';
-        setTimeout(() => this.rapportMelding = '', 4000);
-      },
-    });
+          setTimeout(() => (this.rapportMelding = ''), 4000);
+        },
+        error: (err) => {
+          this.rapportMelding = 'Er ging iets mis bij het rapporteren. Probeer opnieuw.';
+          setTimeout(() => (this.rapportMelding = ''), 4000);
+        },
+      });
   }
 
   openRapporteerModal(beoordelingId: number) {
@@ -247,7 +257,7 @@ export class Detail implements OnInit {
     const resultaat = this.leenMandjeService.voegBoekToe(this.boek);
     this.succesMeldingLenen =
       resultaat === 'Succes'
-        ? `'${this.boek.titel}' is toegevoegd aan je reserveringen!`
+        ? `'${this.boek.titel}' is toegevoegd aan je lenings aanvragen!`
         : resultaat;
     this.isLeenModalOpen = true;
     setTimeout(() => this.sluitLeenModal(), 2500);

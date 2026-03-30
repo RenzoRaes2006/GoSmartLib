@@ -63,6 +63,10 @@ public class Boek {
     private List<Beoordeling> beoordelingen;
 
     @JsonIgnore
+    @OneToMany(mappedBy = "boek", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Uitlening> uitleningen;
+
+    @JsonIgnore
     @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     @JoinTable(name = "leeslijst_map_boeken", inverseJoinColumns = @JoinColumn(name = "map_id"))
     private Set<LeeslijstMap> leeslijstMaps;
