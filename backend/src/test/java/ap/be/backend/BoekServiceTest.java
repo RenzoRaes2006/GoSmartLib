@@ -73,6 +73,40 @@ public class BoekServiceTest {
     }
 
     @Test
+    void givenBoekZonderOptioneleVelden_whenAddBoek_thenFallbackWaardenWordenGezet() {
+        BoekDTO dto = new BoekDTO(
+                null,
+                "Titel",
+                "Auteur",
+                "9780132350884",
+                "",    // uitgever leeg
+                null,  // uitgaveJaar null
+                0,     // pagina
+                null,  // genre null
+                "Dit is een beschrijving",
+                5,
+                "",    // locatie leeg
+                null,  // afbeelding null
+                null,
+                "");   // leesniveau leeg
+
+        when(boekRepository.findByIsbn("9780132350884")).thenReturn(Optional.empty());
+
+        ArgumentCaptor<Boek> boekCaptor = ArgumentCaptor.forClass(Boek.class);
+        when(boekRepository.save(boekCaptor.capture())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        boekService.addBoek(dto);
+
+        Boek opgeslagen = boekCaptor.getValue();
+        assertEquals("Geen uitgever", opgeslagen.getUitgever());
+        assertEquals("Geen uitgavejaar", opgeslagen.getUitgaveJaar());
+        assertTrue(opgeslagen.getGenre().isEmpty());
+        assertEquals("Geen locatie", opgeslagen.getLocatie());
+        assertEquals("", opgeslagen.getAfbeelding());
+        assertEquals("Geen leesniveau", opgeslagen.getLeesniveau());
+    }
+
+    @Test
     void givenBestaandIsbn_whenAddBoek_thenThrowIsbnAlreadyExistsException() {
         BoekDTO dto = new BoekDTO(
                 null,

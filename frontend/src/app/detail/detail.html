@@ -62,7 +62,7 @@
               <span class="info-label">Uitgavejaar</span><span class="info-value">{{ boek?.uitgaveJaar }}</span>
             </div>
             <div class="info-item">
-              <span class="info-label">Locatie</span><span class="info-value">{{ boek?.locatie }}</span>
+              <span class="info-label">Locatie in bib</span><span class="info-value">{{ boek?.locatie }}</span>
             </div>
             <div class="info-item">
               <span class="info-label">Exemplaren</span><span class="info-value">{{ boek?.aantalExemplaren }}</span>
@@ -245,24 +245,38 @@
 
 <!-- Rapporteer Modal (Jouw code) -->
 @if (rapporteerModalOpen) {
-  <div class="modal-overlay">
-    <div class="modal-box rapport-modal">
-      <h3>Rapporteer beoordeling</h3>
-      <p class="modal-label">Waarom rapporteer je deze beoordeling?</p>
-      <textarea
-        [(ngModel)]="rapporteerReden"
-        rows="3"
-        class="form-textarea"
+<div class="modal-overlay">
+  <div class="modal-box rapport-modal">
+    <h3>Rapporteer beoordeling</h3>
+    <p class="modal-label">Waarom rapporteer je deze beoordeling?</p>
+
+    <select [(ngModel)]="geselecteerdeReden" class="form-select">
+      <option value="" disabled selected>Kies een reden...</option>
+      <option value="ongepast">Ongepaste inhoud</option>
+      <option value="spam">Spam</option>
+      <option value="anders">Andere reden...</option>
+    </select>
+
+    @if (geselecteerdeReden === 'anders') {
+      <textarea 
+        [(ngModel)]="rapporteerReden" 
+        rows="3" 
+        class="form-textarea mt-2" 
         placeholder="Voer je reden in (verplicht)..."
       ></textarea>
-      <div class="modal-actions">
-        <button class="cancel-btn" (click)="sluitRapporteerModal()">Annuleren</button>
-        <button class="save-btn" [disabled]="!rapporteerReden.trim()" (click)="bevestigRapport()">
-          Verzenden
-        </button>
-      </div>
+    }
+
+    <div class="modal-actions">
+      <button class="cancel-btn" (click)="sluitRapporteerModal()">Annuleren</button>
+      <button 
+        class="save-btn" 
+        [disabled]="!geselecteerdeReden || (geselecteerdeReden === 'anders' && !rapporteerReden.trim())" 
+        (click)="bevestigRapport()">
+        Verzenden
+      </button>
     </div>
   </div>
+</div>
 }
 
 <!-- Toast Melding (Jouw code) -->
