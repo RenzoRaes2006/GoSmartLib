@@ -8,6 +8,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -48,7 +49,6 @@ public class UitleningTest {
 
     @BeforeEach
     void setUp() {
-        // We maken voor elke test een verse gebruiker en een vers boek aan
         testGebruiker = new Gebruiker();
         testGebruiker.setGebruikerID(1L);
         testGebruiker.setVoorNaam("Test");
@@ -56,30 +56,31 @@ public class UitleningTest {
         testBoek = new Boek();
         testBoek.setId(100L);
         testBoek.setTitel("Spring Boot voor Beginners");
-        testBoek.setAantalExemplaren(5); // Er zijn er nog 5 op voorraad
+        testBoek.setAantalExemplaren(5);
     }
 
     @Test
     void checkLeenStatus_MagLenen_AlsAllesKlopt() {
-        // Arrange (Zet de situatie klaar)
+        // Arrange
         when(boekRepository.findById(100L)).thenReturn(Optional.of(testBoek));
-        when(uitleningRepository.existsByGebruiker_GebruikerIDAndStatus(1L, "AANGEVRAAGD")).thenReturn(false);
+        // We hebben de AANGEVRAAGD check hier weggehaald omdat hij ook niet meer in de
+        // Service zit!
         when(uitleningRepository.existsByGebruiker_GebruikerIDAndBoek_IdAndIsIngeleverdFalse(1L, 100L))
                 .thenReturn(false);
         when(uitleningRepository.findByGebruiker_GebruikerIDAndIsIngeleverdFalse(1L)).thenReturn(new ArrayList<>());
 
-        // Act (Voer de methode uit)
+        // Act
         LeenStatusResponse response = gebruikerService.checkLeenStatus(1L, 100L);
 
-        // Assert (Controleer het resultaat)
+        // Assert
         assertTrue(response.isMagLenen());
-        assertEquals("Beschikbaar om te lenen", response.getReden());
+        assertEquals("Beschikbaar om te reserveren", response.getReden()); // De vernieuwde melding
     }
 
     @Test
     void checkLeenStatus_MagNietLenen_AlsVoorraadNulIs() {
         // Arrange
-        testBoek.setAantalExemplaren(0); // Oeps, uitverkocht!
+        testBoek.setAantalExemplaren(0);
         when(boekRepository.findById(100L)).thenReturn(Optional.of(testBoek));
 
         // Act
@@ -95,7 +96,6 @@ public class UitleningTest {
         // Arrange
         when(boekRepository.findById(100L)).thenReturn(Optional.of(testBoek));
 
-        // We simuleren dat de gebruiker al 3 boeken thuis heeft liggen
         List<Uitlening> actieveLeningen = List.of(new Uitlening(), new Uitlening(), new Uitlening());
         when(uitleningRepository.findByGebruiker_GebruikerIDAndIsIngeleverdFalse(1L)).thenReturn(actieveLeningen);
 
@@ -104,7 +104,43 @@ public class UitleningTest {
 
         // Assert
         assertFalse(response.isMagLenen());
-        assertEquals("Je hebt het maximum van 3 geleende boeken bereikt.", response.getReden());
+        assertEquals("Je hebt je limiet van 3 boeken bereikt (inclusief aanvragen).", response.getReden()); // Vernieuwde
+                                                                                                            // melding
+    }
+
+    @Test
+    void checkLeenStatus_MagNietLenen_AlsBoekAlGeleendOfAangevraagdIs() {
+        // Arrange
+        when(boekRepository.findById(100L)).thenReturn(Optional.of(testBoek));
+        when(uitleningRepository.existsByGebruiker_GebruikerIDAndBoek_IdAndIsIngeleverdFalse(1L, 100L))
+                .thenReturn(true);
+
+        // Act
+        LeenStatusResponse response = gebruikerService.checkLeenStatus(1L, 100L);
+
+        // Assert
+        assertFalse(response.isMagLenen());
+
+        assertEquals("Je hebt dit boek al geleend of in aanvraag.", response.getReden());
+    }
+
+    @Test
+    void checkLeenStatus_MagNietLenen_AlsGebruikerTeLateBoekenHeeft() {
+        // Arrange
+        when(boekRepository.findById(100L)).thenReturn(Optional.of(testBoek));
+        // We geven hier aan dat hij het boek niet dubbel heeft, maar wél een te laat
+        // boek heeft
+        when(uitleningRepository.existsByGebruiker_GebruikerIDAndBoek_IdAndIsIngeleverdFalse(1L, 100L))
+                .thenReturn(false);
+        when(uitleningRepository.existsByGebruiker_GebruikerIDAndIsIngeleverdFalseAndInleverDatumBefore(any(Long.class),
+                any(LocalDate.class))).thenReturn(true);
+
+        // Act
+        LeenStatusResponse response = gebruikerService.checkLeenStatus(1L, 100L);
+
+        // Assert
+        assertFalse(response.isMagLenen());
+        assertEquals("Je hebt nog boeken die te laat zijn. Lever deze eerst in!", response.getReden());
     }
 
     @Test
@@ -113,16 +149,13 @@ public class UitleningTest {
         when(boekRepository.findById(100L)).thenReturn(Optional.of(testBoek));
         when(gebruikerRepository.findById(1L)).thenReturn(Optional.of(testGebruiker));
 
-        int startVoorraad = testBoek.getAantalExemplaren(); // is 5
+        int startVoorraad = testBoek.getAantalExemplaren();
 
         // Act
         gebruikerService.bevestigUitlening(1L, 100L);
 
         // Assert
         assertEquals(startVoorraad - 1, testBoek.getAantalExemplaren(), "De voorraad moet met 1 verminderd zijn");
-
-        // Controleer of boekRepository.save() en uitleningRepository.save() echt zijn
-        // aangeroepen!
         verify(boekRepository, times(1)).save(testBoek);
         verify(uitleningRepository, times(1)).save(any(Uitlening.class));
     }

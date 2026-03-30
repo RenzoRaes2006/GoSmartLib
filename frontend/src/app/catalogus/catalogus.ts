@@ -31,7 +31,8 @@ export class Catalogus implements OnInit, OnDestroy {
   uitgaveJaarTot = signal<number | undefined>(undefined);
   leesniveau = signal<string | undefined>(undefined);
   selectedHoofdGenre = signal<string>('');
-  jaarError = signal<string>('');
+  paginaError = signal<string>('');
+  maxPaginaLimit = 1500;
 
   // Key voor sessionStorage
   private readonly FILTERS_KEYS = 'catalogus_filters';
@@ -129,22 +130,21 @@ export class Catalogus implements OnInit, OnDestroy {
 
   // Methode om filters bij te werken en boeken opnieuw te laden op basis van de nieuwe filters
   updateFilters(): void {
-    const huidigeJaar = new Date().getFullYear();
-    const jaarVan = this.uitgaveJaarVan();
-    const jaarTot = this.uitgaveJaarTot();
+    const min = this.minPagina();
+    const max = this.maxPagina();
 
-    this.jaarError.set('');
+    this.paginaError.set('');
 
-    if (jaarVan && (jaarVan < 1900 || jaarVan > huidigeJaar)) {
-      this.jaarError.set(`Voer een jaar in tussen 1900 en ${huidigeJaar}`);
+    if (min !== undefined && min < 0) {
+      this.paginaError.set('Minimum pagina\'s mag niet negatief zijn');
       return;
     }
-    if (jaarTot && (jaarTot < 1900 || jaarTot > huidigeJaar)) {
-      this.jaarError.set(`Voer een jaar in tussen 1900 en ${huidigeJaar}`);
+    if (max !== undefined && max < 0) {
+      this.paginaError.set('Maximum pagina\'s mag niet negatief zijn');
       return;
     }
-    if (jaarVan && jaarTot && jaarVan > jaarTot) {
-      this.jaarError.set('"Van" mag niet groter zijn dan "Tot"');
+    if (min !== undefined && max !== undefined && min > max) {
+      this.paginaError.set('"Min" mag niet groter zijn dan "Max"');
       return;
     }
 
@@ -161,8 +161,8 @@ export class Catalogus implements OnInit, OnDestroy {
       zoekterm: this.zoekTerm()?.trim() || undefined,
       genres,
       uitgever: this.selectedUitgever()?.trim() || undefined,
-      minPagina: this.minPagina(),
-      maxPagina: this.maxPagina(),
+      minPagina: (this.minPagina() ?? 0) > 0 ? this.minPagina() : undefined,
+      maxPagina: (this.maxPagina() ?? this.maxPaginaLimit) < this.maxPaginaLimit ? this.maxPagina() : undefined,
       sorteerOp: this.selectedSorteerOp() || undefined,
       sorteerRichting: this.selectedSorteerRichting() || 'ASC',
       beschikbaarheid: this.beschikbaarheid() === true ? 'true' : undefined,
@@ -193,6 +193,30 @@ export class Catalogus implements OnInit, OnDestroy {
 
     // Sla de filters op als JSON-string in sessionStorage
     sessionStorage.setItem(this.FILTERS_KEYS, JSON.stringify(huidigeFilters));
+  }
+
+  onMinPaginaSlider(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const value = +input.value;
+    const max = this.maxPagina() ?? this.maxPaginaLimit;
+    const clamped = Math.min(value, max);
+    if (value !== clamped) {
+      input.value = String(clamped);
+    }
+    this.minPagina.set(clamped);
+    this.updateFilters();
+  }
+
+  onMaxPaginaSlider(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const value = +input.value;
+    const min = this.minPagina() ?? 0;
+    const clamped = Math.max(value, min);
+    if (value !== clamped) {
+      input.value = String(clamped);
+    }
+    this.maxPagina.set(clamped);
+    this.updateFilters();
   }
 
   opSorteerRichtingVerandering(): void {
