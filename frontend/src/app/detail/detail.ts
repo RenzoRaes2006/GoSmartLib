@@ -85,7 +85,7 @@ export class Detail implements OnInit {
         },
         error: (err) => console.log('Iets mis gegaan met het krijgen van de boek details. ', err), // Jouw error handling teruggezet
       });
-      this.laadBeoordelingVanBoek();
+      this.laadBeoordelingenVanBoek();
     });
 
     const gebruikerId = 1;
@@ -97,7 +97,7 @@ export class Detail implements OnInit {
     });
   }
 
-  laadBeoordelingVanBoek() {
+  laadBeoordelingenVanBoek() {
     this.beoordelingService.getBeoordelingenOpBoekId(this.boekId).subscribe({
       next: (beoordelingen) => {
         this.beoordelingen = beoordelingen;
@@ -185,18 +185,20 @@ export class Detail implements OnInit {
       next: () => {
         this.form.reset();
         this.submissionError = '';
-        this.laadBeoordelingVanBoek();
+        this.laadBeoordelingenVanBoek();
       },
       // Jouw error handling hersteld!
       error: (error) => {
-        this.submissionError = 'Er ging iets mis bij het toevoegen. Probeer opnieuw.';
-        console.error('Fout bij toevoegen beoordeling: ', error.message);
+        if (error.status === 400) {
+          this.submissionError = 'Je beoordeling bevat ongepaste taal. Pas deze aan en probeer opnieuw.';
+        } else {
+          this.submissionError = 'Er ging iets mis bij het toevoegen. Probeer opnieuw.';
+        }
       },
     });
   }
   // Jouw ongewijzigde functie hersteld!
   bevestigRapport() {
-
     const reden: string = this.geselecteerdeReden === 'Anders' ? this.rapporteerReden : this.geselecteerdeReden;
 
     this.beoordelingService
@@ -205,11 +207,11 @@ export class Detail implements OnInit {
         next: () => {
           this.gerapporteerdeBeoordelingen.push(this.geselecteerdeBeoordelingId!);
 
-
           // Update de lokale lijst zodat de UI direct weerspiegelt dat deze gerapporteerd is
           const beoordeling = this.beoordelingen.find(
             (b) => b.id === this.geselecteerdeBeoordelingId,
           );
+
           if (beoordeling) {
             beoordeling.gerapporteerd = true;
           }
