@@ -56,4 +56,19 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
     }
 
+    @ExceptionHandler(MapNotFoundException.class)
+    public ResponseEntity<String> handleMapNotFound(MapNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(UitleningNotFoundException.class)
+    public ResponseEntity<String> handleUitleningNotFound(UitleningNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(LeenVoorwaardeException.class)
+    public ResponseEntity<String> handleLeenVoorwaarde(LeenVoorwaardeException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+    }
+
 }

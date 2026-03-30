@@ -46,12 +46,8 @@ public class GebruikerController {
             @PathVariable String mapNaam,
             @PathVariable Long boekId,
             @RequestParam(required = false, defaultValue = "📁") String emoji) {
-        try {
-            gebruikerService.voegBoekToeAanMap(gebruikerId, mapNaam, boekId, emoji); // 🚨 emoji hier toegevoegd!
-            return ResponseEntity.ok("Boek succesvol toegevoegd aan map");
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+        gebruikerService.voegBoekToeAanMap(gebruikerId, mapNaam, boekId, emoji);
+        return ResponseEntity.ok("Boek succesvol toegevoegd aan map");
     }
 
     @DeleteMapping("/{gebruikerId}/mappen/{mapNaam}/boeken/{boekId}")
@@ -59,12 +55,8 @@ public class GebruikerController {
             @PathVariable Long gebruikerId,
             @PathVariable String mapNaam,
             @PathVariable Long boekId) {
-        try {
-            gebruikerService.verwijderBoekUitMap(gebruikerId, mapNaam, boekId);
-            return ResponseEntity.ok("Boek succesvol verwijderd uit map");
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+        gebruikerService.verwijderBoekUitMap(gebruikerId, mapNaam, boekId);
+        return ResponseEntity.ok("Boek succesvol verwijderd uit map");
     }
 
     @GetMapping("/{gebruikerId}/lenen/{boekId}/status")
@@ -80,12 +72,8 @@ public class GebruikerController {
     public ResponseEntity<String> leenBoek(
             @PathVariable Long gebruikerId,
             @PathVariable Long boekId) {
-        try {
-            gebruikerService.bevestigUitlening(gebruikerId, boekId);
-            return ResponseEntity.ok("Boek succesvol geleend! Je hebt 1 maand de tijd om het terug te brengen.");
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+        gebruikerService.bevestigUitlening(gebruikerId, boekId);
+        return ResponseEntity.ok("Boek succesvol geleend! Je hebt 1 maand de tijd om het terug te brengen.");
     }
 
     @GetMapping("/aanvragen")

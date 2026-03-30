@@ -2,19 +2,25 @@
   @if (!geselecteerdeMap) {
     <h1>Mijn leeslijsten</h1>
 
-    <div class="album-grid">
-      @for (map of mappen; track map.id) {
-        <div class="album-card cursor-pointer" (click)="openMap(map)">
-          <div class="album-cover">
-            <div class="cover-emoji">
-              {{ map.emoji || (map.naam === 'Favorieten' ? '⭐' : '📁') }}
+    @if (isLoading) {
+      <div class="loading-container">
+        <div class="spinner"></div>
+        <p>Je leeslijsten worden opgehaald...</p>
+      </div>
+    } @else {
+      <div class="album-grid">
+        @for (map of mappen; track map.id) {
+          <div class="album-card cursor-pointer" (click)="openMap(map)">
+            <div class="album-cover">
+              <div class="cover-emoji">
+                {{ map.emoji || (map.naam === 'Favorieten' ? '⭐' : '📁') }}
+              </div>
+              <div class="cover-title">{{ map.naam }}</div>
             </div>
-
-            <div class="cover-title">{{ map.naam }}</div>
           </div>
-        </div>
-      }
-    </div>
+        }
+      </div>
+    }
   } @else {
     <div class="header-section">
       <button class="back-btn" (click)="terugNaarOverzicht()">← Terug naar Mappen</button>

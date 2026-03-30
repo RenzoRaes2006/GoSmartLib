@@ -12,6 +12,11 @@ import ap.be.backend.entity.Gebruiker;
 import ap.be.backend.entity.LeeslijstMap;
 import ap.be.backend.entity.Rol;
 import ap.be.backend.entity.Uitlening;
+import ap.be.backend.exception.BoekNotFoundException;
+import ap.be.backend.exception.GebruikerNotFoundException;
+import ap.be.backend.exception.LeenVoorwaardeException;
+import ap.be.backend.exception.MapNotFoundException;
+import ap.be.backend.exception.UitleningNotFoundException;
 import ap.be.backend.repository.BoekRepository;
 import ap.be.backend.repository.GebruikerRepository;
 import ap.be.backend.repository.LeeslijstMapRepository;
@@ -61,13 +66,13 @@ public class GebruikerService {
 
     public Gebruiker getGebruikerById(Long id) {
         return gebruikerRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Gebruiker met ID " + id + " niet gevonden"));
+                .orElseThrow(() -> new GebruikerNotFoundException("Gebruiker met ID " + id + " niet gevonden"));
     }
 
     public void voegBoekToeAanMap(Long gebruikerId, String mapNaam, Long boekId, String emoji) {
         Gebruiker gebruiker = getGebruikerById(gebruikerId);
         Boek boek = boekRepository.findById(boekId)
-                .orElseThrow(() -> new IllegalArgumentException("Boek met ID " + boekId + " niet gevonden"));
+                .orElseThrow(() -> new BoekNotFoundException("Boek met ID " + boekId + " niet gevonden"));
 
         LeeslijstMap map = leeslijstMapRepository.findByGebruiker_GebruikerIDAndNaam(gebruikerId, mapNaam)
                 .orElseGet(() -> {
@@ -82,10 +87,10 @@ public class GebruikerService {
 
     public void verwijderBoekUitMap(Long gebruikerId, String mapNaam, Long boekId) {
         LeeslijstMap map = leeslijstMapRepository.findByGebruiker_GebruikerIDAndNaam(gebruikerId, mapNaam)
-                .orElseThrow(() -> new IllegalArgumentException("Map niet gevonden"));
+                .orElseThrow(() -> new MapNotFoundException("Map '" + mapNaam + "' niet gevonden"));
 
         Boek boek = boekRepository.findById(boekId)
-                .orElseThrow(() -> new IllegalArgumentException("Boek niet gevonden"));
+                .orElseThrow(() -> new BoekNotFoundException("Boek niet gevonden"));
 
         map.getBoeken().remove(boek);
 
@@ -101,40 +106,38 @@ public class GebruikerService {
         if (boek == null)
             return new LeenStatusResponse(false, "Boek niet gevonden");
 
-        // beschikbaar?
+        // is boek op voorraad in de bib
         if (boek.getAantalExemplaren() <= 0) {
             return new LeenStatusResponse(false, "Boek is momenteel niet beschikbaar.");
-        }
-        if (uitleningRepository.existsByGebruiker_GebruikerIDAndStatus(gebruikerId, "AANGEVRAAGD")) {
-            return new LeenStatusResponse(false,
-                    "Je hebt al een reservering geplaatst. Wacht tot de bibbeheerder deze heeft verwerkt!");
-        }
-        // boek al geleend door gebruiker?
-        if (uitleningRepository.existsByGebruiker_GebruikerIDAndBoek_IdAndIsIngeleverdFalse(gebruikerId, boekId)) {
-            return new LeenStatusResponse(false, "Je hebt dit boek al geleend.");
+
         }
 
-        // heeft gebruiker boeken die te laat zijn?
+        // Heeft gebruiker dit zelfde boek al geleend of is al in aanvraag
+        if (uitleningRepository.existsByGebruiker_GebruikerIDAndBoek_IdAndIsIngeleverdFalse(gebruikerId, boekId)) {
+            return new LeenStatusResponse(false, "Je hebt dit boek al geleend of in aanvraag.");
+        }
+
+        // heeft de gebruiker boeken die te laat zijn
         if (uitleningRepository.existsByGebruiker_GebruikerIDAndIsIngeleverdFalseAndInleverDatumBefore(gebruikerId,
                 LocalDate.now())) {
             return new LeenStatusResponse(false, "Je hebt nog boeken die te laat zijn. Lever deze eerst in!");
         }
+        // De limiet check
 
-        // Max 3 boeken?
         List<Uitlening> actieveLeningen = uitleningRepository
                 .findByGebruiker_GebruikerIDAndIsIngeleverdFalse(gebruikerId);
         if (actieveLeningen.size() >= 3) {
-            return new LeenStatusResponse(false, "Je hebt het maximum van 3 geleende boeken bereikt.");
+            return new LeenStatusResponse(false, "Je hebt je limiet van 3 boeken bereikt (inclusief aanvragen).");
         }
 
-        // Als we alle checks overleven, mag de gebruiker lenen!
-        return new LeenStatusResponse(true, "Beschikbaar om te lenen");
+        // boek lenen
+        return new LeenStatusResponse(true, "Beschikbaar om te reserveren");
     }
 
     public void bevestigUitlening(Long gebruikerId, Long boekId) {
         LeenStatusResponse status = checkLeenStatus(gebruikerId, boekId);
         if (!status.isMagLenen()) {
-            throw new IllegalArgumentException(status.getReden());
+            throw new LeenVoorwaardeException(status.getReden());
         }
 
         Gebruiker gebruiker = gebruikerRepository.findById(gebruikerId).orElseThrow();
@@ -159,7 +162,7 @@ public class GebruikerService {
 
     public void keurAanvraagGoed(Long uitleningId) {
         Uitlening uitlening = uitleningRepository.findById(uitleningId)
-                .orElseThrow(() -> new IllegalArgumentException("Uitlening niet gevonden"));
+                .orElseThrow(() -> new UitleningNotFoundException("Uitlening niet gevonden"));
 
         uitlening.setStatus("GOEDGEKEURD");
 
@@ -172,7 +175,7 @@ public class GebruikerService {
 
     public void weigerAanvraag(Long uitleningId) {
         Uitlening uitlening = uitleningRepository.findById(uitleningId)
-                .orElseThrow(() -> new IllegalArgumentException("Uitlening niet gevonden"));
+                .orElseThrow(() -> new UitleningNotFoundException("Uitlening niet gevonden"));
 
         uitlening.setStatus("GEWEIGERD");
         uitlening.setIngeleverd(true); // Zodat het niet meer meetelt voor zijn limiet van 3
