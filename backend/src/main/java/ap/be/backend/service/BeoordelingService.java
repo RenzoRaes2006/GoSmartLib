@@ -21,14 +21,16 @@ public class BeoordelingService {
     private final BoekRepository boekRepository;
     private final GerapporteerdeBeoordelingRepository gerapporteerdeBeoordelingRepository;
     private final GebruikerRepository gebruikerRepository;
-
+    private final FilterService filterService;
 
     public BeoordelingService(BeoordelingRepository beoordelingRepository, BoekRepository boekRepository,
-            GerapporteerdeBeoordelingRepository gerapporteerdeBeoordelingRepository, GebruikerRepository gebruikerRepository) {
+            GerapporteerdeBeoordelingRepository gerapporteerdeBeoordelingRepository,
+            GebruikerRepository gebruikerRepository, FilterService filterService) {
         this.beoordelingRepository = beoordelingRepository;
         this.boekRepository = boekRepository;
         this.gerapporteerdeBeoordelingRepository = gerapporteerdeBeoordelingRepository;
         this.gebruikerRepository = gebruikerRepository;
+        this.filterService = filterService;
     }
 
     public List<BeoordelingDTO> getBeoordelingenOpBoekId(Long bookId) {
@@ -37,7 +39,8 @@ public class BeoordelingService {
         }
 
         List<Beoordeling> beoordelingen = beoordelingRepository.findByBoekId(bookId);
-        Long tijdelijkGebruikerId = 1L; // TODO: Vervang dit met de daadwerkelijke gebruiker ID uit de beveiligingscontext of sessie
+        Long tijdelijkGebruikerId = 1L; // TODO: Vervang dit met de daadwerkelijke gebruiker ID uit de
+                                        // beveiligingscontext of sessie
 
         return beoordelingen.stream().map(beoordeling -> {
             boolean isGerapporteerd = gerapporteerdeBeoordelingRepository
@@ -47,19 +50,24 @@ public class BeoordelingService {
     }
 
     public void beoordelingOpslaan(BeoordelingDTO dto) {
+        if (filterService.bevatScheldwoorden(dto.inhoud())) {
+            throw new IllegalArgumentException("De beoordeling bevat ongepast taalgebruik en is geweigerd.");
+        }
+
         Boek boek = boekRepository.findById(dto.boekId()).orElseThrow(
                 () -> new BoekNotFoundException(
                         "Kan beoordeling niet opslaan: Boek met id " + dto.boekId() + " is niet gevonden."));
 
         // TIJDELIJKE ID (TODO: later vervangen door ID uit Spring Security context)
-        Long tijdelijkGebruikerId = 1L; 
+        Long tijdelijkGebruikerId = 1L;
 
         // OPHALEN UIT DB
         Gebruiker gebruiker = gebruikerRepository.findById(tijdelijkGebruikerId).orElseThrow(
                 () -> new RuntimeException("Gebruiker niet gevonden met id: " + tijdelijkGebruikerId));
 
-
-        Beoordeling beoordeling = BeoordelingMapper.toEntity(dto, boek, gebruiker); // TODO: Vervang null met daadwerkelijke Gebruiker object op basis van dto.gebruikerId()
+        Beoordeling beoordeling = BeoordelingMapper.toEntity(dto, boek, gebruiker); // TODO: Vervang null met
+                                                                                    // daadwerkelijke Gebruiker object
+                                                                                    // op basis van dto.gebruikerId()
         beoordelingRepository.save(beoordeling);
 
         double gemiddelde = beoordelingRepository.findByBoekId(boek.getId()).stream()

@@ -1,103 +1,178 @@
 package ap.be.backend;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import ap.be.backend.controller.BeoordelingController;
 import ap.be.backend.dto.BeoordelingDTO;
+import ap.be.backend.entity.Beoordeling;
+import ap.be.backend.entity.Boek;
+import ap.be.backend.entity.Gebruiker;
 import ap.be.backend.exception.BoekNotFoundException;
+import ap.be.backend.repository.BeoordelingRepository;
+import ap.be.backend.repository.BoekRepository;
+import ap.be.backend.repository.GebruikerRepository;
+import ap.be.backend.repository.GerapporteerdeBeoordelingRepository;
 import ap.be.backend.service.BeoordelingService;
-import ap.be.backend.service.GerapporteerdeBeoordelingService;
+import ap.be.backend.service.FilterService;
 
-@WebMvcTest(BeoordelingController.class)
+@ExtendWith(MockitoExtension.class)
 public class BeoordelingControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+    @Mock
+    private BeoordelingRepository beoordelingRepository;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    @Mock
+    private BoekRepository boekRepository;
 
-    @MockBean
+    @Mock
+    private GerapporteerdeBeoordelingRepository gerapporteerdeBeoordelingRepository;
+
+    @Mock
+    private GebruikerRepository gebruikerRepository;
+
+    @Mock
+    private FilterService filterService;
+
+    @InjectMocks
     private BeoordelingService beoordelingService;
 
-    @MockBean
-    private GerapporteerdeBeoordelingService gerapporteerdeBeoordelingService;
-
+    private Boek testBoek;
+    private Beoordeling testBeoordeling;
+    private Gebruiker testGebruiker;
     private BeoordelingDTO testDto;
-    private BeoordelingDTO fouteDto;
     private final Long BOEK_ID = 1L;
-    private final Long BEOORDELING_ID = 10L;
 
     @BeforeEach
     void setUp() {
-        testDto = new BeoordelingDTO(BEOORDELING_ID, "Test Gebruiker", BOEK_ID, 5, "Prachtig boek!", false, false);
-        fouteDto = new BeoordelingDTO(null, "Test Gebruiker", BOEK_ID, 9, "Te hoge score", false, false); 
+        testBoek = new Boek();
+        testBoek.setId(BOEK_ID);
+
+        testGebruiker = new Gebruiker();
+        testGebruiker.setId(1L);
+
+        testBeoordeling = new Beoordeling();
+        testBeoordeling.setId(10L);
+        testBeoordeling.setGebruiker(testGebruiker);
+        testBeoordeling.setBoek(testBoek);
+        testBeoordeling.setWaardering(5);
+        testBeoordeling.setInhoud("Geweldig boek!");
+        testBeoordeling.setAnoniem(false);
+
+        testDto = new BeoordelingDTO(10L, "Test Gebruiker", BOEK_ID, 5, "Geweldig boek!", false, false);
+    }
+
+    // =========================================================================
+    // TESTS VOOR: getBeoordelingenOpBoekId(Long bookId)
+    // =========================================================================
+
+    @Test
+    void givenBoekBestaatNiet_whenGetBeoordelingenOpBoekId_thenThrowsBoekNotFoundException() {
+        when(boekRepository.existsById(BOEK_ID)).thenReturn(false);
+
+        BoekNotFoundException exception = assertThrows(BoekNotFoundException.class, () -> {
+            beoordelingService.getBeoordelingenOpBoekId(BOEK_ID);
+        });
+
+        assertEquals("Boek met id " + BOEK_ID + " niet gevonden", exception.getMessage());
+        verify(beoordelingRepository, never()).findByBoekId(BOEK_ID);
     }
 
     @Test
-    void givenBoekBestaat_whenGetBeoordelingenOpBoekId_thenReturns200AndList() throws Exception {
-        when(beoordelingService.getBeoordelingenOpBoekId(BOEK_ID)).thenReturn(List.of(testDto));
+    void givenBoekBestaatZonderBeoordelingen_whenGetBeoordelingenOpBoekId_thenReturnsEmptyList() {
+        when(boekRepository.existsById(BOEK_ID)).thenReturn(true);
+        when(beoordelingRepository.findByBoekId(BOEK_ID)).thenReturn(Collections.emptyList());
 
-        mockMvc.perform(get("/api/books/" + BOEK_ID + "/reviews"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$[0].inhoud").value("Prachtig boek!"))
-                .andExpect(jsonPath("$[0].waardering").value(5))
-                .andExpect(jsonPath("$[0].gebruikerNaam").value("Test Gebruiker"))
-                .andExpect(jsonPath("$[0].isAnoniem").value(false))
-                .andExpect(jsonPath("$[0].gerapporteerd").value(false));
+        List<BeoordelingDTO> result = beoordelingService.getBeoordelingenOpBoekId(BOEK_ID);
+
+        assertTrue(result.isEmpty());
+        verify(beoordelingRepository, times(1)).findByBoekId(BOEK_ID);
     }
 
     @Test
-    void givenBoekBestaatNiet_whenGetBeoordelingenOpBoekId_thenReturns404() throws Exception {
-        when(beoordelingService.getBeoordelingenOpBoekId(BOEK_ID))
-                .thenThrow(new BoekNotFoundException("Boek niet gevonden"));
+    void givenBoekBestaatMetBeoordelingen_whenGetBeoordelingenOpBoekId_thenReturnsBeoordelingDTOList() {
+        when(boekRepository.existsById(BOEK_ID)).thenReturn(true);
+        when(beoordelingRepository.findByBoekId(BOEK_ID)).thenReturn(List.of(testBeoordeling));
+        when(gerapporteerdeBeoordelingRepository.existsByBeoordelingIdAndGebruiker_GebruikerID(10L, 1L))
+                .thenReturn(true);
 
-        mockMvc.perform(get("/api/books/" + BOEK_ID + "/reviews"))
-                .andExpect(status().isNotFound());
+        List<BeoordelingDTO> result = beoordelingService.getBeoordelingenOpBoekId(BOEK_ID);
+
+        assertEquals(1, result.size());
+        assertEquals("Geweldig boek!", result.get(0).inhoud()); 
+        assertTrue(result.get(0).gerapporteerd()); 
+        verify(beoordelingRepository, times(1)).findByBoekId(BOEK_ID);
+    }
+
+    // =========================================================================
+    // TESTS VOOR: beoordelingOpslaan(BeoordelingDTO dto)
+    // =========================================================================
+
+    @Test
+    void givenBeoordelingMetScheldwoorden_whenBeoordelingOpslaan_thenThrowsIllegalArgumentException() {
+        when(filterService.bevatScheldwoorden(testDto.inhoud())).thenReturn(true);
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            beoordelingService.beoordelingOpslaan(testDto);
+        });
+
+        assertEquals("De beoordeling bevat ongepast taalgebruik en is geweigerd.", exception.getMessage());
+        verify(boekRepository, never()).findById(any());
+        verify(beoordelingRepository, never()).save(any(Beoordeling.class));
     }
 
     @Test
-    void givenGeldigeDto_whenBeoordelingOpslaan_thenReturns200AndDto() throws Exception {
-        mockMvc.perform(post("/api/reviews")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(testDto)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.inhoud").value("Prachtig boek!"));
+    void givenBoekBestaatNiet_whenBeoordelingOpslaan_thenThrowsBoekNotFoundException() {
+        when(filterService.bevatScheldwoorden(testDto.inhoud())).thenReturn(false);
+        when(boekRepository.findById(testDto.boekId())).thenReturn(Optional.empty());
+
+        BoekNotFoundException exception = assertThrows(BoekNotFoundException.class, () -> {
+            beoordelingService.beoordelingOpslaan(testDto);
+        });
+
+        assertEquals("Kan beoordeling niet opslaan: Boek met id " + testDto.boekId() + " is niet gevonden.", exception.getMessage());
+        verify(beoordelingRepository, never()).save(any(Beoordeling.class));
     }
 
     @Test
-    void givenOngeldigeDto_whenBeoordelingOpslaan_thenReturns400BadRequest() throws Exception {
-        mockMvc.perform(post("/api/reviews")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(fouteDto)))
-                .andExpect(status().isBadRequest());
+    void givenBoekBestaatMaarGebruikerNiet_whenBeoordelingOpslaan_thenThrowsRuntimeException() {
+        when(filterService.bevatScheldwoorden(testDto.inhoud())).thenReturn(false);
+        when(boekRepository.findById(testDto.boekId())).thenReturn(Optional.of(testBoek));
+        when(gebruikerRepository.findById(1L)).thenReturn(Optional.empty());
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            beoordelingService.beoordelingOpslaan(testDto);
+        });
+
+        assertEquals("Gebruiker niet gevonden met id: 1", exception.getMessage());
+        verify(beoordelingRepository, never()).save(any(Beoordeling.class));
     }
 
     @Test
-    void givenGeldigeReden_whenRapporteerBeoordeling_thenReturns200Ok() throws Exception {
-        String reden = "Ongepaste taal";
+    void givenGeldigeDataEnBestaandBoekEnGebruiker_whenBeoordelingOpslaan_thenSavesBeoordeling() {
+        when(filterService.bevatScheldwoorden(testDto.inhoud())).thenReturn(false);
+        when(boekRepository.findById(testDto.boekId())).thenReturn(Optional.of(testBoek));
+        when(gebruikerRepository.findById(1L)).thenReturn(Optional.of(testGebruiker));
 
-        mockMvc.perform(post("/api/reviews/" + BEOORDELING_ID + "/report")
-                .contentType(MediaType.TEXT_PLAIN)
-                .content(reden))
-                .andExpect(status().isOk());
+        beoordelingService.beoordelingOpslaan(testDto);
+
+        verify(beoordelingRepository, times(1)).save(any(Beoordeling.class));
     }
 }
