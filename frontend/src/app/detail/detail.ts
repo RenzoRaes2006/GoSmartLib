@@ -196,19 +196,15 @@ export class Detail implements OnInit {
   }
   // Jouw ongewijzigde functie hersteld!
   bevestigRapport() {
-<<<<<<< HEAD
+
     const reden: string = this.geselecteerdeReden === 'Anders' ? this.rapporteerReden : this.geselecteerdeReden;
 
-    this.beoordelingService.rapporteerBeoordeling(this.geselecteerdeBeoordelingId!, this.rapporteerReden).subscribe({
-      next: () => {
-        this.gerapporteerdeBeoordelingen.push(this.geselecteerdeBeoordelingId!);
-=======
     this.beoordelingService
       .rapporteerBeoordeling(this.geselecteerdeBeoordelingId!, this.rapporteerReden)
       .subscribe({
         next: () => {
           this.gerapporteerdeBeoordelingen.push(this.geselecteerdeBeoordelingId!);
->>>>>>> 78c201e8220ffa6bd2cc6e057e84670aa413b16e
+
 
           // Update de lokale lijst zodat de UI direct weerspiegelt dat deze gerapporteerd is
           const beoordeling = this.beoordelingen.find(
