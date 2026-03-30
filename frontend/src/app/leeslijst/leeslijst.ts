@@ -14,6 +14,7 @@ export class Leeslijst implements OnInit {
   leeslijstService = inject(LeeslijstService);
   mappen: any[] = [];
   geselecteerdeMap: any = null;
+  isLoading: boolean = true;
 
   ngOnInit(): void {
     this.haalMappenOp();
@@ -21,6 +22,7 @@ export class Leeslijst implements OnInit {
 
   haalMappenOp() {
     const gebruikerId = 1;
+    this.isLoading = true;
     this.leeslijstService.getMappenVanGebruiker(gebruikerId).subscribe({
       next: (data) => {
         const mapLijst = data || [];
@@ -38,10 +40,12 @@ export class Leeslijst implements OnInit {
         }
 
         this.mappen = gefilterdeMappen;
+        this.isLoading = false;
       },
       error: (err) => {
         console.error('Fout bij ophalen mappen', err);
         this.mappen = [{ id: 'fav', naam: 'Favorieten', boeken: [] }];
+        this.isLoading = false;
       },
     });
   }
