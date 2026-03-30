@@ -95,13 +95,13 @@ export class BoekBeheer implements OnInit {
       titel: ['', [Validators.required, Validators.minLength(2)]],
       auteur: ['', [Validators.required, Validators.minLength(2)]],
       isbn: ['', [Validators.required, this.isbnValidator]],
-      uitgever: ['', [Validators.required, Validators.minLength(2)]],
-      uitgaveJaar: ['', [Validators.required, Validators.pattern(/^\d{4}$/)]],
-      pagina: ['', [Validators.required, Validators.pattern(/^\d+$/)]],
-      genre: ['', [Validators.required, Validators.minLength(2)]],
+      uitgever: [''],
+      uitgaveJaar: [''],
+      pagina: [''],
+      genre: [''],
       beschrijving: ['', [Validators.required, Validators.minLength(10)]],
       aantalExemplaren: ['', [Validators.required, Validators.pattern(/^\d+$/)]],
-      locatie: ['', [Validators.required, Validators.minLength(1)]],
+      locatie: [''],
       afbeelding: [''],
       leesniveau: [''],
     });
@@ -338,32 +338,30 @@ export class BoekBeheer implements OnInit {
     }
     // We moeten het bijgewerkte boek casten naar het volledige Boek-model, inclusief het ID
     // We gebruiken 'as unknown as Boek' omdat we zeker weten dat het voldoet aan de structuur van Boek, maar TypeScript dit niet automatisch kan afleiden vanwege het ontbreken van het ID-veld in NieuwBoek.
-    this.boekService
-      .wijzigen(boek.id, bijgewerktBoek as unknown as Boek)
-      .subscribe({
-        next: () => {
-          this.successMessage.set('Boek succesvol bijgewerkt!');
-          this.boekForm.reset();
-          this.boekGevonden.set(false);
-          this.naarTeWijzigenBoek.set(null);
-          this.toonIsbnZoek.set(false);
-          this.laadBoekenPagina(this.currentPage()); // Herlaad de huidige pagina van het boekenoverzicht om de wijzigingen te tonen
-          setTimeout(() => this.successMessage.set(''), 5000);
-        },
-        error: (err) => {
-          console.error('Fout bij het bijwerken van het boek:', err);
+    this.boekService.wijzigen(boek.id, bijgewerktBoek as unknown as Boek).subscribe({
+      next: () => {
+        this.successMessage.set('Boek succesvol bijgewerkt!');
+        this.boekForm.reset();
+        this.boekGevonden.set(false);
+        this.naarTeWijzigenBoek.set(null);
+        this.toonIsbnZoek.set(false);
+        this.laadBoekenPagina(this.currentPage()); // Herlaad de huidige pagina van het boekenoverzicht om de wijzigingen te tonen
+        setTimeout(() => this.successMessage.set(''), 5000);
+      },
+      error: (err) => {
+        console.error('Fout bij het bijwerken van het boek:', err);
 
-          if (err.status === 409) {
-            this.errorMessage.set('Dit ISBN-nummer bestaat al!');
-          } else if (err.status === 400) {
-            this.errorMessage.set('Ongeldige invoer. Controleer alle velden.');
-          } else {
-            this.errorMessage.set('Er is een fout opgetreden: ' + err.message);
-          }
+        if (err.status === 409) {
+          this.errorMessage.set('Dit ISBN-nummer bestaat al!');
+        } else if (err.status === 400) {
+          this.errorMessage.set('Ongeldige invoer. Controleer alle velden.');
+        } else {
+          this.errorMessage.set('Er is een fout opgetreden: ' + err.message);
+        }
 
-          setTimeout(() => this.errorMessage.set(''), 5000);
-        },
-      });
+        setTimeout(() => this.errorMessage.set(''), 5000);
+      },
+    });
   }
 
   // Open de bevestigingsmodal als er een boek geselecteerd is.

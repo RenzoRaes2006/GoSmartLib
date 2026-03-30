@@ -34,15 +34,15 @@ public class BoekService {
         boek.setTitel(boekDTO.titel());
         boek.setAuteur(boekDTO.auteur());
         boek.setIsbn(trimmedIsbn);
-        boek.setUitgever(boekDTO.uitgever());
-        boek.setUitgaveJaar(boekDTO.uitgaveJaar());
-        boek.setGenre(boekDTO.genre());
+        boek.setUitgever(isNotBlank(boekDTO.uitgever()) ? boekDTO.uitgever() : "Geen uitgever");
+        boek.setUitgaveJaar(isNotBlank(boekDTO.uitgaveJaar()) ? boekDTO.uitgaveJaar() : "Geen uitgavejaar");
+        boek.setGenre(boekDTO.genre() != null && !boekDTO.genre().isEmpty() ? boekDTO.genre() : List.of());
         boek.setPagina(boekDTO.pagina());
         boek.setBeschrijving(boekDTO.beschrijving());
         boek.setAantalExemplaren(boekDTO.aantalExemplaren());
-        boek.setLocatie(boekDTO.locatie());
-        boek.setAfbeelding(boekDTO.afbeelding());
-        boek.setLeesniveau(boekDTO.leesniveau());
+        boek.setLocatie(isNotBlank(boekDTO.locatie()) ? boekDTO.locatie() : "Geen locatie");
+        boek.setAfbeelding(isNotBlank(boekDTO.afbeelding()) ? boekDTO.afbeelding() : "");
+        boek.setLeesniveau(isNotBlank(boekDTO.leesniveau()) ? boekDTO.leesniveau() : "Geen leesniveau");
         return boekRepository.save(boek);
     }
 
@@ -56,15 +56,15 @@ public class BoekService {
         boek.setTitel(boekDTO.titel());
         boek.setAuteur(boekDTO.auteur());
         boek.setIsbn(boekDTO.isbn());
-        boek.setUitgever(boekDTO.uitgever());
-        boek.setUitgaveJaar(boekDTO.uitgaveJaar());
-        boek.setGenre(boekDTO.genre());
+        boek.setUitgever(isNotBlank(boekDTO.uitgever()) ? boekDTO.uitgever() : "Geen uitgever");
+        boek.setUitgaveJaar(isNotBlank(boekDTO.uitgaveJaar()) ? boekDTO.uitgaveJaar() : "Geen uitgavejaar");
+        boek.setGenre(boekDTO.genre() != null && !boekDTO.genre().isEmpty() ? boekDTO.genre() : List.of());
         boek.setPagina(boekDTO.pagina());
         boek.setBeschrijving(boekDTO.beschrijving());
         boek.setAantalExemplaren(boekDTO.aantalExemplaren());
-        boek.setLocatie(boekDTO.locatie());
-        boek.setAfbeelding(boekDTO.afbeelding());
-        boek.setLeesniveau(boekDTO.leesniveau());
+        boek.setLocatie(isNotBlank(boekDTO.locatie()) ? boekDTO.locatie() : "Geen locatie");
+        boek.setAfbeelding(isNotBlank(boekDTO.afbeelding()) ? boekDTO.afbeelding() : "");
+        boek.setLeesniveau(isNotBlank(boekDTO.leesniveau()) ? boekDTO.leesniveau() : "Geen leesniveau");
         return boekRepository.save(boek);
     }
 
@@ -125,6 +125,10 @@ public class BoekService {
 
     public List<Boek> getPopulaireBoeken() {
         return boekRepository.findTop5PopulaireBoeken();
+    }
+
+    private boolean isNotBlank(String value) {
+        return value != null && !value.trim().isEmpty();
     }
 
 }
