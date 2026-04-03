@@ -46,9 +46,10 @@ public class ImageController {
 
         // Voor lokaal testen: uncomment onderstaande 2 regels en comment de return
         // eronder
-        String baseUrl = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort();
-        return ResponseEntity.ok(baseUrl + "/api/images/" + bestandsnaam);
-        // return ResponseEntity.ok("/api/images/" + bestandsnaam);
+        // String baseUrl = request.getScheme() + "://" + request.getServerName() + ":"
+        // + request.getServerPort();
+        // return ResponseEntity.ok(baseUrl + "/api/images/" + bestandsnaam);
+        return ResponseEntity.ok("/api/images/" + bestandsnaam);
     }
 
     @GetMapping("/{bestandsnaam}")
