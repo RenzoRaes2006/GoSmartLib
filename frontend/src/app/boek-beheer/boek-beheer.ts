@@ -53,6 +53,9 @@ export class BoekBeheer implements OnInit {
   // Debounce timer voor live zoeken
   private zoekDebounceTimer: any = null;
 
+  uploadModus = signal<'url' | 'bestand'>('url');
+  uploadBezig = signal(false);
+
   // Genre dropdown
   genreHiërarchie: Record<string, string[]> = {
     Avontuur: [],
@@ -512,5 +515,30 @@ export class BoekBeheer implements OnInit {
     this.boekForm.patchValue({ genre: value });
     this.boekForm.get('genre')?.markAsDirty();
     this.boekForm.get('genre')?.updateValueAndValidity();
+  }
+
+  verwijderAfbeelding(): void {
+    this.boekForm.patchValue({ afbeelding: '' });
+  }
+
+  opBestandGeselecteerd(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const bestand = input.files?.[0];
+
+    if (!bestand) return;
+
+    this.uploadBezig.set(true);
+    this.boekService.uploadAfbeelding(bestand).subscribe({
+      next: (url) => {
+        this.boekForm.patchValue({ afbeelding: url });
+        this.uploadBezig.set(false);
+        input.value = '';
+      },
+      error: (err) => {
+        this.errorMessage.set('Afbeelding uploaden mislukt: ' + err.error);
+        this.uploadBezig.set(false);
+        input.value = '';
+      },
+    });
   }
 }

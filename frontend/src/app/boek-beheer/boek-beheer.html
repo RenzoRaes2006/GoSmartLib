@@ -9,14 +9,18 @@
   </div>
   <div class="topbar-messages">
     <div class="message-container error-message" *ngIf="errorMessage()">{{ errorMessage() }}</div>
-    <div class="message-container success-message" *ngIf="successMessage()">{{ successMessage() }}</div>
+    <div class="message-container success-message" *ngIf="successMessage()">
+      {{ successMessage() }}
+    </div>
   </div>
   <button type="button" class="verlaat-button" routerLink="/">Verlaten</button>
 </div>
 
 <div class="isbn-zoek-boek">
   <button type="button" (click)="toggleIsbnZoek()">
-    {{ toonIsbnZoek() ? 'Verberg zoekveld' : mode() === 'toevoegen' ? 'Zoek op ISBN' : 'Zoek boek' }}
+    {{
+      toonIsbnZoek() ? 'Verberg zoekveld' : mode() === 'toevoegen' ? 'Zoek op ISBN' : 'Zoek boek'
+    }}
   </button>
 
   <div *ngIf="toonIsbnZoek()">
@@ -55,7 +59,9 @@
 </div>
 
 <div
-  *ngIf="mode() === 'wijzigen' && !boekGevonden() && (boeknOverzicht().length > 0 || isLoadingBoeken())"
+  *ngIf="
+    mode() === 'wijzigen' && !boekGevonden() && (boeknOverzicht().length > 0 || isLoadingBoeken())
+  "
   class="boeken-overzicht"
 >
   <h3>Beschikbare boeken</h3>
@@ -125,7 +131,11 @@
   </div>
 </div>
 
-<form [formGroup]="boekForm" (ngSubmit)="onSubmit()" *ngIf="mode() === 'toevoegen' || boekGevonden()">
+<form
+  [formGroup]="boekForm"
+  (ngSubmit)="onSubmit()"
+  *ngIf="mode() === 'toevoegen' || boekGevonden()"
+>
   <div>
     <label for="titel">Titel:</label>
     <input id="titel" formControlName="titel" />
@@ -272,6 +282,61 @@
     </div>
   </div>
 
+  <div class="afbeelding-sectie">
+    <label>Afbeelding:</label>
+    <div class="afbeelding-row">
+      <div class="afbeelding-controls">
+        <div class="image-upload-toggle">
+          <button
+            type="button"
+            (click)="uploadModus.set('url')"
+            [class.active]="uploadModus() === 'url'"
+          >
+            URL invoeren
+          </button>
+          <button
+            type="button"
+            (click)="uploadModus.set('bestand')"
+            [class.active]="uploadModus() === 'bestand'"
+          >
+            Bestand uploaden
+          </button>
+        </div>
+
+        <div class="afbeelding-input">
+          <input
+            *ngIf="uploadModus() === 'url'"
+            id="afbeelding"
+            formControlName="afbeelding"
+            placeholder="https://..."
+          />
+
+          <label
+            *ngIf="uploadModus() === 'bestand'"
+            class="file-upload-label"
+          >
+            <input
+              type="file"
+              accept="image/jpeg,image/png"
+              (change)="opBestandGeselecteerd($event)"
+            />
+            <span class="file-upload-btn">Kies bestand</span>
+          </label>
+
+          <small *ngIf="uploadBezig()" class="upload-status">Uploaden...</small>
+        </div>
+      </div>
+
+      <div class="afbeelding-preview" *ngIf="boekForm.get('afbeelding')?.value">
+        <button type="button" class="afbeelding-verwijder" (click)="verwijderAfbeelding()">&times;</button>
+        <img
+          [src]="boekForm.get('afbeelding')?.value"
+          alt="Cover preview"
+        />
+      </div>
+    </div>
+  </div>
+
   <div>
     <label for="aantalExemplaren">Aantal exemplaren:</label>
     <input id="aantalExemplaren" formControlName="aantalExemplaren" />
@@ -295,13 +360,11 @@
     </div>
   </div>
 
-  <div>
-    <label for="afbeelding">Afbeelding URL:</label>
-    <input id="afbeelding" formControlName="afbeelding" />
-  </div>
-
   <div class="form-actions">
-    <button type="submit" [disabled]="boekForm.invalid || (mode() !== 'toevoegen' && !boekGevonden())">
+    <button
+      type="submit"
+      [disabled]="boekForm.invalid || (mode() !== 'toevoegen' && !boekGevonden())"
+    >
       {{ mode() === 'toevoegen' ? 'Boek Toevoegen' : 'Wijzigingen Opslaan' }}
     </button>
     <button
