@@ -16,7 +16,6 @@ import { FormsModule } from '@angular/forms';
   standalone: true,
 })
 export class Catalogus implements OnInit, OnDestroy {
-  // State variabelen
   boekenlijst = signal<Boek[]>([]);
   zoekTerm = signal<string>('');
   filters = signal<FilterOptions>({});
@@ -113,7 +112,7 @@ export class Catalogus implements OnInit, OnDestroy {
     this.laadBoeken();
   }
 
-  // Methode om boeken te laden, optioneel gefilterd op een zoekterm
+  // Om boeken te laden, optioneel gefilterd op een zoekterm
   private laadBoeken(term?: string): void {
     this.boekService.getBoeken(term).subscribe({
       next: (data) => {
@@ -128,7 +127,7 @@ export class Catalogus implements OnInit, OnDestroy {
     this.laadBoeken(term);
   }
 
-  // Methode om filters bij te werken en boeken opnieuw te laden op basis van de nieuwe filters
+  // Om filters bij te werken en boeken opnieuw te laden op basis van de nieuwe filters
   updateFilters(): void {
     const min = this.minPagina();
     const max = this.maxPagina();
@@ -136,11 +135,11 @@ export class Catalogus implements OnInit, OnDestroy {
     this.paginaError.set('');
 
     if (min !== undefined && min < 0) {
-      this.paginaError.set('Minimum pagina\'s mag niet negatief zijn');
+      this.paginaError.set("Minimum pagina's mag niet negatief zijn");
       return;
     }
     if (max !== undefined && max < 0) {
-      this.paginaError.set('Maximum pagina\'s mag niet negatief zijn');
+      this.paginaError.set("Maximum pagina's mag niet negatief zijn");
       return;
     }
     if (min !== undefined && max !== undefined && min > max) {
@@ -162,7 +161,10 @@ export class Catalogus implements OnInit, OnDestroy {
       genres,
       uitgever: this.selectedUitgever()?.trim() || undefined,
       minPagina: (this.minPagina() ?? 0) > 0 ? this.minPagina() : undefined,
-      maxPagina: (this.maxPagina() ?? this.maxPaginaLimit) < this.maxPaginaLimit ? this.maxPagina() : undefined,
+      maxPagina:
+        (this.maxPagina() ?? this.maxPaginaLimit) < this.maxPaginaLimit
+          ? this.maxPagina()
+          : undefined,
       sorteerOp: this.selectedSorteerOp() || undefined,
       sorteerRichting: this.selectedSorteerRichting() || 'ASC',
       beschikbaarheid: this.beschikbaarheid() === true ? 'true' : undefined,
@@ -224,7 +226,7 @@ export class Catalogus implements OnInit, OnDestroy {
     this.updateFilters();
   }
 
-  // Methode om gefilterde boeken te laden op basis van de huidige filters
+  // Om gefilterde boeken te laden op basis van de huidige filters
   private laadGefilterdeBoeken(): void {
     this.boekService.getBoekenGefilterd(this.filters()).subscribe({
       next: (data) => {
@@ -234,7 +236,7 @@ export class Catalogus implements OnInit, OnDestroy {
     });
   }
 
-  // Methode om de hoofdgenres op te halen, deze kunnen worden gebruikt in een dropdown of selectielijst
+  // Om de hoofdgenres op te halen, deze kunnen worden gebruikt in een dropdown of selectielijst
   getHoofdGenres(): string[] {
     return [
       'Fictie algemeen',
@@ -257,12 +259,12 @@ export class Catalogus implements OnInit, OnDestroy {
     ];
   }
 
-  // Methode om subgenres op te halen op basis van het geselecteerde hoofdgenre, deze kunnen worden gebruikt in een dropdown of selectielijst
+  // Om subgenres op te halen op basis van het geselecteerde hoofdgenre
   getSubGenres(hoofdGenre: string): string[] {
     return this.genreHiërarchie[hoofdGenre as keyof typeof this.genreHiërarchie] || [];
   }
 
-  // Methode die wordt aangeroepen wanneer het hoofdgenre verandert, deze reset het geselecteerde subgenre en werkt de filters bij
+  // Om de filters bij te werken en boeken opnieuw te laden op basis van de nieuwe filters
   onHoofdGenreChange(): void {
     this.selectedGenre.set(undefined);
     this.updateFilters();
