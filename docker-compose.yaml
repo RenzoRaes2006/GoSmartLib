@@ -34,6 +34,8 @@ services:
       # - "traefik.http.routers.backend.middlewares=strip-api"
       # - "traefik.http.middlewares.strip-api.stripprefix.prefixes=/api"
       - "traefik.http.services.backend.loadbalancer.server.port=8081"
+    volumes:
+      - uploads_data:/app/uploads/covers
     networks:
       - proxy
 
@@ -58,3 +60,4 @@ networks:
 
 volumes:
   mysql_data:
+  uploads_data:

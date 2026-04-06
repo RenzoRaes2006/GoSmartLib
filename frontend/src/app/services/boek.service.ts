@@ -13,6 +13,9 @@ export class BoekService {
   private apiUrl =
     window.location.hostname === 'localhost' ? 'http://localhost:8081/api/boeken' : '/api/boeken';
 
+  private afbeeldingUrl =
+    window.location.hostname === 'localhost' ? 'http://localhost:8081/api/images' : '/api/images';
+
   private apiGebruikerUrl =
     window.location.hostname === 'localhost'
       ? 'http://localhost:8081/api/gebruiker'
@@ -98,5 +101,11 @@ export class BoekService {
 
   getActieveLeningen(gebruikerId: number): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiGebruikerUrl}/${gebruikerId}/leningen`);
+  }
+
+  uploadAfbeelding(file: File): Observable<string> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post(this.afbeeldingUrl + '/upload', formData, { responseType: 'text' });
   }
 }
