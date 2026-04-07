@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, signal } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import {
   FormBuilder,
   ReactiveFormsModule,
@@ -93,6 +94,7 @@ export class BoekBeheer implements OnInit {
     private fb: FormBuilder,
     private boekService: BoekService,
     private googleBookService: GoogleBookService,
+    private route: ActivatedRoute,
   ) {
     this.boekForm = this.fb.group({
       titel: ['', [Validators.required, Validators.minLength(2)]],
@@ -112,9 +114,14 @@ export class BoekBeheer implements OnInit {
 
   // laad boekenoverzicht als we in wijzigmodus starten
   ngOnInit(): void {
-    if (this.mode() === 'wijzigen') {
-      this.laadBoekenPagina(0);
-    }
+    this.route.queryParams.subscribe((params) => {
+      const urlMode = params['mode'];
+      if (urlMode === 'toevoegen' || urlMode === 'wijzigen') {
+        this.setMode(urlMode);
+      } else if (this.mode() === 'wijzigen') {
+        this.laadBoekenPagina(0);
+      }
+    });
   }
 
   // Wissel tussen toevoegen en wijzigen modus, reset het formulier en laad indien nodig het boekenoverzicht

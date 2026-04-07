@@ -7,6 +7,8 @@ import { HomePageLeerling } from './home-page-leerling/home-page-leerling';
 import { ReserverenComponent } from './reserveren/reserveren';
 import { PageNotFound } from './page-not-found/page-not-found';
 import { Login } from './login/login';
+import { AdminGuard } from './services/admin-guard';
+import { AdminDashboard } from './admin-dashboard/admin-dashboard';
 
 export const routes: Routes = [
   { path: '', component: HomePageLeerling },
@@ -16,7 +18,11 @@ export const routes: Routes = [
   { path: 'boek-beheer', component: BoekBeheer },
   { path: 'reserveren', component: ReserverenComponent },
   { path: 'not-found', component: PageNotFound },
-  { path: 'login/smartschool', component:  Login},
-  { path: '**', redirectTo: "not-found" },
-
+  { path: 'login/smartschool', component: Login },
+  {
+    path: 'admin',
+    component: AdminDashboard,
+    //canActivate: [AdminGuard]
+  },
+  { path: '**', redirectTo: 'not-found' },
 ];

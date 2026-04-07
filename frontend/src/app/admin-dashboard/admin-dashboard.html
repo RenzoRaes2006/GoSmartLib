@@ -1,0 +1,115 @@
+<div class="dashboard-container">
+  <div class="banner">
+    <h1>Beheerdersdashboard</h1>
+    <p>GO! SmartLib Antwerpen</p>
+  </div>
+
+  <h3 class="section-title">Snelle acties</h3>
+  <div class="action-grid">
+    <a routerLink="/beheer/aanvragen" class="action-tile clickable">
+      <h3>Aanvragen bekijken</h3>
+      <p>Goedkeuren of weigeren</p>
+    </a>
+
+    <div class="action-tile cursor-pointer">
+      <h3>Uitleenbalie openen</h3>
+      <p>Retouren en scannen</p>
+    </div>
+
+    <a routerLink="/boek-beheer" [queryParams]="{ mode: 'wijzigen' }" class="action-tile clickable">
+      <h3>Catalogus beheren</h3>
+      <p>Wijzigen en tags beheren</p>
+    </a>
+
+    <a
+      routerLink="/boek-beheer"
+      [queryParams]="{ mode: 'toevoegen' }"
+      class="action-tile clickable"
+    >
+      <h3>Boek toevoegen</h3>
+      <p>Nieuw boek inschrijven</p>
+    </a>
+
+    <a routerLink="/gerapporteerde-beordeling" class="action-tile clickable">
+      <h3>Reviews modereren</h3>
+      <span class="badge">12 nieuwe</span>
+    </a>
+  </div>
+
+  <h3 class="section-title">Algemene statistieken</h3>
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <span class="kpi-label">Totaal boeken</span>
+      <strong class="kpi-value">{{ totaalBoeken }}</strong>
+      <div class="progress-bar">
+        <div class="progress-fill bordeaux-fill" style="width: 100%"></div>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-label">Uitleenratio</span>
+      <strong class="kpi-value text-blue">{{ uitleenRatio }}%</strong>
+      <div class="progress-bar">
+        <div class="progress-fill bg-blue" [style.width.%]="uitleenRatio"></div>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-label">Tijdig geretourneerd</span>
+      <strong class="kpi-value text-green">{{ tijdigeRetour }}%</strong>
+      <div class="progress-bar">
+        <div class="progress-fill bg-green" [style.width.%]="tijdigeRetour"></div>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-label">Unieke leners</span>
+      <strong class="kpi-value text-bordeaux">{{ uniekeLeners }}</strong>
+      <span class="kpi-trend">↗ Gevolgde trend</span>
+    </div>
+  </div>
+
+  <div class="charts-section card">
+    <h3 class="section-title" style="border: none; margin-bottom: 0">KPI's en rapportage</h3>
+    <div class="charts-flex">
+      <div class="chart-box">
+        <h4>Uitleenratio</h4>
+        <div
+          class="pie-chart"
+          [style.background]="'conic-gradient(#8c1b3f ' + uitleenRatio + '%, #cbd5e1 0)'"
+        ></div>
+        <div class="chart-legend">
+          <span style="color: #8c1b3f">Uitgeleend: {{ uitleenRatio }}%</span>
+        </div>
+      </div>
+
+      <div class="chart-box">
+        <h4>Tijdig geretourneerd</h4>
+        <div
+          class="pie-chart"
+          [style.background]="'conic-gradient(#8c1b3f ' + tijdigeRetour + '%, #cbd5e1 0)'"
+        ></div>
+        <div class="chart-legend">
+          <span style="color: #8c1b3f">Op tijd: {{ tijdigeRetour }}%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-grid">
+    <div class="card">
+      <h3 class="section-title">Data importeren en exporteren</h3>
+      <p class="text-muted">Importeer nieuwe collecties via CSV of Excel.</p>
+      <button class="btn-primary" disabled>Importeer CSV (binnenkort)</button>
+    </div>
+
+    <div class="card">
+      <h3 class="section-title">Aankoopsuggesties</h3>
+      <div class="suggestion-item">
+        <span>Fantasiewereld (bijna uitgeput)</span>
+        <span class="badge bg-orange">1 / 3</span>
+      </div>
+      <div class="suggestion-item">
+        <span>Kleurrijk lezen (geen exemplaren)</span>
+        <span class="badge bg-red">0 / 2</span>
+      </div>
+    </div>
+  </div>
+</div>
