@@ -23,17 +23,8 @@ export class BoekService {
 
   private http = inject(HttpClient);
 
-  getBoeken(zoekterm?: string): Observable<Boek[]> {
-    let params = new HttpParams();
-
-    if (zoekterm && zoekterm.trim() !== '') {
-      params = params.set('zoekterm', zoekterm);
-    }
-
-    return this.http.get<Boek[]>(this.apiUrl, { params });
-  }
-
-  getBoekenGefilterd(filters: FilterOptions): Observable<Boek[]> {
+  // getBoekenGefilterd uitbreiden met page/size parameters en return type naar PageResponse<Boek>
+  getBoekenGefilterd(filters: FilterOptions): Observable<PageResponse<Boek>> {
     let params = new HttpParams();
 
     if (filters.genres?.length) {
@@ -48,7 +39,7 @@ export class BoekService {
       }
     });
 
-    return this.http.get<Boek[]>(this.apiUrl, { params });
+    return this.http.get<PageResponse<Boek>>(this.apiUrl, { params });
   }
 
   getBoekOpId(id: number): Observable<Boek> {

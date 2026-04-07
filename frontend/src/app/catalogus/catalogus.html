@@ -160,8 +160,8 @@
   <!-- Boeken -->
   <div class="catalogus-container">
     <h3 class="result-count">
-      {{ boekenlijst().length }}
-      {{ boekenlijst().length === 1 ? 'resultaat' : 'resultaten' }}
+      {{ totaalBoeken() }}
+      {{ totaalBoeken() === 1 ? 'resultaat' : 'resultaten' }}
     </h3>
 
     <div class="boeken-grid">
@@ -202,6 +202,23 @@
       } @empty {
         <p class="no-results">Geen boeken gevonden voor deze zoekopdracht.</p>
       }
+    </div>
+    <div class="paginering">
+      <button
+        (click)="gaNaarVorigePagina()"
+        [disabled]="huidigePagina() === 0"
+        class="pagination-btn"
+      >
+        Vorige
+      </button>
+      <span class="pagina-info">Pagina {{ huidigePagina() + 1 }} van {{ totaalPaginas() }}</span>
+      <button
+        (click)="gaNaarVolgendePagina()"
+        [disabled]="huidigePagina() >= totaalPaginas() - 1"
+        class="pagination-btn"
+      >
+        Volgende
+      </button>
     </div>
   </div>
 </div>

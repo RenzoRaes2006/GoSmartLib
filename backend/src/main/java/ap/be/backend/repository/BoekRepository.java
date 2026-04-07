@@ -3,7 +3,8 @@ package ap.be.backend.repository;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -27,7 +28,7 @@ public interface BoekRepository extends JpaRepository<Boek, Long> {
                         "(:uitgaveJaarVan IS NULL OR b.uitgaveJaar >= :uitgaveJaarVan) AND " +
                         "(:uitgaveJaarTot IS NULL OR b.uitgaveJaar <= :uitgaveJaarTot) AND " +
                         "(:leesniveau IS NULL OR b.leesniveau = :leesniveau)")
-        List<Boek> filterBoeken(@Param("zoekterm") String zoekterm,
+        Page<Boek> filterBoeken(@Param("zoekterm") String zoekterm,
                         @Param("genres") List<String> genres,
                         @Param("uitgever") String uitgever,
                         @Param("minPagina") Integer minPagina,
@@ -36,7 +37,7 @@ public interface BoekRepository extends JpaRepository<Boek, Long> {
                         @Param("uitgaveJaarVan") Integer uitgaveJaarVan,
                         @Param("uitgaveJaarTot") Integer uitgaveJaarTot,
                         @Param("leesniveau") String leesniveau,
-                        Sort sort);
+                        Pageable pageable);
 
         @Query(value = "SELECT b.* FROM boek b LEFT JOIN leeslijst_map_boeken lmb ON b.id = lmb.boek_id GROUP BY b.id ORDER BY COUNT(lmb.map_id) DESC LIMIT 5", nativeQuery = true)
         List<Boek> findTop5PopulaireBoeken();

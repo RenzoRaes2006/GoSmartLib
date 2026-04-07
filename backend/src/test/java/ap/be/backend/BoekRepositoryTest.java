@@ -7,6 +7,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 import java.util.List;
@@ -81,15 +84,15 @@ class BoekRepositoryTest {
         b2.setAuteur("Jane Smith");
         b2.setLocatie("B2");
         boekRepository.saveAll(List.of(b1, b2));
-        Sort sort = Sort.by(Sort.Direction.ASC, "locatie");
+        Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Direction.ASC, "locatie"));
 
         // When
-        List<Boek> result = boekRepository.filterBoeken("java", null, null, null, null, null, null, null, null,
-                sort);
+        Page<Boek> result = boekRepository.filterBoeken("java", null, null, null, null, null, null, null, null,
+                pageable);
 
         // Then
-        assertThat(result).isNotEmpty();
-        assertThat(result.stream().map(Boek::getTitel).toList()).contains("Java for Beginners");
+        assertThat(result.getContent()).isNotEmpty();
+        assertThat(result.getContent().stream().map(Boek::getTitel).toList()).contains("Java for Beginners");
     }
 
     @Test
@@ -100,15 +103,15 @@ class BoekRepositoryTest {
         b1.setAuteur("Joshua Bloch");
         b1.setLocatie("C3");
         boekRepository.save(b1);
-        Sort sort = Sort.by(Sort.Direction.ASC, "locatie");
+        Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Direction.ASC, "locatie"));
 
         // When
-        List<Boek> result = boekRepository.filterBoeken("Bloch", null, null, null, null, null, null, null, null,
-                sort);
+        Page<Boek> result = boekRepository.filterBoeken("Bloch", null, null, null, null, null, null, null, null,
+                pageable);
 
         // Then
-        assertThat(result).isNotEmpty();
-        assertThat(result.get(0).getAuteur()).isEqualTo("Joshua Bloch");
+        assertThat(result.getContent()).isNotEmpty();
+        assertThat(result.getContent().get(0).getAuteur()).isEqualTo("Joshua Bloch");
     }
 
     // --- FIND BY ISBN ---
