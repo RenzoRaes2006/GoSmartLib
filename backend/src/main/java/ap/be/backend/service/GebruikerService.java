@@ -134,24 +134,26 @@ public class GebruikerService {
         return new LeenStatusResponse(true, "Beschikbaar om te reserveren");
     }
 
-    public void bevestigUitlening(Long gebruikerId, Long boekId) {
+    public synchronized void bevestigUitlening(Long gebruikerId, Long boekId) {
         LeenStatusResponse status = checkLeenStatus(gebruikerId, boekId);
         if (!status.isMagLenen()) {
             throw new LeenVoorwaardeException(status.getReden());
         }
 
-        Gebruiker gebruiker = gebruikerRepository.findById(gebruikerId).orElseThrow();
-        Boek boek = boekRepository.findById(boekId).orElseThrow();
+        Gebruiker gebruiker = gebruikerRepository.findById(gebruikerId)
+                .orElseThrow(() -> new GebruikerNotFoundException("Gebruiker niet gevonden"));
+        Boek boek = boekRepository.findById(boekId)
+                .orElseThrow(() -> new BoekNotFoundException("Boek niet gevonden"));
 
-        // Voorraad verminderen
+        // Decrease stock in the library
         boek.setAantalExemplaren(boek.getAantalExemplaren() - 1);
         boekRepository.save(boek);
 
-        // Uitleen termijn 1 maand vanaf vandaag
+        // Set loan period to 1 month from today
         LocalDate vandaag = LocalDate.now();
         LocalDate inleverDatum = vandaag.plusMonths(1);
 
-        // Aanmaken en opslaan
+        // Create and save the new loan request
         Uitlening nieuweUitlening = new Uitlening(gebruiker, boek, vandaag, inleverDatum);
         uitleningRepository.save(nieuweUitlening);
     }
@@ -189,5 +191,19 @@ public class GebruikerService {
 
     public List<Uitlening> getActieveLeningenVanGebruiker(Long gebruikerId) {
         return uitleningRepository.findByGebruiker_GebruikerIDAndIsIngeleverdFalse(gebruikerId);
+    }
+
+    public void verwijderLening(Long uitleningId) {
+        // find the loan in the database
+        Uitlening uitlening = uitleningRepository.findById(uitleningId)
+                .orElseThrow(() -> new UitleningNotFoundException("Uitlening niet gevonden"));
+
+        // restore the book stock before deleting the loan
+        Boek boek = uitlening.getBoek();
+        boek.setAantalExemplaren(boek.getAantalExemplaren() + 1);
+        boekRepository.save(boek);
+
+        // delete the loan completely from the database
+        uitleningRepository.delete(uitlening);
     }
 }

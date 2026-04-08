@@ -133,6 +133,7 @@
                     <span>{{ lening.resterendeDagen }} d</span>
                   }
                 </div>
+                <button class="btn-verwijderen" (click)="verwijder(lening.id)">Verwijderen</button>
               </div>
             } @empty {
               <p class="empty-message">Geen boeken geleend.</p>

@@ -23,7 +23,6 @@ export class BoekService {
 
   private http = inject(HttpClient);
 
-  // getBoekenGefilterd uitbreiden met page/size parameters en return type naar PageResponse<Boek>
   getBoekenGefilterd(filters: FilterOptions): Observable<PageResponse<Boek>> {
     let params = new HttpParams();
 
@@ -94,6 +93,27 @@ export class BoekService {
     return this.http.get<any[]>(`${this.apiGebruikerUrl}/${gebruikerId}/leningen`);
   }
 
+  // fetch all pending loan requests
+  getAlleAanvragen(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiGebruikerUrl}/aanvragen`);
+  }
+
+  // approve a loan request
+  keurAanvraagGoed(uitleningId: number): Observable<string> {
+    return this.http.put(`${this.apiGebruikerUrl}/aanvragen/${uitleningId}/goedkeuren`, {}, { responseType: 'text' as 'json' }) as Observable<string>;
+  }
+
+  // reject a loan request
+  weigerAanvraag(uitleningId: number): Observable<string> {
+    return this.http.put(`${this.apiGebruikerUrl}/aanvragen/${uitleningId}/weigeren`, {}, { responseType: 'text' as 'json' }) as Observable<string>;
+  }
+
+  // delete a loan
+  verwijderLening(uitleningId: number): Observable<string> {
+    return this.http.delete(`${this.apiGebruikerUrl}/leningen/${uitleningId}`, { responseType: 'text' as 'json' }) as Observable<string>;
+  }
+
+  // upload an image file
   uploadAfbeelding(file: File): Observable<string> {
     const formData = new FormData();
     formData.append('file', file);

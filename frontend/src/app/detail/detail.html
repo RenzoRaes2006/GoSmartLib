@@ -2,10 +2,8 @@
   <a routerLink="/catalogus" class="back-link">← Terug naar catalogus</a>
 
   <div class="content-layout">
-    
     <div class="main-column">
       <div class="top-row">
-        
         <!-- Linker kolom: Cover & Tags -->
         <div class="left-col">
           <div class="image-container">
@@ -61,25 +59,31 @@
 
           <div class="info-grid">
             <div class="info-item">
-              <span class="info-label">Uitgever</span><span class="info-value">{{ boek?.uitgever }}</span>
+              <span class="info-label">Uitgever</span
+              ><span class="info-value">{{ boek?.uitgever }}</span>
             </div>
             <div class="info-item">
-              <span class="info-label">Aantal pagina's</span><span class="info-value">{{ boek?.pagina }}</span>
+              <span class="info-label">Aantal pagina's</span
+              ><span class="info-value">{{ boek?.pagina }}</span>
             </div>
             <div class="info-item">
               <span class="info-label">ISBN</span><span class="info-value">{{ boek?.isbn }}</span>
             </div>
             <div class="info-item">
-              <span class="info-label">Uitgavejaar</span><span class="info-value">{{ boek?.uitgaveJaar }}</span>
+              <span class="info-label">Uitgavejaar</span
+              ><span class="info-value">{{ boek?.uitgaveJaar }}</span>
             </div>
             <div class="info-item">
-              <span class="info-label">Locatie in bib</span><span class="info-value">{{ boek?.locatie }}</span>
+              <span class="info-label">Locatie in bib</span
+              ><span class="info-value">{{ boek?.locatie }}</span>
             </div>
             <div class="info-item">
-              <span class="info-label">Exemplaren</span><span class="info-value">{{ boek?.aantalExemplaren }}</span>
+              <span class="info-label">Exemplaren</span
+              ><span class="info-value">{{ boek?.aantalExemplaren }}</span>
             </div>
             <div class="info-item">
-              <span class="info-label">Leesniveau</span><span class="info-value">{{ boek?.leesniveau }}</span>
+              <span class="info-label">Leesniveau</span
+              ><span class="info-value">{{ boek?.leesniveau }}</span>
             </div>
           </div>
 
@@ -130,13 +134,17 @@
           @for (beoordeling of beoordelingen; track $index) {
             <div class="review-item">
               <div class="review-header">
-                <span class="review-rating">{{ '★'.repeat(beoordeling.waardering) + '☆'.repeat(5 - beoordeling.waardering) }}</span>
+                <span class="review-rating">{{
+                  '★'.repeat(beoordeling.waardering) + '☆'.repeat(5 - beoordeling.waardering)
+                }}</span>
                 <span class="reviewer-name">- {{ beoordeling.gebruikerNaam }}</span>
               </div>
               <p class="review-content">{{ beoordeling.inhoud }}</p>
 
               @if (!beoordeling.gerapporteerd) {
-                <button class="rapporteer-btn" (click)="openRapporteerModal(beoordeling.id!)">Rapporteer</button>
+                <button class="rapporteer-btn" (click)="openRapporteerModal(beoordeling.id!)">
+                  Rapporteer
+                </button>
               } @else {
                 <span class="gerapporteerd-label">Reeds gerapporteerd ✓</span>
               }
@@ -160,18 +168,25 @@
                 <input type="radio" id="star1" formControlName="waardering" value="1" />
                 <label for="star1" title="1 ster">★</label>
               </div>
-              
-              <textarea id="inhoud" name="inhoud" rows="3" formControlName="inhoud" class="form-textarea" placeholder="Deel je mening over dit boek..."></textarea>
+
+              <textarea
+                id="inhoud"
+                name="inhoud"
+                rows="3"
+                formControlName="inhoud"
+                class="form-textarea"
+                placeholder="Deel je mening over dit boek..."
+              ></textarea>
 
               <!-- Jouw Checkbox sectie behouden -->
-              <label style="display: block; margin-top: 10px; margin-bottom: 10px; font-size: 14px;">
-                <input type="checkbox" formControlName="isAnoniem">
+              <label style="display: block; margin-top: 10px; margin-bottom: 10px; font-size: 14px">
+                <input type="checkbox" formControlName="isAnoniem" />
                 Plaats deze review anoniem
               </label>
 
               <button type="submit" class="submit-btn">Verzenden</button>
-              
-              @if(submissionError){
+
+              @if (submissionError) {
                 <div class="error-message">
                   <p>{{ submissionError }}</p>
                 </div>
@@ -219,12 +234,29 @@
               </button>
             }
           </div>
-          <input #nieuweMap type="text" placeholder="Nieuwe map naam..." class="nieuwe-map-input" style="width: 100%; margin-top: 10px; padding: 12px; border: 1px solid #e2dfd5; border-radius: 8px;" />
+          <input
+            #nieuweMap
+            type="text"
+            placeholder="Nieuwe map naam..."
+            class="nieuwe-map-input"
+            style="
+              width: 100%;
+              margin-top: 10px;
+              padding: 12px;
+              border: 1px solid #e2dfd5;
+              border-radius: 8px;
+            "
+          />
         </div>
 
-        <div class="modal-actions" style="margin-top: 20px;">
+        <div class="modal-actions" style="margin-top: 20px">
           <button class="cancel-btn" (click)="sluitModal()">Annuleren</button>
-          <button class="save-btn" (click)="bevestigToevoegenAanMap(bestaandeMap.value, nieuweMap.value)">Opslaan</button>
+          <button
+            class="save-btn"
+            (click)="bevestigToevoegenAanMap(bestaandeMap.value, nieuweMap.value)"
+          >
+            Opslaan
+          </button>
         </div>
       }
     </div>
@@ -256,43 +288,52 @@
 
 <!-- Rapporteer Modal (Jouw code) -->
 @if (rapporteerModalOpen) {
-<div class="modal-overlay">
-  <div class="modal-box rapport-modal">
-    <h3>Rapporteer beoordeling</h3>
-    <p class="modal-label">Waarom rapporteer je deze beoordeling?</p>
+  <div class="modal-overlay">
+    <div class="modal-box rapport-modal">
+      <h3>Rapporteer beoordeling</h3>
+      <p class="modal-label">Waarom rapporteer je deze beoordeling?</p>
 
-    <select [(ngModel)]="geselecteerdeReden" class="form-select">
-      <option value="" disabled selected>Kies een reden...</option>
-      <option value="ongepast">Ongepaste inhoud</option>
-      <option value="spam">Spam</option>
-      <option value="anders">Andere reden...</option>
-    </select>
+      <select [(ngModel)]="geselecteerdeReden" class="form-select">
+        <option value="" disabled selected>Kies een reden...</option>
+        <option value="scheldwoorden">Scheldwoorden of grof taalgebruik</option>
+        <option value="spoiler">Verklapt het verhaal (spoiler)</option>
+        <option value="irrelevant">Gaat helemaal niet over het boek</option>
+        <option value="pesten">Iemand pesten of kwetsen</option>
+        <option value="spam">Spam of onzin</option>
+        <option value="anders">Iets anders...</option>
+      </select>
 
-    @if (geselecteerdeReden === 'anders') {
-      <textarea 
-        [(ngModel)]="rapporteerReden" 
-        rows="3" 
-        class="form-textarea mt-2" 
-        placeholder="Voer je reden in (verplicht)..."
-      ></textarea>
-    }
+      @if (geselecteerdeReden === 'anders') {
+        <textarea
+          [(ngModel)]="rapporteerReden"
+          rows="3"
+          class="form-textarea mt-2"
+          placeholder="Voer je reden in (verplicht)..."
+        ></textarea>
+      }
 
-    <div class="modal-actions">
-      <button class="cancel-btn" (click)="sluitRapporteerModal()">Annuleren</button>
-      <button 
-        class="save-btn" 
-        [disabled]="!geselecteerdeReden || (geselecteerdeReden === 'anders' && !rapporteerReden.trim())" 
-        (click)="bevestigRapport()">
-        Verzenden
-      </button>
+      <div class="modal-actions">
+        <button class="cancel-btn" (click)="sluitRapporteerModal()">Annuleren</button>
+        <button
+          class="save-btn"
+          [disabled]="
+            !geselecteerdeReden || (geselecteerdeReden === 'anders' && !rapporteerReden.trim())
+          "
+          (click)="bevestigRapport()"
+        >
+          Verzenden
+        </button>
+      </div>
     </div>
   </div>
-</div>
 }
 
 <!-- Toast Melding (Jouw code) -->
 @if (rapportMelding) {
-  <div class="toast-message">
+  <div class="toast-message" [class.toast-error]="rapportMeldingType === 'error'">
+    <span class="toast-icon" aria-hidden="true">{{
+      rapportMeldingType === 'error' ? '!' : '✓'
+    }}</span>
     <p>{{ rapportMelding }}</p>
   </div>
 }

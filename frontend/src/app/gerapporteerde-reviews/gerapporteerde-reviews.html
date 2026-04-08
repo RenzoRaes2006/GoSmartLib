@@ -1,0 +1,44 @@
+<section class="reports-page">
+  <header class="reports-header">
+    <h2>Gerapporteerde Beoordelingen</h2>
+    <p>Beheer gemelde reviews en onderneem actie.</p>
+  </header>
+
+  @if (rapportages.length === 0) {
+    <div class="empty-state">
+      Er zijn momenteel geen gerapporteerde beoordelingen.
+    </div>
+  }
+
+  <div class="reports-grid">
+    @for (rapport of rapportages; track rapport.id) {
+      <article class="report-card">
+        <div class="report-card-header">
+          <strong>Reden: {{ rapport.reden }}</strong>
+            <!-- <small>Gemeld op: {{ rapport.datumGemeld | date:'dd/MM/yyyy HH:mm' }}</small> -->
+        </div>
+          
+        <div class="report-card-body">
+          <h5>Boek: {{ rapport.boekTitel }}</h5>
+          <p class="review-content">"{{ rapport.reviewInhoud }}"</p>
+            
+          <div class="meta-grid">
+            <span>Schrijver ID: <strong>{{ rapport.schrijverId }}</strong></span>
+            <span>Melder ID: <strong>{{ rapport.melderId }}</strong></span>
+            <span>Review ID: {{ rapport.reviewId }}</span>
+            <span>Rapport ID: {{ rapport.id }}</span>
+          </div>
+
+          <div class="action-row">
+            <button class="btn-neutral" (click)="negeerRapportage(rapport.id)">
+              Rapportage Negeren
+            </button>
+            <button class="btn-danger" (click)="verwijderReview(rapport.reviewId)">
+              Review Verwijderen
+            </button>
+          </div>
+        </div>
+      </article>
+    }
+  </div>
+</section>

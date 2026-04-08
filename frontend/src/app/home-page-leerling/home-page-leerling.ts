@@ -131,4 +131,17 @@ export class HomePageLeerling implements OnInit {
     // 4. Sluit de pop-up
     this.isEditModalOpen.set(false);
   }
+
+  verwijder(id: number) {
+    if (confirm('Weet je zeker dat je deze lening volledig wil verwijderen?')) {
+      this.boekService.verwijderLening(id).subscribe({
+        next: (bericht) => {
+          alert(bericht);
+          // refresh the list after deletion (call your fetch function here)
+          this.haalLeningenOp(); // of haalAanvragenOp()
+        },
+        error: (err) => alert('Fout bij verwijderen: ' + err.message)
+      });
+    }
+  }
 }
