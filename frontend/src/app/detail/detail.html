@@ -264,7 +264,8 @@
 
 <!-- Toast Melding (Jouw code) -->
 @if (rapportMelding) {
-<div class="toast-message">
+<div class="toast-message" [class.toast-error]="rapportMeldingType === 'error'">
+  <span class="toast-icon" aria-hidden="true">{{ rapportMeldingType === 'error' ? '!' : '✓' }}</span>
   <p>{{ rapportMelding }}</p>
 </div>
 }

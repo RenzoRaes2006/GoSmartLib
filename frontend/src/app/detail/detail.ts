@@ -10,6 +10,7 @@ import { RouterLink, ActivatedRoute } from '@angular/router';
 import { BoekService } from '../services/boek.service';
 import { Boek } from '../models/Boek';
 import { ReviewService } from '../services/review-service';
+import { RapportageService } from '../services/rapportage-service';
 import { Beoordeling } from '../models/review.model';
 import { LeeslijstService } from '../services/leeslijstService';
 import { LeenMandjeService } from '../services/leen-mandje.service';
@@ -21,7 +22,8 @@ import { LeenMandjeService } from '../services/leen-mandje.service';
   styleUrl: './detail.css',
 })
 export class Detail implements OnInit {
-  beoordelingService = inject(ReviewService);
+  reviewService = inject(ReviewService);
+  rapportageService = inject(RapportageService);
   boekService = inject(BoekService);
   fb = inject(FormBuilder);
   route = inject(ActivatedRoute);
@@ -50,6 +52,7 @@ export class Detail implements OnInit {
   waarderingPrecentage: number = 0;
 
   rapportMelding: string = '';
+  rapportMeldingType: 'success' | 'error' = 'success';
   rapporteerModalOpen: boolean = false;
   rapporteerReden: string = '';
   geselecteerdeReden: string = '';
@@ -98,7 +101,7 @@ export class Detail implements OnInit {
   }
 
   laadBeoordelingenVanBoek() {
-    this.beoordelingService.getBeoordelingenOpBoekId(this.boekId).subscribe({
+    this.reviewService.getBeoordelingenOpBoekId(this.boekId).subscribe({
       next: (beoordelingen) => {
         this.beoordelingen = beoordelingen;
         this.updateBoekWaardering();
@@ -181,7 +184,7 @@ export class Detail implements OnInit {
       gerapporteerd: false,
     };
 
-    this.beoordelingService.voegBeoordelingToe(beoordeling).subscribe({
+    this.reviewService.voegBeoordelingToe(beoordeling).subscribe({
       next: () => {
         this.form.reset();
         this.submissionError = '';
@@ -199,10 +202,18 @@ export class Detail implements OnInit {
   }
   // Jouw ongewijzigde functie hersteld!
   bevestigRapport() {
-    const reden: string = this.geselecteerdeReden === 'Anders' ? this.rapporteerReden : this.geselecteerdeReden;
+    const customReden = this.rapporteerReden.trim();
+    const reden: string = this.geselecteerdeReden === 'anders' ? customReden : this.geselecteerdeReden;
 
-    this.beoordelingService
-      .rapporteerBeoordeling(this.geselecteerdeBeoordelingId!, this.rapporteerReden)
+    if (!reden) {
+      this.rapportMeldingType = 'error';
+      this.rapportMelding = 'Geef een geldige reden op.';
+      setTimeout(() => (this.rapportMelding = ''), 3000);
+      return;
+    }
+
+    this.rapportageService
+      .rapporteerBeoordeling(this.geselecteerdeBeoordelingId!, reden)
       .subscribe({
         next: () => {
           this.gerapporteerdeBeoordelingen.push(this.geselecteerdeBeoordelingId!);
@@ -216,6 +227,7 @@ export class Detail implements OnInit {
             beoordeling.gerapporteerd = true;
           }
 
+          this.rapportMeldingType = 'success';
           this.rapportMelding = 'Beoordeling succesvol gerapporteerd. Bedankt voor je feedback!';
           this.rapporteerModalOpen = false;
           this.geselecteerdeBeoordelingId = null;
@@ -224,6 +236,7 @@ export class Detail implements OnInit {
           setTimeout(() => (this.rapportMelding = ''), 4000);
         },
         error: (err) => {
+          this.rapportMeldingType = 'error';
           this.rapportMelding = 'Er ging iets mis bij het rapporteren. Probeer opnieuw.';
           setTimeout(() => (this.rapportMelding = ''), 4000);
         },
@@ -233,10 +246,13 @@ export class Detail implements OnInit {
   openRapporteerModal(beoordelingId: number) {
     this.rapporteerModalOpen = true;
     this.geselecteerdeBeoordelingId = beoordelingId;
+    this.geselecteerdeReden = '';
+    this.rapporteerReden = '';
   }
 
   sluitRapporteerModal() {
     this.rapporteerModalOpen = false;
+    this.geselecteerdeReden = '';
     this.rapporteerReden = '';
   }
 

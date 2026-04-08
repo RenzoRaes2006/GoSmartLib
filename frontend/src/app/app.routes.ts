@@ -7,6 +7,7 @@ import { HomePageLeerling } from './home-page-leerling/home-page-leerling';
 import { ReserverenComponent } from './reserveren/reserveren';
 import { PageNotFound } from './page-not-found/page-not-found';
 import { Login } from './login/login';
+import { GerapporteerdeReviews } from './gerapporteerde-reviews/gerapporteerde-reviews';
 
 export const routes: Routes = [
   { path: '', component: HomePageLeerling },
@@ -17,6 +18,6 @@ export const routes: Routes = [
   { path: 'reserveren', component: ReserverenComponent },
   { path: 'not-found', component: PageNotFound },
   { path: 'login/smartschool', component:  Login},
+  { path: 'gerapporteerde-beoordelingen', component: GerapporteerdeReviews},
   { path: '**', redirectTo: "not-found" },
-
 ];
