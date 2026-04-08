@@ -23,7 +23,12 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.*;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class GebruikerServiceTest {
@@ -125,5 +130,89 @@ public class GebruikerServiceTest {
         // then
         assertTrue(actualLoans.isEmpty());
         then(uitleningRepository).should(times(1)).findByGebruiker_GebruikerIDAndIsIngeleverdFalse(userId);
+    }
+    @Test
+    void givenPendingLoans_whenGetAlleAanvragen_thenReturnList() {
+        // given: the repository returns a list of loans with status "AANGEVRAAGD"
+        testUitlening.setStatus("AANGEVRAAGD");
+        List<Uitlening> expectedAanvragen = Arrays.asList(testUitlening);
+        given(uitleningRepository.findByStatus("AANGEVRAAGD")).willReturn(expectedAanvragen);
+
+        // when: we fetch all pending requests
+        List<Uitlening> actualAanvragen = gebruikerService.getAlleAanvragen();
+
+        // then: the correct list is returned
+        assertEquals(1, actualAanvragen.size());
+        assertEquals("AANGEVRAAGD", actualAanvragen.get(0).getStatus());
+        then(uitleningRepository).should(times(1)).findByStatus("AANGEVRAAGD");
+    }
+
+    @Test
+    void givenValidLoanId_whenKeurAanvraagGoed_thenUpdateStatusAndDates() {
+        // given: a valid pending loan exists
+        testUitlening.setStatus("AANGEVRAAGD");
+        given(uitleningRepository.findById(100L)).willReturn(Optional.of(testUitlening));
+
+        // when: the librarian approves the loan
+        gebruikerService.keurAanvraagGoed(100L);
+
+        // then: status changes to GOEDGEKEURD and the loan is saved
+        assertEquals("GOEDGEKEURD", testUitlening.getStatus());
+        assertNotNull(testUitlening.getUitleenDatum());
+        assertNotNull(testUitlening.getInleverDatum());
+        then(uitleningRepository).should(times(1)).save(testUitlening);
+    }
+
+    @Test
+    void givenValidLoanId_whenWeigerAanvraag_thenUpdateStatusAndRestoreStock() {
+        // given: a valid pending loan exists and the book has a stock of 5
+        testUitlening.setStatus("AANGEVRAAGD");
+        testBoek.setAantalExemplaren(5); 
+        given(uitleningRepository.findById(100L)).willReturn(Optional.of(testUitlening));
+
+        // when: the librarian rejects the loan
+        gebruikerService.weigerAanvraag(100L);
+
+        // then: status is GEWEIGERD, it is marked as returned (so it doesn't count towards the limit)
+        assertEquals("GEWEIGERD", testUitlening.getStatus());
+        assertTrue(testUitlening.isIngeleverd());
+        
+        // then: the book stock is increased back to 6
+        assertEquals(6, testBoek.getAantalExemplaren());
+        
+        // then: both the book and the loan are saved to the database
+        then(boekRepository).should(times(1)).save(testBoek);
+        then(uitleningRepository).should(times(1)).save(testUitlening);
+    }
+
+    @Test
+    void givenInvalidLoanId_whenKeurAanvraagGoed_thenThrowException() {
+        // given: an invalid loan ID that cannot be found
+        Long invalidId = 999L;
+        given(uitleningRepository.findById(invalidId)).willReturn(Optional.empty());
+
+        // when & then: an exception is thrown
+        assertThrows(ap.be.backend.exception.UitleningNotFoundException.class, () -> {
+            gebruikerService.keurAanvraagGoed(invalidId);
+        });
+        
+        // verify that save was never called
+        then(uitleningRepository).should(never()).save(any(Uitlening.class));
+    }
+
+    @Test
+    void givenInvalidLoanId_whenWeigerAanvraag_thenThrowException() {
+        // given: an invalid loan ID that cannot be found
+        Long invalidId = 999L;
+        given(uitleningRepository.findById(invalidId)).willReturn(Optional.empty());
+
+        // when & then: an exception is thrown
+        assertThrows(ap.be.backend.exception.UitleningNotFoundException.class, () -> {
+            gebruikerService.weigerAanvraag(invalidId);
+        });
+
+        // verify that save was never called on either repository
+        then(boekRepository).should(never()).save(any(Boek.class));
+        then(uitleningRepository).should(never()).save(any(Uitlening.class));
     }
 }
