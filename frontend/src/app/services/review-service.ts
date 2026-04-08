@@ -18,7 +18,7 @@ export class ReviewService {
     return this.http.post<Beoordeling>(`${this.apiUrl}/reviews`, beoordeling);
   }
 
-  rapporteerBeoordeling(id: number, reden: string) {
-    return this.http.post(`${this.apiUrl}/reviews/${id}/report`, { reden });
+  verwijderRapporteerdeBeoordeling(reviewId: number) {
+    return this.http.delete(`${this.apiUrl}/reviews/${reviewId}`);
   }
 }
