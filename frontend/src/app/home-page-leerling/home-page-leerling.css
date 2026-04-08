@@ -1,5 +1,5 @@
 /* =========================================
-   VOLLEDIGE BREEDTE LAYOUT & BASIS KLEUREN
+   FULL WIDTH LAYOUT & BASE COLORS
    ========================================= */
 .page-wrapper {
   width: 100%;
@@ -16,13 +16,12 @@
   margin: 0 auto;
 }
 
-
 .bg-white {
   background-color: #ffffff;
 }
 
 .bg-beige {
-  background-color: #f0efe4; /* Beige achtergrond */
+  background-color: #f0efe4; /* beige background */
 }
 
 h2 {
@@ -32,7 +31,7 @@ h2 {
 }
 
 /* =========================================
-   SECTIE 1: Welkom banner
+   SECTION 1: Welcome banner
    ========================================= */
 .welcome-banner-modern {
   background-color: #f0efe4; 
@@ -52,7 +51,7 @@ h2 {
   gap: 15px; 
 }
 
-/* Het GO! logo */
+/* the GO! logo */
 .go-logo {
   height: 60px;
   width: auto;
@@ -73,16 +72,16 @@ h2 {
 }
 
 /* =========================================
-   LEESDOEL WIDGET & POTLOOD KNOP
+   READING GOAL WIDGET & PENCIL BUTTON
    ========================================= */
 .goal-wrapper {
   display: flex;
-  align-items: center; /* Zorgt dat de kleine knop mooi in het midden zweeft */
+  align-items: center; /* ensures the small button floats nicely in the middle */
   gap: 15px; 
   margin-top: 10px;
 }
 
-/* De leesdoel widget zelf */
+/* the reading goal widget itself */
 .reading-goal {
   background: #ffffff; 
   padding: 18px 25px;
@@ -98,8 +97,8 @@ h2 {
 
 .goal-text {
   display: flex;
-  justify-content: space-between; /* Drukt de teksten uit elkaar */
-  width: 100%; /* Zorgt dat de tekst niet aan elkaar plakt */
+  justify-content: space-between; /* pushes texts apart */
+  width: 100%; /* ensures text doesn't stick together */
   gap: 10px;
   margin-bottom: 10px;
   font-size: 0.95rem;
@@ -120,7 +119,7 @@ h2 {
   transition: width 1s ease-in-out;
 }
 
-/* De kleine ronde potlood knop (zoals op de foto!) */
+/* the small round pencil button (like in the picture!) */
 .edit-goal-btn.round-btn {
   background: #ffffff; 
   border: 1px solid #e2dfd5;
@@ -128,7 +127,7 @@ h2 {
   cursor: pointer;
   padding: 0;
   
-  /* Vaste, kleine grootte voor een perfect rondje */
+  /* fixed, small size for a perfect circle */
   width: 38px; 
   height: 38px; 
   border-radius: 50%; 
@@ -149,7 +148,7 @@ h2 {
   box-shadow: 0 4px 8px rgba(0,0,0,0.08);
 }
 
-/* De afbeelding aan de rechterkant */
+/* the image on the right side */
 .welcome-image {
   flex: 1;
   min-width: 300px; 
@@ -163,7 +162,7 @@ h2 {
 }
 
 /* =========================================
-   SECTIE 2: Uitgelichte boeken (5 kolommen)
+   SECTION 2: Featured books (5 columns)
    ========================================= */
 .featured-section { width: 100%; }
 
@@ -245,7 +244,7 @@ h2 {
 }
 
 /* =========================================
-   SECTIE 3: Leeslijsten & uitleentermijnen
+   SECTION 3: Reading lists & loan periods
    ========================================= */
 .bottom-split {
   display: grid;
@@ -392,6 +391,7 @@ h2 {
   align-items: center;
   gap: 10px;
   overflow: hidden;
+  margin-right: auto; /* push the badge and button neatly to the right side */
 }
 
 .lening-titel {
@@ -413,8 +413,36 @@ h2 {
   white-space: nowrap;
 }
 
+/* styling for the delete button */
+.btn-verwijderen {
+  background-color: #8c1b3f; 
+  color: #ffffff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 5px rgba(140, 27, 63, 0.2);
+  margin-left: 15px; /* add some space between the badge and the button */
+}
+
+/* hover effect */
+.btn-verwijderen:hover {
+  background-color: #6d1531; 
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(140, 27, 63, 0.3);
+}
+
+/* click effect */
+.btn-verwijderen:active {
+  transform: translateY(0); 
+  box-shadow: 0 2px 4px rgba(140, 27, 63, 0.2);
+}
+
 /* =========================================
-   POP-UP MODAL VOOR LEESDOEL
+   POP-UP MODAL FOR READING GOAL
    ========================================= */
 .modal-overlay {
   position: fixed;
@@ -530,7 +558,7 @@ h2 {
 }
 
 /* =========================================
-   RESPONSIVITEIT
+   RESPONSIVENESS
    ========================================= */
 @media (max-width: 1000px) {
   .uitgelicht-grid { grid-template-columns: repeat(3, 1fr); }
@@ -556,9 +584,9 @@ h2 {
 @media (max-width: 600px) {
   .uitgelicht-grid { grid-template-columns: repeat(2, 1fr); }
   
-  /* Zorgt dat op mobiel de knop en de leesdoel balk nog netjes naast of onder elkaar passen */
+  /* ensures the button and reading goal bar fit nicely next to or below each other on mobile */
   .goal-wrapper {
     flex-direction: row; 
-    align-items: center; /* Aangepast naar center voor mobiel */
+    align-items: center; /* adjusted to center for mobile */
   }
-} 
+}

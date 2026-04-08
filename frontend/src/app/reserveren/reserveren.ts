@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { LeenMandjeService } from '../services/leen-mandje.service';
@@ -18,8 +18,11 @@ export class ReserverenComponent implements OnInit {
 
   boekenInMandje: Boek[] = [];
 
-  // simuleren dat de leerling is ingelogd met ID 1
+  // simulate user login
   ingelogdeGebruikerId = 1;
+
+  // signal to keep track of active loans
+  actieveLeningen = signal<number>(0);
 
   isBezig = false;
   statusMelding = '';
@@ -28,6 +31,14 @@ export class ReserverenComponent implements OnInit {
   ngOnInit() {
     this.mandjeService.mandje$.subscribe((boeken) => {
       this.boekenInMandje = boeken;
+    });
+
+    // fetch active loans to calculate the limit
+    this.boekService.getActieveLeningen(this.ingelogdeGebruikerId).subscribe({
+      next: (leningen) => {
+        this.actieveLeningen.set(leningen.length);
+      },
+      error: (err) => console.error('Fout bij ophalen teller', err)
     });
   }
 
@@ -74,6 +85,9 @@ export class ReserverenComponent implements OnInit {
         this.statusMelding = 'Aanvraag succesvol verstuurd! De bibbeheerder zet je boeken klaar.';
         this.isSucces = true;
         this.mandjeService.maakMandjeLeeg();
+        
+        // update the counter visually after a successful request
+        this.actieveLeningen.update(count => count + aantalKlaar);
       }
     }
   }
