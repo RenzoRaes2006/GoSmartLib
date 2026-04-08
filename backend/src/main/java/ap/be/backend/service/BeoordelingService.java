@@ -44,7 +44,7 @@ public class BeoordelingService {
 
         return beoordelingen.stream().map(beoordeling -> {
             boolean isGerapporteerd = gerapporteerdeBeoordelingRepository
-                    .existsByBeoordelingIdAndGebruiker_GebruikerID(beoordeling.getId(), tijdelijkGebruikerId);
+                    .existsByBeoordelingIdAndGebruikerMelder_GebruikerID(beoordeling.getId(), tijdelijkGebruikerId);
             return BeoordelingMapper.toDTO(beoordeling, isGerapporteerd);
         }).toList();
     }
@@ -76,5 +76,13 @@ public class BeoordelingService {
                 .orElse(0.0);
         boek.setPopulariteit(gemiddelde);
         boekRepository.save(boek);
+    }
+
+    public void verwijderBeoordeling(Long beoordelingId) {
+        if (!beoordelingRepository.existsById(beoordelingId)) {
+            throw new IllegalArgumentException("Beoordeling niet gevonden met id: " + beoordelingId);
+        }
+
+        beoordelingRepository.deleteById(beoordelingId);
     }
 }

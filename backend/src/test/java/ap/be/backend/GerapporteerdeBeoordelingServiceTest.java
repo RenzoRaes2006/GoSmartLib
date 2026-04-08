@@ -23,6 +23,7 @@ import ap.be.backend.entity.GerapporteerdeBeoordeling;
 import ap.be.backend.exception.BeoordelingNotFoundException;
 import ap.be.backend.exception.DuplicateReportException;
 import ap.be.backend.exception.GebruikerNotFoundException;
+import ap.be.backend.exception.RapportageNotFoundException;
 import ap.be.backend.repository.BeoordelingRepository;
 import ap.be.backend.repository.GebruikerRepository;
 import ap.be.backend.repository.GerapporteerdeBeoordelingRepository;
@@ -57,8 +58,7 @@ public class GerapporteerdeBeoordelingServiceTest {
         testBeoordeling.setId(BEOORDELING_ID);
 
         testGebruiker = new Gebruiker();
-        // Zorg dat je hier de juiste setter gebruikt voor jouw Gebruiker entiteit
-        // Bijv: testGebruiker.setId(GEBRUIKER_ID); 
+        testGebruiker.setGebruikerID(GEBRUIKER_ID);
     }
 
     // =========================================================================
@@ -68,7 +68,7 @@ public class GerapporteerdeBeoordelingServiceTest {
     @Test
     void givenRapportBestaatAl_whenRapporteerBeoordeling_thenThrowsDuplicateReportException() {
         // GIVEN
-        when(gerapporteerdeBeoordelingRepository.existsByBeoordelingIdAndGebruiker_GebruikerID(BEOORDELING_ID, GEBRUIKER_ID))
+        when(gerapporteerdeBeoordelingRepository.existsByBeoordelingIdAndGebruikerMelder_GebruikerID(BEOORDELING_ID, GEBRUIKER_ID))
                 .thenReturn(true);
 
         // WHEN & THEN
@@ -87,7 +87,7 @@ public class GerapporteerdeBeoordelingServiceTest {
     @Test
     void givenBeoordelingBestaatNiet_whenRapporteerBeoordeling_thenThrowsBeoordelingNotFoundException() {
         // GIVEN
-        when(gerapporteerdeBeoordelingRepository.existsByBeoordelingIdAndGebruiker_GebruikerID(BEOORDELING_ID, GEBRUIKER_ID))
+        when(gerapporteerdeBeoordelingRepository.existsByBeoordelingIdAndGebruikerMelder_GebruikerID(BEOORDELING_ID, GEBRUIKER_ID))
                 .thenReturn(false);
         when(beoordelingRepository.findById(BEOORDELING_ID)).thenReturn(Optional.empty());
 
@@ -106,7 +106,7 @@ public class GerapporteerdeBeoordelingServiceTest {
     @Test
     void givenGebruikerBestaatNiet_whenRapporteerBeoordeling_thenThrowsGebruikerNotFoundException() {
         // GIVEN
-        when(gerapporteerdeBeoordelingRepository.existsByBeoordelingIdAndGebruiker_GebruikerID(BEOORDELING_ID, GEBRUIKER_ID))
+        when(gerapporteerdeBeoordelingRepository.existsByBeoordelingIdAndGebruikerMelder_GebruikerID(BEOORDELING_ID, GEBRUIKER_ID))
                 .thenReturn(false);
         when(beoordelingRepository.findById(BEOORDELING_ID)).thenReturn(Optional.of(testBeoordeling));
         when(gebruikerRepository.findById(GEBRUIKER_ID)).thenReturn(Optional.empty());
@@ -125,7 +125,7 @@ public class GerapporteerdeBeoordelingServiceTest {
     @Test
     void givenGeldigeData_whenRapporteerBeoordeling_thenSavesGerapporteerdeBeoordeling() {
         // GIVEN
-        when(gerapporteerdeBeoordelingRepository.existsByBeoordelingIdAndGebruiker_GebruikerID(BEOORDELING_ID, GEBRUIKER_ID))
+        when(gerapporteerdeBeoordelingRepository.existsByBeoordelingIdAndGebruikerMelder_GebruikerID(BEOORDELING_ID, GEBRUIKER_ID))
                 .thenReturn(false);
         when(beoordelingRepository.findById(BEOORDELING_ID)).thenReturn(Optional.of(testBeoordeling));
         when(gebruikerRepository.findById(GEBRUIKER_ID)).thenReturn(Optional.of(testGebruiker));
@@ -148,7 +148,7 @@ public class GerapporteerdeBeoordelingServiceTest {
         assertEquals("Reden mag niet leeg zijn.", exception.getMessage());
         
         // Verifieer dat de rest van de code NOOIT wordt uitgevoerd
-        verify(gerapporteerdeBeoordelingRepository, never()).existsByBeoordelingIdAndGebruiker_GebruikerID(any(), any());
+        verify(gerapporteerdeBeoordelingRepository, never()).existsByBeoordelingIdAndGebruikerMelder_GebruikerID(any(), any());
         verify(gerapporteerdeBeoordelingRepository, never()).save(any());
     }
 
@@ -161,7 +161,7 @@ public class GerapporteerdeBeoordelingServiceTest {
 
         assertEquals("Reden mag niet leeg zijn.", exception.getMessage());
         
-        verify(gerapporteerdeBeoordelingRepository, never()).existsByBeoordelingIdAndGebruiker_GebruikerID(any(), any());
+        verify(gerapporteerdeBeoordelingRepository, never()).existsByBeoordelingIdAndGebruikerMelder_GebruikerID(any(), any());
         verify(gerapporteerdeBeoordelingRepository, never()).save(any());
     }
 
@@ -174,7 +174,29 @@ public class GerapporteerdeBeoordelingServiceTest {
 
         assertEquals("Reden mag niet leeg zijn.", exception.getMessage());
         
-        verify(gerapporteerdeBeoordelingRepository, never()).existsByBeoordelingIdAndGebruiker_GebruikerID(any(), any());
+        verify(gerapporteerdeBeoordelingRepository, never()).existsByBeoordelingIdAndGebruikerMelder_GebruikerID(any(), any());
         verify(gerapporteerdeBeoordelingRepository, never()).save(any());
+    }
+
+    @Test
+    void givenBestaandeRapportage_whenVerwijderRapportage_thenDeletesById() {
+        Long rapportageId = 5L;
+        when(gerapporteerdeBeoordelingRepository.existsById(rapportageId)).thenReturn(true);
+
+        gerapporteerdeBeoordelingService.verwijderRapportage(rapportageId);
+
+        verify(gerapporteerdeBeoordelingRepository, times(1)).deleteById(rapportageId);
+    }
+
+    @Test
+    void givenNietBestaandeRapportage_whenVerwijderRapportage_thenThrowsIllegalArgumentException() {
+        Long rapportageId = 6L;
+        when(gerapporteerdeBeoordelingRepository.existsById(rapportageId)).thenReturn(false);
+
+        RapportageNotFoundException exception = assertThrows(RapportageNotFoundException.class,
+                () -> gerapporteerdeBeoordelingService.verwijderRapportage(rapportageId));
+
+        assertEquals("Rapportage niet gevonden met id: " + rapportageId, exception.getMessage());
+        verify(gerapporteerdeBeoordelingRepository, never()).deleteById(rapportageId);
     }
 }
