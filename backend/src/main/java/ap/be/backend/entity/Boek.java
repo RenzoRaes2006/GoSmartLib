@@ -40,6 +40,9 @@ public class Boek {
     @ElementCollection
     private List<String> genre;
 
+    @ElementCollection
+    private List<String> thematischeTag;
+
     @Lob
     @Column(length = 100000)
     private String beschrijving;

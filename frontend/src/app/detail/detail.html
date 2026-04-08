@@ -28,6 +28,17 @@
               @for (genre of boek?.genre; track $index) {
                 <span class="tag">{{ genre }}</span>
               } @empty {
+                <span class="tag">Geen genres</span>
+              }
+            </div>
+          </div>
+
+          <div class="tags-section">
+            <span class="tags-label">Thematische tags</span>
+            <div class="tags-list">
+              @for (tag of boek?.thematischeTag; track $index) {
+                <span class="tag">{{ tag }}</span>
+              } @empty {
                 <span class="tag">Geen thema's</span>
               }
             </div>

@@ -6,6 +6,7 @@ export interface NieuwBoek {
   uitgaveJaar: string;
   pagina: string;
   genre: string | string[];
+  thematischeTag: string | string[];
   beschrijving: string;
   aantalExemplaren: string;
   locatie: string;

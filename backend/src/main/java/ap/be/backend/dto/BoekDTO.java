@@ -17,6 +17,7 @@ public record BoekDTO(
         @JsonProperty("uitgaveJaar") String uitgaveJaar,
         @JsonProperty("pagina") int pagina,
         @JsonProperty("genre") List<String> genre,
+        @JsonProperty("thematischeTag") List<String> thematischeTag,
         @JsonProperty("beschrijving") @NotBlank(message = "Beschrijving mag niet leeg zijn") String beschrijving,
         @JsonProperty("aantalExemplaren") @Min(value = 0, message = "Aantal exemplaren mag niet negatief zijn") int aantalExemplaren,
         @JsonProperty("locatie") String locatie,

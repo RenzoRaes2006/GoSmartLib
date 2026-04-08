@@ -4,6 +4,7 @@ export interface Boek {
   auteur: string;
   uitgever: string;
   genre: string[];
+  thematischeTag: string[];
   pagina: number;
   uitgaveJaar: string;
   beschrijving: string;

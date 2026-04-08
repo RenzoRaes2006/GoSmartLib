@@ -24,6 +24,11 @@ public class BoekSeed implements CommandLineRunner {
             "Avontuur", "Oorlog & conflict", "Horror", "Humor", "Graphic novel / strip", "Poëzie",
             "Biografie / autobiografie", "Filosofie", "Geschiedenis", "Kunst & cultuur",
             "Maatschappij & politiek", "Psychologie", "Wetenschap & technologie" };
+    String[] thematischeTags = { "Liefde & relaties", "Vriendschap", "Identiteit & zelfbeeld",
+            "Gender & seksualiteit", "Diversiteit & inclusie", "Mentale gezondheid", "Rouw & verlies",
+            "Familie", "School & prestatiedruk", "Sociale media", "Migratie & afkomst",
+            "Armoede & ongelijkheid", "Macht & onrecht", "Avontuur & ontdekking", "Overleven",
+            "Toekomst & technologie" };
     Random random = new Random();
 
     // Spring injecteert de repository automatisch via de constructor
@@ -64,6 +69,15 @@ public class BoekSeed implements CommandLineRunner {
                         nieuwBoek.setGenre(List.of(genre1));
                     } else {
                         nieuwBoek.setGenre(List.of(genre1, genre2));
+                    }
+
+                    // Thematische tags: wijs 1-2 random tags toe
+                    String tag1 = thematischeTags[random.nextInt(thematischeTags.length)];
+                    String tag2 = thematischeTags[random.nextInt(thematischeTags.length)];
+                    if (tag1.equals(tag2)) {
+                        nieuwBoek.setThematischeTag(List.of(tag1));
+                    } else {
+                        nieuwBoek.setThematischeTag(List.of(tag1, tag2));
                     }
 
                     // Afbeelding
