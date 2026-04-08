@@ -1,9 +1,12 @@
 package ap.be.backend.mappers;
 
+import ap.be.backend.dto.GerapporteerdeBeoordelingAdminDTO;
 import ap.be.backend.dto.GerapporteerdeBeoordelingDTO;
 import ap.be.backend.entity.Beoordeling;
 import ap.be.backend.entity.GerapporteerdeBeoordeling;
 
+
+// deze mapper werkt met twee verschillende DTO's: een voor algemene gebruikers (GerapporteerdeBeoordelingDTO) en een uitgebreidere voor admins (GerapporteerdeBeoordelingAdminDTO).
 public class GerapporteerdeBeoordelingMapper {
 
     // Van Entity naar DTO
@@ -15,15 +18,17 @@ public class GerapporteerdeBeoordelingMapper {
                 gerapporteerd.getDatumGemeld());
     }
 
-    // Van DTO naar Entity
-    public static GerapporteerdeBeoordeling toEntity(GerapporteerdeBeoordelingDTO dto, Beoordeling beoordeling) {
-        GerapporteerdeBeoordeling gerapporteerd = new GerapporteerdeBeoordeling();
-        gerapporteerd.setId(dto.id());
-        gerapporteerd.setBeoordeling(beoordeling);
-        gerapporteerd.setReden(dto.reden());
-        if (dto.datumGemeld() != null) {
-            gerapporteerd.setDatumGemeld(dto.datumGemeld());
-        }
-        return gerapporteerd;
+// Voor admin overzicht (GET) - Van Entity naar Admin DTO
+    public static GerapporteerdeBeoordelingAdminDTO toAdminDTO(GerapporteerdeBeoordeling entity) {
+        return new GerapporteerdeBeoordelingAdminDTO(
+                entity.getId(),
+                entity.getBeoordeling().getId(),
+                entity.getBeoordeling().getBoek().getTitel(), // Haalt titel via beoordeling -> boek
+                entity.getBeoordeling().getInhoud(),
+                entity.getBeoordeling().getGebruiker().getSchoolId(), // Originele schrijver
+                entity.getGebruikerMelder().getSchoolId(), // De persoon die rapporteert
+                entity.getReden(),
+                entity.getDatumGemeld()
+        );
     }
 }
