@@ -78,4 +78,9 @@ public class GlobalExceptionHandler {
                 .body("Bestand is te groot. Maximale grootte is 5MB.");
     }
 
+    @ExceptionHandler(RapportageNotFoundException.class)
+    public ResponseEntity<String> handleRapportageNotFound(RapportageNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
+
 }
