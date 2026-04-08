@@ -8,6 +8,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 import ap.be.backend.entity.Boek;
@@ -20,7 +23,7 @@ public class BoekFilterRepositoryTest {
     @Autowired
     private BoekRepository boekRepository;
 
-    private final Sort defaultSort = Sort.by(Sort.Direction.ASC, "id");
+    private final Pageable defaultPageable = PageRequest.of(0, 100, Sort.by(Sort.Direction.ASC, "id"));
 
     // --- GENRE FILTERS ---
 
@@ -36,11 +39,11 @@ public class BoekFilterRepositoryTest {
         // When - filter op ["Non-fictie algemeen", "Filosofie"] (hoofdgenre +
         // subgenres)
         List<String> genres = List.of("Non-fictie algemeen", "Filosofie", "Psychologie", "Geschiedenis");
-        List<Boek> resultaat = boekRepository.filterBoeken(null, genres, null, null, null,
-                null, null, null, null, null);
+        Page<Boek> resultaat = boekRepository.filterBoeken(null, genres, null, null, null,
+                null, null, null, null, defaultPageable);
 
         // Then - het filosofieboek moet zichtbaar zijn
-        List<String> titels = resultaat.stream().map(Boek::getTitel).toList();
+        List<String> titels = resultaat.getContent().stream().map(Boek::getTitel).toList();
         assertThat(titels).contains(filosofieBoek.getTitel());
     }
 
@@ -54,11 +57,11 @@ public class BoekFilterRepositoryTest {
         boekRepository.save(hoofdgenreBoek);
 
         // When
-        List<Boek> resultaat = boekRepository.filterBoeken(null, List.of("Non-fictie algemeen"),
-                null, null, null, null, null, null, null, null);
+        Page<Boek> resultaat = boekRepository.filterBoeken(null, List.of("Non-fictie algemeen"),
+                null, null, null, null, null, null, null, defaultPageable);
 
         // Then
-        List<String> titels = resultaat.stream().map(Boek::getTitel).toList();
+        List<String> titels = resultaat.getContent().stream().map(Boek::getTitel).toList();
         assertThat(titels).contains(hoofdgenreBoek.getTitel());
     }
 
@@ -72,11 +75,11 @@ public class BoekFilterRepositoryTest {
         boekRepository.save(thrilllerBoek);
 
         // When - filter op Filosofie, niet op Thriller
-        List<Boek> resultaat = boekRepository.filterBoeken(null, List.of("Filosofie"),
-                null, null, null, null, null, null, null, null);
+        Page<Boek> resultaat = boekRepository.filterBoeken(null, List.of("Filosofie"),
+                null, null, null, null, null, null, null, defaultPageable);
 
         // Then
-        List<String> titels = resultaat.stream().map(Boek::getTitel).toList();
+        List<String> titels = resultaat.getContent().stream().map(Boek::getTitel).toList();
         assertThat(titels).doesNotContain(thrilllerBoek.getTitel());
     }
 
@@ -94,11 +97,11 @@ public class BoekFilterRepositoryTest {
         boekRepository.save(boek2);
 
         // When
-        List<Boek> resultaat = boekRepository.filterBoeken(null, List.of("Filosofie", "Psychologie"),
-                null, null, null, null, null, null, null, null);
+        Page<Boek> resultaat = boekRepository.filterBoeken(null, List.of("Filosofie", "Psychologie"),
+                null, null, null, null, null, null, null, defaultPageable);
 
         // Then - beide boeken worden getoond
-        List<String> titels = resultaat.stream().map(Boek::getTitel).toList();
+        List<String> titels = resultaat.getContent().stream().map(Boek::getTitel).toList();
         assertThat(titels).contains(boek1.getTitel(), boek2.getTitel());
     }
 
@@ -118,11 +121,11 @@ public class BoekFilterRepositoryTest {
         boekRepository.save(moeilijkBoek);
 
         // When - filter op leesniveau "A (eenvoudig taalgebruik)"
-        List<Boek> resultaat = boekRepository.filterBoeken(null, null, null, null, null,
-                null, null, null, "A (eenvoudig taalgebruik)", defaultSort);
+        Page<Boek> resultaat = boekRepository.filterBoeken(null, null, null, null, null,
+                null, null, null, "A (eenvoudig taalgebruik)", defaultPageable);
 
         // Then
-        List<String> titels = resultaat.stream().map(Boek::getTitel).toList();
+        List<String> titels = resultaat.getContent().stream().map(Boek::getTitel).toList();
         assertThat(titels).contains(eenvoudigBoek.getTitel());
         assertThat(titels).doesNotContain(moeilijkBoek.getTitel());
     }
@@ -143,11 +146,11 @@ public class BoekFilterRepositoryTest {
         boekRepository.save(uitgeleend);
 
         // When
-        List<Boek> resultaat = boekRepository.filterBoeken(null, null, null, null, null,
-                true, null, null, null, null);
+        Page<Boek> resultaat = boekRepository.filterBoeken(null, null, null, null, null,
+                true, null, null, null, defaultPageable);
 
         // Then
-        List<String> titels = resultaat.stream().map(Boek::getTitel).toList();
+        List<String> titels = resultaat.getContent().stream().map(Boek::getTitel).toList();
         assertThat(titels).contains(beschikbaar.getTitel());
         assertThat(titels).doesNotContain(uitgeleend.getTitel());
     }
@@ -164,12 +167,12 @@ public class BoekFilterRepositoryTest {
         boekRepository.save(boek);
 
         // When
-        List<Boek> resultaat = boekRepository.filterBoeken(uniekwoord, null, null, null, null,
-                null, null, null, null, null);
+        Page<Boek> resultaat = boekRepository.filterBoeken(uniekwoord, null, null, null, null,
+                null, null, null, null, defaultPageable);
 
         // Then
-        assertThat(resultaat).isNotEmpty();
-        assertThat(resultaat.get(0).getTitel()).contains(uniekwoord);
+        assertThat(resultaat.getContent()).isNotEmpty();
+        assertThat(resultaat.getContent().get(0).getTitel()).contains(uniekwoord);
     }
 
     // --- BOEKBEHEER ZOEKEN ---
@@ -184,12 +187,12 @@ public class BoekFilterRepositoryTest {
         boekRepository.save(boek);
 
         // When - zoek op auteur via zoekterm
-        List<Boek> resultaat = boekRepository.filterBoeken(uniekAuteur, null, null, null, null,
-                null, null, null, null, null);
+        Page<Boek> resultaat = boekRepository.filterBoeken(uniekAuteur, null, null, null, null,
+                null, null, null, null, defaultPageable);
 
         // Then
-        assertThat(resultaat).isNotEmpty();
-        assertThat(resultaat.get(0).getAuteur()).contains(uniekAuteur);
+        assertThat(resultaat.getContent()).isNotEmpty();
+        assertThat(resultaat.getContent().get(0).getAuteur()).contains(uniekAuteur);
     }
 
     @Test
@@ -205,12 +208,12 @@ public class BoekFilterRepositoryTest {
         boekRepository.save(boek);
 
         // When - zoek op ISBN via zoekterm
-        List<Boek> resultaat = boekRepository.filterBoeken(uniekIsbn, null, null, null, null,
-                null, null, null, null, null);
+        Page<Boek> resultaat = boekRepository.filterBoeken(uniekIsbn, null, null, null, null,
+                null, null, null, null, defaultPageable);
 
         // Then
-        assertThat(resultaat).isNotEmpty();
-        assertThat(resultaat.get(0).getIsbn()).isEqualTo(uniekIsbn);
+        assertThat(resultaat.getContent()).isNotEmpty();
+        assertThat(resultaat.getContent().get(0).getIsbn()).isEqualTo(uniekIsbn);
     }
 
     @Test
@@ -223,12 +226,12 @@ public class BoekFilterRepositoryTest {
         boekRepository.save(boek);
 
         // When - zoek op een deel van de titel
-        List<Boek> resultaat = boekRepository.filterBoeken(uniekwoord, null, null, null, null,
-                null, null, null, null, null);
+        Page<Boek> resultaat = boekRepository.filterBoeken(uniekwoord, null, null, null, null,
+                null, null, null, null, defaultPageable);
 
         // Then
-        assertThat(resultaat).isNotEmpty();
-        assertThat(resultaat.get(0).getTitel()).contains(uniekwoord);
+        assertThat(resultaat.getContent()).isNotEmpty();
+        assertThat(resultaat.getContent().get(0).getTitel()).contains(uniekwoord);
     }
 
     @Test
@@ -241,12 +244,12 @@ public class BoekFilterRepositoryTest {
         boekRepository.save(boek);
 
         // When - zoek met lowercase
-        List<Boek> resultaat = boekRepository.filterBoeken(uniekwoord.toLowerCase(), null, null, null, null,
-                null, null, null, null, null);
+        Page<Boek> resultaat = boekRepository.filterBoeken(uniekwoord.toLowerCase(), null, null, null, null,
+                null, null, null, null, defaultPageable);
 
         // Then
-        assertThat(resultaat).isNotEmpty();
-        assertThat(resultaat.get(0).getTitel()).contains(uniekwoord);
+        assertThat(resultaat.getContent()).isNotEmpty();
+        assertThat(resultaat.getContent().get(0).getTitel()).contains(uniekwoord);
     }
 
     @Test
@@ -255,11 +258,11 @@ public class BoekFilterRepositoryTest {
         String onbestaand = "XYZBESTAATNIETZZZZ" + System.currentTimeMillis();
 
         // When
-        List<Boek> resultaat = boekRepository.filterBoeken(onbestaand, null, null, null, null,
-                null, null, null, null, null);
+        Page<Boek> resultaat = boekRepository.filterBoeken(onbestaand, null, null, null, null,
+                null, null, null, null, defaultPageable);
 
         // Then
-        assertThat(resultaat).isEmpty();
+        assertThat(resultaat.getContent()).isEmpty();
     }
 
     // --- GECOMBINEERDE FILTERS ---
@@ -279,11 +282,11 @@ public class BoekFilterRepositoryTest {
         boekRepository.save(geenMatch);
 
         // When - filter op zoekterm + genre Roman
-        List<Boek> resultaat = boekRepository.filterBoeken(uniekwoord, List.of("Roman"),
-                null, null, null, null, null, null, null, null);
+        Page<Boek> resultaat = boekRepository.filterBoeken(uniekwoord, List.of("Roman"),
+                null, null, null, null, null, null, null, defaultPageable);
 
         // Then - alleen het Roman-boek
-        List<String> titels = resultaat.stream().map(Boek::getTitel).toList();
+        List<String> titels = resultaat.getContent().stream().map(Boek::getTitel).toList();
         assertThat(titels).contains(match.getTitel());
         assertThat(titels).doesNotContain(geenMatch.getTitel());
     }

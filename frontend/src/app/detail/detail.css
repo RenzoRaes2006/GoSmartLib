@@ -488,23 +488,86 @@
 
 .toast-message {
     position: fixed;
-    bottom: 30px;
-    right: 30px;
-    background-color: #48bb78; 
-    color: white;
-    padding: 16px 24px;
-    border-radius: 8px;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    bottom: 26px;
+    right: 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 320px;
+    max-width: min(560px, calc(100vw - 24px));
+    background: linear-gradient(135deg, #8c1b3f 0%, #6d1531 100%);
+    color: #fff8f0;
+    padding: 14px 16px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 14px;
+    box-shadow: 0 14px 24px -14px rgba(140, 27, 63, 0.65);
     z-index: 10000;
     font-weight: 600;
-    animation: slideUpFade 0.4s ease-out forwards;
+    overflow: hidden;
+    animation: toastEnter 0.46s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
-.toast-message p { margin: 0; }
+.toast-message::after {
+    content: '';
+    position: absolute;
+    inset: auto 0 0;
+    height: 3px;
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.65));
+    transform-origin: left;
+    animation: toastProgress 4s linear forwards;
+}
 
-@keyframes slideUpFade {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+.toast-icon {
+    width: 26px;
+    height: 26px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    line-height: 1;
+    font-weight: 800;
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    flex-shrink: 0;
+}
+
+.toast-message p {
+    margin: 0;
+    line-height: 1.35;
+    font-size: 0.98rem;
+}
+
+.toast-message.toast-error {
+    background: linear-gradient(135deg, #c53030 0%, #9b2c2c 100%);
+    box-shadow: 0 14px 24px -14px rgba(197, 48, 48, 0.62);
+    color: #fff5f5;
+}
+
+@keyframes toastEnter {
+    from {
+        opacity: 0;
+        transform: translateY(24px) scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes toastProgress {
+    from { transform: scaleX(1); }
+    to { transform: scaleX(0); }
+}
+
+@media (max-width: 680px) {
+    .toast-message {
+        right: 12px;
+        left: 12px;
+        min-width: auto;
+        max-width: none;
+        bottom: 14px;
+    }
 }
 
 .error-message {

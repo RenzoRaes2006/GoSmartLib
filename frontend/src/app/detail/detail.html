@@ -2,33 +2,29 @@
   <a routerLink="/catalogus" class="back-link">← Terug naar catalogus</a>
 
   <div class="content-layout">
-    
+
     <div class="main-column">
       <div class="top-row">
-        
+
         <!-- Linker kolom: Cover & Tags -->
         <div class="left-col">
           <div class="image-container">
             @if (boek?.aantalExemplaren && boek!.aantalExemplaren > 0) {
-              <span class="status-badge">Beschikbaar</span>
+            <span class="status-badge">Beschikbaar</span>
             }
-            <img
-              [src]="
+            <img [src]="
                 boek?.afbeelding ||
                 'https://bookshow.blurb.com/bookshow/cache/P11360640/md/cover_2.jpeg?access_key=675523b769268bce5b0b710b3d0e7841'
-              "
-              alt="Book Cover"
-              class="book-cover"
-            />
+              " alt="Book Cover" class="book-cover" />
           </div>
 
           <div class="tags-section">
             <span class="tags-label">Genres</span>
             <div class="tags-list">
               @for (genre of boek?.genre; track $index) {
-                <span class="tag">{{ genre }}</span>
+              <span class="tag">{{ genre }}</span>
               } @empty {
-                <span class="tag">Geen thema's</span>
+              <span class="tag">Geen thema's</span>
               }
             </div>
           </div>
@@ -38,13 +34,13 @@
         <div class="mid-col">
           <h1 class="book-title">{{ boek?.titel }}</h1>
           @if (beoordelingen.length > 0) {
-            <div class="rating-container">
-              <span class="rating-score">{{ boekWaardering }}</span>
-              <div class="stars-outer">
-                <div class="stars-inner" [style.width.%]="waarderingPrecentage"></div>
-              </div>
-              <span class="review-count">({{ beoordelingen.length }} reviews)</span>
+          <div class="rating-container">
+            <span class="rating-score">{{ boekWaardering }}</span>
+            <div class="stars-outer">
+              <div class="stars-inner" [style.width.%]="waarderingPrecentage"></div>
             </div>
+            <span class="review-count">({{ beoordelingen.length }} reviews)</span>
+          </div>
           }
           <p class="book-author">door {{ boek?.auteur }}</p>
 
@@ -73,27 +69,17 @@
           </div>
 
           <div class="action-buttons">
-            <button
-              type="button"
-              class="primary-btn"
-              [disabled]="!magLenen"
-              [class.disabled-btn]="!magLenen"
-              (click)="voegToeAanReservering()"
-            >
+            <button type="button" class="primary-btn" [disabled]="!magLenen" [class.disabled-btn]="!magLenen"
+              (click)="voegToeAanReservering()">
               Voeg toe aan leningen
             </button>
 
             @if (!magLenen) {
-              <p class="leen-reden-tekst">{{ leenReden }}</p>
+            <p class="leen-reden-tekst">{{ leenReden }}</p>
             }
 
             <div class="secondary-actions">
-              <button
-                type="button"
-                class="secondary-btn"
-                [disabled]="isFavoriet"
-                (click)="voegToeAanFavorieten()"
-              >
+              <button type="button" class="secondary-btn" [disabled]="isFavoriet" (click)="voegToeAanFavorieten()">
                 {{ isFavoriet ? '✅ Opgeslagen in Favorieten' : '♡ Favoriet' }}
               </button>
               <button type="button" class="secondary-btn" (click)="voegToeAanLeeslijst()">
@@ -117,21 +103,22 @@
           <h3 class="reviews-subtitle">Leerling Reviews</h3>
 
           @for (beoordeling of beoordelingen; track $index) {
-            <div class="review-item">
-              <div class="review-header">
-                <span class="review-rating">{{ '★'.repeat(beoordeling.waardering) + '☆'.repeat(5 - beoordeling.waardering) }}</span>
-                <span class="reviewer-name">- {{ beoordeling.gebruikerNaam }}</span>
-              </div>
-              <p class="review-content">{{ beoordeling.inhoud }}</p>
-
-              @if (!beoordeling.gerapporteerd) {
-                <button class="rapporteer-btn" (click)="openRapporteerModal(beoordeling.id!)">Rapporteer</button>
-              } @else {
-                <span class="gerapporteerd-label">Reeds gerapporteerd ✓</span>
-              }
+          <div class="review-item">
+            <div class="review-header">
+              <span class="review-rating">{{ '★'.repeat(beoordeling.waardering) + '☆'.repeat(5 - beoordeling.waardering)
+                }}</span>
+              <span class="reviewer-name">- {{ beoordeling.gebruikerNaam }}</span>
             </div>
+            <p class="review-content">{{ beoordeling.inhoud }}</p>
+
+            @if (!beoordeling.gerapporteerd) {
+            <button class="rapporteer-btn" (click)="openRapporteerModal(beoordeling.id!)">Rapporteer</button>
+            } @else {
+            <span class="gerapporteerd-label">Reeds gerapporteerd ✓</span>
+            }
+          </div>
           } @empty {
-            <p class="no-reviews">Er zijn nog geen reviews voor dit boek.</p>
+          <p class="no-reviews">Er zijn nog geen reviews voor dit boek.</p>
           }
 
           <div class="review-form-container">
@@ -149,8 +136,9 @@
                 <input type="radio" id="star1" formControlName="waardering" value="1" />
                 <label for="star1" title="1 ster">★</label>
               </div>
-              
-              <textarea id="inhoud" name="inhoud" rows="3" formControlName="inhoud" class="form-textarea" placeholder="Deel je mening over dit boek..."></textarea>
+
+              <textarea id="inhoud" name="inhoud" rows="3" formControlName="inhoud" class="form-textarea"
+                placeholder="Deel je mening over dit boek..."></textarea>
 
               <!-- Jouw Checkbox sectie behouden -->
               <label style="display: block; margin-top: 10px; margin-bottom: 10px; font-size: 14px;">
@@ -159,11 +147,11 @@
               </label>
 
               <button type="submit" class="submit-btn">Verzenden</button>
-              
+
               @if(submissionError){
-                <div class="error-message">
-                  <p>{{ submissionError }}</p>
-                </div>
+              <div class="error-message">
+                <p>{{ submissionError }}</p>
+              </div>
               }
             </form>
           </div>
@@ -177,70 +165,67 @@
 
 <!-- Leeslijst Modal (Met Vriend's Emojis) -->
 @if (isModalOpen) {
-  <div class="modal-overlay">
-    <div class="modal-box">
-      @if (succesMeldingMap) {
-        <div class="success-state">
-          <h3>{{ succesMeldingMap }}</h3>
-        </div>
-      } @else {
-        <h3>Toevoegen aan leeslijst</h3>
-
-        <p class="modal-label">Kies een bestaande map:</p>
-        <select #bestaandeMap class="modal-select">
-          <option value="">-- Selecteer een map --</option>
-          @for (map of mappen; track map.id) {
-            <option [value]="map.naam">{{ map.emoji || '📁' }} {{ map.naam }}</option>
-          }
-        </select>
-
-        <p class="modal-label" style="margin-top: 15px">OF maak een nieuwe map:</p>
-
-        <div class="emoji-picker-container">
-          <div class="emoji-grid">
-            @for (emoji of beschikbareEmojis; track $index) {
-              <button
-                class="emoji-btn"
-                [class.selected]="selectedEmoji === emoji"
-                (click)="selectedEmoji = emoji"
-              >
-                {{ emoji }}
-              </button>
-            }
-          </div>
-          <input #nieuweMap type="text" placeholder="Nieuwe map naam..." class="nieuwe-map-input" style="width: 100%; margin-top: 10px; padding: 12px; border: 1px solid #e2dfd5; border-radius: 8px;" />
-        </div>
-
-        <div class="modal-actions" style="margin-top: 20px;">
-          <button class="cancel-btn" (click)="sluitModal()">Annuleren</button>
-          <button class="save-btn" (click)="bevestigToevoegenAanMap(bestaandeMap.value, nieuweMap.value)">Opslaan</button>
-        </div>
-      }
+<div class="modal-overlay">
+  <div class="modal-box">
+    @if (succesMeldingMap) {
+    <div class="success-state">
+      <h3>{{ succesMeldingMap }}</h3>
     </div>
+    } @else {
+    <h3>Toevoegen aan leeslijst</h3>
+
+    <p class="modal-label">Kies een bestaande map:</p>
+    <select #bestaandeMap class="modal-select">
+      <option value="">-- Selecteer een map --</option>
+      @for (map of mappen; track map.id) {
+      <option [value]="map.naam">{{ map.emoji || '📁' }} {{ map.naam }}</option>
+      }
+    </select>
+
+    <p class="modal-label" style="margin-top: 15px">OF maak een nieuwe map:</p>
+
+    <div class="emoji-picker-container">
+      <div class="emoji-grid">
+        @for (emoji of beschikbareEmojis; track $index) {
+        <button class="emoji-btn" [class.selected]="selectedEmoji === emoji" (click)="selectedEmoji = emoji">
+          {{ emoji }}
+        </button>
+        }
+      </div>
+      <input #nieuweMap type="text" placeholder="Nieuwe map naam..." class="nieuwe-map-input"
+        style="width: 100%; margin-top: 10px; padding: 12px; border: 1px solid #e2dfd5; border-radius: 8px;" />
+    </div>
+
+    <div class="modal-actions" style="margin-top: 20px;">
+      <button class="cancel-btn" (click)="sluitModal()">Annuleren</button>
+      <button class="save-btn" (click)="bevestigToevoegenAanMap(bestaandeMap.value, nieuweMap.value)">Opslaan</button>
+    </div>
+    }
   </div>
+</div>
 }
 
 <!-- Leen Modal (Nieuw van je vriend) -->
 @if (isLeenModalOpen) {
-  <div class="modal-overlay">
-    <div class="modal-box">
-      @if (succesMeldingLenen) {
-        <div class="success-state">
-          <h3>Succes!</h3>
-          <p>{{ succesMeldingLenen }}</p>
-        </div>
-      } @else {
-        <h3>Boek Lenen</h3>
-        <p style="margin-bottom: 25px">{{ succesMeldingLenen }}</p>
-        <div class="modal-actions">
-          <button class="cancel-btn" (click)="sluitLeenModal()">Annuleren</button>
-          <button class="save-btn" style="background: #ea580c" (click)="voegToeAanReservering()">
-            Bevestig Lening
-          </button>
-        </div>
-      }
+<div class="modal-overlay">
+  <div class="modal-box">
+    @if (succesMeldingLenen) {
+    <div class="success-state">
+      <h3>Succes!</h3>
+      <p>{{ succesMeldingLenen }}</p>
     </div>
+    } @else {
+    <h3>Boek Lenen</h3>
+    <p style="margin-bottom: 25px">{{ succesMeldingLenen }}</p>
+    <div class="modal-actions">
+      <button class="cancel-btn" (click)="sluitLeenModal()">Annuleren</button>
+      <button class="save-btn" style="background: #ea580c" (click)="voegToeAanReservering()">
+        Bevestig Lening
+      </button>
+    </div>
+    }
   </div>
+</div>
 }
 
 <!-- Rapporteer Modal (Jouw code) -->
@@ -252,25 +237,23 @@
 
     <select [(ngModel)]="geselecteerdeReden" class="form-select">
       <option value="" disabled selected>Kies een reden...</option>
-      <option value="ongepast">Ongepaste inhoud</option>
-      <option value="spam">Spam</option>
-      <option value="anders">Andere reden...</option>
+      <option value="scheldwoorden">Scheldwoorden of grof taalgebruik</option>
+      <option value="spoiler">Verklapt het verhaal (spoiler)</option>
+      <option value="irrelevant">Gaat helemaal niet over het boek</option>
+      <option value="pesten">Iemand pesten of kwetsen</option>
+      <option value="spam">Spam of onzin</option>
+      <option value="anders">Iets anders...</option>
     </select>
 
     @if (geselecteerdeReden === 'anders') {
-      <textarea 
-        [(ngModel)]="rapporteerReden" 
-        rows="3" 
-        class="form-textarea mt-2" 
-        placeholder="Voer je reden in (verplicht)..."
-      ></textarea>
+    <textarea [(ngModel)]="rapporteerReden" rows="3" class="form-textarea mt-2"
+      placeholder="Voer je reden in (verplicht)..."></textarea>
     }
 
     <div class="modal-actions">
       <button class="cancel-btn" (click)="sluitRapporteerModal()">Annuleren</button>
-      <button 
-        class="save-btn" 
-        [disabled]="!geselecteerdeReden || (geselecteerdeReden === 'anders' && !rapporteerReden.trim())" 
+      <button class="save-btn"
+        [disabled]="!geselecteerdeReden || (geselecteerdeReden === 'anders' && !rapporteerReden.trim())"
         (click)="bevestigRapport()">
         Verzenden
       </button>
@@ -281,7 +264,8 @@
 
 <!-- Toast Melding (Jouw code) -->
 @if (rapportMelding) {
-  <div class="toast-message">
-    <p>{{ rapportMelding }}</p>
-  </div>
+<div class="toast-message" [class.toast-error]="rapportMeldingType === 'error'">
+  <span class="toast-icon" aria-hidden="true">{{ rapportMeldingType === 'error' ? '!' : '✓' }}</span>
+  <p>{{ rapportMelding }}</p>
+</div>
 }

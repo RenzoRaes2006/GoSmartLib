@@ -10,6 +10,7 @@ import { RouterLink, ActivatedRoute } from '@angular/router';
 import { BoekService } from '../services/boek.service';
 import { Boek } from '../models/Boek';
 import { ReviewService } from '../services/review-service';
+import { RapportageService } from '../services/rapportage-service';
 import { Beoordeling } from '../models/review.model';
 import { LeeslijstService } from '../services/leeslijstService';
 import { LeenMandjeService } from '../services/leen-mandje.service';
@@ -21,7 +22,8 @@ import { LeenMandjeService } from '../services/leen-mandje.service';
   styleUrl: './detail.css',
 })
 export class Detail implements OnInit {
-  beoordelingService = inject(ReviewService);
+  reviewService = inject(ReviewService);
+  rapportageService = inject(RapportageService);
   boekService = inject(BoekService);
   fb = inject(FormBuilder);
   route = inject(ActivatedRoute);
@@ -50,6 +52,7 @@ export class Detail implements OnInit {
   waarderingPrecentage: number = 0;
 
   rapportMelding: string = '';
+  rapportMeldingType: 'success' | 'error' = 'success';
   rapporteerModalOpen: boolean = false;
   rapporteerReden: string = '';
   geselecteerdeReden: string = '';
@@ -85,7 +88,7 @@ export class Detail implements OnInit {
         },
         error: (err) => console.log('Iets mis gegaan met het krijgen van de boek details. ', err), // Jouw error handling teruggezet
       });
-      this.laadBeoordelingVanBoek();
+      this.laadBeoordelingenVanBoek();
     });
 
     const gebruikerId = 1;
@@ -97,8 +100,8 @@ export class Detail implements OnInit {
     });
   }
 
-  laadBeoordelingVanBoek() {
-    this.beoordelingService.getBeoordelingenOpBoekId(this.boekId).subscribe({
+  laadBeoordelingenVanBoek() {
+    this.reviewService.getBeoordelingenOpBoekId(this.boekId).subscribe({
       next: (beoordelingen) => {
         this.beoordelingen = beoordelingen;
         this.updateBoekWaardering();
@@ -181,39 +184,50 @@ export class Detail implements OnInit {
       gerapporteerd: false,
     };
 
-    this.beoordelingService.voegBeoordelingToe(beoordeling).subscribe({
+    this.reviewService.voegBeoordelingToe(beoordeling).subscribe({
       next: () => {
         this.form.reset();
         this.submissionError = '';
-        this.laadBeoordelingVanBoek();
+        this.laadBeoordelingenVanBoek();
       },
       // Jouw error handling hersteld!
       error: (error) => {
-        this.submissionError = 'Er ging iets mis bij het toevoegen. Probeer opnieuw.';
-        console.error('Fout bij toevoegen beoordeling: ', error.message);
+        if (error.status === 400) {
+          this.submissionError = 'Je beoordeling bevat ongepaste taal. Pas deze aan en probeer opnieuw.';
+        } else {
+          this.submissionError = 'Er ging iets mis bij het toevoegen. Probeer opnieuw.';
+        }
       },
     });
   }
   // Jouw ongewijzigde functie hersteld!
   bevestigRapport() {
+    const customReden = this.rapporteerReden.trim();
+    const reden: string = this.geselecteerdeReden === 'anders' ? customReden : this.geselecteerdeReden;
 
-    const reden: string = this.geselecteerdeReden === 'Anders' ? this.rapporteerReden : this.geselecteerdeReden;
+    if (!reden) {
+      this.rapportMeldingType = 'error';
+      this.rapportMelding = 'Geef een geldige reden op.';
+      setTimeout(() => (this.rapportMelding = ''), 3000);
+      return;
+    }
 
-    this.beoordelingService
-      .rapporteerBeoordeling(this.geselecteerdeBeoordelingId!, this.rapporteerReden)
+    this.rapportageService
+      .rapporteerBeoordeling(this.geselecteerdeBeoordelingId!, reden)
       .subscribe({
         next: () => {
           this.gerapporteerdeBeoordelingen.push(this.geselecteerdeBeoordelingId!);
-
 
           // Update de lokale lijst zodat de UI direct weerspiegelt dat deze gerapporteerd is
           const beoordeling = this.beoordelingen.find(
             (b) => b.id === this.geselecteerdeBeoordelingId,
           );
+
           if (beoordeling) {
             beoordeling.gerapporteerd = true;
           }
 
+          this.rapportMeldingType = 'success';
           this.rapportMelding = 'Beoordeling succesvol gerapporteerd. Bedankt voor je feedback!';
           this.rapporteerModalOpen = false;
           this.geselecteerdeBeoordelingId = null;
@@ -222,6 +236,7 @@ export class Detail implements OnInit {
           setTimeout(() => (this.rapportMelding = ''), 4000);
         },
         error: (err) => {
+          this.rapportMeldingType = 'error';
           this.rapportMelding = 'Er ging iets mis bij het rapporteren. Probeer opnieuw.';
           setTimeout(() => (this.rapportMelding = ''), 4000);
         },
@@ -231,10 +246,13 @@ export class Detail implements OnInit {
   openRapporteerModal(beoordelingId: number) {
     this.rapporteerModalOpen = true;
     this.geselecteerdeBeoordelingId = beoordelingId;
+    this.geselecteerdeReden = '';
+    this.rapporteerReden = '';
   }
 
   sluitRapporteerModal() {
     this.rapporteerModalOpen = false;
+    this.geselecteerdeReden = '';
     this.rapporteerReden = '';
   }
 

@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, signal } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import {
   FormBuilder,
   ReactiveFormsModule,
@@ -53,6 +54,9 @@ export class BoekBeheer implements OnInit {
   // Debounce timer voor live zoeken
   private zoekDebounceTimer: any = null;
 
+  uploadModus = signal<'url' | 'bestand'>('url');
+  uploadBezig = signal(false);
+
   // Genre dropdown
   genreHiërarchie: Record<string, string[]> = {
     Avontuur: [],
@@ -90,6 +94,7 @@ export class BoekBeheer implements OnInit {
     private fb: FormBuilder,
     private boekService: BoekService,
     private googleBookService: GoogleBookService,
+    private route: ActivatedRoute,
   ) {
     this.boekForm = this.fb.group({
       titel: ['', [Validators.required, Validators.minLength(2)]],
@@ -109,9 +114,14 @@ export class BoekBeheer implements OnInit {
 
   // laad boekenoverzicht als we in wijzigmodus starten
   ngOnInit(): void {
-    if (this.mode() === 'wijzigen') {
-      this.laadBoekenPagina(0);
-    }
+    this.route.queryParams.subscribe((params) => {
+      const urlMode = params['mode'];
+      if (urlMode === 'toevoegen' || urlMode === 'wijzigen') {
+        this.setMode(urlMode);
+      } else if (this.mode() === 'wijzigen') {
+        this.laadBoekenPagina(0);
+      }
+    });
   }
 
   // Wissel tussen toevoegen en wijzigen modus, reset het formulier en laad indien nodig het boekenoverzicht
@@ -149,7 +159,7 @@ export class BoekBeheer implements OnInit {
     }
   }
 
-  // Poplueren van het formulier met de gegevens van een boek dat geselecteerd is voor wijziging
+  // Populeren van het formulier met de gegevens van een boek dat geselecteerd is voor wijziging
   private mapBoekNaarFormValue(boek: Boek) {
     return {
       titel: boek.titel,
@@ -179,7 +189,7 @@ export class BoekBeheer implements OnInit {
     return { isbn: 'ISBN moet 10 of 13 of GOcijfers zijn' };
   };
 
-  // Nieuwe, vereenvoudigde functie om een "GO" nummer te genereren
+  // Vereenvoudigde functie om een "GO" nummer te genereren
   genereerIsbn(): void {
     const willekeurigeCijfers = this.randomCijfers(11);
 
@@ -189,7 +199,6 @@ export class BoekBeheer implements OnInit {
 
     this.boekForm.patchValue({ isbn });
 
-    // Dit zorgt ervoor dat Angular de input herkent als ingevuld en de nieuwe isbnValidator aanroept
     this.boekForm.get('isbn')?.markAsDirty();
     this.boekForm.get('isbn')?.markAsTouched();
     this.boekForm.get('isbn')?.updateValueAndValidity();
@@ -278,6 +287,7 @@ export class BoekBeheer implements OnInit {
     }
   }
 
+  // Verwerk het toevoegen van een nieuw boek
   private submitToevoegen() {
     if (this.boekForm.invalid) {
       this.boekForm.markAllAsTouched();
@@ -336,8 +346,7 @@ export class BoekBeheer implements OnInit {
         .map((g) => g.trim())
         .filter((g) => g.length > 0);
     }
-    // We moeten het bijgewerkte boek casten naar het volledige Boek-model, inclusief het ID
-    // We gebruiken 'as unknown as Boek' omdat we zeker weten dat het voldoet aan de structuur van Boek, maar TypeScript dit niet automatisch kan afleiden vanwege het ontbreken van het ID-veld in NieuwBoek.
+
     this.boekService.wijzigen(boek.id, bijgewerktBoek as unknown as Boek).subscribe({
       next: () => {
         this.successMessage.set('Boek succesvol bijgewerkt!');
@@ -345,7 +354,7 @@ export class BoekBeheer implements OnInit {
         this.boekGevonden.set(false);
         this.naarTeWijzigenBoek.set(null);
         this.toonIsbnZoek.set(false);
-        this.laadBoekenPagina(this.currentPage()); // Herlaad de huidige pagina van het boekenoverzicht om de wijzigingen te tonen
+        this.laadBoekenPagina(this.currentPage());
         setTimeout(() => this.successMessage.set(''), 5000);
       },
       error: (err) => {
@@ -402,7 +411,6 @@ export class BoekBeheer implements OnInit {
   }
 
   // Laad een pagina met boeken voor het overzicht, inclusief paginering.
-  // Deze functie wordt aangeroepen bij het initialiseren van het component en bij het navigeren tussen pagina's.
   laadBoekenPagina(page: number = 0) {
     this.isLoadingBoeken.set(true);
     this.boekService.getBoekenPaged(page, this.pageSize).subscribe({
@@ -465,7 +473,6 @@ export class BoekBeheer implements OnInit {
     }, 300);
   }
 
-  // Deze functie wordt aangeroepen wanneer een gebruiker een boek selecteert uit de lijst.
   // Voor 'wijzig': toon het formulier. Voor 'verwijder': toon direct de modal.
   selecteerBoekUitLijst(boek: Boek, actie: 'wijzig' | 'verwijder') {
     if (actie === 'verwijder') {
@@ -512,5 +519,30 @@ export class BoekBeheer implements OnInit {
     this.boekForm.patchValue({ genre: value });
     this.boekForm.get('genre')?.markAsDirty();
     this.boekForm.get('genre')?.updateValueAndValidity();
+  }
+
+  verwijderAfbeelding(): void {
+    this.boekForm.patchValue({ afbeelding: '' });
+  }
+
+  opBestandGeselecteerd(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const bestand = input.files?.[0];
+
+    if (!bestand) return;
+
+    this.uploadBezig.set(true);
+    this.boekService.uploadAfbeelding(bestand).subscribe({
+      next: (url) => {
+        this.boekForm.patchValue({ afbeelding: url });
+        this.uploadBezig.set(false);
+        input.value = '';
+      },
+      error: (err) => {
+        this.errorMessage.set('Afbeelding uploaden mislukt: ' + err.error);
+        this.uploadBezig.set(false);
+        input.value = '';
+      },
+    });
   }
 }

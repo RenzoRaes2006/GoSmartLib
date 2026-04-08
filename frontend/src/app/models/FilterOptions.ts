@@ -11,4 +11,6 @@ export interface FilterOptions {
   uitgaveJaarVan?: number;
   uitgaveJaarTot?: number;
   leesniveau?: string;
+  page?: number;
+  size?: number;
 }

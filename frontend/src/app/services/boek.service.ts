@@ -13,6 +13,9 @@ export class BoekService {
   private apiUrl =
     window.location.hostname === 'localhost' ? 'http://localhost:8081/api/boeken' : '/api/boeken';
 
+  private afbeeldingUrl =
+    window.location.hostname === 'localhost' ? 'http://localhost:8081/api/images' : '/api/images';
+
   private apiGebruikerUrl =
     window.location.hostname === 'localhost'
       ? 'http://localhost:8081/api/gebruiker'
@@ -20,17 +23,7 @@ export class BoekService {
 
   private http = inject(HttpClient);
 
-  getBoeken(zoekterm?: string): Observable<Boek[]> {
-    let params = new HttpParams();
-
-    if (zoekterm && zoekterm.trim() !== '') {
-      params = params.set('zoekterm', zoekterm);
-    }
-
-    return this.http.get<Boek[]>(this.apiUrl, { params });
-  }
-
-  getBoekenGefilterd(filters: FilterOptions): Observable<Boek[]> {
+  getBoekenGefilterd(filters: FilterOptions): Observable<PageResponse<Boek>> {
     let params = new HttpParams();
 
     if (filters.genres?.length) {
@@ -45,7 +38,7 @@ export class BoekService {
       }
     });
 
-    return this.http.get<Boek[]>(this.apiUrl, { params });
+    return this.http.get<PageResponse<Boek>>(this.apiUrl, { params });
   }
 
   getBoekOpId(id: number): Observable<Boek> {
@@ -115,7 +108,15 @@ export class BoekService {
     return this.http.put(`${this.apiGebruikerUrl}/aanvragen/${uitleningId}/weigeren`, {}, { responseType: 'text' as 'json' }) as Observable<string>;
   }
 
+  // delete a loan
   verwijderLening(uitleningId: number): Observable<string> {
     return this.http.delete(`${this.apiGebruikerUrl}/leningen/${uitleningId}`, { responseType: 'text' as 'json' }) as Observable<string>;
+  }
+
+  // upload an image file
+  uploadAfbeelding(file: File): Observable<string> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post(this.afbeeldingUrl + '/upload', formData, { responseType: 'text' });
   }
 }

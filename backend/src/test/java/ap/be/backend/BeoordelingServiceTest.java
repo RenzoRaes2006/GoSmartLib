@@ -30,6 +30,7 @@ import ap.be.backend.repository.BoekRepository;
 import ap.be.backend.repository.GebruikerRepository;
 import ap.be.backend.repository.GerapporteerdeBeoordelingRepository;
 import ap.be.backend.service.BeoordelingService;
+import ap.be.backend.service.FilterService;
 
 @ExtendWith(MockitoExtension.class)
 public class BeoordelingServiceTest {
@@ -45,6 +46,9 @@ public class BeoordelingServiceTest {
 
     @Mock
     private GebruikerRepository gebruikerRepository;
+
+    @Mock
+    private FilterService filterService;
 
     @InjectMocks
     private BeoordelingService beoordelingService;
@@ -108,7 +112,7 @@ public class BeoordelingServiceTest {
     void givenBoekBestaatMetBeoordelingen_whenGetBeoordelingenOpBoekId_thenReturnsBeoordelingDTOList() {
         when(boekRepository.existsById(BOEK_ID)).thenReturn(true);
         when(beoordelingRepository.findByBoekId(BOEK_ID)).thenReturn(List.of(testBeoordeling));
-        when(gerapporteerdeBeoordelingRepository.existsByBeoordelingIdAndGebruiker_GebruikerID(10L, 1L))
+        when(gerapporteerdeBeoordelingRepository.existsByBeoordelingIdAndGebruikerMelder_GebruikerID(10L, 1L))
                 .thenReturn(true);
 
         List<BeoordelingDTO> result = beoordelingService.getBeoordelingenOpBoekId(BOEK_ID);
@@ -125,6 +129,7 @@ public class BeoordelingServiceTest {
 
     @Test
     void givenBoekBestaatNiet_whenBeoordelingOpslaan_thenThrowsBoekNotFoundException() {
+        when(filterService.bevatScheldwoorden(testDto.inhoud())).thenReturn(false);
         when(boekRepository.findById(testDto.boekId())).thenReturn(Optional.empty());
 
         BoekNotFoundException exception = assertThrows(BoekNotFoundException.class, () -> {
@@ -137,6 +142,7 @@ public class BeoordelingServiceTest {
 
     @Test
     void givenBoekBestaatMaarGebruikerNiet_whenBeoordelingOpslaan_thenThrowsRuntimeException() {
+        when(filterService.bevatScheldwoorden(testDto.inhoud())).thenReturn(false);
         when(boekRepository.findById(testDto.boekId())).thenReturn(Optional.of(testBoek));
         // We mocken de repository zodat hij de tijdelijke gebruiker (ID 1) niet kan vinden
         when(gebruikerRepository.findById(1L)).thenReturn(Optional.empty());
@@ -151,6 +157,7 @@ public class BeoordelingServiceTest {
 
     @Test
     void givenGeldigeDataEnBestaandBoekEnGebruiker_whenBeoordelingOpslaan_thenSavesBeoordeling() {
+        when(filterService.bevatScheldwoorden(testDto.inhoud())).thenReturn(false);
         when(boekRepository.findById(testDto.boekId())).thenReturn(Optional.of(testBoek));
         // We mocken de repository zodat hij succesvol de Gebruiker teruggeeft
         when(gebruikerRepository.findById(1L)).thenReturn(Optional.of(testGebruiker));
@@ -158,5 +165,27 @@ public class BeoordelingServiceTest {
         beoordelingService.beoordelingOpslaan(testDto);
 
         verify(beoordelingRepository, times(1)).save(any(Beoordeling.class));
+    }
+
+    @Test
+    void givenBestaandeBeoordeling_whenVerwijderBeoordeling_thenDeletesById() {
+        Long beoordelingId = 99L;
+        when(beoordelingRepository.existsById(beoordelingId)).thenReturn(true);
+
+        beoordelingService.verwijderBeoordeling(beoordelingId);
+
+        verify(beoordelingRepository, times(1)).deleteById(beoordelingId);
+    }
+
+    @Test
+    void givenNietBestaandeBeoordeling_whenVerwijderBeoordeling_thenThrowsIllegalArgumentException() {
+        Long beoordelingId = 100L;
+        when(beoordelingRepository.existsById(beoordelingId)).thenReturn(false);
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> beoordelingService.verwijderBeoordeling(beoordelingId));
+
+        assertEquals("Beoordeling niet gevonden met id: " + beoordelingId, exception.getMessage());
+        verify(beoordelingRepository, never()).deleteById(beoordelingId);
     }
 }

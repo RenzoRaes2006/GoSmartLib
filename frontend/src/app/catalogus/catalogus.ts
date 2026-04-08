@@ -16,7 +16,6 @@ import { FormsModule } from '@angular/forms';
   standalone: true,
 })
 export class Catalogus implements OnInit, OnDestroy {
-  // State variabelen
   boekenlijst = signal<Boek[]>([]);
   zoekTerm = signal<string>('');
   filters = signal<FilterOptions>({});
@@ -33,6 +32,10 @@ export class Catalogus implements OnInit, OnDestroy {
   selectedHoofdGenre = signal<string>('');
   paginaError = signal<string>('');
   maxPaginaLimit = 1500;
+  huidigePagina = signal<number>(0);
+  paginaGrootte = signal<number>(10);
+  totaalPaginas = signal<number>(1);
+  totaalBoeken = signal<number>(0);
 
   // Key voor sessionStorage
   private readonly FILTERS_KEYS = 'catalogus_filters';
@@ -103,44 +106,33 @@ export class Catalogus implements OnInit, OnDestroy {
         this.uitgaveJaarTot.set(filters.uitgaveJaarTot);
         this.leesniveau.set(filters.leesniveau);
         this.selectedHoofdGenre.set(filters.selectedHoofdGenre || '');
+        this.huidigePagina.set(filters.huidigePagina || 0);
 
-        this.updateFilters();
+        this.updateFilters(false);
         return;
       } catch (e) {
         console.error('Fout bij parsen filters:', e);
       }
     }
-    this.laadBoeken();
+    this.updateFilters();
   }
 
-  // Methode om boeken te laden, optioneel gefilterd op een zoekterm
-  private laadBoeken(term?: string): void {
-    this.boekService.getBoeken(term).subscribe({
-      next: (data) => {
-        this.boekenlijst.set(data);
-      },
-      error: (err) => console.log('Fout bij ophalen boeken:', err),
-    });
-  }
-
-  onSearch(term: string): void {
-    this.zoekTerm.set(term);
-    this.laadBoeken(term);
-  }
-
-  // Methode om filters bij te werken en boeken opnieuw te laden op basis van de nieuwe filters
-  updateFilters(): void {
+  // Om filters bij te werken en boeken opnieuw te laden op basis van de nieuwe filters
+  updateFilters(resetPagina = true): void {
+    if (resetPagina) {
+      this.huidigePagina.set(0);
+    }
     const min = this.minPagina();
     const max = this.maxPagina();
 
     this.paginaError.set('');
 
     if (min !== undefined && min < 0) {
-      this.paginaError.set('Minimum pagina\'s mag niet negatief zijn');
+      this.paginaError.set("Minimum pagina's mag niet negatief zijn");
       return;
     }
     if (max !== undefined && max < 0) {
-      this.paginaError.set('Maximum pagina\'s mag niet negatief zijn');
+      this.paginaError.set("Maximum pagina's mag niet negatief zijn");
       return;
     }
     if (min !== undefined && max !== undefined && min > max) {
@@ -162,13 +154,18 @@ export class Catalogus implements OnInit, OnDestroy {
       genres,
       uitgever: this.selectedUitgever()?.trim() || undefined,
       minPagina: (this.minPagina() ?? 0) > 0 ? this.minPagina() : undefined,
-      maxPagina: (this.maxPagina() ?? this.maxPaginaLimit) < this.maxPaginaLimit ? this.maxPagina() : undefined,
+      maxPagina:
+        (this.maxPagina() ?? this.maxPaginaLimit) < this.maxPaginaLimit
+          ? this.maxPagina()
+          : undefined,
       sorteerOp: this.selectedSorteerOp() || undefined,
       sorteerRichting: this.selectedSorteerRichting() || 'ASC',
       beschikbaarheid: this.beschikbaarheid() === true ? 'true' : undefined,
       uitgaveJaarVan: this.uitgaveJaarVan(),
       uitgaveJaarTot: this.uitgaveJaarTot(),
       leesniveau: this.leesniveau(),
+      page: this.huidigePagina(),
+      size: this.paginaGrootte(),
     };
 
     // Update de filters in de state en laad de gefilterde boeken
@@ -189,6 +186,7 @@ export class Catalogus implements OnInit, OnDestroy {
       uitgaveJaarTot: this.uitgaveJaarTot(),
       leesniveau: this.leesniveau(),
       selectedHoofdGenre: this.selectedHoofdGenre(),
+      huidigePagina: this.huidigePagina(),
     };
 
     // Sla de filters op als JSON-string in sessionStorage
@@ -224,17 +222,19 @@ export class Catalogus implements OnInit, OnDestroy {
     this.updateFilters();
   }
 
-  // Methode om gefilterde boeken te laden op basis van de huidige filters
+  // Om gefilterde boeken te laden op basis van de huidige filters
   private laadGefilterdeBoeken(): void {
     this.boekService.getBoekenGefilterd(this.filters()).subscribe({
       next: (data) => {
-        this.boekenlijst.set(data);
+        this.boekenlijst.set(data.content);
+        this.totaalPaginas.set(data.totalPages);
+        this.totaalBoeken.set(data.totalElements);
       },
       error: (err) => console.log('Fout bij ophalen gefilterde boeken:', err),
     });
   }
 
-  // Methode om de hoofdgenres op te halen, deze kunnen worden gebruikt in een dropdown of selectielijst
+  // Om de hoofdgenres op te halen, deze kunnen worden gebruikt in een dropdown of selectielijst
   getHoofdGenres(): string[] {
     return [
       'Fictie algemeen',
@@ -257,18 +257,31 @@ export class Catalogus implements OnInit, OnDestroy {
     ];
   }
 
-  // Methode om subgenres op te halen op basis van het geselecteerde hoofdgenre, deze kunnen worden gebruikt in een dropdown of selectielijst
+  // Om subgenres op te halen op basis van het geselecteerde hoofdgenre
   getSubGenres(hoofdGenre: string): string[] {
     return this.genreHiërarchie[hoofdGenre as keyof typeof this.genreHiërarchie] || [];
   }
 
-  // Methode die wordt aangeroepen wanneer het hoofdgenre verandert, deze reset het geselecteerde subgenre en werkt de filters bij
+  // Om de filters bij te werken en boeken opnieuw te laden op basis van de nieuwe filters
   onHoofdGenreChange(): void {
     this.selectedGenre.set(undefined);
     this.updateFilters();
   }
 
   resetFilters(): void {
+    const hadFilters =
+      !!this.zoekTerm()?.trim() ||
+      this.selectedGenre() !== undefined ||
+      !!this.selectedUitgever()?.trim() ||
+      this.minPagina() !== undefined ||
+      this.maxPagina() !== undefined ||
+      this.selectedSorteerOp() !== undefined ||
+      this.beschikbaarheid() !== undefined ||
+      this.uitgaveJaarVan() !== undefined ||
+      this.uitgaveJaarTot() !== undefined ||
+      this.leesniveau() !== undefined ||
+      !!this.selectedHoofdGenre();
+
     this.zoekTerm.set('');
     this.selectedGenre.set(undefined);
     this.selectedUitgever.set('');
@@ -282,6 +295,22 @@ export class Catalogus implements OnInit, OnDestroy {
     this.leesniveau.set(undefined);
     this.selectedHoofdGenre.set('');
     sessionStorage.removeItem(this.FILTERS_KEYS);
-    this.updateFilters();
+    this.updateFilters(hadFilters);
+  }
+
+  gaNaarVolgendePagina() {
+    if (this.huidigePagina() < this.totaalPaginas() - 1) {
+      this.huidigePagina.set(this.huidigePagina() + 1);
+      this.updateFilters(false);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  gaNaarVorigePagina() {
+    if (this.huidigePagina() > 0) {
+      this.huidigePagina.set(this.huidigePagina() - 1);
+      this.updateFilters(false);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   }
 }
