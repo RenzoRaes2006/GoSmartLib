@@ -87,7 +87,7 @@ class BoekRepositoryTest {
         Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Direction.ASC, "locatie"));
 
         // When
-        Page<Boek> result = boekRepository.filterBoeken("java", null, null, null, null, null, null, null, null,
+        Page<Boek> result = boekRepository.filterBoeken("java", null, null, null, null, null, null, null, null, null,
                 pageable);
 
         // Then
@@ -106,7 +106,7 @@ class BoekRepositoryTest {
         Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Direction.ASC, "locatie"));
 
         // When
-        Page<Boek> result = boekRepository.filterBoeken("Bloch", null, null, null, null, null, null, null, null,
+        Page<Boek> result = boekRepository.filterBoeken("Bloch", null, null, null, null, null, null, null, null, null,
                 pageable);
 
         // Then

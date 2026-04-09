@@ -14,11 +14,12 @@ import ap.be.backend.entity.Boek;
 public interface BoekRepository extends JpaRepository<Boek, Long> {
         Optional<Boek> findByIsbn(String isbn);
 
-        @Query("SELECT DISTINCT b FROM Boek b LEFT JOIN b.genre g WHERE " +
+        @Query("SELECT DISTINCT b FROM Boek b LEFT JOIN b.genre g LEFT JOIN b.thematischeTag t WHERE " +
                         "(:zoekterm IS NULL OR LOWER(b.titel) LIKE LOWER(CONCAT('%', :zoekterm, '%')) OR " +
                         "LOWER(b.auteur) LIKE LOWER(CONCAT('%', :zoekterm, '%')) OR " +
                         "b.isbn LIKE CONCAT('%', :zoekterm, '%')) AND " +
                         "(:genres IS NULL OR g IN :genres) AND " +
+                        "(:thematischeTags IS NULL OR t IN :thematischeTags) AND " +
                         "(:uitgever IS NULL OR LOWER(b.uitgever) LIKE LOWER(CONCAT('%', :uitgever, '%'))) AND " +
                         "(:minPagina IS NULL OR b.pagina >= :minPagina) AND " +
                         "(:maxPagina IS NULL OR b.pagina <= :maxPagina) AND " +
@@ -30,6 +31,7 @@ public interface BoekRepository extends JpaRepository<Boek, Long> {
                         "(:leesniveau IS NULL OR b.leesniveau = :leesniveau)")
         Page<Boek> filterBoeken(@Param("zoekterm") String zoekterm,
                         @Param("genres") List<String> genres,
+                        @Param("thematischeTags") List<String> thematischeTags,
                         @Param("uitgever") String uitgever,
                         @Param("minPagina") Integer minPagina,
                         @Param("maxPagina") Integer maxPagina,

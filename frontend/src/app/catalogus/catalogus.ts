@@ -30,6 +30,7 @@ export class Catalogus implements OnInit, OnDestroy {
   uitgaveJaarTot = signal<number | undefined>(undefined);
   leesniveau = signal<string | undefined>(undefined);
   selectedHoofdGenre = signal<string>('');
+  selectedThematischeTag = signal<string | undefined>(undefined);
   paginaError = signal<string>('');
   maxPaginaLimit = 1500;
   huidigePagina = signal<number>(0);
@@ -56,6 +57,26 @@ export class Catalogus implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.navSub.unsubscribe();
   }
+
+  // Beschikbare thematische tags
+  beschikbareTags: string[] = [
+    'Armoede & ongelijkheid',
+    'Avontuur & ontdekking',
+    'Diversiteit & inclusie',
+    'Familie',
+    'Gender & seksualiteit',
+    'Identiteit & zelfbeeld',
+    'Liefde & relaties',
+    'Macht & onrecht',
+    'Mentale gezondheid',
+    'Migratie & afkomst',
+    'Overleven',
+    'Rouw & verlies',
+    'School & prestatiedruk',
+    'Sociale media',
+    'Toekomst & technologie',
+    'Vriendschap',
+  ];
 
   // Genre hiërarchie
   genreHiërarchie = {
@@ -106,6 +127,7 @@ export class Catalogus implements OnInit, OnDestroy {
         this.uitgaveJaarTot.set(filters.uitgaveJaarTot);
         this.leesniveau.set(filters.leesniveau);
         this.selectedHoofdGenre.set(filters.selectedHoofdGenre || '');
+        this.selectedThematischeTag.set(filters.selectedThematischeTag);
         this.huidigePagina.set(filters.huidigePagina || 0);
 
         this.updateFilters(false);
@@ -152,6 +174,7 @@ export class Catalogus implements OnInit, OnDestroy {
     const filterOptions: FilterOptions = {
       zoekterm: this.zoekTerm()?.trim() || undefined,
       genres,
+      thematischeTags: this.selectedThematischeTag() ? [this.selectedThematischeTag()!] : undefined,
       uitgever: this.selectedUitgever()?.trim() || undefined,
       minPagina: (this.minPagina() ?? 0) > 0 ? this.minPagina() : undefined,
       maxPagina:
@@ -186,6 +209,7 @@ export class Catalogus implements OnInit, OnDestroy {
       uitgaveJaarTot: this.uitgaveJaarTot(),
       leesniveau: this.leesniveau(),
       selectedHoofdGenre: this.selectedHoofdGenre(),
+      selectedThematischeTag: this.selectedThematischeTag(),
       huidigePagina: this.huidigePagina(),
     };
 
@@ -280,6 +304,7 @@ export class Catalogus implements OnInit, OnDestroy {
       this.uitgaveJaarVan() !== undefined ||
       this.uitgaveJaarTot() !== undefined ||
       this.leesniveau() !== undefined ||
+      this.selectedThematischeTag() !== undefined ||
       !!this.selectedHoofdGenre();
 
     this.zoekTerm.set('');
@@ -294,6 +319,7 @@ export class Catalogus implements OnInit, OnDestroy {
     this.uitgaveJaarTot.set(undefined);
     this.leesniveau.set(undefined);
     this.selectedHoofdGenre.set('');
+    this.selectedThematischeTag.set(undefined);
     sessionStorage.removeItem(this.FILTERS_KEYS);
     this.updateFilters(hadFilters);
   }

@@ -84,7 +84,8 @@ public class BoekService {
         return boekRepository.findByIsbn(isbn.trim()).orElse(null);
     }
 
-    public Page<Boek> filterBoeken(String zoekterm, List<String> genres, String uitgever, Integer minPagina,
+    public Page<Boek> filterBoeken(String zoekterm, List<String> genres, List<String> thematischeTags, String uitgever,
+            Integer minPagina,
             Integer maxPagina,
             Boolean beschikbaarheid, Integer uitgaveJaarVan, Integer uitgaveJaarTot, String leesniveau, Integer page,
             Integer size,
@@ -92,7 +93,9 @@ public class BoekService {
         validateYearRange(uitgaveJaarVan, uitgaveJaarTot);
         PageRequest pageable = PageRequest.of(page != null ? page : 0, size != null ? size : 10, sort);
         List<String> genresParam = (genres == null || genres.isEmpty()) ? null : genres;
-        return boekRepository.filterBoeken(zoekterm, genresParam, uitgever, minPagina, maxPagina, beschikbaarheid,
+        List<String> tagsParam = (thematischeTags == null || thematischeTags.isEmpty()) ? null : thematischeTags;
+        return boekRepository.filterBoeken(zoekterm, genresParam, tagsParam, uitgever, minPagina, maxPagina,
+                beschikbaarheid,
                 uitgaveJaarVan, uitgaveJaarTot, leesniveau, pageable);
     }
 

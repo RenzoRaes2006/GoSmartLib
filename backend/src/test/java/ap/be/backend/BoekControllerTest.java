@@ -41,7 +41,7 @@ public class BoekControllerTest {
                 String term = "java";
                 Page<Boek> page = new PageImpl<>(List.of(new Boek()));
                 Mockito.when(boekService.filterBoeken(eq(term), any(), any(), any(), any(),
-                                any(), any(), any(), any(), any(), any(), any()))
+                                any(), any(), any(), any(), any(), any(), any(), any()))
                                 .thenReturn(page);
 
                 // When & Then
@@ -50,7 +50,7 @@ public class BoekControllerTest {
                                 .andExpect(jsonPath("$.content").isArray());
 
                 Mockito.verify(boekService).filterBoeken(eq(term), any(), any(), any(), any(),
-                                any(), any(), any(), any(), any(), any(), any());
+                                any(), any(), any(), any(), any(), any(), any(), any());
         }
 
         @Test
@@ -58,7 +58,7 @@ public class BoekControllerTest {
                 // Given
                 Page<Boek> page = new PageImpl<>(List.of());
                 Mockito.when(boekService.filterBoeken(any(), any(), any(), any(), any(),
-                                any(), any(), any(), any(), any(), any(), any()))
+                                any(), any(), any(), any(), any(), any(), any(), any()))
                                 .thenReturn(page);
 
                 // When & Then
@@ -66,7 +66,7 @@ public class BoekControllerTest {
                                 .andExpect(status().isOk());
 
                 Mockito.verify(boekService).filterBoeken(any(), any(), any(), any(), any(),
-                                any(), any(), any(), any(), any(), any(), any());
+                                any(), any(), any(), any(), any(), any(), any(), any());
         }
 
         // --- POST: BOEK TOEVOEGEN ---

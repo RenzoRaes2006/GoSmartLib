@@ -30,8 +30,12 @@ export class BoekService {
       filters.genres.forEach((g) => (params = params.append('genre', g)));
     }
 
+    if (filters.thematischeTags?.length) {
+      filters.thematischeTags.forEach((t) => (params = params.append('thematischeTag', t)));
+    }
+
     Object.entries(filters).forEach(([key, value]) => {
-      if (key === 'genres') return;
+      if (key === 'genres' || key === 'thematischeTags') return;
       if (value !== undefined && value !== null && value !== '') {
         const paramKey = key === 'beschikbaarheid' ? 'beschikbaar' : key;
         params = params.set(paramKey, value.toString());
@@ -45,14 +49,16 @@ export class BoekService {
     return this.http.get<Boek>(`${this.apiUrl}/${id}`);
   }
 
-  getBeheerBoekenGefilterd(filters: FilterOptions): Observable<Boek[]> {
-    let params = new HttpParams();
+  getBeheerBoekenGefilterd(filters: FilterOptions, page: number = 0, size: number = 6): Observable<PageResponse<Boek>> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', size.toString());
 
     if (filters.zoekterm && filters.zoekterm.trim() !== '') {
       params = params.set('zoekterm', filters.zoekterm);
     }
 
-    return this.http.get<Boek[]>(`${this.apiUrl}`, { params });
+    return this.http.get<PageResponse<Boek>>(`${this.apiUrl}`, { params });
   }
 
   toevoegen(boek: NieuwBoek): Observable<Boek> {

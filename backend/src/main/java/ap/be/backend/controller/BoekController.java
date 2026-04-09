@@ -36,6 +36,7 @@ public class BoekController {
     public Page<Boek> getAlleBoeken(
             @RequestParam(required = false) String zoekterm,
             @RequestParam(required = false) List<String> genre,
+            @RequestParam(required = false) List<String> thematischeTag,
             @RequestParam(required = false) String uitgever,
             @RequestParam(required = false) Integer minPagina,
             @RequestParam(required = false) Integer maxPagina,
@@ -55,7 +56,7 @@ public class BoekController {
             sort = Sort.by(Sort.Direction.ASC, "id");
         }
 
-        return boekService.filterBoeken(zoekterm, genre, uitgever, minPagina, maxPagina,
+        return boekService.filterBoeken(zoekterm, genre, thematischeTag, uitgever, minPagina, maxPagina,
                 beschikbaar != null ? Boolean.parseBoolean(beschikbaar) : null, uitgaveJaarVan, uitgaveJaarTot,
                 leesniveau, page, size, sort);
     }

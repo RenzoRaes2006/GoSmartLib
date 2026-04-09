@@ -79,7 +79,21 @@
         }
       </div>
 
-      <!-- 4. Leesniveau -->
+      <!-- 4. Thematische tag -->
+      <label for="thematische-tag-filter">Thematische tag</label>
+      <select
+        id="thematische-tag-filter"
+        [(ngModel)]="selectedThematischeTag"
+        (change)="updateFilters()"
+        class="sidebar-input"
+      >
+        <option [ngValue]="undefined">Alle thema's</option>
+        @for (tag of beschikbareTags; track tag) {
+          <option [value]="tag">{{ tag }}</option>
+        }
+      </select>
+
+      <!-- 5. Leesniveau -->
       <label for="leesniveau-filter">Leesniveau</label>
       <select
         id="leesniveau-filter"
@@ -94,7 +108,7 @@
         <option value="D (literair niveau)">D (literair niveau)</option>
       </select>
 
-      <!-- 5. Pagina's -->
+      <!-- 6. Pagina's -->
       <label>Pagina's</label>
       <div class="pagina-slider">
         <div class="slider-track">
@@ -133,7 +147,7 @@
         <span class="error-text">{{ paginaError() }}</span>
       }
 
-      <!-- 6. sorteren -->
+      <!-- 7. sorteren -->
       <label for="sort-select">Sorteren op</label>
       <div class="sort-row">
         <select

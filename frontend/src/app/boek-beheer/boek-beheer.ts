@@ -91,22 +91,22 @@ export class BoekBeheer implements OnInit {
 
   // Thematische tags dropdown
   beschikbareTags: string[] = [
-    'Liefde & relaties',
-    'Vriendschap',
-    'Identiteit & zelfbeeld',
-    'Gender & seksualiteit',
+    'Armoede & ongelijkheid',
+    'Avontuur & ontdekking',
     'Diversiteit & inclusie',
-    'Mentale gezondheid',
-    'Rouw & verlies',
     'Familie',
+    'Gender & seksualiteit',
+    'Identiteit & zelfbeeld',
+    'Liefde & relaties',
+    'Macht & onrecht',
+    'Mentale gezondheid',
+    'Migratie & afkomst',
+    'Overleven',
+    'Rouw & verlies',
     'School & prestatiedruk',
     'Sociale media',
-    'Migratie & afkomst',
-    'Armoede & ongelijkheid',
-    'Macht & onrecht',
-    'Avontuur & ontdekking',
-    'Overleven',
     'Toekomst & technologie',
+    'Vriendschap',
   ];
   selectedTag = signal('');
   geselecteerdeTags = signal<string[]>([]);
@@ -179,9 +179,19 @@ export class BoekBeheer implements OnInit {
     this.geselecteerdeTags.set([]);
     this.selectedTag.set('');
 
+    this.resetDropdowns();
+
     if (this.mode() === 'toevoegen') {
       this.toonIsbnZoek.set(false);
     }
+  }
+
+  private resetDropdowns() {
+    this.geselecteerdeGenres.set([]);
+    this.selectedHoofdGenre.set('');
+    this.selectedSubGenre.set('');
+    this.geselecteerdeTags.set([]);
+    this.selectedTag.set('');
   }
 
   // Populeren van het formulier met de gegevens van een boek dat geselecteerd is voor wijziging
@@ -212,7 +222,7 @@ export class BoekBeheer implements OnInit {
     if (/^\d{10}$/.test(value) || /^\d{13}$/.test(value) || /^GO\d{11}$/.test(value)) {
       return null;
     }
-    return { isbn: 'ISBN moet 10 of 13 of GOcijfers zijn' };
+    return { isbn: 'ISBN moet 10 of 13 of GO cijfers zijn' };
   };
 
   // Vereenvoudigde functie om een "GO" nummer te genereren
@@ -339,6 +349,7 @@ export class BoekBeheer implements OnInit {
           console.log('Boek succesvol toegevoegd');
           this.successMessage.set('Boek succesvol toegevoegd!');
           this.boekForm.reset();
+          this.resetDropdowns();
           setTimeout(() => this.successMessage.set(''), 5000);
         },
         error: (err) => {
@@ -391,6 +402,7 @@ export class BoekBeheer implements OnInit {
       next: () => {
         this.successMessage.set('Boek succesvol bijgewerkt!');
         this.boekForm.reset();
+        this.resetDropdowns();
         this.boekGevonden.set(false);
         this.naarTeWijzigenBoek.set(null);
         this.toonIsbnZoek.set(false);
@@ -436,6 +448,7 @@ export class BoekBeheer implements OnInit {
       next: () => {
         this.successMessage.set('Boek succesvol verwijderd!');
         this.boekForm.reset();
+        this.resetDropdowns();
         this.boekGevonden.set(false);
         this.naarTeWijzigenBoek.set(null);
         this.toonIsbnZoek.set(false);
@@ -470,14 +483,40 @@ export class BoekBeheer implements OnInit {
 
   gaNaarVolgendePagina() {
     if (this.currentPage() + 1 < this.totaalPages()) {
-      this.laadBoekenPagina(this.currentPage() + 1);
+      const nextPage = this.currentPage() + 1;
+      if (this.zoekTerm().trim().length > 0) {
+        this.laadZoekResultaten(nextPage);
+      } else {
+        this.laadBoekenPagina(nextPage);
+      }
     }
   }
 
   gaNaarVorigePagina() {
     if (this.currentPage() > 0) {
-      this.laadBoekenPagina(this.currentPage() - 1);
+      const prevPage = this.currentPage() - 1;
+      if (this.zoekTerm().trim().length > 0) {
+        this.laadZoekResultaten(prevPage);
+      } else {
+        this.laadBoekenPagina(prevPage);
+      }
     }
+  }
+
+  private laadZoekResultaten(page: number) {
+    this.isLoadingBoeken.set(true);
+    const filters: FilterOptions = { zoekterm: this.zoekTerm() };
+    this.boekService.getBeheerBoekenGefilterd(filters, page, this.pageSize).subscribe({
+      next: (response) => {
+        this.boeknOverzicht.set(response.content);
+        this.currentPage.set(response.number);
+        this.totaalPages.set(response.totalPages);
+        this.isLoadingBoeken.set(false);
+      },
+      error: () => {
+        this.isLoadingBoeken.set(false);
+      },
+    });
   }
 
   // Live zoeken: filter de boekenlijst terwijl de gebruiker typt
@@ -497,11 +536,11 @@ export class BoekBeheer implements OnInit {
           // Zoek en toon resultaten in de lijst
           this.isLoadingBoeken.set(true);
           const filters: FilterOptions = { zoekterm: this.zoekTerm() };
-          this.boekService.getBeheerBoekenGefilterd(filters).subscribe({
-            next: (data) => {
-              this.boeknOverzicht.set(data);
-              this.currentPage.set(0);
-              this.totaalPages.set(1);
+          this.boekService.getBeheerBoekenGefilterd(filters, 0, this.pageSize).subscribe({
+            next: (response) => {
+              this.boeknOverzicht.set(response.content);
+              this.currentPage.set(response.number);
+              this.totaalPages.set(response.totalPages);
               this.isLoadingBoeken.set(false);
             },
             error: () => {
@@ -525,7 +564,9 @@ export class BoekBeheer implements OnInit {
       this.geselecteerdeGenres.set(Array.isArray(boek.genre) ? [...boek.genre] : []);
       this.updateGenreFormControl();
       // Populeer geselecteerde thematische tags vanuit het boek
-      this.geselecteerdeTags.set(Array.isArray(boek.thematischeTag) ? [...boek.thematischeTag] : []);
+      this.geselecteerdeTags.set(
+        Array.isArray(boek.thematischeTag) ? [...boek.thematischeTag] : [],
+      );
       this.updateTagFormControl();
       // Formulier tonen voor wijzigen
       this.boekForm.patchValue(this.mapBoekNaarFormValue(boek));

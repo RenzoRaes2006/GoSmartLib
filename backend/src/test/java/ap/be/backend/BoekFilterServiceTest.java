@@ -39,12 +39,12 @@ public class BoekFilterServiceTest {
                 // Given
                 Page<Boek> verwacht = new PageImpl<>(List.of(new Boek("Boek A", "Auteur A")));
                 when(boekRepository.filterBoeken(eq(null), eq(null), eq(null), eq(null), eq(null),
-                                eq(null), eq(null), eq(null), eq(null), any()))
+                                eq(null), eq(null), eq(null), eq(null), eq(null), any()))
                                 .thenReturn(verwacht);
 
                 // When
                 Page<Boek> resultaat = boekService.filterBoeken(null, null, null, null, null,
-                                null, null, null, null, null, null, defaultSort);
+                                null, null, null, null, null, null, null, defaultSort);
 
                 // Then
                 assertEquals(verwacht.getContent(), resultaat.getContent());
@@ -56,12 +56,12 @@ public class BoekFilterServiceTest {
                 List<String> genres = List.of("Filosofie");
                 Page<Boek> verwacht = new PageImpl<>(List.of(new Boek("Socrates", "Plato")));
                 when(boekRepository.filterBoeken(eq(null), eq(genres), eq(null), eq(null), eq(null),
-                                eq(null), eq(null), eq(null), eq(null), any()))
+                                eq(null), eq(null), eq(null), eq(null), eq(null), any()))
                                 .thenReturn(verwacht);
 
                 // When
                 Page<Boek> resultaat = boekService.filterBoeken(null, genres, null, null, null,
-                                null, null, null, null, null, null, defaultSort);
+                                null, null, null, null, null, null, null, defaultSort);
 
                 // Then
                 assertEquals(verwacht.getContent(), resultaat.getContent());
@@ -75,12 +75,12 @@ public class BoekFilterServiceTest {
                                 new Boek("Sapiens", "Harari"),
                                 new Boek("Denken snel en langzaam", "Kahneman")));
                 when(boekRepository.filterBoeken(eq(null), eq(genres), eq(null), eq(null), eq(null),
-                                eq(null), eq(null), eq(null), eq(null), any()))
+                                eq(null), eq(null), eq(null), eq(null), eq(null), any()))
                                 .thenReturn(verwacht);
 
                 // When
                 Page<Boek> resultaat = boekService.filterBoeken(null, genres, null, null, null,
-                                null, null, null, null, null, null, defaultSort);
+                                null, null, null, null, null, null, null, defaultSort);
 
                 // Then
                 assertEquals(2, resultaat.getContent().size());
@@ -92,12 +92,12 @@ public class BoekFilterServiceTest {
                 List<String> legeGenres = Collections.emptyList();
                 Page<Boek> verwacht = new PageImpl<>(List.of(new Boek("Alle Boeken", "Iedereen")));
                 when(boekRepository.filterBoeken(eq(null), eq(null), eq(null), eq(null), eq(null),
-                                eq(null), eq(null), eq(null), eq(null), any()))
+                                eq(null), eq(null), eq(null), eq(null), eq(null), any()))
                                 .thenReturn(verwacht);
 
                 // When
                 Page<Boek> resultaat = boekService.filterBoeken(null, legeGenres, null, null, null,
-                                null, null, null, null, null, null, defaultSort);
+                                null, null, null, null, null, null, null, defaultSort);
 
                 // Then - lege lijst wordt als null doorgegeven
                 assertEquals(verwacht.getContent(), resultaat.getContent());
@@ -109,9 +109,9 @@ public class BoekFilterServiceTest {
         void givenJaarVanKleinerDan1900_whenFilterBoeken_thenGooitInvalidYearRangeException() {
                 // When & Then
                 assertThrows(InvalidYearRangeException.class, () -> boekService.filterBoeken(null, null, null, null,
-                                null, null, 1899, null, null, null, null, defaultSort));
+                                null, null, null, 1899, null, null, null, null, defaultSort));
                 verify(boekRepository, never()).filterBoeken(any(), any(), any(), any(), any(),
-                                any(), any(), any(), any(), any());
+                                any(), any(), any(), any(), any(), any());
         }
 
         @Test
@@ -121,18 +121,18 @@ public class BoekFilterServiceTest {
 
                 // When & Then
                 assertThrows(InvalidYearRangeException.class, () -> boekService.filterBoeken(null, null, null, null,
-                                null, null, null, toekomstjaar, null, null, null, defaultSort));
+                                null, null, null, null, toekomstjaar, null, null, null, defaultSort));
                 verify(boekRepository, never()).filterBoeken(any(), any(), any(), any(), any(),
-                                any(), any(), any(), any(), any());
+                                any(), any(), any(), any(), any(), any());
         }
 
         @Test
         void givenJaarVanGroterDanJaarTot_whenFilterBoeken_thenGooitInvalidYearRangeException() {
                 // When & Then
                 assertThrows(InvalidYearRangeException.class, () -> boekService.filterBoeken(null, null, null, null,
-                                null, null, 2020, 2010, null, null, null, defaultSort));
+                                null, null, null, 2020, 2010, null, null, null, defaultSort));
                 verify(boekRepository, never()).filterBoeken(any(), any(), any(), any(), any(),
-                                any(), any(), any(), any(), any());
+                                any(), any(), any(), any(), any(), any());
         }
 
         @Test
@@ -140,12 +140,12 @@ public class BoekFilterServiceTest {
                 // Given
                 Page<Boek> verwacht = new PageImpl<>(List.of(new Boek("Modern Boek", "Auteur")));
                 when(boekRepository.filterBoeken(eq(null), eq(null), eq(null), eq(null), eq(null),
-                                eq(null), eq(2000), eq(2020), eq(null), any()))
+                                eq(null), eq(null), eq(2000), eq(2020), eq(null), any()))
                                 .thenReturn(verwacht);
 
                 // When
                 Page<Boek> resultaat = boekService.filterBoeken(null, null, null, null, null,
-                                null, 2000, 2020, null, null, null, defaultSort);
+                                null, null, 2000, 2020, null, null, null, defaultSort);
 
                 // Then
                 assertEquals(verwacht.getContent(), resultaat.getContent());
@@ -160,12 +160,12 @@ public class BoekFilterServiceTest {
                 beschikbaarBoek.setAantalExemplaren(3);
                 Page<Boek> verwacht = new PageImpl<>(List.of(beschikbaarBoek));
                 when(boekRepository.filterBoeken(eq(null), eq(null), eq(null), eq(null), eq(null),
-                                eq(true), eq(null), eq(null), eq(null), any()))
+                                eq(null), eq(true), eq(null), eq(null), eq(null), any()))
                                 .thenReturn(verwacht);
 
                 // When
                 Page<Boek> resultaat = boekService.filterBoeken(null, null, null, null, null,
-                                true, null, null, null, null, null, defaultSort);
+                                null, true, null, null, null, null, null, defaultSort);
 
                 // Then
                 assertEquals(1, resultaat.getContent().size());
@@ -178,12 +178,12 @@ public class BoekFilterServiceTest {
                 boek.setLeesniveau("A (eenvoudig taalgebruik)");
                 Page<Boek> verwacht = new PageImpl<>(List.of(boek));
                 when(boekRepository.filterBoeken(eq(null), eq(null), eq(null), eq(null), eq(null),
-                                eq(null), eq(null), eq(null), eq("A (eenvoudig taalgebruik)"), any()))
+                                eq(null), eq(null), eq(null), eq(null), eq("A (eenvoudig taalgebruik)"), any()))
                                 .thenReturn(verwacht);
 
                 // When
                 Page<Boek> resultaat = boekService.filterBoeken(null, null, null, null, null,
-                                null, null, null, "A (eenvoudig taalgebruik)", null, null, defaultSort);
+                                null, null, null, null, "A (eenvoudig taalgebruik)", null, null, defaultSort);
 
                 // Then
                 assertEquals(1, resultaat.getContent().size());
@@ -196,12 +196,12 @@ public class BoekFilterServiceTest {
                 Boek boek = new Boek("De Alchemist", "Paulo Coelho");
                 Page<Boek> verwacht = new PageImpl<>(List.of(boek));
                 when(boekRepository.filterBoeken(eq("alchemist"), eq(null), eq(null), eq(null), eq(null),
-                                eq(null), eq(null), eq(null), eq(null), any()))
+                                eq(null), eq(null), eq(null), eq(null), eq(null), any()))
                                 .thenReturn(verwacht);
 
                 // When
                 Page<Boek> resultaat = boekService.filterBoeken("alchemist", null, null, null, null,
-                                null, null, null, null, null, null, defaultSort);
+                                null, null, null, null, null, null, null, defaultSort);
 
                 // Then
                 assertEquals(1, resultaat.getContent().size());
@@ -215,12 +215,12 @@ public class BoekFilterServiceTest {
                 // Given - boekbeheer zoekt op auteur
                 Boek boek = new Boek("De Alchemist", "Paulo Coelho");
                 when(boekRepository.filterBoeken(eq("coelho"), eq(null), eq(null), eq(null), eq(null),
-                                eq(null), eq(null), eq(null), eq(null), any()))
+                                eq(null), eq(null), eq(null), eq(null), eq(null), any()))
                                 .thenReturn(new PageImpl<>(List.of(boek)));
 
                 // When
                 Page<Boek> resultaat = boekService.filterBoeken("coelho", null, null, null, null,
-                                null, null, null, null, null, null, defaultSort);
+                                null, null, null, null, null, null, null, defaultSort);
 
                 // Then
                 assertEquals(1, resultaat.getContent().size());
@@ -233,12 +233,12 @@ public class BoekFilterServiceTest {
                 Boek boek = new Boek("Clean Code", "Robert Martin");
                 boek.setIsbn("9780132350884");
                 when(boekRepository.filterBoeken(eq("9780132350884"), eq(null), eq(null), eq(null), eq(null),
-                                eq(null), eq(null), eq(null), eq(null), any()))
+                                eq(null), eq(null), eq(null), eq(null), eq(null), any()))
                                 .thenReturn(new PageImpl<>(List.of(boek)));
 
                 // When
                 Page<Boek> resultaat = boekService.filterBoeken("9780132350884", null, null, null, null,
-                                null, null, null, null, null, null, defaultSort);
+                                null, null, null, null, null, null, null, defaultSort);
 
                 // Then
                 assertEquals(1, resultaat.getContent().size());
@@ -249,12 +249,12 @@ public class BoekFilterServiceTest {
         void givenZoektermZonderMatch_whenFilterBoeken_thenGeeftLegeLijst() {
                 // Given
                 when(boekRepository.filterBoeken(eq("xyzbestaatnietzzzz"), eq(null), eq(null), eq(null), eq(null),
-                                eq(null), eq(null), eq(null), eq(null), any()))
+                                eq(null), eq(null), eq(null), eq(null), eq(null), any()))
                                 .thenReturn(new PageImpl<>(List.of()));
 
                 // When
                 Page<Boek> resultaat = boekService.filterBoeken("xyzbestaatnietzzzz", null, null, null, null,
-                                null, null, null, null, null, null, defaultSort);
+                                null, null, null, null, null, null, null, defaultSort);
 
                 // Then
                 assertEquals(0, resultaat.getContent().size());
@@ -267,12 +267,12 @@ public class BoekFilterServiceTest {
                                 new Boek("Effective Java", "Joshua Bloch"),
                                 new Boek("Java Concurrency", "Brian Goetz")));
                 when(boekRepository.filterBoeken(eq("java"), eq(null), eq(null), eq(null), eq(null),
-                                eq(null), eq(null), eq(null), eq(null), any()))
+                                eq(null), eq(null), eq(null), eq(null), eq(null), any()))
                                 .thenReturn(verwacht);
 
                 // When
                 Page<Boek> resultaat = boekService.filterBoeken("java", null, null, null, null,
-                                null, null, null, null, null, null, defaultSort);
+                                null, null, null, null, null, null, null, defaultSort);
 
                 // Then
                 assertEquals(2, resultaat.getContent().size());
@@ -284,12 +284,12 @@ public class BoekFilterServiceTest {
         void givenPaginaBereik_whenFilterBoeken_thenGeeftMinEnMaxPaginaAanRepository() {
                 // Given
                 Page<Boek> verwacht = new PageImpl<>(List.of(new Boek("Kort Boek", "Auteur")));
-                when(boekRepository.filterBoeken(eq(null), eq(null), eq(null), eq(100), eq(300),
+                when(boekRepository.filterBoeken(eq(null), eq(null), eq(null), eq(null), eq(100), eq(300),
                                 eq(null), eq(null), eq(null), eq(null), any()))
                                 .thenReturn(verwacht);
 
                 // When
-                Page<Boek> resultaat = boekService.filterBoeken(null, null, null, 100, 300,
+                Page<Boek> resultaat = boekService.filterBoeken(null, null, null, null, 100, 300,
                                 null, null, null, null, null, null, defaultSort);
 
                 // Then

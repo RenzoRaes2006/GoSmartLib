@@ -2,6 +2,7 @@ export interface FilterOptions {
   zoekterm?: string;
   genre?: string;
   genres?: string[];
+  thematischeTags?: string[];
   uitgever?: string;
   minPagina?: number;
   maxPagina?: number;
