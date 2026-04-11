@@ -125,4 +125,8 @@ export class BoekService {
     formData.append('file', file);
     return this.http.post(this.afbeeldingUrl + '/upload', formData, { responseType: 'text' });
   }
+
+  getLeengeschiedenis(gebruikerId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiGebruikerUrl}/${gebruikerId}/geschiedenis`);
+  }
 }

@@ -104,4 +104,10 @@ public class GebruikerController {
         gebruikerService.verwijderLening(uitleningId);
         return ResponseEntity.ok("Lening succesvol verwijderd en voorraad hersteld.");
     }
+
+    @GetMapping("/{gebruikerId}/geschiedenis")
+    public ResponseEntity<List<Uitlening>> getLeengeschiedenis(@PathVariable Long gebruikerId) {
+        return ResponseEntity.ok(gebruikerService.getLeengeschiedenisVanGebruiker(gebruikerId));
+    }
+
 }

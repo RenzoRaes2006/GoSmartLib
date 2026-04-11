@@ -11,6 +11,7 @@ import { AanvragenBeheer } from './aanvragen-beheer/aanvragen-beheer';
 import { AdminGuard } from './services/admin-guard';
 import { AdminDashboard } from './admin-dashboard/admin-dashboard';
 import { GerapporteerdeReviews } from './gerapporteerde-reviews/gerapporteerde-reviews';
+import { Leengeschiedenis } from './leengeschiedenis/leengeschiedenis';
 
 export const routes: Routes = [
   { path: '', component: HomePageLeerling },
@@ -23,6 +24,7 @@ export const routes: Routes = [
   { path: 'login/smartschool', component: Login },
   { path: 'beheer/aanvragen', component: AanvragenBeheer },
   { path: 'gerapporteerde-beoordelingen', component: GerapporteerdeReviews },
+  { path: 'leengeschiedenis', component: Leengeschiedenis },
   {
     path: 'admin',
     component: AdminDashboard,

@@ -206,4 +206,9 @@ public class GebruikerService {
         // delete the loan completely from the database
         uitleningRepository.delete(uitlening);
     }
+
+    public List<Uitlening> getLeengeschiedenisVanGebruiker(Long gebruikerId) {
+        // Haalt alle leningen op, inclusief ingeleverde en afgewezen boeken
+        return uitleningRepository.findByGebruiker_GebruikerIDOrderByUitleenDatumDesc(gebruikerId);
+    }
 }
