@@ -21,13 +21,13 @@ export class AdminDashboard implements OnInit {
   nieuweReviews: number = 12;
 
   ngOnInit(): void {
-    this.boekService.getBoeken().subscribe(
-      (boeken) => {
-        this.totaalBoeken = boeken.length;
+    this.boekService.getBoekenPaged(0, 1).subscribe({
+      next: (response) => {
+        this.totaalBoeken = response.totalElements;
       },
-      (error) => {
+      error: (error: Error) => {
         console.error('Fout bij het ophalen van boeken:', error);
       },
-    );
+    });
   }
 }

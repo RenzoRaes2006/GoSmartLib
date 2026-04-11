@@ -1,0 +1,86 @@
+<div class="page-wrapper bg-beige full-width-section">
+  <div class="inner-container">
+    
+    <a routerLink="/" class="back-link">← Terug naar hoofdpagina</a>
+    
+    <div class="header-sectie">
+      <h1 class="page-title">Mijn leengeschiedenis</h1>
+      <p class="subtitle">Een overzicht van al jouw leesavonturen, geordend per schooljaar.</p>
+    </div>
+
+    <div class="filter-card">
+      <label for="schooljaar">Toon gegevens voor schooljaar:</label>
+      <select id="schooljaar" [(ngModel)]="geselecteerdSchooljaar" class="custom-select">
+        @for (jaar of beschikbareSchooljaren(); track jaar) {
+          <option [value]="jaar">{{ jaar }}</option>
+        }
+      </select>
+    </div>
+
+    @if (beschikbareSchooljaren().length === 0) {
+      <div class="empty-state">
+        <span class="emoji">📚</span>
+        <p>Je hebt nog geen leengeschiedenis. Tijd om een boek te zoeken!</p>
+        <a routerLink="/catalogus" class="btn-primary">Naar de catalogus</a>
+      </div>
+    } @else {
+      
+      <div class="chart-card">
+        <h2>Geleende boeken per maand</h2>
+        <div class="bar-chart-container">
+          
+          <div class="bar-chart">
+            @for (maand of dataPerMaand(); track maand.naam) {
+              <div class="bar-column">
+                <div class="bar-fill-area">
+                  <div class="bar-value" [style.height.%]="maand.percentage">
+                    @if (maand.aantal > 0) {
+                      <span class="aantal-label">{{ maand.aantal }}</span>
+                    }
+                  </div>
+                </div>
+                <div class="bar-label">{{ maand.naam.substring(0, 3) }}</div>
+              </div>
+            }
+          </div>
+          
+        </div>
+      </div>
+
+      <div class="maanden-lijst">
+        @for (maand of dataPerMaand(); track maand.naam) {
+          @if (maand.leningen.length > 0) {
+            <div class="maand-sectie">
+              <h3 class="maand-titel">
+                {{ maand.naam }} <span class="maand-count">({{ maand.aantal }} boeken)</span>
+              </h3>
+              
+              <div class="boeken-grid">
+                @for (lening of maand.leningen; track lening.id) {
+                  <div class="geschiedenis-card" [routerLink]="['/details', lening.boek.id]">
+                    <img [src]="lening.boek.afbeelding" [alt]="lening.boek.titel" class="boek-cover">
+                    
+                    <div class="boek-info">
+                      <h4>{{ lening.boek.titel }}</h4>
+                      <p class="auteur">{{ lening.boek.auteur }}</p>
+                      
+                      <div class="badge-row">
+                        <span class="status-badge" [class.ingeleverd]="lening.isIngeleverd">
+                          {{ lening.isIngeleverd ? 'Ingeleverd' : 'Geleend' }}
+                        </span>
+                        <span class="datum-badge">
+                          {{ lening.uitleenDatum | date:'dd MMM yyyy' }}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        }
+      </div>
+    }
+
+  </div>
+</div>

@@ -55,7 +55,7 @@
         <div class="uitgelicht-grid">
           @for (boek of uitgelichteBoeken(); track boek.id) {
           <div class="boek-card" [routerLink]="['/details', boek.id]">
-            <img [src]="boek.afbeelding" [alt]="boek.titel">
+            <img [src]="boek.afbeelding || 'https://bookshow.blurb.com/bookshow/cache/P11360640/md/cover_2.jpeg?access_key=675523b769268bce5b0b710b3d0e7841'" [alt]="boek.titel">
             <div class="boek-info">
               <h4>{{ boek.titel }}</h4>
               <p>{{ boek.auteur }}</p>
@@ -133,6 +133,7 @@
                     <span>{{ lening.resterendeDagen }} d</span>
                   }
                 </div>
+                <button class="btn-verwijderen" (click)="verwijder(lening.id)">Verwijderen</button>
               </div>
             } @empty {
               <p class="empty-message">Geen boeken geleend.</p>

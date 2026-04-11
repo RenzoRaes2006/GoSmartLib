@@ -89,6 +89,28 @@ export class BoekBeheer implements OnInit {
   geselecteerdeGenres = signal<string[]>([]);
   hoofdGenres = Object.keys(this.genreHiërarchie);
 
+  // Thematische tags dropdown
+  beschikbareTags: string[] = [
+    'Armoede & ongelijkheid',
+    'Avontuur & ontdekking',
+    'Diversiteit & inclusie',
+    'Familie',
+    'Gender & seksualiteit',
+    'Identiteit & zelfbeeld',
+    'Liefde & relaties',
+    'Macht & onrecht',
+    'Mentale gezondheid',
+    'Migratie & afkomst',
+    'Overleven',
+    'Rouw & verlies',
+    'School & prestatiedruk',
+    'Sociale media',
+    'Toekomst & technologie',
+    'Vriendschap',
+  ];
+  selectedTag = signal('');
+  geselecteerdeTags = signal<string[]>([]);
+
   // Constructor met dependency injection en formulieropbouw
   constructor(
     private fb: FormBuilder,
@@ -104,6 +126,7 @@ export class BoekBeheer implements OnInit {
       uitgaveJaar: [''],
       pagina: [''],
       genre: [''],
+      thematischeTag: [''],
       beschrijving: ['', [Validators.required, Validators.minLength(10)]],
       aantalExemplaren: ['', [Validators.required, Validators.pattern(/^\d+$/)]],
       locatie: [''],
@@ -153,10 +176,22 @@ export class BoekBeheer implements OnInit {
     this.geselecteerdeGenres.set([]);
     this.selectedHoofdGenre.set('');
     this.selectedSubGenre.set('');
+    this.geselecteerdeTags.set([]);
+    this.selectedTag.set('');
+
+    this.resetDropdowns();
 
     if (this.mode() === 'toevoegen') {
       this.toonIsbnZoek.set(false);
     }
+  }
+
+  private resetDropdowns() {
+    this.geselecteerdeGenres.set([]);
+    this.selectedHoofdGenre.set('');
+    this.selectedSubGenre.set('');
+    this.geselecteerdeTags.set([]);
+    this.selectedTag.set('');
   }
 
   // Populeren van het formulier met de gegevens van een boek dat geselecteerd is voor wijziging
@@ -169,6 +204,7 @@ export class BoekBeheer implements OnInit {
       uitgaveJaar: boek.uitgaveJaar,
       pagina: String(boek.pagina),
       genre: Array.isArray(boek.genre) ? boek.genre.join(', ') : '',
+      thematischeTag: Array.isArray(boek.thematischeTag) ? boek.thematischeTag.join(', ') : '',
       beschrijving: boek.beschrijving,
       aantalExemplaren: String(boek.aantalExemplaren),
       locatie: boek.locatie,
@@ -186,7 +222,7 @@ export class BoekBeheer implements OnInit {
     if (/^\d{10}$/.test(value) || /^\d{13}$/.test(value) || /^GO\d{11}$/.test(value)) {
       return null;
     }
-    return { isbn: 'ISBN moet 10 of 13 of GOcijfers zijn' };
+    return { isbn: 'ISBN moet 10 of 13 of GO cijfers zijn' };
   };
 
   // Vereenvoudigde functie om een "GO" nummer te genereren
@@ -301,11 +337,19 @@ export class BoekBeheer implements OnInit {
           .map((g) => g.trim())
           .filter((g) => g.length > 0);
       }
+      // Converteer kommagescheiden thematischeTag-string naar array
+      if (typeof nieuwBoek.thematischeTag === 'string') {
+        nieuwBoek.thematischeTag = nieuwBoek.thematischeTag
+          .split(',')
+          .map((t) => t.trim())
+          .filter((t) => t.length > 0);
+      }
       this.boekService.toevoegen(nieuwBoek).subscribe({
         next: () => {
           console.log('Boek succesvol toegevoegd');
           this.successMessage.set('Boek succesvol toegevoegd!');
           this.boekForm.reset();
+          this.resetDropdowns();
           setTimeout(() => this.successMessage.set(''), 5000);
         },
         error: (err) => {
@@ -346,11 +390,19 @@ export class BoekBeheer implements OnInit {
         .map((g) => g.trim())
         .filter((g) => g.length > 0);
     }
+    // Converteer kommagescheiden thematischeTag-string naar array
+    if (typeof bijgewerktBoek.thematischeTag === 'string') {
+      bijgewerktBoek.thematischeTag = bijgewerktBoek.thematischeTag
+        .split(',')
+        .map((t) => t.trim())
+        .filter((t) => t.length > 0);
+    }
 
     this.boekService.wijzigen(boek.id, bijgewerktBoek as unknown as Boek).subscribe({
       next: () => {
         this.successMessage.set('Boek succesvol bijgewerkt!');
         this.boekForm.reset();
+        this.resetDropdowns();
         this.boekGevonden.set(false);
         this.naarTeWijzigenBoek.set(null);
         this.toonIsbnZoek.set(false);
@@ -396,6 +448,7 @@ export class BoekBeheer implements OnInit {
       next: () => {
         this.successMessage.set('Boek succesvol verwijderd!');
         this.boekForm.reset();
+        this.resetDropdowns();
         this.boekGevonden.set(false);
         this.naarTeWijzigenBoek.set(null);
         this.toonIsbnZoek.set(false);
@@ -430,14 +483,40 @@ export class BoekBeheer implements OnInit {
 
   gaNaarVolgendePagina() {
     if (this.currentPage() + 1 < this.totaalPages()) {
-      this.laadBoekenPagina(this.currentPage() + 1);
+      const nextPage = this.currentPage() + 1;
+      if (this.zoekTerm().trim().length > 0) {
+        this.laadZoekResultaten(nextPage);
+      } else {
+        this.laadBoekenPagina(nextPage);
+      }
     }
   }
 
   gaNaarVorigePagina() {
     if (this.currentPage() > 0) {
-      this.laadBoekenPagina(this.currentPage() - 1);
+      const prevPage = this.currentPage() - 1;
+      if (this.zoekTerm().trim().length > 0) {
+        this.laadZoekResultaten(prevPage);
+      } else {
+        this.laadBoekenPagina(prevPage);
+      }
     }
+  }
+
+  private laadZoekResultaten(page: number) {
+    this.isLoadingBoeken.set(true);
+    const filters: FilterOptions = { zoekterm: this.zoekTerm() };
+    this.boekService.getBeheerBoekenGefilterd(filters, page, this.pageSize).subscribe({
+      next: (response) => {
+        this.boeknOverzicht.set(response.content);
+        this.currentPage.set(response.number);
+        this.totaalPages.set(response.totalPages);
+        this.isLoadingBoeken.set(false);
+      },
+      error: () => {
+        this.isLoadingBoeken.set(false);
+      },
+    });
   }
 
   // Live zoeken: filter de boekenlijst terwijl de gebruiker typt
@@ -457,11 +536,11 @@ export class BoekBeheer implements OnInit {
           // Zoek en toon resultaten in de lijst
           this.isLoadingBoeken.set(true);
           const filters: FilterOptions = { zoekterm: this.zoekTerm() };
-          this.boekService.getBeheerBoekenGefilterd(filters).subscribe({
-            next: (data) => {
-              this.boeknOverzicht.set(data);
-              this.currentPage.set(0);
-              this.totaalPages.set(1);
+          this.boekService.getBeheerBoekenGefilterd(filters, 0, this.pageSize).subscribe({
+            next: (response) => {
+              this.boeknOverzicht.set(response.content);
+              this.currentPage.set(response.number);
+              this.totaalPages.set(response.totalPages);
               this.isLoadingBoeken.set(false);
             },
             error: () => {
@@ -484,6 +563,11 @@ export class BoekBeheer implements OnInit {
       // Populeer geselecteerde genres vanuit het boek
       this.geselecteerdeGenres.set(Array.isArray(boek.genre) ? [...boek.genre] : []);
       this.updateGenreFormControl();
+      // Populeer geselecteerde thematische tags vanuit het boek
+      this.geselecteerdeTags.set(
+        Array.isArray(boek.thematischeTag) ? [...boek.thematischeTag] : [],
+      );
+      this.updateTagFormControl();
       // Formulier tonen voor wijzigen
       this.boekForm.patchValue(this.mapBoekNaarFormValue(boek));
       this.boekGevonden.set(true);
@@ -519,6 +603,30 @@ export class BoekBeheer implements OnInit {
     this.boekForm.patchValue({ genre: value });
     this.boekForm.get('genre')?.markAsDirty();
     this.boekForm.get('genre')?.updateValueAndValidity();
+  }
+
+  // Voeg een thematische tag toe aan de lijst van geselecteerde tags
+  voegTagToe() {
+    const tag = this.selectedTag();
+    if (tag && !this.geselecteerdeTags().includes(tag)) {
+      this.geselecteerdeTags.set([...this.geselecteerdeTags(), tag]);
+      this.updateTagFormControl();
+    }
+    this.selectedTag.set('');
+  }
+
+  // Verwijder een thematische tag uit de lijst
+  verwijderTag(tag: string) {
+    this.geselecteerdeTags.set(this.geselecteerdeTags().filter((t) => t !== tag));
+    this.updateTagFormControl();
+  }
+
+  // Update de thematischeTag form control
+  private updateTagFormControl() {
+    const value = this.geselecteerdeTags().join(', ');
+    this.boekForm.patchValue({ thematischeTag: value });
+    this.boekForm.get('thematischeTag')?.markAsDirty();
+    this.boekForm.get('thematischeTag')?.updateValueAndValidity();
   }
 
   verwijderAfbeelding(): void {

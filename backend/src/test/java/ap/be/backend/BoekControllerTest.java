@@ -31,8 +31,10 @@ public class BoekControllerTest {
 
         @Autowired
         private MockMvc mockMvc;
+
         @MockBean
         private BoekImportService boekImportService;
+
         @MockBean
         private BoekRepository boekRepository;
 
@@ -43,32 +45,34 @@ public class BoekControllerTest {
         public void givenSearchTerm_whenGetAlleBoekenCalled_thenCallsFilterBoekenInService() throws Exception {
                 // Given
                 String term = "java";
+                Page<Boek> page = new PageImpl<>(List.of(new Boek()));
                 Mockito.when(boekService.filterBoeken(eq(term), any(), any(), any(), any(),
-                                any(), any(), any(), any(), any()))
-                                .thenReturn(List.of(new Boek()));
+                                any(), any(), any(), any(), any(), any(), any(), any()))
+                                .thenReturn(page);
 
                 // When & Then
                 mockMvc.perform(get("/api/boeken").param("zoekterm", term))
                                 .andExpect(status().isOk())
-                                .andExpect(jsonPath("$").isArray());
+                                .andExpect(jsonPath("$.content").isArray());
 
                 Mockito.verify(boekService).filterBoeken(eq(term), any(), any(), any(), any(),
-                                any(), any(), any(), any(), any());
+                                any(), any(), any(), any(), any(), any(), any(), any());
         }
 
         @Test
         public void givenNoSearchTerm_whenGetAlleBoekenCalled_thenCallsFilterBoekenInService() throws Exception {
                 // Given
+                Page<Boek> page = new PageImpl<>(List.of());
                 Mockito.when(boekService.filterBoeken(any(), any(), any(), any(), any(),
-                                any(), any(), any(), any(), any()))
-                                .thenReturn(List.of());
+                                any(), any(), any(), any(), any(), any(), any(), any()))
+                                .thenReturn(page);
 
                 // When & Then
                 mockMvc.perform(get("/api/boeken"))
                                 .andExpect(status().isOk());
 
                 Mockito.verify(boekService).filterBoeken(any(), any(), any(), any(), any(),
-                                any(), any(), any(), any(), any());
+                                any(), any(), any(), any(), any(), any(), any(), any());
         }
 
         // --- POST: BOEK TOEVOEGEN ---
@@ -300,6 +304,7 @@ public class BoekControllerTest {
                 mockMvc.perform(get("/api/boeken/isbn/0000000000000"))
                                 .andExpect(status().isNotFound());
         }
+
         // --- POST: BOEKEN IMPORTEREN (EXCEL) ---
 
         @Test
@@ -330,7 +335,6 @@ public class BoekControllerTest {
                                 new byte[0]);
 
                 // When & Then: De controller gooit een IllegalArgumentException.
-                // De GlobalExceptionHandler vangt dit op en maakt er een 400 Bad Request van.
                 mockMvc.perform(multipart("/api/boeken/import").file(leegBestand))
                                 .andExpect(status().isBadRequest())
                                 .andExpect(content().string("Het geüploade bestand is leeg."));
@@ -350,8 +354,7 @@ public class BoekControllerTest {
                                 .thenThrow(new IsbnAlreadyExistsException(
                                                 "ISBN 9780132350884 bestaat al in de database."));
 
-                // When & Then: De GlobalExceptionHandler grijpt in en maakt er een 409 Conflict
-                // van.
+                // When & Then: De GlobalExceptionHandler grijpt in
                 mockMvc.perform(multipart("/api/boeken/import").file(file))
                                 .andExpect(status().isConflict())
                                 .andExpect(content().string("ISBN 9780132350884 bestaat al in de database."));

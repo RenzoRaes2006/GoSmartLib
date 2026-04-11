@@ -20,7 +20,7 @@ export class HomePageLeerling implements OnInit {
   naam = signal<string>('Jeroen');
   gebruikerId = 1; // Tijdelijk hardcoded, pas aan naar ingelogde gebruiker
 
-  gelezenBoeken = signal<number>(6);
+  gelezenBoeken = signal<number>(0);
   leesDoel = signal<number>(10);
 
   // Variabelen voor de pop-up (Modal)
@@ -58,6 +58,17 @@ export class HomePageLeerling implements OnInit {
 
     // 3. Haal de actieve leningen op
     this.haalLeningenOp();
+
+    this.boekService.getLeengeschiedenis(this.gebruikerId).subscribe({
+      next: (geschiedenis) => {
+        // Tel alle leningen, behalve degene die door de bibbeheerder zijn geweigerd
+        const geldigeLeningen = geschiedenis.filter(lening => lening.status !== 'GEWEIGERD');
+        
+        // Update de meter op het scherm!
+        this.gelezenBoeken.set(geldigeLeningen.length);
+      },
+      error: (err) => console.error('Kon leengeschiedenis niet laden voor teller:', err)
+    });
   }
 
   haalLeningenOp() {
@@ -130,5 +141,18 @@ export class HomePageLeerling implements OnInit {
 
     // 4. Sluit de pop-up
     this.isEditModalOpen.set(false);
+  }
+
+  verwijder(id: number) {
+    if (confirm('Weet je zeker dat je deze lening volledig wil verwijderen?')) {
+      this.boekService.verwijderLening(id).subscribe({
+        next: (bericht) => {
+          alert(bericht);
+          // refresh the list after deletion (call your fetch function here)
+          this.haalLeningenOp(); // of haalAanvragenOp()
+        },
+        error: (err) => alert('Fout bij verwijderen: ' + err.message)
+      });
+    }
   }
 }

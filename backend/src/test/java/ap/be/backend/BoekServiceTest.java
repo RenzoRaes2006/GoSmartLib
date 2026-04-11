@@ -51,6 +51,7 @@ public class BoekServiceTest {
                 "2008",
                 464,
                 List.of("Software", "Programming"),
+                null,
                 "A handbook of agile software craftsmanship",
                 3,
                 "A1",
@@ -83,6 +84,7 @@ public class BoekServiceTest {
                 null,  // uitgaveJaar null
                 0,     // pagina
                 null,  // genre null
+                null,  // thematischeTag null
                 "Dit is een beschrijving",
                 5,
                 "",    // locatie leeg
@@ -117,6 +119,7 @@ public class BoekServiceTest {
                 "2003",
                 560,
                 List.of("Architecture"),
+                null,
                 "DDD blue book",
                 2,
                 "B2",
@@ -173,6 +176,7 @@ public class BoekServiceTest {
                 "2025",
                 320,
                 List.of("Tech"),
+                null,
                 "Updated description",
                 7,
                 "C3",
@@ -210,6 +214,7 @@ public class BoekServiceTest {
                 "2024",
                 100,
                 List.of("Any"),
+                null,
                 "Any",
                 1,
                 "Z1",

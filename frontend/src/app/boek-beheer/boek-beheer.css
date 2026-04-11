@@ -696,9 +696,9 @@ select:focus {
    ===================== */
 
 .genre-leesniveau-row {
-  grid-column: 1 / 3;
+  grid-column: 1 / -1;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr;
   gap: 18px;
   align-items: start;
 }

@@ -38,6 +38,7 @@ public class BoekService {
         boek.setUitgever(isNotBlank(boekDTO.uitgever()) ? boekDTO.uitgever() : "Geen uitgever");
         boek.setUitgaveJaar(isNotBlank(boekDTO.uitgaveJaar()) ? boekDTO.uitgaveJaar() : "Geen uitgavejaar");
         boek.setGenre(boekDTO.genre() != null && !boekDTO.genre().isEmpty() ? boekDTO.genre() : new ArrayList<>());
+        boek.setThematischeTag(boekDTO.thematischeTag() != null && !boekDTO.thematischeTag().isEmpty() ? boekDTO.thematischeTag() : new ArrayList<>());
         boek.setPagina(boekDTO.pagina());
         boek.setBeschrijving(boekDTO.beschrijving());
         boek.setAantalExemplaren(boekDTO.aantalExemplaren());
@@ -60,6 +61,7 @@ public class BoekService {
         boek.setUitgever(isNotBlank(boekDTO.uitgever()) ? boekDTO.uitgever() : "Geen uitgever");
         boek.setUitgaveJaar(isNotBlank(boekDTO.uitgaveJaar()) ? boekDTO.uitgaveJaar() : "Geen uitgavejaar");
         boek.setGenre(boekDTO.genre() != null && !boekDTO.genre().isEmpty() ? boekDTO.genre() : new ArrayList<>());
+        boek.setThematischeTag(boekDTO.thematischeTag() != null && !boekDTO.thematischeTag().isEmpty() ? boekDTO.thematischeTag() : new ArrayList<>());
         boek.setPagina(boekDTO.pagina());
         boek.setBeschrijving(boekDTO.beschrijving());
         boek.setAantalExemplaren(boekDTO.aantalExemplaren());
@@ -82,14 +84,19 @@ public class BoekService {
         return boekRepository.findByIsbn(isbn.trim()).orElse(null);
     }
 
-    public List<Boek> filterBoeken(String zoekterm, List<String> genres, String uitgever, Integer minPagina,
+    public Page<Boek> filterBoeken(String zoekterm, List<String> genres, List<String> thematischeTags, String uitgever,
+            Integer minPagina,
             Integer maxPagina,
-            Boolean beschikbaarheid, Integer uitgaveJaarVan, Integer uitgaveJaarTot, String leesniveau,
+            Boolean beschikbaarheid, Integer uitgaveJaarVan, Integer uitgaveJaarTot, String leesniveau, Integer page,
+            Integer size,
             Sort sort) {
         validateYearRange(uitgaveJaarVan, uitgaveJaarTot);
+        PageRequest pageable = PageRequest.of(page != null ? page : 0, size != null ? size : 10, sort);
         List<String> genresParam = (genres == null || genres.isEmpty()) ? null : genres;
-        return boekRepository.filterBoeken(zoekterm, genresParam, uitgever, minPagina, maxPagina, beschikbaarheid,
-                uitgaveJaarVan, uitgaveJaarTot, leesniveau, sort);
+        List<String> tagsParam = (thematischeTags == null || thematischeTags.isEmpty()) ? null : thematischeTags;
+        return boekRepository.filterBoeken(zoekterm, genresParam, tagsParam, uitgever, minPagina, maxPagina,
+                beschikbaarheid,
+                uitgaveJaarVan, uitgaveJaarTot, leesniveau, pageable);
     }
 
     private void validateYearRange(Integer uitgaveJaarVan, Integer uitgaveJaarTot) {

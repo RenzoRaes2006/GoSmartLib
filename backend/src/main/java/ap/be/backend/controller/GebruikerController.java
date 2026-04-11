@@ -97,4 +97,17 @@ public class GebruikerController {
     public ResponseEntity<List<Uitlening>> getActieveLeningen(@PathVariable Long gebruikerId) {
         return ResponseEntity.ok(gebruikerService.getActieveLeningenVanGebruiker(gebruikerId));
     }
+
+    @DeleteMapping("/leningen/{uitleningId}")
+    public ResponseEntity<String> verwijderLening(@PathVariable Long uitleningId) {
+        // execute the delete action and return a success message
+        gebruikerService.verwijderLening(uitleningId);
+        return ResponseEntity.ok("Lening succesvol verwijderd en voorraad hersteld.");
+    }
+
+    @GetMapping("/{gebruikerId}/geschiedenis")
+    public ResponseEntity<List<Uitlening>> getLeengeschiedenis(@PathVariable Long gebruikerId) {
+        return ResponseEntity.ok(gebruikerService.getLeengeschiedenisVanGebruiker(gebruikerId));
+    }
+
 }

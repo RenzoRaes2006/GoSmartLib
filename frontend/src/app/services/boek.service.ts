@@ -23,46 +23,44 @@ export class BoekService {
 
   private http = inject(HttpClient);
 
-  getBoeken(zoekterm?: string): Observable<Boek[]> {
-    let params = new HttpParams();
-
-    if (zoekterm && zoekterm.trim() !== '') {
-      params = params.set('zoekterm', zoekterm);
-    }
-
-    return this.http.get<Boek[]>(this.apiUrl, { params });
-  }
-
-  getBoekenGefilterd(filters: FilterOptions): Observable<Boek[]> {
+  getBoekenGefilterd(filters: FilterOptions): Observable<PageResponse<Boek>> {
     let params = new HttpParams();
 
     if (filters.genres?.length) {
       filters.genres.forEach((g) => (params = params.append('genre', g)));
     }
 
+    if (filters.thematischeTags?.length) {
+      filters.thematischeTags.forEach((t) => (params = params.append('thematischeTag', t)));
+    }
+
     Object.entries(filters).forEach(([key, value]) => {
-      if (key === 'genres') return;
+      if (key === 'genres' || key === 'thematischeTags') return;
       if (value !== undefined && value !== null && value !== '') {
         const paramKey = key === 'beschikbaarheid' ? 'beschikbaar' : key;
         params = params.set(paramKey, value.toString());
       }
     });
 
-    return this.http.get<Boek[]>(this.apiUrl, { params });
+    return this.http.get<PageResponse<Boek>>(this.apiUrl, { params });
   }
 
   getBoekOpId(id: number): Observable<Boek> {
     return this.http.get<Boek>(`${this.apiUrl}/${id}`);
   }
 
-  getBeheerBoekenGefilterd(filters: FilterOptions): Observable<Boek[]> {
-    let params = new HttpParams();
+  getBeheerBoekenGefilterd(
+    filters: FilterOptions,
+    page: number = 0,
+    size: number = 6,
+  ): Observable<PageResponse<Boek>> {
+    let params = new HttpParams().set('page', page.toString()).set('size', size.toString());
 
     if (filters.zoekterm && filters.zoekterm.trim() !== '') {
       params = params.set('zoekterm', filters.zoekterm);
     }
 
-    return this.http.get<Boek[]>(`${this.apiUrl}`, { params });
+    return this.http.get<PageResponse<Boek>>(`${this.apiUrl}`, { params });
   }
 
   toevoegen(boek: NieuwBoek): Observable<Boek> {
@@ -103,6 +101,37 @@ export class BoekService {
     return this.http.get<any[]>(`${this.apiGebruikerUrl}/${gebruikerId}/leningen`);
   }
 
+  // fetch all pending loan requests
+  getAlleAanvragen(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiGebruikerUrl}/aanvragen`);
+  }
+
+  // approve a loan request
+  keurAanvraagGoed(uitleningId: number): Observable<string> {
+    return this.http.put(
+      `${this.apiGebruikerUrl}/aanvragen/${uitleningId}/goedkeuren`,
+      {},
+      { responseType: 'text' as 'json' },
+    ) as Observable<string>;
+  }
+
+  // reject a loan request
+  weigerAanvraag(uitleningId: number): Observable<string> {
+    return this.http.put(
+      `${this.apiGebruikerUrl}/aanvragen/${uitleningId}/weigeren`,
+      {},
+      { responseType: 'text' as 'json' },
+    ) as Observable<string>;
+  }
+
+  // delete a loan
+  verwijderLening(uitleningId: number): Observable<string> {
+    return this.http.delete(`${this.apiGebruikerUrl}/leningen/${uitleningId}`, {
+      responseType: 'text' as 'json',
+    }) as Observable<string>;
+  }
+
+  // upload an image file
   uploadAfbeelding(file: File): Observable<string> {
     const formData = new FormData();
     formData.append('file', file);
@@ -114,5 +143,9 @@ export class BoekService {
     formData.append('file', file, file.name);
 
     return this.http.post(`${this.apiUrl}/import`, formData, { responseType: 'text' });
+  }
+
+  getLeengeschiedenis(gebruikerId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiGebruikerUrl}/${gebruikerId}/geschiedenis`);
   }
 }

@@ -2,6 +2,8 @@ package ap.be.backend.controller;
 
 import java.util.List;
 
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,13 +17,13 @@ import ap.be.backend.service.GerapporteerdeBeoordelingService;
 import jakarta.validation.Valid;
 
 @RestController
-// @CrossOrigin(origins = {"http://frontend.localhost", "http://localhost:4200"})
 @RequestMapping("/api")
 public class BeoordelingController {
     private final BeoordelingService beoordelingService;
     private final GerapporteerdeBeoordelingService gerapporteerdeBeoordelingService;
 
-    public BeoordelingController(BeoordelingService beoordelingService, GerapporteerdeBeoordelingService gerapporteerdeBeoordelingService) {
+    public BeoordelingController(BeoordelingService beoordelingService,
+            GerapporteerdeBeoordelingService gerapporteerdeBeoordelingService) {
         this.beoordelingService = beoordelingService;
         this.gerapporteerdeBeoordelingService = gerapporteerdeBeoordelingService;
     }
@@ -31,7 +33,9 @@ public class BeoordelingController {
         return beoordelingService.getBeoordelingenOpBoekId(id);
     }
 
-    @PostMapping("/reviews") // dat moet verbeter worden, want er moet ook een boekId meegegeven worden. dan in de service moet dan ook een boek opgehaald worden en dan de beoordeling aan dat boek koppelen
+    @PostMapping("/reviews") // dat moet verbeter worden, want er moet ook een boekId meegegeven worden. dan
+                             // in de service moet dan ook een boek opgehaald worden en dan de beoordeling
+                             // aan dat boek koppelen
     public BeoordelingDTO beoordelingOpslaan(@Valid @RequestBody BeoordelingDTO beoordeling) {
         beoordelingService.beoordelingOpslaan(beoordeling);
         return beoordeling;
@@ -39,7 +43,15 @@ public class BeoordelingController {
 
     @PostMapping("/reviews/{id}/report")
     public void rapporteerBeoordeling(@PathVariable("id") Long beoordelingId, @RequestBody String reden) {
-        Long tijdelijkeGebruikerId = 1L; // tijdelijke gebruiker ID, dit moet vervangen worden door de daadwerkelijke gebruiker ID uit de authenticatie context
+        Long tijdelijkeGebruikerId = 1L; // tijdelijke gebruiker ID, dit moet vervangen worden door de daadwerkelijke
+                                         // gebruiker ID uit de authenticatie context
         gerapporteerdeBeoordelingService.rapporteerBeoordeling(beoordelingId, tijdelijkeGebruikerId, reden);
+    }
+
+    
+    @DeleteMapping("/reviews/{id}")
+    public ResponseEntity<Void> verwijderBeoordeling(@PathVariable("id") Long beoordelingId) {
+        beoordelingService.verwijderBeoordeling(beoordelingId);
+        return ResponseEntity.noContent().build();
     }
 }

@@ -30,8 +30,13 @@ export class Catalogus implements OnInit, OnDestroy {
   uitgaveJaarTot = signal<number | undefined>(undefined);
   leesniveau = signal<string | undefined>(undefined);
   selectedHoofdGenre = signal<string>('');
+  selectedThematischeTag = signal<string | undefined>(undefined);
   paginaError = signal<string>('');
   maxPaginaLimit = 1500;
+  huidigePagina = signal<number>(0);
+  paginaGrootte = signal<number>(10);
+  totaalPaginas = signal<number>(1);
+  totaalBoeken = signal<number>(0);
 
   // Key voor sessionStorage
   private readonly FILTERS_KEYS = 'catalogus_filters';
@@ -52,6 +57,26 @@ export class Catalogus implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.navSub.unsubscribe();
   }
+
+  // Beschikbare thematische tags
+  beschikbareTags: string[] = [
+    'Armoede & ongelijkheid',
+    'Avontuur & ontdekking',
+    'Diversiteit & inclusie',
+    'Familie',
+    'Gender & seksualiteit',
+    'Identiteit & zelfbeeld',
+    'Liefde & relaties',
+    'Macht & onrecht',
+    'Mentale gezondheid',
+    'Migratie & afkomst',
+    'Overleven',
+    'Rouw & verlies',
+    'School & prestatiedruk',
+    'Sociale media',
+    'Toekomst & technologie',
+    'Vriendschap',
+  ];
 
   // Genre hiërarchie
   genreHiërarchie = {
@@ -102,33 +127,23 @@ export class Catalogus implements OnInit, OnDestroy {
         this.uitgaveJaarTot.set(filters.uitgaveJaarTot);
         this.leesniveau.set(filters.leesniveau);
         this.selectedHoofdGenre.set(filters.selectedHoofdGenre || '');
+        this.selectedThematischeTag.set(filters.selectedThematischeTag);
+        this.huidigePagina.set(filters.huidigePagina || 0);
 
-        this.updateFilters();
+        this.updateFilters(false);
         return;
       } catch (e) {
         console.error('Fout bij parsen filters:', e);
       }
     }
-    this.laadBoeken();
-  }
-
-  // Om boeken te laden, optioneel gefilterd op een zoekterm
-  private laadBoeken(term?: string): void {
-    this.boekService.getBoeken(term).subscribe({
-      next: (data) => {
-        this.boekenlijst.set(data);
-      },
-      error: (err) => console.log('Fout bij ophalen boeken:', err),
-    });
-  }
-
-  onSearch(term: string): void {
-    this.zoekTerm.set(term);
-    this.laadBoeken(term);
+    this.updateFilters();
   }
 
   // Om filters bij te werken en boeken opnieuw te laden op basis van de nieuwe filters
-  updateFilters(): void {
+  updateFilters(resetPagina = true): void {
+    if (resetPagina) {
+      this.huidigePagina.set(0);
+    }
     const min = this.minPagina();
     const max = this.maxPagina();
 
@@ -159,6 +174,7 @@ export class Catalogus implements OnInit, OnDestroy {
     const filterOptions: FilterOptions = {
       zoekterm: this.zoekTerm()?.trim() || undefined,
       genres,
+      thematischeTags: this.selectedThematischeTag() ? [this.selectedThematischeTag()!] : undefined,
       uitgever: this.selectedUitgever()?.trim() || undefined,
       minPagina: (this.minPagina() ?? 0) > 0 ? this.minPagina() : undefined,
       maxPagina:
@@ -171,6 +187,8 @@ export class Catalogus implements OnInit, OnDestroy {
       uitgaveJaarVan: this.uitgaveJaarVan(),
       uitgaveJaarTot: this.uitgaveJaarTot(),
       leesniveau: this.leesniveau(),
+      page: this.huidigePagina(),
+      size: this.paginaGrootte(),
     };
 
     // Update de filters in de state en laad de gefilterde boeken
@@ -191,6 +209,8 @@ export class Catalogus implements OnInit, OnDestroy {
       uitgaveJaarTot: this.uitgaveJaarTot(),
       leesniveau: this.leesniveau(),
       selectedHoofdGenre: this.selectedHoofdGenre(),
+      selectedThematischeTag: this.selectedThematischeTag(),
+      huidigePagina: this.huidigePagina(),
     };
 
     // Sla de filters op als JSON-string in sessionStorage
@@ -230,7 +250,9 @@ export class Catalogus implements OnInit, OnDestroy {
   private laadGefilterdeBoeken(): void {
     this.boekService.getBoekenGefilterd(this.filters()).subscribe({
       next: (data) => {
-        this.boekenlijst.set(data);
+        this.boekenlijst.set(data.content);
+        this.totaalPaginas.set(data.totalPages);
+        this.totaalBoeken.set(data.totalElements);
       },
       error: (err) => console.log('Fout bij ophalen gefilterde boeken:', err),
     });
@@ -271,6 +293,20 @@ export class Catalogus implements OnInit, OnDestroy {
   }
 
   resetFilters(): void {
+    const hadFilters =
+      !!this.zoekTerm()?.trim() ||
+      this.selectedGenre() !== undefined ||
+      !!this.selectedUitgever()?.trim() ||
+      this.minPagina() !== undefined ||
+      this.maxPagina() !== undefined ||
+      this.selectedSorteerOp() !== undefined ||
+      this.beschikbaarheid() !== undefined ||
+      this.uitgaveJaarVan() !== undefined ||
+      this.uitgaveJaarTot() !== undefined ||
+      this.leesniveau() !== undefined ||
+      this.selectedThematischeTag() !== undefined ||
+      !!this.selectedHoofdGenre();
+
     this.zoekTerm.set('');
     this.selectedGenre.set(undefined);
     this.selectedUitgever.set('');
@@ -283,7 +319,24 @@ export class Catalogus implements OnInit, OnDestroy {
     this.uitgaveJaarTot.set(undefined);
     this.leesniveau.set(undefined);
     this.selectedHoofdGenre.set('');
+    this.selectedThematischeTag.set(undefined);
     sessionStorage.removeItem(this.FILTERS_KEYS);
-    this.updateFilters();
+    this.updateFilters(hadFilters);
+  }
+
+  gaNaarVolgendePagina() {
+    if (this.huidigePagina() < this.totaalPaginas() - 1) {
+      this.huidigePagina.set(this.huidigePagina() + 1);
+      this.updateFilters(false);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  gaNaarVorigePagina() {
+    if (this.huidigePagina() > 0) {
+      this.huidigePagina.set(this.huidigePagina() - 1);
+      this.updateFilters(false);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   }
 }

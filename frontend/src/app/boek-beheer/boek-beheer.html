@@ -309,6 +309,41 @@
           <option value="D (literair niveau)">D (literair niveau)</option>
         </select>
       </div>
+
+      <div>
+        <label>Thematische tags:</label>
+        <input type="hidden" formControlName="thematischeTag" />
+        <div class="genre-dropdown-row">
+          <select
+            [ngModel]="selectedTag()"
+            (ngModelChange)="selectedTag.set($event)"
+            [ngModelOptions]="{ standalone: true }"
+          >
+            <option value="">Kies een thematische tag</option>
+            @for (tag of beschikbareTags; track tag) {
+              <option [value]="tag">{{ tag }}</option>
+            }
+          </select>
+          <button
+            type="button"
+            class="genre-toevoegen-btn"
+            (click)="voegTagToe()"
+            [disabled]="!selectedTag()"
+          >
+            +
+          </button>
+        </div>
+        @if (geselecteerdeTags().length > 0) {
+          <div class="genre-tags">
+            @for (tag of geselecteerdeTags(); track tag) {
+              <span class="genre-tag">
+                {{ tag }}
+                <button type="button" (click)="verwijderTag(tag)">&times;</button>
+              </span>
+            }
+          </div>
+        }
+      </div>
     </div>
 
     <div>
