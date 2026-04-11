@@ -9,6 +9,7 @@ import { PageNotFound } from './page-not-found/page-not-found';
 import { Login } from './login/login';
 import { AdminGuard } from './services/admin-guard';
 import { AdminDashboard } from './admin-dashboard/admin-dashboard';
+import { BoekImport } from './boek-import/boek-import';
 
 export const routes: Routes = [
   { path: '', component: HomePageLeerling },
@@ -24,5 +25,6 @@ export const routes: Routes = [
     component: AdminDashboard,
     //canActivate: [AdminGuard]
   },
+  { path: 'boek-import', component: BoekImport },
   { path: '**', redirectTo: 'not-found' },
 ];

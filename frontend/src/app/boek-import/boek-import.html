@@ -1,0 +1,54 @@
+<div class="import-page-container">
+  <div class="beheer-topbar">
+    <h2>Data importeren</h2>
+    <button type="button" class="verlaat-button" routerLink="/admin">Terug naar dashboard</button>
+  </div>
+
+  <div class="import-card">
+    <div class="import-header">
+      <h3>Bulk import via Excel</h3>
+      <p>
+        Upload een Excel-bestand (.xlsx) om meerdere boeken tegelijk aan de catalogus toe te voegen.
+        Zorg dat de kolomnamen exact overeenkomen met ons systeem.
+      </p>
+
+      <div style="display: flex; gap: 10px; justify-content: center; margin-top: 15px">
+        <button type="button" class="btn-secondary" (click)="downloadExcelVoorbeeld()">
+          📊 Download voorbeeld (.xlsx)
+        </button>
+      </div>
+    </div>
+
+    <div class="message-container error-message" *ngIf="errorMessage()">
+      {{ errorMessage() }}
+    </div>
+    <div class="message-container success-message" *ngIf="successMessage()">
+      {{ successMessage() }}
+    </div>
+
+    <div class="upload-sectie">
+      <label for="fileUpload" class="file-label">Selecteer Excel-bestand</label>
+      <input
+        id="fileUpload"
+        type="file"
+        #fileInput
+        (change)="onFileSelected($event)"
+        accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+        class="file-input"
+      />
+
+      <div class="file-info" *ngIf="selectedFile">
+        Geselecteerd: <strong>{{ selectedFile.name }}</strong>
+      </div>
+
+      <button
+        type="button"
+        class="btn-primary upload-btn"
+        (click)="uploadBestand(fileInput)"
+        [disabled]="!selectedFile || isUploading()"
+      >
+        {{ isUploading() ? 'Bestand aan het verwerken...' : 'Start import' }}
+      </button>
+    </div>
+  </div>
+</div>

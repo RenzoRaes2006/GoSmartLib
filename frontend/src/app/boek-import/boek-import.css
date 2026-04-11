@@ -1,0 +1,233 @@
+/* =========================================
+   BOEK IMPORT STYLING (Huisstijl GO!)
+   ========================================= */
+:host {
+  display: block;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #2d3748;
+  width: 100%;
+  padding: 40px;
+  box-sizing: border-box;
+  min-height: 100vh;
+  background-color: #efefe3; /* De koelere beige achtergrond */
+}
+
+.import-page-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* =====================
+   TOPBAR
+   ===================== */
+.beheer-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.beheer-topbar h2 {
+  color: #8c1b3f;
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.verlaat-button {
+  background: #ffffff;
+  border: 1px solid #c4bead;
+  color: #718096;
+  padding: 10px 20px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.verlaat-button:hover {
+  background: #faf9f5;
+  color: #8c1b3f;
+  border-color: #8c1b3f;
+}
+
+/* =====================
+   IMPORT KAART
+   ===================== */
+.import-card {
+  background: #ffffff;
+  border: 1px solid #c4bead;
+  border-top: 5px solid #8c1b3f;
+  border-radius: 16px;
+  padding: 40px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+}
+
+.import-header {
+  margin-bottom: 30px;
+  text-align: center;
+  border-bottom: 1px solid #e2dfd5;
+  padding-bottom: 20px;
+}
+
+.import-header h3 {
+  color: #8c1b3f;
+  font-size: 1.4rem;
+  margin: 0 0 10px 0;
+}
+
+.import-header p {
+  color: #718096;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* =====================
+   UPLOAD SECTIE
+   ===================== */
+.upload-sectie {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 30px;
+  background-color: #faf9f5;
+  border: 2px dashed #c4bead;
+  border-radius: 12px;
+  transition: border-color 0.3s;
+}
+
+.upload-sectie:hover {
+  border-color: #8c1b3f;
+}
+
+/* Verberg de standaard lelijke file input */
+.file-input {
+  display: none;
+}
+
+/* Maak een mooie custom knop voor het selecteren */
+.file-label {
+  background-color: #ffffff;
+  color: #8c1b3f;
+  border: 2px solid #8c1b3f;
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.file-label:hover {
+  background-color: #8c1b3f;
+  color: #ffffff;
+}
+
+.file-info {
+  background-color: #e2e8f0;
+  color: #2d3748;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+.upload-btn {
+  margin-top: 10px;
+  width: 100%;
+  max-width: 300px;
+  padding: 14px 24px;
+  font-size: 1.05rem;
+}
+
+/* =====================
+   KNOPPEN ALGEMEEN
+   ===================== */
+.btn-primary {
+  background: #8c1b3f;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #6d1531;
+  transform: translateY(-2px);
+}
+
+.btn-primary:disabled {
+  background: #cbd5e1;
+  cursor: not-allowed;
+  color: #64748b;
+  transform: none;
+}
+.btn-secondary {
+  background: #ffffff;
+  color: #8c1b3f;
+  border: 1px solid #8c1b3f;
+  border-radius: 10px;
+  padding: 8px 16px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  margin-top: 15px;
+  transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+  background: #faf9f5;
+  box-shadow: 0 4px 8px rgba(140, 27, 63, 0.1);
+}
+
+/* =====================
+   BERICHTEN
+   ===================== */
+.message-container {
+  padding: 15px 20px;
+  margin-bottom: 25px;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.error-message {
+  color: #991b1b;
+  background: #fff5f5;
+  border: 1px solid #fecaca;
+}
+
+.success-message {
+  color: #166534;
+  background: #f0fff4;
+  border: 1px solid #c6f6d5;
+}
+
+/* =====================
+   RESPONSIVE
+   ===================== */
+@media (max-width: 768px) {
+  :host {
+    padding: 20px 15px;
+  }
+  
+  .import-card {
+    padding: 25px 20px;
+  }
+  
+  .beheer-topbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+  
+  .verlaat-button {
+    align-self: flex-start;
+  }
+}

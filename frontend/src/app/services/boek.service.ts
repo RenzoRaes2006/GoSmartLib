@@ -108,4 +108,11 @@ export class BoekService {
     formData.append('file', file);
     return this.http.post(this.afbeeldingUrl + '/upload', formData, { responseType: 'text' });
   }
+
+  importeerBoeken(file: File): Observable<string> {
+    const formData: FormData = new FormData();
+    formData.append('file', file, file.name);
+
+    return this.http.post(`${this.apiUrl}/import`, formData, { responseType: 'text' });
+  }
 }

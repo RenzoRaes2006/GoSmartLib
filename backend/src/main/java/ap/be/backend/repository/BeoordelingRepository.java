@@ -8,4 +8,4 @@ import ap.be.backend.entity.Beoordeling;
 
 public interface BeoordelingRepository extends ListCrudRepository<Beoordeling, Long> {
     List<Beoordeling> findByBoekId(long boekId);
-} 
+}

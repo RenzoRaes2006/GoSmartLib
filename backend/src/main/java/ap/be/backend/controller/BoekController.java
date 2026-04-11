@@ -13,9 +13,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import ap.be.backend.dto.BoekDTO;
 import ap.be.backend.entity.Boek;
+import ap.be.backend.service.BoekImportService;
 import ap.be.backend.service.BoekService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -26,9 +28,11 @@ import org.springframework.data.domain.Sort;
 // })
 public class BoekController {
     private final BoekService boekService;
+    private final BoekImportService boekImportService;
 
-    public BoekController(BoekService boekService) {
+    public BoekController(BoekService boekService, BoekImportService boekImportService) {
         this.boekService = boekService;
+        this.boekImportService = boekImportService;
     }
 
     @GetMapping("/api/boeken")
@@ -106,6 +110,18 @@ public class BoekController {
     public ResponseEntity<List<Boek>> getPopulaireBoeken() {
         List<Boek> populaireBoeken = boekService.getPopulaireBoeken();
         return ResponseEntity.ok(populaireBoeken);
+    }
+
+    @PostMapping("/api/boeken/import")
+    @CrossOrigin(origins = "*", allowedHeaders = "*")
+    public ResponseEntity<?> importeerBoeken(@RequestParam("file") MultipartFile file) {
+        if (file.isEmpty()) {
+            throw new IllegalArgumentException("Het geüploade bestand is leeg.");
+        }
+
+        int aantalGeimporteerd = boekImportService.importeerBestand(file);
+
+        return ResponseEntity.ok("Aantal geïmporteerde boeken: " + aantalGeimporteerd);
     }
 
 }
