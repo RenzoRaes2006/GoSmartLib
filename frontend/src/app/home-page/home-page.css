@@ -26,7 +26,27 @@
   box-shadow: 0 6px 15px rgba(140, 27, 63, 0.3);
 }
 
+.leerkracht-sectie {
+  margin-top: -10px;
+}
 
+.leerkracht-sectie .section-header h2 {
+  margin-top: 0;
+}
+
+.leerkracht-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  margin-top: 15px;
+}
+
+.leerkracht-sectie {
+  background-color: #f0efe4;
+  padding: 25px;
+  border-radius: 16px;
+  margin-top: 20px;
+}
 /* =========================================
    FULL WIDTH LAYOUT & BASE COLORS
    ========================================= */

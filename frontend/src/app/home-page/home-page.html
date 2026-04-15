@@ -44,35 +44,33 @@
       </section>
 
     </div>
+@if (gebruikerRol() === 'LEERKRACHT') {
+<div class="inner-container leerkracht-sectie">
+  <div class="section-header">
+    <h2>Leerkrachtentools</h2>
+  </div>
+
+  <div class="leerkracht-grid">
+    <button class="btn-leerkracht" [routerLink]="['/bulk-ontlenen']">
+      Klas ontlenen
+    </button>
+
+    <button class="btn-leerkracht" [routerLink]="['/didactische-collectie']">
+      Lesmateriaal
+    </button>
+
+    <button class="btn-leerkracht" [routerLink]="['/leerlingen-overzicht']">
+      Leerling opzoeken
+    </button>
+
+    <button class="btn-leerkracht" [routerLink]="['/leeslijsten-beheer']">
+      Leeslijsten
+    </button>
+  </div>
+</div>
+}
   </section>
 
-  @if (gebruikerRol() === 'LEERKRACHT') {
-  <section class="full-width-section bg-white border-line">
-    <div class="inner-container">
-      <div class="section-header">
-        <h2>Leerkrachtentools</h2>
-      </div>
-
-      <div class="leerkracht-grid">
-        <button class="btn-leerkracht" [routerLink]="['/bulk-ontlenen']">
-          Klas ontlenen
-        </button>
-
-        <button class="btn-leerkracht" [routerLink]="['/didactische-collectie']">
-          Lesmateriaal
-        </button>
-
-        <button class="btn-leerkracht" [routerLink]="['/leerlingen-overzicht']">
-          Leerling opzoeken
-        </button>
-
-        <button class="btn-leerkracht" [routerLink]="['/leeslijsten-beheer']">
-          Leeslijsten
-        </button>
-      </div>
-    </div>
-  </section>
-  }
 
   <section class="full-width-section bg-beige border-line">
     <div class="inner-container">
