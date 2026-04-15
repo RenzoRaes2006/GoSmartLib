@@ -9,10 +9,13 @@ import { FormsModule } from '@angular/forms';
 @Component({
   selector: 'app-home-page-leerling',
   imports: [CommonModule, RouterLink, FormsModule],
-  templateUrl: './home-page-leerling.html',
-  styleUrl: './home-page-leerling.css',
+  templateUrl: './home-page.html',
+  styleUrl: './home-page.css',
 })
-export class HomePageLeerling implements OnInit {
+export class HomePage implements OnInit {
+  // Voeg dit toe in je DashboardComponent class
+  gebruikerRol = signal<string>('LEERKRACHT'); // kan ook 'LEERLING' zijn
+
   private boekService = inject(BoekService);
   private leeslijstService = inject(LeeslijstService);
 
@@ -63,7 +66,7 @@ export class HomePageLeerling implements OnInit {
       next: (geschiedenis) => {
         // Tel alle leningen, behalve degene die door de bibbeheerder zijn geweigerd
         const geldigeLeningen = geschiedenis.filter(lening => lening.status !== 'GEWEIGERD');
-        
+
         // Update de meter op het scherm!
         this.gelezenBoeken.set(geldigeLeningen.length);
       },

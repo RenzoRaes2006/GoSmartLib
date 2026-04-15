@@ -15,7 +15,7 @@
           </div>
 
           <div class="goal-wrapper">
-            
+
             <div class="reading-goal">
               <div class="goal-text">
                 <span>Jouw leesdoel dit jaar</span>
@@ -46,6 +46,34 @@
     </div>
   </section>
 
+  @if (gebruikerRol() === 'LEERKRACHT') {
+  <section class="full-width-section bg-white border-line">
+    <div class="inner-container">
+      <div class="section-header">
+        <h2>Leerkrachtentools</h2>
+      </div>
+
+      <div class="leerkracht-grid">
+        <button class="btn-leerkracht" [routerLink]="['/bulk-ontlenen']">
+          Klas ontlenen
+        </button>
+
+        <button class="btn-leerkracht" [routerLink]="['/didactische-collectie']">
+          Lesmateriaal
+        </button>
+
+        <button class="btn-leerkracht" [routerLink]="['/leerlingen-overzicht']">
+          Leerling opzoeken
+        </button>
+
+        <button class="btn-leerkracht" [routerLink]="['/leeslijsten-beheer']">
+          Leeslijsten
+        </button>
+      </div>
+    </div>
+  </section>
+  }
+
   <section class="full-width-section bg-beige border-line">
     <div class="inner-container">
 
@@ -55,7 +83,9 @@
         <div class="uitgelicht-grid">
           @for (boek of uitgelichteBoeken(); track boek.id) {
           <div class="boek-card" [routerLink]="['/details', boek.id]">
-            <img [src]="boek.afbeelding || 'https://bookshow.blurb.com/bookshow/cache/P11360640/md/cover_2.jpeg?access_key=675523b769268bce5b0b710b3d0e7841'" [alt]="boek.titel">
+            <img
+              [src]="boek.afbeelding || 'https://bookshow.blurb.com/bookshow/cache/P11360640/md/cover_2.jpeg?access_key=675523b769268bce5b0b710b3d0e7841'"
+              [alt]="boek.titel">
             <div class="boek-info">
               <h4>{{ boek.titel }}</h4>
               <p>{{ boek.auteur }}</p>
@@ -118,25 +148,25 @@
         <div class="uitleentermijnen-container">
           <h2>Uitleentermijnen</h2>
           <div class="scroll-list">
-            
+
             @for (lening of leningen(); track lening.id) {
-              <div class="lening-item" [class.urgent]="lening.resterendeDagen <= 7 && !lening.isAanvraag">
-                <div class="lening-titel-box">
-                  <span class="book-icon">📘</span>
-                  <span class="lening-titel">{{ lening.titel }}</span>
-                </div>
-                
-                <div class="dagen-badge">
-                  @if (lening.isAanvraag) {
-                    <span>Wachtend ⏳</span>
-                  } @else {
-                    <span>{{ lening.resterendeDagen }} d</span>
-                  }
-                </div>
-                <button class="btn-verwijderen" (click)="verwijder(lening.id)">Verwijderen</button>
+            <div class="lening-item" [class.urgent]="lening.resterendeDagen <= 7 && !lening.isAanvraag">
+              <div class="lening-titel-box">
+                <span class="book-icon">📘</span>
+                <span class="lening-titel">{{ lening.titel }}</span>
               </div>
+
+              <div class="dagen-badge">
+                @if (lening.isAanvraag) {
+                <span>Wachtend ⏳</span>
+                } @else {
+                <span>{{ lening.resterendeDagen }} d</span>
+                }
+              </div>
+              <button class="btn-verwijderen" (click)="verwijder(lening.id)">Verwijderen</button>
+            </div>
             } @empty {
-              <p class="empty-message">Geen boeken geleend.</p>
+            <p class="empty-message">Geen boeken geleend.</p>
             }
 
           </div>
