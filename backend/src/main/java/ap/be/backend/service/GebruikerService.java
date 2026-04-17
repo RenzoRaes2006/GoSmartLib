@@ -211,4 +211,14 @@ public class GebruikerService {
         // Haalt alle leningen op, inclusief ingeleverde en afgewezen boeken
         return uitleningRepository.findByGebruiker_GebruikerIDOrderByUitleenDatumDesc(gebruikerId);
     }
+
+    public Gebruiker getLeerlingBySchoolId(long schoolId) {
+        Gebruiker gebruiker = gebruikerRepository.findBySchoolId(schoolId)
+                .orElseThrow(
+                        () -> new GebruikerNotFoundException("Leerling met school ID " + schoolId + " niet gevonden"));
+        if (gebruiker.getRol() != Rol.LEERLING) {
+            throw new GebruikerNotFoundException("Leerling met school ID " + schoolId + " niet gevonden");
+        }
+        return gebruiker;
+    }
 }
