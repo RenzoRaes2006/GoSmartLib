@@ -215,4 +215,22 @@ public class GebruikerServiceTest {
         then(boekRepository).should(never()).save(any(Boek.class));
         then(uitleningRepository).should(never()).save(any(Uitlening.class));
     }
+
+    @Test
+    void givenUser_whenGetLeengeschiedenis_thenReturnOrderedList() {
+        // given: a user with a history of loans
+        Long userId = 1L;
+        List<Uitlening> expectedHistory = Arrays.asList(testUitlening);
+        
+        // mock the specific repository call we created for the history
+        given(uitleningRepository.findByGebruiker_GebruikerIDOrderByUitleenDatumDesc(userId))
+                .willReturn(expectedHistory);
+
+        // when: we fetch the history
+        List<Uitlening> actualHistory = gebruikerService.getLeengeschiedenisVanGebruiker(userId);
+
+        // then: it returns the correct list and calls the correct repository method
+        assertEquals(1, actualHistory.size());
+        then(uitleningRepository).should(times(1)).findByGebruiker_GebruikerIDOrderByUitleenDatumDesc(userId);
+    }
 }
