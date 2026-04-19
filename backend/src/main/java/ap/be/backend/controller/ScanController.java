@@ -2,8 +2,8 @@ package ap.be.backend.controller;
 
 import org.springframework.web.bind.annotation.RestController;
 
-import ap.be.backend.dto.ScanRequestDTO;
-import ap.be.backend.dto.ScanResponseDTO;
+import ap.be.backend.dto.ScanBatchRequestDTO;
+import ap.be.backend.dto.ScanBatchResponseDTO;
 import ap.be.backend.service.ScanService;
 
 import org.springframework.http.ResponseEntity;
@@ -20,10 +20,9 @@ public class ScanController {
     }
 
     @CrossOrigin(origins = "*", allowedHeaders = "*")
-    @PostMapping("/api/scan")
-    public ResponseEntity<ScanResponseDTO> verwerkScan(@RequestBody ScanRequestDTO scanRequest) {
-        ScanResponseDTO response = scanService.verwerkScan(scanRequest);
+    @PostMapping("/api/scan/batch")
+    public ResponseEntity<ScanBatchResponseDTO> verwerkBatch(@RequestBody ScanBatchRequestDTO batchRequest) {
+        ScanBatchResponseDTO response = scanService.verwerkBatch(batchRequest);
         return ResponseEntity.ok(response);
     }
-
 }

@@ -13,6 +13,7 @@ import { AdminDashboard } from './admin-dashboard/admin-dashboard';
 import { BoekImport } from './boek-import/boek-import';
 import { GerapporteerdeReviews } from './gerapporteerde-reviews/gerapporteerde-reviews';
 import { Leengeschiedenis } from './leengeschiedenis/leengeschiedenis';
+import { ScanModus } from './scan-modus/scan-modus';
 
 export const routes: Routes = [
   { path: '', component: HomePageLeerling },
@@ -24,6 +25,7 @@ export const routes: Routes = [
   { path: 'not-found', component: PageNotFound },
   { path: 'login/smartschool', component: Login },
   { path: 'beheer/aanvragen', component: AanvragenBeheer },
+  { path: 'beheer/scan', component: ScanModus },
   { path: 'gerapporteerde-beoordelingen', component: GerapporteerdeReviews },
   { path: 'leengeschiedenis', component: Leengeschiedenis },
   {

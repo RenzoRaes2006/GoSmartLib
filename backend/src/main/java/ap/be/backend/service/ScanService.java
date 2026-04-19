@@ -1,16 +1,17 @@
 package ap.be.backend.service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import ap.be.backend.dto.ScanRequestDTO;
-import ap.be.backend.dto.ScanResponseDTO;
+import ap.be.backend.dto.ScanBatchItemResultDTO;
+import ap.be.backend.dto.ScanBatchRequestDTO;
+import ap.be.backend.dto.ScanBatchResponseDTO;
 import ap.be.backend.entity.Boek;
 import ap.be.backend.entity.Gebruiker;
 import ap.be.backend.entity.Uitlening;
-import ap.be.backend.exception.BoekNotFoundException;
-import ap.be.backend.exception.BoekNietBeschikbaarException;
 import ap.be.backend.repository.BoekRepository;
 import ap.be.backend.repository.UitleningRepository;
 import jakarta.transaction.Transactional;
@@ -32,44 +33,71 @@ public class ScanService {
     }
 
     @Transactional
-    public ScanResponseDTO verwerkScan(ScanRequestDTO scanRequest) {
-        Gebruiker gebruiker = gebruikerService.getGebruikerById(scanRequest.getGebruikerId());
+    public ScanBatchResponseDTO verwerkBatch(ScanBatchRequestDTO request) {
+        Gebruiker gebruiker = gebruikerService.getGebruikerById(request.getGebruikerId());
+        String actie = request.getActie();
+        List<ScanBatchItemResultDTO> resultaten = new ArrayList<>();
 
-        String isbn = scanRequest.getIsbn();
-        Boek boek = boekService.getBoekByIsbn(isbn);
-        if (boek == null) {
-            throw new BoekNotFoundException("Boek met ISBN " + isbn + " niet gevonden.");
+        if (!"UITLENING".equals(actie) && !"RETOUR".equals(actie)) {
+            throw new IllegalArgumentException("Onbekende actie: " + actie);
         }
 
-        Uitlening uitlening = uitleningRepository
-                .findFirstByGebruikerAndBoekAndIsIngeleverdFalseOrderByUitleenDatumAsc(gebruiker, boek)
-                .orElse(null);
+        for (String isbn : request.getIsbns()) {
+            try {
+                Boek boek = boekService.getBoekByIsbn(isbn);
+                if (boek == null) {
+                    resultaten.add(new ScanBatchItemResultDTO(isbn, null, "FOUT", "Boek niet gevonden."));
+                    continue;
+                }
 
-        if (uitlening != null) {
-            uitlening.setIngeleverd(true);
-            uitlening.setInleverDatum(LocalDate.now());
-            boek.setAantalExemplaren(boek.getAantalExemplaren() + 1);
-            uitleningRepository.save(uitlening);
-            boekRepository.save(boek);
-            return new ScanResponseDTO("RETOUR", uitlening, boek);
+                Uitlening bestaande = uitleningRepository
+                        .findFirstByGebruikerAndBoekAndIsIngeleverdFalseOrderByUitleenDatumAsc(gebruiker, boek)
+                        .orElse(null);
+
+                if ("UITLENING".equals(actie)) {
+                    if (bestaande != null) {
+                        resultaten.add(new ScanBatchItemResultDTO(isbn, boek.getTitel(), "FOUT",
+                                "Je hebt dit boek al geleend."));
+                        continue;
+                    }
+                    if (boek.getAantalExemplaren() <= 0) {
+                        resultaten.add(new ScanBatchItemResultDTO(isbn, boek.getTitel(), "FOUT",
+                                "Geen exemplaren beschikbaar."));
+                        continue;
+                    }
+                    boek.setAantalExemplaren(boek.getAantalExemplaren() - 1);
+                    boekRepository.save(boek);
+
+                    Uitlening nieuw = new Uitlening();
+                    nieuw.setGebruiker(gebruiker);
+                    nieuw.setBoek(boek);
+                    nieuw.setUitleenDatum(LocalDate.now());
+                    nieuw.setInleverDatum(LocalDate.now().plusMonths(1));
+                    nieuw.setIngeleverd(false);
+                    nieuw.setStatus("ACTIEF");
+                    uitleningRepository.save(nieuw);
+
+                    resultaten.add(new ScanBatchItemResultDTO(isbn, boek.getTitel(), "OK", null));
+                } else {
+                    if (bestaande == null) {
+                        resultaten.add(new ScanBatchItemResultDTO(isbn, boek.getTitel(), "FOUT",
+                                "Geen actieve uitlening gevonden om terug te brengen."));
+                        continue;
+                    }
+                    bestaande.setIngeleverd(true);
+                    bestaande.setInleverDatum(LocalDate.now());
+                    boek.setAantalExemplaren(boek.getAantalExemplaren() + 1);
+                    uitleningRepository.save(bestaande);
+                    boekRepository.save(boek);
+
+                    resultaten.add(new ScanBatchItemResultDTO(isbn, boek.getTitel(), "OK", null));
+                }
+            } catch (Exception e) {
+                resultaten.add(new ScanBatchItemResultDTO(isbn, null, "FOUT",
+                        "Onverwachte fout: " + e.getMessage()));
+            }
         }
 
-        if (boek.getAantalExemplaren() <= 0) {
-            throw new BoekNietBeschikbaarException("Boek met ISBN " + isbn + " is momenteel niet beschikbaar.");
-        }
-
-        boek.setAantalExemplaren(boek.getAantalExemplaren() - 1);
-        boekRepository.save(boek);
-
-        Uitlening nieuweUitlening = new Uitlening();
-        nieuweUitlening.setGebruiker(gebruiker);
-        nieuweUitlening.setBoek(boek);
-        nieuweUitlening.setUitleenDatum(LocalDate.now());
-        nieuweUitlening.setInleverDatum(LocalDate.now().plusMonths(1));
-        nieuweUitlening.setIngeleverd(false);
-        nieuweUitlening.setStatus("ACTIEF");
-
-        uitleningRepository.save(nieuweUitlening);
-        return new ScanResponseDTO("UITLENING", nieuweUitlening, boek);
+        return new ScanBatchResponseDTO(actie, resultaten);
     }
 }
