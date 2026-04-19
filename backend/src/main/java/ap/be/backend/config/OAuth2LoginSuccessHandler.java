@@ -35,11 +35,13 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
         // hier moet ik nog kijken naar de documentatie van smartschool voor de juiste attribute namen
         String smartschoolId = oAuth2User.getAttribute("id");
+        String rol = oAuth2User.getAttribute("role");
+        String naam = oAuth2User.getAttribute("name");
 
         userRepository.findBySmartschoolId(smartschoolId)
                 .orElseGet(() -> userRepository.save(new User(smartschoolId)));
 
-        String jwtToken = jwtService.generateToken(smartschoolId);
+        String jwtToken = jwtService.generateToken(smartschoolId, rol, naam);
 
         String redirectUrl = frontendBaseUrl + "/login-success?token=" + jwtToken;
 

@@ -10,7 +10,7 @@ export class LoginSuccessComponent implements OnInit {
   route = inject(ActivatedRoute);
   router = inject(Router);
 
-  ngOnInit(): void {s
+  ngOnInit(): void {
     // Lees de parameters uit de URL
     this.route.queryParams.subscribe(params => {
       const token = params['token'];

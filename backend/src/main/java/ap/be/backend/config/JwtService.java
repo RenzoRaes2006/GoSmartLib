@@ -26,9 +26,11 @@ public class JwtService {
     // Token is 1 dag geldig (in milliseconden)
     private final long expiration = 86400000;
 
-    public String generateToken(String smartschoolId) {
+    public String generateToken(String smartschoolId, String rol, String naam) {
         return Jwts.builder()
-                .setSubject(smartschoolId) // Hier stoppen we enkel de ID in de token
+                .setSubject(smartschoolId)
+                .claim("role", rol)
+                .claim("name", naam)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)

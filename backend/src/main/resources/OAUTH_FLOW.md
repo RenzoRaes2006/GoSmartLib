@@ -89,3 +89,48 @@ Dit is een custom Spring Security Filter dat vóór elke API-call wordt uitgevoe
 3.  **Validatie:** Het filter roept `jwtService.isTokenValid()` aan.
 4.  **Identificatie:** Als de token klopt, roept het `jwtService.extractSmartschoolId()` aan om te zien *wie* dit verzoek doet.
 5.  **Beveiligingscontext Updaten:** Het filter plaatst de Smartschool ID in de `SecurityContextHolder`. Hiermee wordt Spring Security officieel verteld: *"Dit verzoek is veilig en wordt uitgevoerd door gebruiker X"*. Vanaf dat moment mag de code door naar de betreffende Controller.
+
+
+## 7. Gebruikersrollen & Frontend Status (RBAC & Signals)
+
+Om functionaliteiten af te schermen op basis van de rol van de gebruiker (Role-Based Access Control), slaan we de rol NIET op in de database (i.v.m. privacy-eisen), maar verpakken we deze in de JWT.
+
+**A. Backend: Claims toevoegen**
+In de `OAuth2LoginSuccessHandler` lezen we extra gegevens uit het Smartschool-profiel en sturen we deze mee naar de `JwtService`:
+1. Smartschool ID (verplicht)
+2. Rol (bijv. leerling, leerkracht, beheerder)
+3. Naam van de ingelogde gebruiker
+
+In `JwtService.java` worden deze toegevoegd als extra "claims" (datavelden) in de token:
+`.claim("role", rol)`
+`.claim("name", naam)`
+
+**B. Frontend: Token Decoderen & Signals**
+In Angular gebruiken we de library `jwt-decode` om de Base64-gecodeerde token uit te pakken tot leesbare JSON. We doen dit centraal in een `AuthService`.
+We gebruiken Angular **Signals** om deze data globaal en reactief beschikbaar te maken voor de hele applicatie:
+
+```typescript
+// Voorbeeld AuthService state
+public currentUser = signal<{ id: string, name: string, role: string } | null>(null);
+
+## 8. Route Beveiliging (Auth Guards)
+
+Om te voorkomen dat onbevoegden via de URL afgeschermde pagina's openen, gebruiken we Angular Auth Guards. 
+
+* Werking: Een Guard controleert een voorwaarde vóór het laden van de route.
+* Implementatie: De `authGuard` checkt of `authService.currentUser()` is ingevuld.
+* Toepassing: In `app.routes.ts` voegen we `canActivate: [authGuard]` toe aan beveiligde routes. Publieke pagina's krijgen deze beveiliging niet.
+
+---
+
+## 9. Architectuurkeuzes (Voor verdediging)
+
+Tijdens de ontwikkeling zijn deze bewuste keuzes gemaakt:
+
+A. Geen Refresh Tokens
+De JWT is 24 uur geldig. Daarna logt de gebruiker opnieuw in. Een complexe automatische refresh-flow is bewust buiten scope gelaten; de focus ligt op de kernfunctionaliteit van de bibliotheek.
+
+B. Privacy (Data van anderen)
+We slaan enkel anonieme Smartschool ID's op in de database, nooit namen. 
+* Eigen naam: Zit in de JWT voor snelle weergave.
+* Namen van anderen (bijv. bij reviews): De Spring Boot backend haalt deze *live* op bij Smartschool via een achtergrond-API-call en stuurt ze gecombineerd met de review door naar Angular.
