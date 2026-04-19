@@ -13,16 +13,18 @@ import { AdminDashboard } from './admin-dashboard/admin-dashboard';
 import { BoekImport } from './boek-import/boek-import';
 import { GerapporteerdeReviews } from './gerapporteerde-reviews/gerapporteerde-reviews';
 import { Leengeschiedenis } from './leengeschiedenis/leengeschiedenis';
+import { LoginSuccessComponent } from './login-success/login-success';
 
 export const routes: Routes = [
   { path: '', component: HomePage },
   { path: 'catalogus', component: Catalogus },
+  { path: 'login-success', component: LoginSuccessComponent },
   { path: 'details/:id', component: Detail },
   { path: 'leeslijst/:id', component: Leeslijst },
   { path: 'boek-beheer', component: BoekBeheer },
   { path: 'reserveren', component: ReserverenComponent },
   { path: 'not-found', component: PageNotFound },
-  { path: 'login/smartschool', component: Login },
+  { path: 'login', component: Login },
   { path: 'beheer/aanvragen', component: AanvragenBeheer },
   { path: 'gerapporteerde-beoordelingen', component: GerapporteerdeReviews },
   { path: 'leengeschiedenis', component: Leengeschiedenis },
