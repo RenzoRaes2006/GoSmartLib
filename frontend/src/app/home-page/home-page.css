@@ -605,7 +605,44 @@ h2 {
   background: #6d1531;
   transform: translateY(-2px);
 }
+/* =========================================
+   UITLEENTERMIJNEN & VERLENGEN (THEMA UPDATE)
+   ========================================= */
 
+/* Container die de dagen-badge en de knop netjes uit elkaar houdt */
+.lening-acties {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+/* Strakke knop in het bordeauxrode thema van GO! Antwerpen */
+.btn-verlengen {
+  background-color: transparent;
+  color: #8c1b3f; /* Jullie thema-kleur */
+  border: 1px solid #8c1b3f;
+  border-radius: 20px; /* Zelfde mooie afronding als de dagen-badge */
+  font-size: 0.80rem;
+  font-weight: 600;
+  padding: 4px 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+/* Hover: Knop vult zich bordeauxrood met witte tekst */
+.btn-verlengen:not(:disabled):hover {
+  background-color: #8c1b3f;
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(140, 27, 63, 0.2);
+}
+
+/* Disabled: Neutraal grijs als het boek al verlengd is */
+.btn-verlengen:disabled {
+  color: #a0aec0;
+  border-color: #e2e8f0;
+  background-color: #f8fafc;
+  cursor: not-allowed;
+}
 /* =========================================
    RESPONSIVENESS
    ========================================= */

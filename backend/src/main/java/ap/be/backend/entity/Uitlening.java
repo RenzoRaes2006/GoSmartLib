@@ -34,6 +34,8 @@ public class Uitlening {
 
     private String status;
 
+    private boolean isVerlengd;
+
     public Uitlening() {
     }
 
@@ -44,5 +46,6 @@ public class Uitlening {
         this.uitleenDatum = null;
         this.inleverDatum = null;
         this.isIngeleverd = false;
+        this.isVerlengd = false;
     }
 }

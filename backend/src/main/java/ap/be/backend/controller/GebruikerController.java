@@ -16,6 +16,7 @@ import ap.be.backend.entity.LeeslijstMap;
 import ap.be.backend.entity.Uitlening;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -103,6 +104,14 @@ public class GebruikerController {
         // execute the delete action and return a success message
         gebruikerService.verwijderLening(uitleningId);
         return ResponseEntity.ok("Lening succesvol verwijderd en voorraad hersteld.");
+    }
+
+    @PatchMapping("/leningen/{uitleningId}/verlengen")
+    @CrossOrigin(origins = { "http://frontend.localhost", "http://localhost:4200",
+            "http://frontend-sp09.cloud-ap.be" }, allowedHeaders = "*")
+    public ResponseEntity<String> verlengLening(@PathVariable("uitleningId") Long uitleningId) {
+        gebruikerService.verlengUitlening(uitleningId);
+        return ResponseEntity.ok("Uitleentermijn succesvol verlengd met 14 dagen.");
     }
 
     @GetMapping("/{gebruikerId}/geschiedenis")
