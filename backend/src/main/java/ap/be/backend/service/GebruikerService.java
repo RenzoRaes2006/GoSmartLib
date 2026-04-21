@@ -211,4 +211,34 @@ public class GebruikerService {
         // Haalt alle leningen op, inclusief ingeleverde en afgewezen boeken
         return uitleningRepository.findByGebruiker_GebruikerIDOrderByUitleenDatumDesc(gebruikerId);
     }
+
+    public void verlengUitlening(Long uitleningId) {
+        Uitlening uitlening = uitleningRepository.findById(uitleningId)
+                .orElseThrow(() -> new UitleningNotFoundException("Uitlening niet gevonden"));
+
+        if (uitlening.isIngeleverd()) {
+            throw new IllegalArgumentException("Dit boek is al ingeleverd.");
+        }
+        if (uitlening.isVerlengd()) {
+            throw new IllegalArgumentException("Je hebt dit boek al een keer verlengd.");
+        }
+        if ("AANGEVRAAGD".equals(uitlening.getStatus())) {
+            throw new IllegalArgumentException("Je kunt een boek dat nog in aanvraag is niet verlengen.");
+        }
+
+        uitlening.setInleverDatum(uitlening.getInleverDatum().plusDays(14));
+        uitlening.setVerlengd(true);
+
+        uitleningRepository.save(uitlening);
+    }
+
+    public Gebruiker getLeerlingBySchoolId(long schoolId) {
+        Gebruiker gebruiker = gebruikerRepository.findBySchoolId(schoolId)
+                .orElseThrow(
+                        () -> new GebruikerNotFoundException("Leerling met school ID " + schoolId + " niet gevonden"));
+        if (gebruiker.getRol() != Rol.LEERLING) {
+            throw new GebruikerNotFoundException("Leerling met school ID " + schoolId + " niet gevonden");
+        }
+        return gebruiker;
+    }
 }

@@ -148,4 +148,12 @@ export class BoekService {
   getLeengeschiedenis(gebruikerId: number): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiGebruikerUrl}/${gebruikerId}/geschiedenis`);
   }
+
+  verlengLening(uitleningId: number): Observable<string> {
+    return this.http.patch(
+      `${this.apiGebruikerUrl}/leningen/${uitleningId}/verlengen`,
+      {},
+      { responseType: 'text' as 'json' },
+    ) as Observable<string>;
+  }
 }

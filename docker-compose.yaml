@@ -29,7 +29,7 @@ services:
     labels:
       - "traefik.enable=true"
       # - "traefik.http.routers.backend.rule=Host(`frontend.localhost`) && PathPrefix(`/api`)"
-      - "traefik.http.routers.backend.rule=(Host(`frontend-sp09.cloud-ap.be`) || Host(`api-sp09.cloud-ap.be`) || Host(`frontend.localhost`)) && PathPrefix(`/api`)"
+      - "traefik.http.routers.backend.rule=(Host(`frontend-sp09.cloud-ap.be`) || Host(`api-sp09.cloud-ap.be`) || Host(`frontend.localhost`)) && (PathPrefix(`/api`) || PathPrefix(`/oauth2`) || PathPrefix(`/login/oauth2`) || Path(`/error`))"
       - "traefik.http.routers.backend.entrypoints=web"
       # - "traefik.http.routers.backend.middlewares=strip-api"
       # - "traefik.http.middlewares.strip-api.stripprefix.prefixes=/api"

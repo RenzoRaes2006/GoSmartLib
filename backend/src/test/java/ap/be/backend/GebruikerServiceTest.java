@@ -122,7 +122,8 @@ public class GebruikerServiceTest {
     void givenUserWithNoActiveLoans_whenGetActieveLeningenVanGebruiker_thenReturnEmptyList() {
         // given
         Long userId = 2L;
-        given(uitleningRepository.findByGebruiker_GebruikerIDAndIsIngeleverdFalse(userId)).willReturn(Collections.emptyList());
+        given(uitleningRepository.findByGebruiker_GebruikerIDAndIsIngeleverdFalse(userId))
+                .willReturn(Collections.emptyList());
 
         // when
         List<Uitlening> actualLoans = gebruikerService.getActieveLeningenVanGebruiker(userId);
@@ -131,6 +132,7 @@ public class GebruikerServiceTest {
         assertTrue(actualLoans.isEmpty());
         then(uitleningRepository).should(times(1)).findByGebruiker_GebruikerIDAndIsIngeleverdFalse(userId);
     }
+
     @Test
     void givenPendingLoans_whenGetAlleAanvragen_thenReturnList() {
         // given: the repository returns a list of loans with status "AANGEVRAAGD"
@@ -167,19 +169,20 @@ public class GebruikerServiceTest {
     void givenValidLoanId_whenWeigerAanvraag_thenUpdateStatusAndRestoreStock() {
         // given: a valid pending loan exists and the book has a stock of 5
         testUitlening.setStatus("AANGEVRAAGD");
-        testBoek.setAantalExemplaren(5); 
+        testBoek.setAantalExemplaren(5);
         given(uitleningRepository.findById(100L)).willReturn(Optional.of(testUitlening));
 
         // when: the librarian rejects the loan
         gebruikerService.weigerAanvraag(100L);
 
-        // then: status is GEWEIGERD, it is marked as returned (so it doesn't count towards the limit)
+        // then: status is GEWEIGERD, it is marked as returned (so it doesn't count
+        // towards the limit)
         assertEquals("GEWEIGERD", testUitlening.getStatus());
         assertTrue(testUitlening.isIngeleverd());
-        
+
         // then: the book stock is increased back to 6
         assertEquals(6, testBoek.getAantalExemplaren());
-        
+
         // then: both the book and the loan are saved to the database
         then(boekRepository).should(times(1)).save(testBoek);
         then(uitleningRepository).should(times(1)).save(testUitlening);
@@ -195,7 +198,7 @@ public class GebruikerServiceTest {
         assertThrows(ap.be.backend.exception.UitleningNotFoundException.class, () -> {
             gebruikerService.keurAanvraagGoed(invalidId);
         });
-        
+
         // verify that save was never called
         then(uitleningRepository).should(never()).save(any(Uitlening.class));
     }
@@ -214,5 +217,85 @@ public class GebruikerServiceTest {
         // verify that save was never called on either repository
         then(boekRepository).should(never()).save(any(Boek.class));
         then(uitleningRepository).should(never()).save(any(Uitlening.class));
+    }
+
+    @Test
+    void givenUser_whenGetLeengeschiedenis_thenReturnOrderedList() {
+        // given: a user with a history of loans
+        Long userId = 1L;
+        List<Uitlening> expectedHistory = Arrays.asList(testUitlening);
+
+        // mock the specific repository call we created for the history
+        given(uitleningRepository.findByGebruiker_GebruikerIDOrderByUitleenDatumDesc(userId))
+                .willReturn(expectedHistory);
+
+        // when: we fetch the history
+        List<Uitlening> actualHistory = gebruikerService.getLeengeschiedenisVanGebruiker(userId);
+
+        // then: it returns the correct list and calls the correct repository method
+        assertEquals(1, actualHistory.size());
+        then(uitleningRepository).should(times(1)).findByGebruiker_GebruikerIDOrderByUitleenDatumDesc(userId);
+    }
+
+    // --- NIEUWE TESTS VOOR VERLENGEN (FEATURE 55) ---
+    @Test
+    void verlengUitlening_Succesvol_Telt14DagenOpEnZetVerlengdOpTrue() {
+        // Given
+        testUitlening.setStatus("GOEDGEKEURD");
+
+        // Stel een uitlening in met een geldige inleverdatum over één maand.
+        testUitlening.setInleverDatum(LocalDate.now().plusMonths(1));
+        LocalDate origineleDatum = testUitlening.getInleverDatum();
+
+        when(uitleningRepository.findById(100L)).thenReturn(Optional.of(testUitlening));
+
+        // When
+        gebruikerService.verlengUitlening(100L);
+
+        // Then
+        assertTrue(testUitlening.isVerlengd());
+        assertEquals(origineleDatum.plusDays(14), testUitlening.getInleverDatum());
+        verify(uitleningRepository, times(1)).save(testUitlening);
+    }
+
+    @Test
+    void verlengUitlening_AlIngeleverd_GooitException() {
+        // Given
+        testUitlening.setIngeleverd(true);
+        testUitlening.setStatus("GOEDGEKEURD");
+        when(uitleningRepository.findById(100L)).thenReturn(Optional.of(testUitlening));
+
+        // When & Then
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            gebruikerService.verlengUitlening(100L);
+        });
+        assertEquals("Dit boek is al ingeleverd.", exception.getMessage());
+    }
+
+    @Test
+    void verlengUitlening_AlVerlengd_GooitException() {
+        // Given
+        testUitlening.setVerlengd(true);
+        testUitlening.setStatus("GOEDGEKEURD");
+        when(uitleningRepository.findById(100L)).thenReturn(Optional.of(testUitlening));
+
+        // When & Then
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            gebruikerService.verlengUitlening(100L);
+        });
+        assertEquals("Je hebt dit boek al een keer verlengd.", exception.getMessage());
+    }
+
+    @Test
+    void verlengUitlening_NogInAanvraag_GooitException() {
+        // Given
+        testUitlening.setStatus("AANGEVRAAGD");
+        when(uitleningRepository.findById(100L)).thenReturn(Optional.of(testUitlening));
+
+        // When & Then
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            gebruikerService.verlengUitlening(100L);
+        });
+        assertEquals("Je kunt een boek dat nog in aanvraag is niet verlengen.", exception.getMessage());
     }
 }
