@@ -26,4 +26,6 @@ public interface UitleningRepository extends JpaRepository<Uitlening, Long> {
     boolean existsByGebruiker_GebruikerIDAndStatus(Long gebruikerId, String status);
 
     List<Uitlening> findByGebruiker_GebruikerIDOrderByUitleenDatumDesc(Long gebruikerId);
+
+    List<Uitlening> findByIsIngeleverdFalseOrderByUitleenDatumDesc();
 }

@@ -211,4 +211,9 @@ public class GebruikerService {
         // Haalt alle leningen op, inclusief ingeleverde en afgewezen boeken
         return uitleningRepository.findByGebruiker_GebruikerIDOrderByUitleenDatumDesc(gebruikerId);
     }
+
+    // Fetch all active loans across the entire system for the librarian
+    public List<Uitlening> getAlleActieveLeningenSysteem() {
+        return uitleningRepository.findByIsIngeleverdFalseOrderByUitleenDatumDesc();
+    }
 }

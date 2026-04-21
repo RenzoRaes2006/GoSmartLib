@@ -21,6 +21,11 @@ export class BoekService {
       ? 'http://localhost:8081/api/gebruiker'
       : '/api/gebruiker';
 
+      private apiBeheerUrl =
+    window.location.hostname === 'localhost'
+      ? 'http://localhost:8081/api/beheer'
+      : '/api/beheer';
+
   private http = inject(HttpClient);
 
   getBoekenGefilterd(filters: FilterOptions): Observable<PageResponse<Boek>> {
@@ -147,5 +152,11 @@ export class BoekService {
 
   getLeengeschiedenis(gebruikerId: number): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiGebruikerUrl}/${gebruikerId}/geschiedenis`);
+  }
+
+  // fetch all active loans in the system for the admin dashboard
+  getAlleActieveLeningenSysteem(): Observable<any[]> {
+    // Let op: hier staat nu apiBeheerUrl in plaats van apiGebruikerUrl
+    return this.http.get<any[]>(`${this.apiBeheerUrl}/leningen/actief`);
   }
 }

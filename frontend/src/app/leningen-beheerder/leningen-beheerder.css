@@ -1,0 +1,206 @@
+/* =========================================
+   LAYOUT
+   ========================================= */
+.page-wrapper {
+  width: 100%;
+  min-height: calc(100vh - 80px);
+  padding: 40px 20px;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.bg-beige {
+  background-color: #f0efe4;
+}
+
+.inner-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header-sectie {
+  margin-bottom: 30px;
+}
+
+.page-title {
+  font-size: 2.2rem;
+  color: #8c1b3f;
+  margin: 0 0 10px 0;
+}
+
+.subtitle {
+  color: #718096;
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+/* =========================================
+   SEARCH & FILTER
+   ========================================= */
+.filter-card {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+  border: 1px solid #e2dfd5;
+  margin-bottom: 25px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 8px 15px;
+  flex: 1;
+  max-width: 500px;
+}
+
+.search-icon {
+  margin-right: 10px;
+  color: #a0aec0;
+}
+
+.search-input {
+  border: none;
+  background: transparent;
+  width: 100%;
+  font-size: 1rem;
+  outline: none;
+  color: #2d3748;
+}
+
+.stat-badge {
+  background: #edf2f7;
+  padding: 10px 15px;
+  border-radius: 8px;
+  color: #4a5568;
+}
+
+.stat-badge strong {
+  color: #8c1b3f;
+  font-size: 1.1rem;
+}
+
+/* =========================================
+   TABLE
+   ========================================= */
+.table-container {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+  border: 1px solid #e2dfd5;
+  overflow-x: auto;
+}
+
+.beheer-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.beheer-table th {
+  background-color: #f8fafc;
+  padding: 15px 20px;
+  color: #4a5568;
+  font-weight: 600;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.beheer-table td {
+  padding: 15px 20px;
+  border-bottom: 1px solid #edf2f7;
+  vertical-align: middle;
+}
+
+.beheer-table tr:hover {
+  background-color: #fcfdfd;
+}
+
+.book-cell {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.table-cover {
+  width: 40px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 4px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.book-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.book-text .titel {
+  font-weight: 600;
+  color: #2d3748;
+}
+
+.book-text .auteur {
+  font-size: 0.85rem;
+  color: #718096;
+}
+
+.user-cell {
+  color: #2d3748;
+}
+
+.date-cell {
+  color: #718096;
+  font-size: 0.95rem;
+}
+
+/* =========================================
+   BADGES
+   ========================================= */
+.stock-badge {
+  background-color: #c6f6d5;
+  color: #22543d;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.stock-badge.low-stock {
+  background-color: #fed7d7;
+  color: #9b2c2c;
+}
+
+.status-badge {
+  background-color: #bee3f8;
+  color: #2b6cb0;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: bold;
+}
+
+.status-badge.goedgekeurd {
+  background-color: #8c1b3f;
+  color: white;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 50px;
+  color: #718096;
+}
+
+.empty-state .emoji {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: 10px;
+}
