@@ -1,13 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 
-import { Toegankelijkheid } from './toegankelijkheid';
+import { ToegankelijkheidService } from './toegankelijkheid';
 
 describe('Toegankelijkheid', () => {
-  let service: Toegankelijkheid;
+  let service: ToegankelijkheidService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(Toegankelijkheid);
+    service = TestBed.inject(ToegankelijkheidService);
   });
 
   it('should be created', () => {

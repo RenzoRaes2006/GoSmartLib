@@ -1,20 +1,28 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { BoekService } from '../services/boek.service';
 import { Boek } from '../models/Boek';
 import { LeeslijstService } from '../services/leeslijstService';
 import { FormsModule } from '@angular/forms';
+import { AuthService } from '../services/AuthService';
 
 @Component({
   selector: 'app-home-page-leerling',
   imports: [CommonModule, RouterLink, FormsModule],
-  templateUrl: './home-page-leerling.html',
-  styleUrl: './home-page-leerling.css',
+  templateUrl: './home-page.html',
+  styleUrl: './home-page.css',
 })
-export class HomePageLeerling implements OnInit {
+export class HomePage implements OnInit {
   private boekService = inject(BoekService);
   private leeslijstService = inject(LeeslijstService);
+
+  // Toegevoegd door een vriend. AuthService injecteren om gebruikersinfo te kunnen gebruiken
+  private authService = inject(AuthService);
+  private router = inject(Router);
+  gebruikerRol = computed(() => this.authService.currentUser()?.role?.toLowerCase() ?? 'leerling');
+  // eind toevoeging vriend
+
 
   // Gebruikersinfo & Gamification
   naam = signal<string>('Jeroen');
@@ -40,6 +48,14 @@ export class HomePageLeerling implements OnInit {
   });
 
   ngOnInit(): void {
+    
+    // toegevoegd door een vriend, check de rol van de gebruiker en stuur door naar admin pagina als het een beheerder is
+    if (this.gebruikerRol() === 'beheerder') {
+      this.router.navigate(['/admin']);
+      return;
+    }
+    // eind toevoeging vriend
+
     // 1. Haal populaire boeken op
     this.boekService.getPopulaireBoeken().subscribe({
       next: (data) => {
@@ -63,7 +79,7 @@ export class HomePageLeerling implements OnInit {
       next: (geschiedenis) => {
         // Tel alle leningen, behalve degene die door de bibbeheerder zijn geweigerd
         const geldigeLeningen = geschiedenis.filter(lening => lening.status !== 'GEWEIGERD');
-        
+
         // Update de meter op het scherm!
         this.gelezenBoeken.set(geldigeLeningen.length);
       },
