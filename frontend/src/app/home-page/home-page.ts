@@ -13,9 +13,6 @@ import { FormsModule } from '@angular/forms';
   styleUrl: './home-page.css',
 })
 export class HomePage implements OnInit {
-  // Voeg dit toe in je DashboardComponent class
-  gebruikerRol = signal<string>('LEERKRACHT'); // kan ook 'LEERLING' zijn
-
   private boekService = inject(BoekService);
   private leeslijstService = inject(LeeslijstService);
 

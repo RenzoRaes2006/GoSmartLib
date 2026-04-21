@@ -13,6 +13,7 @@ import { AdminDashboard } from './admin-dashboard/admin-dashboard';
 import { BoekImport } from './boek-import/boek-import';
 import { GerapporteerdeReviews } from './gerapporteerde-reviews/gerapporteerde-reviews';
 import { Leengeschiedenis } from './leengeschiedenis/leengeschiedenis';
+import { Leerkrachtdashboard } from './leerkrachtdashboard/leerkrachtdashboard';
 
 export const routes: Routes = [
   { path: '', component: HomePage },
@@ -26,6 +27,7 @@ export const routes: Routes = [
   { path: 'beheer/aanvragen', component: AanvragenBeheer },
   { path: 'gerapporteerde-beoordelingen', component: GerapporteerdeReviews },
   { path: 'leengeschiedenis', component: Leengeschiedenis },
+  { path: 'leerkracht-dashboard', component: Leerkrachtdashboard },
   {
     path: 'admin',
     component: AdminDashboard,
