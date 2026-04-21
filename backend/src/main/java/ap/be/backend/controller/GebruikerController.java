@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ap.be.backend.repository.LeeslijstMapRepository;
 import ap.be.backend.service.GebruikerService;
 import ap.be.backend.dto.LeenStatusResponse;
+import ap.be.backend.entity.Gebruiker;
 import ap.be.backend.entity.LeeslijstMap;
 import ap.be.backend.entity.Uitlening;
 
@@ -117,6 +118,12 @@ public class GebruikerController {
     @GetMapping("/{gebruikerId}/geschiedenis")
     public ResponseEntity<List<Uitlening>> getLeengeschiedenis(@PathVariable Long gebruikerId) {
         return ResponseEntity.ok(gebruikerService.getLeengeschiedenisVanGebruiker(gebruikerId));
+    }
+
+    @GetMapping("/schoolid/{schoolId}")
+    public ResponseEntity<Gebruiker> getLeerlingBySchoolId(@PathVariable long schoolId) {
+        Gebruiker leerling = gebruikerService.getLeerlingBySchoolId(schoolId);
+        return ResponseEntity.ok(leerling);
     }
 
 }

@@ -231,4 +231,14 @@ public class GebruikerService {
 
         uitleningRepository.save(uitlening);
     }
+
+    public Gebruiker getLeerlingBySchoolId(long schoolId) {
+        Gebruiker gebruiker = gebruikerRepository.findBySchoolId(schoolId)
+                .orElseThrow(
+                        () -> new GebruikerNotFoundException("Leerling met school ID " + schoolId + " niet gevonden"));
+        if (gebruiker.getRol() != Rol.LEERLING) {
+            throw new GebruikerNotFoundException("Leerling met school ID " + schoolId + " niet gevonden");
+        }
+        return gebruiker;
+    }
 }

@@ -2,10 +2,13 @@ package ap.be.backend.repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import ap.be.backend.entity.Boek;
+import ap.be.backend.entity.Gebruiker;
 import ap.be.backend.entity.Uitlening;
 
 @Repository
@@ -26,4 +29,7 @@ public interface UitleningRepository extends JpaRepository<Uitlening, Long> {
     boolean existsByGebruiker_GebruikerIDAndStatus(Long gebruikerId, String status);
 
     List<Uitlening> findByGebruiker_GebruikerIDOrderByUitleenDatumDesc(Long gebruikerId);
+
+    Optional<Uitlening> findFirstByGebruikerAndBoekAndIsIngeleverdFalseOrderByUitleenDatumAsc(Gebruiker gebruiker,
+            Boek boek);
 }

@@ -12,11 +12,10 @@ import { AdminDashboard } from './admin-dashboard/admin-dashboard';
 import { BoekImport } from './boek-import/boek-import';
 import { GerapporteerdeReviews } from './gerapporteerde-reviews/gerapporteerde-reviews';
 import { Leengeschiedenis } from './leengeschiedenis/leengeschiedenis';
+import { ScanModus } from './scan-modus/scan-modus';
 import { LoginSuccessComponent } from './login-success/login-success';
 import { adminGuard } from './guards/admin-guard';
 import { authGuard } from './guards/auth.guard';
-
-
 
 export const routes: Routes = [
   { path: '', component: HomePage },
@@ -29,6 +28,7 @@ export const routes: Routes = [
   { path: 'not-found', component: PageNotFound },
   { path: 'login', component: Login },
   { path: 'beheer/aanvragen', component: AanvragenBeheer },
+  { path: 'beheer/scan', component: ScanModus },
   { path: 'gerapporteerde-beoordelingen', component: GerapporteerdeReviews },
   { path: 'leengeschiedenis', component: Leengeschiedenis },
   {
