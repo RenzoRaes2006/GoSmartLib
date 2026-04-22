@@ -1,5 +1,6 @@
 package ap.be.backend;
 
+import ap.be.backend.dto.LeenStatusResponse;
 import ap.be.backend.entity.Boek;
 import ap.be.backend.entity.Gebruiker;
 import ap.be.backend.entity.LeeslijstMap;
@@ -24,6 +25,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.*;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -297,5 +299,59 @@ public class GebruikerServiceTest {
             gebruikerService.verlengUitlening(100L);
         });
         assertEquals("Je kunt een boek dat nog in aanvraag is niet verlengen.", exception.getMessage());
+    }
+
+    @Test
+    void givenOverdueBooks_whenCheckLeenStatus_thenReturnFalseAndErrorMessage() {
+        // ARRANGE (Setup)
+        Long userId = 1L;
+        Long bookId = 2L;
+        
+        Boek mockBoek = new Boek();
+        mockBoek.setAantalExemplaren(5); // Zorg dat het boek wel op voorraad is, anders faalt de test te vroeg
+        
+        // Vertel de neppe database dat het boek bestaat
+        given(boekRepository.findById(bookId)).willReturn(Optional.of(mockBoek));
+        
+        // Vertel de neppe database: "Ja, deze specifieke gebruiker heeft een boek dat te laat is!"
+        given(uitleningRepository.existsByGebruiker_GebruikerIDAndIsIngeleverdFalseAndInleverDatumBefore(
+                eq(userId), any(LocalDate.class))).willReturn(true);
+
+        // ACT (Voer de methode uit)
+        LeenStatusResponse response = gebruikerService.checkLeenStatus(userId, bookId);
+
+        // ASSERT (Controleer het resultaat)
+        assertFalse(response.isMagLenen(), "De gebruiker mag niet lenen omdat hij een te laat boek heeft.");
+        assertEquals("Je hebt nog boeken die te laat zijn. Lever deze eerst in!", response.getReden());
+        
+        // Verifieer dat de juiste repository methode ook echt is aangeroepen
+        then(uitleningRepository).should().existsByGebruiker_GebruikerIDAndIsIngeleverdFalseAndInleverDatumBefore(eq(userId), any(LocalDate.class));
+    }
+
+    @Test
+    void givenNoOverdueBooks_whenCheckLeenStatus_thenReturnTrue() {
+        // ARRANGE (Setup)
+        Long userId = 1L;
+        Long bookId = 2L;
+        
+        Boek mockBoek = new Boek();
+        mockBoek.setAantalExemplaren(5); 
+        
+        given(boekRepository.findById(bookId)).willReturn(Optional.of(mockBoek));
+        
+        // Nu zeggen we: "Nee, deze gebruiker heeft KEEN te late boeken"
+        given(uitleningRepository.existsByGebruiker_GebruikerIDAndIsIngeleverdFalseAndInleverDatumBefore(
+                eq(userId), any(LocalDate.class))).willReturn(false);
+                
+        // We moeten ook zorgen dat hij het boek nog niet heeft en onder de limiet van 3 zit
+        given(uitleningRepository.existsByGebruiker_GebruikerIDAndBoek_IdAndIsIngeleverdFalse(userId, bookId)).willReturn(false);
+        given(uitleningRepository.findByGebruiker_GebruikerIDAndIsIngeleverdFalse(userId)).willReturn(List.of()); // Lege lijst (0 actieve leningen)
+
+        // ACT
+        LeenStatusResponse response = gebruikerService.checkLeenStatus(userId, bookId);
+
+        // ASSERT
+        assertTrue(response.isMagLenen(), "De gebruiker moet mogen lenen.");
+        assertEquals("Beschikbaar om te reserveren", response.getReden());
     }
 }
