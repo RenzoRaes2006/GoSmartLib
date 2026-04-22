@@ -12,6 +12,7 @@ import { AdminDashboard } from './admin-dashboard/admin-dashboard';
 import { BoekImport } from './boek-import/boek-import';
 import { GerapporteerdeReviews } from './gerapporteerde-reviews/gerapporteerde-reviews';
 import { Leengeschiedenis } from './leengeschiedenis/leengeschiedenis';
+import { Leerkrachtdashboard } from './leerkrachtdashboard/leerkrachtdashboard';
 import { ScanModus } from './scan-modus/scan-modus';
 import { LoginSuccessComponent } from './login-success/login-success';
 import { adminGuard } from './guards/admin-guard';
@@ -33,13 +34,8 @@ export const routes: Routes = [
   { path: 'gerapporteerde-beoordelingen', component: GerapporteerdeReviews },
   { path: 'leengeschiedenis', component: Leengeschiedenis },
   { path: 'beheer/actieve-leningen', component: LeningenBeheerder },
-  {
-    path: 'admin',
-    component: AdminDashboard,
-    //canActivate: [AdminGuard]
-  },
+  { path: 'leerkracht-dashboard', component: Leerkrachtdashboard },
+  { path: 'admin', component: AdminDashboard },
   { path: 'boek-import', component: BoekImport },
-
-  // the wildcard (**) must ALWAYS be the absolute last item in the array
   { path: '**', redirectTo: 'not-found' }
 ];

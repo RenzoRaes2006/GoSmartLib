@@ -1,11 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { BoekService } from '../services/boek.service';
 import { Boek } from '../models/Boek';
 import { LeeslijstService } from '../services/leeslijstService';
 import { FormsModule } from '@angular/forms';
-import { AuthService } from '../services/AuthService';
 
 @Component({
   selector: 'app-home-page-leerling',
@@ -16,12 +15,6 @@ import { AuthService } from '../services/AuthService';
 export class HomePage implements OnInit {
   private boekService = inject(BoekService);
   private leeslijstService = inject(LeeslijstService);
-
-  // Toegevoegd door een vriend. AuthService injecteren om gebruikersinfo te kunnen gebruiken
-  private authService = inject(AuthService);
-  private router = inject(Router);
-  gebruikerRol = computed(() => this.authService.currentUser()?.role?.toLowerCase() ?? 'leerling');
-  // eind toevoeging vriend
 
   // Gebruikersinfo & Gamification
   naam = signal<string>('Jeroen');
@@ -47,19 +40,12 @@ export class HomePage implements OnInit {
   });
 
   ngOnInit(): void {
-    // toegevoegd door een vriend, check de rol van de gebruiker en stuur door naar admin pagina als het een beheerder is
-    if (this.gebruikerRol() === 'beheerder') {
-      this.router.navigate(['/admin']);
-      return;
-    }
-    // eind toevoeging vriend
-
     // 1. Haal populaire boeken op
     this.boekService.getPopulaireBoeken().subscribe({
       next: (data) => {
         this.uitgelichteBoeken.set(data.slice(0, 5));
       },
-      error: (err) => console.error('Kon uitgelichte boeken niet laden:', err),
+      error: (err) => console.error('Kon uitgelichte boeken niet laden:', err)
     });
 
     // 2. Haal mappen/leeslijsten op voor deze gebruiker
@@ -67,7 +53,7 @@ export class HomePage implements OnInit {
       next: (mappen) => {
         this.leeslijsten.set(mappen.slice(0, 3));
       },
-      error: (err) => console.error('Kon leeslijsten/mappen niet laden:', err),
+      error: (err) => console.error('Kon leeslijsten/mappen niet laden:', err)
     });
 
     // 3. Haal de actieve leningen op
@@ -76,12 +62,12 @@ export class HomePage implements OnInit {
     this.boekService.getLeengeschiedenis(this.gebruikerId).subscribe({
       next: (geschiedenis) => {
         // Tel alle leningen, behalve degene die door de bibbeheerder zijn geweigerd
-        const geldigeLeningen = geschiedenis.filter((lening) => lening.status !== 'GEWEIGERD');
+        const geldigeLeningen = geschiedenis.filter(lening => lening.status !== 'GEWEIGERD');
 
         // Update de meter op het scherm!
         this.gelezenBoeken.set(geldigeLeningen.length);
       },
-      error: (err) => console.error('Kon leengeschiedenis niet laden voor teller:', err),
+      error: (err) => console.error('Kon leengeschiedenis niet laden voor teller:', err)
     });
   }
 
@@ -89,13 +75,14 @@ export class HomePage implements OnInit {
     this.boekService.getActieveLeningen(this.gebruikerId).subscribe({
       next: (data) => {
         const verwerkteLeningen = data.map((uitlening) => {
+
           // Check of de lening nog goedgekeurd moet worden
           if (uitlening.status === 'AANGEVRAAGD' || !uitlening.inleverDatum) {
             return {
               id: uitlening.id,
               titel: uitlening.boek.titel,
               resterendeDagen: 999, // Zet ze helemaal onderaan in de sortering
-              isAanvraag: true,
+              isAanvraag: true
             };
           }
 
@@ -114,14 +101,13 @@ export class HomePage implements OnInit {
             id: uitlening.id,
             titel: uitlening.boek.titel,
             resterendeDagen: verschilDagen,
-            isAanvraag: false,
-            isVerlengd: uitlening.verlengd,
+            isAanvraag: false
           };
         });
 
         this.leningen.set(verwerkteLeningen);
       },
-      error: (err) => console.error('Kon actieve leningen niet ophalen:', err),
+      error: (err) => console.error('Kon actieve leningen niet ophalen:', err)
     });
   }
 
@@ -156,21 +142,17 @@ export class HomePage implements OnInit {
     // 4. Sluit de pop-up
     this.isEditModalOpen.set(false);
   }
-  verlengBoek(leningId: number) {
-    this.boekService.verlengLening(leningId).subscribe({
-      next: (bericht) => {
-        alert(bericht || 'Boek succesvol verlengd.');
-        this.haalLeningenOp();
-      },
-      error: (err) => {
-        console.error('Fout bij verlengen:', err);
 
-        if (err.error instanceof ProgressEvent) {
-          alert('Kan de server niet bereiken. Controleer of de backend draait.');
-        } else {
-          alert(err.error || 'Er ging iets mis bij het verlengen.');
-        }
-      },
-    });
+  verwijder(id: number) {
+    if (confirm('Weet je zeker dat je deze lening volledig wil verwijderen?')) {
+      this.boekService.verwijderLening(id).subscribe({
+        next: (bericht) => {
+          alert(bericht);
+          // refresh the list after deletion (call your fetch function here)
+          this.haalLeningenOp(); // of haalAanvragenOp()
+        },
+        error: (err) => alert('Fout bij verwijderen: ' + err.message)
+      });
+    }
   }
 }
