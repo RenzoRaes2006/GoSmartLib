@@ -45,7 +45,7 @@ export class HomePage implements OnInit {
       next: (data) => {
         this.uitgelichteBoeken.set(data.slice(0, 5));
       },
-      error: (err) => console.error('Kon uitgelichte boeken niet laden:', err)
+      error: (err) => console.error('Kon uitgelichte boeken niet laden:', err),
     });
 
     // 2. Haal mappen/leeslijsten op voor deze gebruiker
@@ -53,7 +53,7 @@ export class HomePage implements OnInit {
       next: (mappen) => {
         this.leeslijsten.set(mappen.slice(0, 3));
       },
-      error: (err) => console.error('Kon leeslijsten/mappen niet laden:', err)
+      error: (err) => console.error('Kon leeslijsten/mappen niet laden:', err),
     });
 
     // 3. Haal de actieve leningen op
@@ -62,12 +62,12 @@ export class HomePage implements OnInit {
     this.boekService.getLeengeschiedenis(this.gebruikerId).subscribe({
       next: (geschiedenis) => {
         // Tel alle leningen, behalve degene die door de bibbeheerder zijn geweigerd
-        const geldigeLeningen = geschiedenis.filter(lening => lening.status !== 'GEWEIGERD');
+        const geldigeLeningen = geschiedenis.filter((lening) => lening.status !== 'GEWEIGERD');
 
         // Update de meter op het scherm!
         this.gelezenBoeken.set(geldigeLeningen.length);
       },
-      error: (err) => console.error('Kon leengeschiedenis niet laden voor teller:', err)
+      error: (err) => console.error('Kon leengeschiedenis niet laden voor teller:', err),
     });
   }
 
@@ -75,14 +75,13 @@ export class HomePage implements OnInit {
     this.boekService.getActieveLeningen(this.gebruikerId).subscribe({
       next: (data) => {
         const verwerkteLeningen = data.map((uitlening) => {
-
           // Check of de lening nog goedgekeurd moet worden
           if (uitlening.status === 'AANGEVRAAGD' || !uitlening.inleverDatum) {
             return {
               id: uitlening.id,
               titel: uitlening.boek.titel,
               resterendeDagen: 999, // Zet ze helemaal onderaan in de sortering
-              isAanvraag: true
+              isAanvraag: true,
             };
           }
 
@@ -101,13 +100,14 @@ export class HomePage implements OnInit {
             id: uitlening.id,
             titel: uitlening.boek.titel,
             resterendeDagen: verschilDagen,
-            isAanvraag: false
+            isAanvraag: false,
+            isVerlengd: uitlening.verlengd,
           };
         });
 
         this.leningen.set(verwerkteLeningen);
       },
-      error: (err) => console.error('Kon actieve leningen niet ophalen:', err)
+      error: (err) => console.error('Kon actieve leningen niet ophalen:', err),
     });
   }
 
@@ -143,16 +143,20 @@ export class HomePage implements OnInit {
     this.isEditModalOpen.set(false);
   }
 
-  verwijder(id: number) {
-    if (confirm('Weet je zeker dat je deze lening volledig wil verwijderen?')) {
-      this.boekService.verwijderLening(id).subscribe({
-        next: (bericht) => {
-          alert(bericht);
-          // refresh the list after deletion (call your fetch function here)
-          this.haalLeningenOp(); // of haalAanvragenOp()
-        },
-        error: (err) => alert('Fout bij verwijderen: ' + err.message)
-      });
-    }
+  verlengBoek(leningId: number) {
+    this.boekService.verlengLening(leningId).subscribe({
+      next: (bericht) => {
+        alert(bericht || 'Boek succesvol verlengd.');
+        this.haalLeningenOp();
+      },
+      error: (err) => {
+        console.error('Fout bij verlengen:', err);
+        if (err.error instanceof ProgressEvent) {
+          alert('Kan de server niet bereiken. Controleer of de backend draait.');
+        } else {
+          alert(err.error || 'Er ging iets mis bij het verlengen.');
+        }
+      },
+    });
   }
 }
