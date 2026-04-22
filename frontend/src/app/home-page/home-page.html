@@ -135,6 +135,12 @@
                 <span>{{ lening.resterendeDagen }} d</span>
                 }
               </div>
+              @if (!lening.isAanvraag) {
+              <button class="btn-verlengen" (click)="verlengBoek(lening.id)" [disabled]="lening.isVerlengd"
+                [title]="lening.isVerlengd ? 'Je hebt dit boek al eens verlengd' : 'Verleng met 14 dagen'">
+                Verlengen
+              </button>
+              }
               <button class="btn-verwijderen" (click)="verwijder(lening.id)">Verwijderen</button>
             </div>
             } @empty {

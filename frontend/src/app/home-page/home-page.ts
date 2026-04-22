@@ -101,7 +101,8 @@ export class HomePage implements OnInit {
             id: uitlening.id,
             titel: uitlening.boek.titel,
             resterendeDagen: verschilDagen,
-            isAanvraag: false
+            isAanvraag: false,
+            isVerlengd: uitlening.verlengd
           };
         });
 
@@ -141,6 +142,23 @@ export class HomePage implements OnInit {
 
     // 4. Sluit de pop-up
     this.isEditModalOpen.set(false);
+  }
+
+  verlengBoek(leningId: number) {
+    this.boekService.verlengLening(leningId).subscribe({
+      next: (bericht) => {
+        alert(bericht || 'Boek succesvol verlengd.');
+        this.haalLeningenOp();
+      },
+      error: (err) => {
+        console.error('Fout bij verlengen:', err);
+        if (err.error instanceof ProgressEvent) {
+          alert('Kan de server niet bereiken. Controleer of de backend draait.');
+        } else {
+          alert(err.error || 'Er ging iets mis bij het verlengen.');
+        }
+      }
+    });
   }
 
   verwijder(id: number) {
