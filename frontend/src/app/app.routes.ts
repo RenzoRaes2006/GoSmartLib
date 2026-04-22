@@ -16,6 +16,7 @@ import { ScanModus } from './scan-modus/scan-modus';
 import { LoginSuccessComponent } from './login-success/login-success';
 import { adminGuard } from './guards/admin-guard';
 import { authGuard } from './guards/auth.guard';
+import { LeningenBeheerder } from './leningen-beheerder/leningen-beheerder';
 
 export const routes: Routes = [
   { path: '', component: HomePage },
@@ -31,6 +32,7 @@ export const routes: Routes = [
   { path: 'beheer/scan', component: ScanModus },
   { path: 'gerapporteerde-beoordelingen', component: GerapporteerdeReviews },
   { path: 'leengeschiedenis', component: Leengeschiedenis },
+  { path: 'beheer/actieve-leningen', component: LeningenBeheerder },
   {
     path: 'admin',
     component: AdminDashboard,
@@ -39,24 +41,5 @@ export const routes: Routes = [
   { path: 'boek-import', component: BoekImport },
 
   // the wildcard (**) must ALWAYS be the absolute last item in the array
-  { path: '**', redirectTo: 'not-found' },
-
-  // { path: '', component: HomePage },
-  // { path: 'catalogus', component: Catalogus },
-  // { path: 'details/:id', component: Detail },
-  // { path: 'login', component: Login },
-  // { path: 'login-success', component: LoginSuccessComponent },
-  // { path: 'not-found', component: PageNotFound },
-
-  // { path: 'leeslijst/:id', component: Leeslijst, canActivate: [authGuard] },
-  // { path: 'reserveren', component: ReserverenComponent, canActivate: [authGuard] },
-  // { path: 'leengeschiedenis', component: Leengeschiedenis, canActivate: [authGuard] },
-
-  // { path: 'boek-beheer', component: BoekBeheer, canActivate: [adminGuard] },
-  // { path: 'beheer/aanvragen', component: AanvragenBeheer, canActivate: [adminGuard] },
-  // { path: 'gerapporteerde-beoordelingen', component: GerapporteerdeReviews, canActivate: [adminGuard] },
-  // { path: 'boek-import', component: BoekImport, canActivate: [adminGuard] },
-  // { path: 'admin', component: AdminDashboard, canActivate: [adminGuard] },
-
-  // { path: '**', redirectTo: 'not-found' },
+  { path: '**', redirectTo: 'not-found' }
 ];

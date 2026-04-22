@@ -21,6 +21,11 @@ export class BoekService {
       ? 'http://localhost:8081/api/gebruiker'
       : '/api/gebruiker';
 
+  private apiBeheerUrl =
+    window.location.hostname === 'localhost'
+      ? 'http://localhost:8081/api/beheer'
+      : '/api/beheer';
+
   private http = inject(HttpClient);
 
   getBoekenGefilterd(filters: FilterOptions): Observable<PageResponse<Boek>> {
@@ -101,12 +106,12 @@ export class BoekService {
     return this.http.get<any[]>(`${this.apiGebruikerUrl}/${gebruikerId}/leningen`);
   }
 
-  // fetch all pending loan requests
+  // Fetch all pending loan requests
   getAlleAanvragen(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiGebruikerUrl}/aanvragen`);
   }
 
-  // approve a loan request
+  // Approve a loan request
   keurAanvraagGoed(uitleningId: number): Observable<string> {
     return this.http.put(
       `${this.apiGebruikerUrl}/aanvragen/${uitleningId}/goedkeuren`,
@@ -115,7 +120,7 @@ export class BoekService {
     ) as Observable<string>;
   }
 
-  // reject a loan request
+  // Reject a loan request
   weigerAanvraag(uitleningId: number): Observable<string> {
     return this.http.put(
       `${this.apiGebruikerUrl}/aanvragen/${uitleningId}/weigeren`,
@@ -124,14 +129,14 @@ export class BoekService {
     ) as Observable<string>;
   }
 
-  // delete a loan
+  // Delete a loan
   verwijderLening(uitleningId: number): Observable<string> {
     return this.http.delete(`${this.apiGebruikerUrl}/leningen/${uitleningId}`, {
       responseType: 'text' as 'json',
     }) as Observable<string>;
   }
 
-  // upload an image file
+  // Upload an image file
   uploadAfbeelding(file: File): Observable<string> {
     const formData = new FormData();
     formData.append('file', file);
@@ -155,5 +160,10 @@ export class BoekService {
       {},
       { responseType: 'text' as 'json' },
     ) as Observable<string>;
+  }
+
+  // Fetch all active loans in the system for the admin dashboard
+  getAlleActieveLeningenSysteem(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiBeheerUrl}/leningen/actief`);
   }
 }

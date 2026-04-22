@@ -1,0 +1,80 @@
+<div class="page-wrapper bg-beige full-width-section">
+  <div class="inner-container">
+    
+    <div class="header-sectie">
+      <h1 class="page-title">Actieve Leningen Overzicht</h1>
+      <p class="subtitle">Volg de uitleenstatus van alle boeken en leerlingen op.</p>
+    </div>
+
+    <div class="filter-card">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input 
+          type="text" 
+          [(ngModel)]="zoekterm" 
+          placeholder="Zoek op boektitel of naam leerling..." 
+          class="search-input"
+        />
+      </div>
+      
+      <div class="stats-box">
+        <span class="stat-badge">Totaal actief: <strong>{{ gefilterdeLeningen().length }}</strong></span>
+      </div>
+    </div>
+
+    <div class="table-container">
+      @if (gefilterdeLeningen().length === 0) {
+        <div class="empty-state">
+          <span class="emoji">✅</span>
+          <p>Geen actieve leningen gevonden.</p>
+        </div>
+      } @else {
+        <table class="beheer-table">
+          <thead>
+            <tr>
+              <th>Boek</th>
+              <th>Voorraad</th>
+              <th>Leerling</th>
+              <th>Status</th>
+              <th>Uitleendatum</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (lening of gefilterdeLeningen(); track lening.id) {
+              <tr>
+                <td class="book-cell">
+                  <img [src]="lening.boek.afbeelding" alt="cover" class="table-cover">
+                  <div class="book-text">
+                    <span class="titel">{{ lening.boek.titel }}</span>
+                    <span class="auteur">{{ lening.boek.auteur }}</span>
+                  </div>
+                </td>
+                
+                <td>
+                  <span class="stock-badge" [class.low-stock]="lening.boek.aantalExemplaren <= 1">
+                    {{ lening.boek.aantalExemplaren }} over
+                  </span>
+                </td>
+                
+                <td class="user-cell">
+                  <strong>{{ lening.gebruiker.voorNaam }} {{ lening.gebruiker.achternaam }}</strong>
+                </td>
+                
+                <td>
+                  <span class="status-badge" [class.goedgekeurd]="lening.status === 'GOEDGEKEURD'">
+                    {{ lening.status }}
+                  </span>
+                </td>
+                
+                <td class="date-cell">
+                  {{ lening.uitleenDatum | date:'dd-MM-yyyy'}}
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+
+  </div>
+</div>
