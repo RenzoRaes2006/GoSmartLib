@@ -30,7 +30,7 @@
       <p>Nieuw boek inschrijven</p>
     </a>
 
-    <a routerLink="/gerapporteerde-beordeling" class="action-tile clickable">
+    <a routerLink="/gerapporteerde-beoordelingen" class="action-tile clickable">
       <h3>Reviews modereren</h3>
       <span class="badge">12 nieuwe</span>
     </a>
@@ -66,29 +66,26 @@
     </div>
   </div>
 
-  <div class="charts-section card">
-    <h3 class="section-title" style="border: none; margin-bottom: 0">KPI's en rapportage</h3>
-    <div class="charts-flex">
-      <div class="chart-box">
-        <h4>Uitleenratio</h4>
-        <div
-          class="pie-chart"
-          [style.background]="'conic-gradient(#8c1b3f ' + uitleenRatio + '%, #cbd5e1 0)'"
-        ></div>
-        <div class="chart-legend">
-          <span style="color: #8c1b3f">Uitgeleend: {{ uitleenRatio }}%</span>
-        </div>
-      </div>
+  <div class="card recent-loans-card">
+    <div class="recent-loans-header">
+      <h3 class="section-title">Recente actieve leningen</h3>
+      <a routerLink="/beheer/actieve-leningen" class="btn-primary btn-small">
+        Bekijk alle actieve leningen
+      </a>
+    </div>
 
-      <div class="chart-box">
-        <h4>Tijdig geretourneerd</h4>
-        <div
-          class="pie-chart"
-          [style.background]="'conic-gradient(#8c1b3f ' + tijdigeRetour + '%, #cbd5e1 0)'"
-        ></div>
-        <div class="chart-legend">
-          <span style="color: #8c1b3f">Op tijd: {{ tijdigeRetour }}%</span>
-        </div>
+    <div *ngIf="recenteLeningen.length === 0" class="empty-state">
+      Er zijn momenteel geen actieve leningen.
+    </div>
+
+    <div class="loan-item" *ngFor="let lening of recenteLeningen">
+      <div>
+        <strong class="loan-item-title">{{ lening.boek.titel }}</strong>
+        <span class="loan-item-subtitle">Geleend door: {{ lening.gebruiker.voorNaam }} {{ lening.gebruiker.achternaam }}</span>
+      </div>
+      <div class="loan-item-right">
+        <span class="loan-item-label">Inleveren voor:</span>
+        <span class="badge bg-blue-alt">{{ lening.inleverDatum | date:'dd/MM/yyyy' }}</span>
       </div>
     </div>
   </div>
@@ -100,7 +97,7 @@
       <a
         routerLink="/boek-import"
         class="btn-primary"
-        style="text-decoration: none; display: inline-block"
+        style="text-decoration: none; display: inline-block; margin-top: 0.5rem;"
         >Start import</a
       >
     </div>
