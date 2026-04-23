@@ -111,7 +111,6 @@ export class BoekBeheer implements OnInit {
   selectedTag = signal('');
   geselecteerdeTags = signal<string[]>([]);
 
-  // Constructor met dependency injection en formulieropbouw
   constructor(
     private fb: FormBuilder,
     private boekService: BoekService,
