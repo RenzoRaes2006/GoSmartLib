@@ -51,13 +51,14 @@ public class GebruikerSeed implements CommandLineRunner {
             gebruiker4.setEmail("klaas.klaassen@gosmartlib.be");
             gebruiker4.setSchoolId(12348L);
             gebruiker4.setRol(Rol.LEERLING);
+            
+            Gebruiker opgeslagenGebruiker = gebruikerRepository.save(testGebruiker);
 
             gebruikerRepository.save(gebruiker2);
             gebruikerRepository.save(gebruiker3);
             gebruikerRepository.save(gebruiker4);
 
-            Gebruiker opgeslagenGebruiker = gebruikerRepository.save(testGebruiker);
-
+            
             LeeslijstMap favorietenMap = new LeeslijstMap("Favorieten", opgeslagenGebruiker);
             mapRepository.save(favorietenMap);
 
