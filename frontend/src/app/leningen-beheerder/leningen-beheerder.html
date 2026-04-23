@@ -2,8 +2,8 @@
   <div class="inner-container">
     
     <div class="header-sectie">
-      <h1 class="page-title">Actieve Leningen Overzicht</h1>
-      <p class="subtitle">Volg de uitleenstatus van alle boeken en leerlingen op.</p>
+      <h1 class="page-title">Actieve leningen overzicht</h1>
+      <p class="subtitle">Volg de uitleenstatus van alle boeken en leerlingen op</p>
     </div>
 
     <div class="filter-card">
@@ -11,22 +11,23 @@
         <span class="search-icon">🔍</span>
         <input 
           type="text" 
-          [(ngModel)]="zoekterm" 
+          [ngModel]="zoekterm()" 
+          (ngModelChange)="updateZoekterm($event)"
           placeholder="Zoek op boektitel of naam leerling..." 
           class="search-input"
         />
       </div>
       
       <div class="stats-box">
-        <span class="stat-badge">Totaal actief: <strong>{{ gefilterdeLeningen().length }}</strong></span>
+        <span class="stat-badge">Totaal dringend: <strong>{{ gefilterdeLeningen().length }}</strong></span>
       </div>
     </div>
 
     <div class="table-container">
       @if (gefilterdeLeningen().length === 0) {
-        <div class="empty-state">
-          <span class="emoji">✅</span>
-          <p>Geen actieve leningen gevonden.</p>
+        <div class="empty-state" style="padding: 3rem; text-align: center;">
+          <span class="emoji" style="font-size: 3rem;">✅</span>
+          <p>Geen dringende leningen gevonden voor deze zoekopdracht.</p>
         </div>
       } @else {
         <table class="beheer-table">
@@ -37,10 +38,10 @@
               <th>Leerling</th>
               <th>Status</th>
               <th>Uitleendatum</th>
-            </tr>
+              <th>Inleverdatum</th> </tr>
           </thead>
           <tbody>
-            @for (lening of gefilterdeLeningen(); track lening.id) {
+            @for (lening of zichtbareLeningen(); track lening.id) {
               <tr>
                 <td class="book-cell">
                   <img [src]="lening.boek.afbeelding" alt="cover" class="table-cover">
@@ -69,10 +70,36 @@
                 <td class="date-cell">
                   {{ lening.uitleenDatum | date:'dd-MM-yyyy'}}
                 </td>
+
+                <td class="date-cell" style="font-weight: bold; color: #8c1b3f;">
+                  {{ lening.inleverDatum | date:'dd-MM-yyyy'}}
+                </td>
               </tr>
             }
           </tbody>
         </table>
+
+        <div class="pagination-controls" style="display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 25px; padding-bottom: 20px;">
+          <button 
+            class="btn-primary" 
+            (click)="vorigePagina()" 
+            [disabled]="huidigePagina() === 1"
+            style="padding: 8px 16px; border-radius: 5px; cursor: pointer; border: none; background-color: #8c1b3f; color: white;">
+            &larr; Vorige
+          </button>
+          
+          <span style="font-weight: bold; color: #4b5563;">
+            Pagina {{ huidigePagina() }} van {{ totaalAantalPaginas() }}
+          </span>
+          
+          <button 
+            class="btn-primary" 
+            (click)="volgendePagina()" 
+            [disabled]="huidigePagina() === totaalAantalPaginas()"
+            style="padding: 8px 16px; border-radius: 5px; cursor: pointer; border: none; background-color: #8c1b3f; color: white;">
+            Volgende &rarr;
+          </button>
+        </div>
       }
     </div>
 
