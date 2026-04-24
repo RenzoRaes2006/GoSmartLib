@@ -24,6 +24,7 @@ export const routes: Routes = [
   { path: 'catalogus', component: Catalogus },
   { path: 'login-success', component: LoginSuccessComponent },
   { path: 'details/:id', component: Detail },
+  { path: 'leeslijst', component: Leeslijst },
   { path: 'leeslijst/:id', component: Leeslijst },
   { path: 'boek-beheer', component: BoekBeheer },
   { path: 'reserveren', component: ReserverenComponent },
