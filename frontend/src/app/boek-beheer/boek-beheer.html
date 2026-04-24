@@ -449,7 +449,7 @@
         type="submit"
         [disabled]="boekForm.invalid || (mode() !== 'toevoegen' && !boekGevonden())"
       >
-        {{ mode() === 'toevoegen' ? 'Boek Toevoegen' : 'Wijzigingen Opslaan' }}
+        {{ mode() === 'toevoegen' ? 'Boek toevoegen' : 'Wijzigingen opslaan' }}
       </button>
       @if (mode() === 'wijzigen' && boekGevonden()) {
         <button
@@ -471,7 +471,7 @@
   <div class="modal-overlay" (click)="sluitVerwijderModal()">
     <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h3>Boek Verwijderen</h3>
+        <h3>Boek verwijderen</h3>
       </div>
       <div class="modal-body">
         <p>Weet je zeker dat je dit boek wilt verwijderen?</p>
