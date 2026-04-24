@@ -87,28 +87,17 @@
         <div class="leeslijsten-container">
           <div class="section-header">
             <h2>Jouw leeslijsten</h2>
-            <a [routerLink]="['/leeslijst', 1]" class="view-all-link">
+            <a [routerLink]="['/leeslijst']" class="view-all-link">
               Bekijk alle <span>&rarr;</span>
             </a>
           </div>
 
           <div class="lijsten-grid">
             @for (lijst of leeslijsten(); track $index) {
-              <div class="lijst-tile">
-                @if (lijst.boeken && lijst.boeken.length > 0) {
-                  <img
-                    [src]="
-                      lijst.boeken[lijst.boeken.length - 1].afbeelding ||
-                      'https://bookshow.blurb.com/bookshow/cache/P11360640/md/cover_2.jpeg?access_key=675523b769268bce5b0b710b3d0e7841'
-                    "
-                    alt="Cover"
-                    class="lijst-cover-img"
-                  />
-                } @else if (lijst.naam === 'Favorieten') {
-                  <span class="lijst-icon">⭐</span>
-                } @else {
-                  <span class="lijst-icon">📁</span>
-                }
+              <div class="lijst-tile" [routerLink]="['/leeslijst', lijst.id]">
+                <span class="lijst-icon">
+                  {{ lijst.emoji || (lijst.naam === 'Favorieten' ? '⭐' : '📁') }}
+                </span>
 
                 <h3>{{ lijst.naam }}</h3>
                 <p>{{ lijst.boeken ? lijst.boeken.length : 0 }} boeken</p>
