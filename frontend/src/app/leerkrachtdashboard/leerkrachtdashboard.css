@@ -99,14 +99,8 @@
   color: var(--teacher-muted);
 }
 
-.tile-overview {
-  grid-column: span 8;
-  border-top: 5px solid var(--teacher-rose);
-  background: linear-gradient(180deg, #ffffff 0%, #fff7f9 100%);
-}
-
 .tile-search {
-  grid-column: span 4;
+  grid-column: span 12;
   border-top: 5px solid var(--teacher-amber);
   background: linear-gradient(180deg, #ffffff 0%, #fff8ef 100%);
 }
@@ -173,30 +167,8 @@
   transform: translateY(-2px);
 }
 
-.btn-icon {
-  display: inline-flex;
-  width: 18px;
-  height: 18px;
-  margin-right: 8px;
-  align-items: center;
-  justify-content: center;
-}
-
-.btn-icon svg {
-  width: 18px;
-  height: 18px;
-}
-
-.function-btn .btn-icon {
-  color: #ffffff;
-}
-
 .catalogus-btn {
   background: linear-gradient(135deg, #9b2a4c, var(--teacher-bordeaux));
-}
-
-.catalogus-btn .btn-icon {
-  color: #ffffff;
 }
 
 .insights-section {
