@@ -7,9 +7,9 @@ import { Component } from '@angular/core';
   styleUrl: './login.css',
 })
 export class Login {
-  private authBaseUrl = 'http://localhost:8081';
+  private authBaseUrl = 'http://api-sp09.cloud-ap.be/oauth2';
 
   loginMetSmartschool() {
-    window.location.href = `${this.authBaseUrl}/oauth2/authorization/smartschool`;
+    window.location.href = `${this.authBaseUrl}/login/oauth2/code/smartschool`;
   }
 }
