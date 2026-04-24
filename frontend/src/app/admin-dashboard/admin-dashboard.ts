@@ -12,27 +12,16 @@ import { BoekService } from '../services/boek.service';
 export class AdminDashboard implements OnInit {
   boekService = inject(BoekService);
 
-  totaalBoeken = 0;
-  recenteLeningen: any[] = []; 
+  recenteLeningen: any[] = [];
 
-  // tijdelijke data
-  uitleenRatio: number = 68;
-  tijdigeRetour: number = 92;
-  uniekeLeners: number = 345;
-  nieuweReviews: number = 12;
+  // tijdelijke dummy data — te vervangen door echte statistieken zodra backend-endpoints beschikbaar zijn
+  percentageUitgeleend: number = 42;
+  teLaatIngeleverd: number = 7;
+  populairsteGenre: string = 'Fantasy';
+  gemiddeldeLeenduur: number = 14;
 
   ngOnInit(): void {
-    // 1. Totaal aantal boeken ophalen
-    this.boekService.getBoekenPaged(0, 1).subscribe({
-      next: (response) => {
-        this.totaalBoeken = response.totalElements;
-      },
-      error: (error: Error) => {
-        console.error('Fout bij het ophalen van boeken:', error);
-      },
-    });
-
-    // 2. Actieve leningen ophalen, sorteren en beperken tot max 5
+    // Actieve leningen ophalen, sorteren en beperken tot max 5
     this.boekService.getAlleActieveLeningenSysteem().subscribe({
       next: (response) => {
         

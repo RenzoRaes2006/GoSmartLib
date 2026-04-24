@@ -39,30 +39,26 @@
   <h3 class="section-title">Algemene statistieken</h3>
   <div class="kpi-grid">
     <div class="kpi-card">
-      <span class="kpi-label">Totaal boeken</span>
-      <strong class="kpi-value">{{ totaalBoeken }}</strong>
+      <span class="kpi-label">Collectie uitgeleend</span>
+      <strong class="kpi-value text-blue">{{ percentageUitgeleend }}%</strong>
       <div class="progress-bar">
-        <div class="progress-fill bordeaux-fill" style="width: 100%"></div>
+        <div class="progress-fill bg-blue" [style.width.%]="percentageUitgeleend"></div>
       </div>
     </div>
     <div class="kpi-card">
-      <span class="kpi-label">Uitleenratio</span>
-      <strong class="kpi-value text-blue">{{ uitleenRatio }}%</strong>
-      <div class="progress-bar">
-        <div class="progress-fill bg-blue" [style.width.%]="uitleenRatio"></div>
-      </div>
+      <span class="kpi-label">Te laat ingeleverd</span>
+      <strong class="kpi-value text-bordeaux">{{ teLaatIngeleverd }}</strong>
+      <span class="kpi-trend">boeken over inleverdatum</span>
     </div>
     <div class="kpi-card">
-      <span class="kpi-label">Tijdig geretourneerd</span>
-      <strong class="kpi-value text-green">{{ tijdigeRetour }}%</strong>
-      <div class="progress-bar">
-        <div class="progress-fill bg-green" [style.width.%]="tijdigeRetour"></div>
-      </div>
+      <span class="kpi-label">Populairste genre</span>
+      <strong class="kpi-value text-green">{{ populairsteGenre }}</strong>
+      <span class="kpi-trend">meest geleend deze maand</span>
     </div>
     <div class="kpi-card">
-      <span class="kpi-label">Unieke leners</span>
-      <strong class="kpi-value text-bordeaux">{{ uniekeLeners }}</strong>
-      <span class="kpi-trend">↗ Gevolgde trend</span>
+      <span class="kpi-label">Gemiddelde leenduur</span>
+      <strong class="kpi-value">{{ gemiddeldeLeenduur }} dagen</strong>
+      <span class="kpi-trend">per uitlening</span>
     </div>
   </div>
 
@@ -90,28 +86,14 @@
     </div>
   </div>
 
-  <div class="bottom-grid">
-    <div class="card">
-      <h3 class="section-title">Data importeren en exporteren</h3>
-      <p class="text-muted">Importeer nieuwe collecties via CSV of Excel.</p>
-      <a
-        routerLink="/boek-import"
-        class="btn-primary"
-        style="text-decoration: none; display: inline-block; margin-top: 0.5rem;"
-        >Start import</a
-      >
-    </div>
-
-    <div class="card">
-      <h3 class="section-title">Aankoopsuggesties</h3>
-      <div class="suggestion-item">
-        <span>Fantasiewereld (bijna uitgeput)</span>
-        <span class="badge bg-orange">1 / 3</span>
-      </div>
-      <div class="suggestion-item">
-        <span>Kleurrijk lezen (geen exemplaren)</span>
-        <span class="badge bg-red">0 / 2</span>
-      </div>
-    </div>
+  <div class="card">
+    <h3 class="section-title">Data importeren en exporteren</h3>
+    <p class="text-muted">Importeer nieuwe collecties via CSV of Excel.</p>
+    <a
+      routerLink="/boek-import"
+      class="btn-primary"
+      style="text-decoration: none; display: inline-block; margin-top: 0.5rem;"
+      >Start import</a
+    >
   </div>
 </div>
