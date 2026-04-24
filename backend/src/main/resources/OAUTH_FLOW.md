@@ -23,7 +23,7 @@ De backend fungeert als de "OAuth Client". De volgende eigenschappen zijn essent
 De flow is ontworpen om de veiligheid te maximaliseren door de tokens voornamelijk in de backend te verwerken.
 
 1. De start (Angular)
-De gebruiker klikt op de login-knop. Angular verwijst de browser door naar de backend (bijvoorbeeld `http://localhost:8080/oauth2/authorization/smartschool`).
+De gebruiker klikt op de login-knop. Angular verwijst de browser door naar de backend (bijvoorbeeld `https://api-sp09.cloud-ap.be/oauth2/authorization/smartschool`).
 
 2. De doorverwijzing (Spring Boot)
 De backend ontvangt dit verzoek en stuurt de browser direct door naar de inlogpagina van Smartschool. De backend geeft hierbij de Client ID mee.
@@ -44,7 +44,7 @@ De backend gebruikt de ontvangen Access Token om de gegevens van de gebruiker ve
 * De `AuthenticationSuccessHandler` wordt geactiveerd.
 * De Smartschool ID wordt gecontroleerd in de database (en opgeslagen indien nieuw).
 * De `JwtService` genereert een eigen gosmartbib-token (JWT).
-* De backend stuurt de browser terug naar de Angular frontend, met de JWT in de URL (`http://localhost:4200/login-success?token=JOUW_JWT`).
+* De backend stuurt de browser terug naar de Angular frontend, met de JWT in de URL (`https://frontend-sp09.cloud-ap.be/login-success?token=JOUW_JWT`).
 
 8. De afronding (Angular)
 De `LoginSuccessComponent` leest de JWT uit de adresbalk, slaat deze op in `localStorage` en stuurt de gebruiker naar de homepage (en verwijdert zo de token uit de zichtbare URL).

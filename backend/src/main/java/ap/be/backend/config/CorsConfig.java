@@ -11,8 +11,9 @@ public class CorsConfig implements WebMvcConfigurer {
         registry.addMapping("/**")
                 .allowedOrigins(
                     "http://localhost:4200", 
-                    "http://frontend.localhost", 
-                    "http://frontend-sp09.cloud-ap.be"
+                    "https://localhost:4200",
+                    "https://frontend.localhost",
+                    "https://frontend-sp09.cloud-ap.be"
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*");

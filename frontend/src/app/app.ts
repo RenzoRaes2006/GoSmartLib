@@ -17,8 +17,8 @@ export class App {
 
   // saveData(ingevoerdeNaam: string) {
 
-  //   // this.http.post('http://frontend.localhost/api/save', { naam: ingevoerdeNaam }).subscribe({
-  //    this.http.post('http://frontend.localhost/api/save', { naam: ingevoerdeNaam }).subscribe({
+  //   // this.http.post('https://frontend.localhost/api/save', { naam: ingevoerdeNaam }).subscribe({
+  //    this.http.post('https://frontend.localhost/api/save', { naam: ingevoerdeNaam }).subscribe({
   //     next: (result) => (this.status = 'Gelukt! Opgeslagen in MySQL.'),
   //     error: (err) => {
   //       this.status = 'Fout bij opslaan!';
