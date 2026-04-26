@@ -677,7 +677,20 @@ h2 {
   background-color: #f8fafc;
   cursor: not-allowed;
 }
+/* Specifieke modifier om de verleng-modal ruimer te maken zonder de leesdoel-modal te breken */
+.modal-box-breed {
+  max-width: 550px; /* Standaard was 400px */
+  padding: 40px;    /* Iets meer ademruimte binnenin */
+}
 
+.modal-box-breed h3 {
+  font-size: 1.7rem; /* Titel net iets groter */
+}
+
+.modal-box-breed p {
+  font-size: 1.05rem; /* Waarschuwingstekst iets beter leesbaar */
+  line-height: 1.6;
+}
 /* =========================================
    RESPONSIVENESS
    ========================================= */

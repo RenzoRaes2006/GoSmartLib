@@ -130,16 +130,11 @@
                     <span>{{ lening.resterendeDagen }} d</span>
                   }
                 </div>
-                @if (!lening.isAanvraag) {
+                @if (!lening.isAanvraag && !lening.isVerlengd) {
                   <button
                     class="btn-verlengen"
-                    (click)="verlengBoek(lening.id)"
-                    [disabled]="lening.isVerlengd"
-                    [title]="
-                      lening.isVerlengd
-                        ? 'Je hebt dit boek al eens verlengd'
-                        : 'Verleng met 14 dagen'
-                    "
+                    (click)="openVerlengModal(lening.id)"
+                    title="Verleng"
                   >
                     Verlengen
                   </button>
@@ -157,7 +152,7 @@
 
 @if (isEditModalOpen()) {
   <div class="modal-overlay" (click)="sluitEditModal()">
-    <div class="modal-box" (click)="$event.stopPropagation()">
+    <div class="modal-box modal-box-breed" (click)="$event.stopPropagation()">
       <h3>Pas je leesdoel aan 🎯</h3>
       <p>Hoeveel boeken daag jij jezelf uit om te lezen dit schooljaar?</p>
 
@@ -169,6 +164,47 @@
       <div class="modal-actions">
         <button class="btn-cancel" (click)="sluitEditModal()">Annuleren</button>
         <button class="btn-save" (click)="slaLeesdoelOp()">Opslaan</button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (isVerlengModalOpen()) {
+  <div class="modal-overlay" (click)="sluitVerlengModal()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <h3>Boek verlengen</h3>
+      <p>
+        Weet je zeker dat je <strong>"{{ teVerlengenBoekTitel() }}"</strong> wilt verlengen?
+      </p>
+
+      <p style="font-size: 0.85rem; color: #718096; margin-bottom: 20px">
+        Je uitleentermijn wordt met 14 dagen verlengd. Let op: je kunt een boek maar één keer
+        verlengen.
+      </p>
+
+      @if (verlengFout()) {
+        <div
+          style="
+            color: #991b1b;
+            background: #fff5f5;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            border: 1px solid #fecaca;
+          "
+        >
+          {{ verlengFout() }}
+        </div>
+      }
+
+      <div class="modal-actions">
+        <button class="btn-cancel" (click)="sluitVerlengModal()" [disabled]="isVerlengenBezig()">
+          Annuleren
+        </button>
+        <button class="btn-save" (click)="bevestigVerlengen()" [disabled]="isVerlengenBezig()">
+          {{ isVerlengenBezig() ? 'Bezig...' : 'Ja, verlengen' }}
+        </button>
       </div>
     </div>
   </div>
