@@ -60,25 +60,6 @@ export class BoekImport {
       },
     });
   }
-  // Methode om een voorbeeld CSV-bestand te genereren en downloaden
-  downloadVoorbeeld() {
-    const csvContent =
-      'Titel,Auteur,ISBN,Uitgever,Uitgavejaar,Pagina,Genre,Beschrijving,Aantal exemplaren,Locatie,Afbeelding URL,Leesniveau\n' +
-      'De Hobbit,J.R.R. Tolkien,9789022573523,Boekerij,2015,352,"Fantasy, Avontuur",Een episch avontuur over Bilbo Balings.,3,Kast A1,https://example.com/hobbit.jpg,B (gemiddeld taalgebruik)\n' +
-      'Harry Potter en de Steen der Wijzen,J.K. Rowling,9789061695977,De Harmonie,1998,256,"Fantasy, Jeugd",Een jongen ontdekt dat hij een tovenaar is.,5,Kast A2,,A (eenvoudig taalgebruik)';
-
-    // Zet de string om naar een 'Blob' (een bestands-object in de browser)
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-
-    // Maak een onzichtbare link aan, klik erop, en gooi hem weer weg
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', 'voorbeeld_boeken_import.csv');
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  }
 
   downloadExcelVoorbeeld() {
     const data = [
@@ -90,11 +71,13 @@ export class BoekImport {
         Uitgavejaar: '2015',
         Pagina: 352,
         Genre: 'Fantasy, Avontuur',
+        'Thematische tags': 'Klassieker, Magie, Reis',
         Beschrijving: 'Een episch avontuur over Bilbo Balings.',
         'Aantal exemplaren': 3,
         Locatie: 'Kast A1',
         'Afbeelding URL': 'https://example.com/hobbit.jpg',
         Leesniveau: 'B (gemiddeld taalgebruik)',
+        Populariteit: 4.5,
       },
       {
         Titel: 'Harry Potter en de Steen der Wijzen',
