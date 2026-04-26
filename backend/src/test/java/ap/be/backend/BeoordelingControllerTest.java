@@ -36,7 +36,7 @@ class BeoordelingControllerTest {
     void getBeoordelingenOpBoekIdGeeftLijstTerug() {
         Long boekId = 1L;
         List<BeoordelingDTO> expected = List.of(
-                new BeoordelingDTO(10L, "Test Gebruiker", boekId, 4, "Sterke review", false, false));
+            new BeoordelingDTO(10L, "Test Gebruiker", boekId, 4, "Sterke review", false, false, false));
         when(beoordelingService.getBeoordelingenOpBoekId(boekId)).thenReturn(expected);
 
         List<BeoordelingDTO> result = beoordelingController.getBeoordelingenOpBoekId(boekId);
@@ -48,7 +48,7 @@ class BeoordelingControllerTest {
 
     @Test
     void beoordelingOpslaanReturnedZelfdeDto() {
-        BeoordelingDTO dto = new BeoordelingDTO(11L, "Leerling", 2L, 5, "Top boek", true, false);
+        BeoordelingDTO dto = new BeoordelingDTO(11L, "Leerling", 2L, 5, "Top boek", true, false, false);
         doNothing().when(beoordelingService).beoordelingOpslaan(dto);
 
         BeoordelingDTO response = beoordelingController.beoordelingOpslaan(dto);

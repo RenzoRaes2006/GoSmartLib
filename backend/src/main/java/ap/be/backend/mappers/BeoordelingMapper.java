@@ -22,7 +22,8 @@ public class BeoordelingMapper {
                 beoordeling.getWaardering(),
                 beoordeling.getInhoud(),
                 beoordeling.isAnoniem(),
-                gerapporteerd);
+            gerapporteerd,
+            beoordeling.isSpoiler());
     }
 
     // Nu geven we zowel Boek als Gebruiker mee
@@ -34,6 +35,7 @@ public class BeoordelingMapper {
         beoordeling.setAnoniem(dto.isAnoniem());
         beoordeling.setWaardering(dto.waardering());
         beoordeling.setInhoud(dto.inhoud());
+        beoordeling.setSpoiler(dto.isSpoiler());
         return beoordeling;
     }
 }
