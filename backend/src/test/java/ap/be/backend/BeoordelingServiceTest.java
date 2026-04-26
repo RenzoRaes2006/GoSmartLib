@@ -75,10 +75,11 @@ public class BeoordelingServiceTest {
         testBeoordeling.setWaardering(5);
         testBeoordeling.setInhoud("Geweldig boek!");
         testBeoordeling.setAnoniem(false);
+        testBeoordeling.setSpoiler(false);
 
         // Update deze constructor naar jouw exacte BeoordelingDTO velden 
         // (bijv: id, gebruikerId, gebruikersnaam, boekId, waardering, inhoud, isAnoniem, gerapporteerd)
-        testDto = new BeoordelingDTO(10L, "Test Gebruiker", BOEK_ID, 5, "Geweldig boek!", false, false);
+        testDto = new BeoordelingDTO(10L, "Test Gebruiker", BOEK_ID, 5, "Geweldig boek!", false, false, false);
     }
 
     // =========================================================================
