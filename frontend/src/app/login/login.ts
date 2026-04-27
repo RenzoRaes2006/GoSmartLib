@@ -12,4 +12,4 @@ export class Login {
   loginMetSmartschool() {
     window.location.href = `${this.authBaseUrl}/oauth2/authorization/smartschool`;
   }
-}
+} 
