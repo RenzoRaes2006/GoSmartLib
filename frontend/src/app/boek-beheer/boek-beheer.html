@@ -1,12 +1,18 @@
 <div class="beheer-topbar">
-  <div class="mode-selector">
-    <button type="button" (click)="setMode('wijzigen')" [class.active]="mode() === 'wijzigen'">
-      Boek beheren
-    </button>
-    <button type="button" (click)="setMode('toevoegen')" [class.active]="mode() === 'toevoegen'">
-      Boek toevoegen
-    </button>
-  </div>
+  @if (toonModeSelector()) {
+    <div class="mode-selector">
+      <button type="button" (click)="setMode('wijzigen')" [class.active]="mode() === 'wijzigen'">
+        Boek beheren
+      </button>
+      <button type="button" (click)="setMode('toevoegen')" [class.active]="mode() === 'toevoegen'">
+        Boek toevoegen
+      </button>
+    </div>
+  } @else {
+    <h2 class="beheer-titel">
+      {{ mode() === 'toevoegen' ? 'Boek toevoegen' : 'Catalogus beheren' }}
+    </h2>
+  }
   <div class="topbar-messages">
     @if (errorMessage()) {
       <div class="message-container error-message">{{ errorMessage() }}</div>
@@ -15,7 +21,7 @@
       <div class="message-container success-message">{{ successMessage() }}</div>
     }
   </div>
-  <button type="button" class="verlaat-button" routerLink="/">Verlaten</button>
+  <button type="button" class="verlaat-button" routerLink="/admin">Verlaten</button>
 </div>
 
 <div class="isbn-zoek-boek">

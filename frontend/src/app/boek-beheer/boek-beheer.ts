@@ -26,6 +26,7 @@ import { FilterOptions } from '../models/FilterOptions';
 export class BoekBeheer implements OnInit {
   // Mode management
   mode = signal<'toevoegen' | 'wijzigen'>('wijzigen');
+  toonModeSelector = signal(true);
 
   // Formulier en statusberichten
   boekForm;
@@ -139,9 +140,13 @@ export class BoekBeheer implements OnInit {
     this.route.queryParams.subscribe((params) => {
       const urlMode = params['mode'];
       if (urlMode === 'toevoegen' || urlMode === 'wijzigen') {
+        this.toonModeSelector.set(false);
         this.setMode(urlMode);
-      } else if (this.mode() === 'wijzigen') {
-        this.laadBoekenPagina(0);
+      } else {
+        this.toonModeSelector.set(true);
+        if (this.mode() === 'wijzigen') {
+          this.laadBoekenPagina(0);
+        }
       }
     });
   }
