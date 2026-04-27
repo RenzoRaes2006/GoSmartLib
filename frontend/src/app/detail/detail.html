@@ -122,6 +122,28 @@
       <div class="description-box">
         <p>{{ boek?.beschrijving }}</p>
       </div>
+
+      @if (gelijkaardigeBoeken.length > 0) {
+        <section class="gelijkaardige-section">
+          <h2 class="gelijkaardige-title">Gelijkaardige boeken</h2>
+          <div class="gelijkaardige-row">
+            @for (g of gelijkaardigeBoeken; track g.id) {
+              <a class="gelijkaardige-card" [routerLink]="['/details', g.id]">
+                <img
+                  class="gelijkaardige-cover"
+                  [src]="
+                    g.afbeelding ||
+                    'https://bookshow.blurb.com/bookshow/cache/P11360640/md/cover_2.jpeg?access_key=675523b769268bce5b0b710b3d0e7841'
+                  "
+                  [alt]="g.titel"
+                />
+                <span class="gelijkaardige-titel">{{ g.titel }}</span>
+                <span class="gelijkaardige-auteur">{{ g.auteur }}</span>
+              </a>
+            }
+          </div>
+        </section>
+      }
     </div>
 
     <!-- Rechter kolom: JOUW code (Dynamische namen, isAnoniem checkbox & rapporteer logic) -->
