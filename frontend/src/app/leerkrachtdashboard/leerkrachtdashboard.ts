@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { LeerlingService } from '../services/Leerling.service';
+import { LeerlingService } from '../services/Leerling.service'; // Let op: kleine letter l bij leerling.service
 
 @Component({
   selector: 'app-leerkrachtdashboard',
+  standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './leerkrachtdashboard.html',
   styleUrl: './leerkrachtdashboard.css',
@@ -12,75 +13,56 @@ import { LeerlingService } from '../services/Leerling.service';
 export class Leerkrachtdashboard implements OnInit {
   private leerlingService = inject(LeerlingService);
 
-  // signals voor statusbeheer
-  searchQuery = signal<string>('');
-  selectedClass = signal<string>('');
-  selectedStudent = signal<any | null>(null);
-  
-  // signals voor paginering
-  huidigePagina = signal<number>(1);
+  huidigePagina = signal<number>(0);
   itemsPerPagina = 5;
+  totaalAantalPaginas = signal<number>(0);
+  selectedClass = signal<string>('');
+  zoekterm = signal<string>('');
 
-  // signal voor de opgehaalde data
-  students = signal<any[]>([]);
-
-  // beschikbare klassen
-  availableClasses = ['1a', '1b', '2a', '2b', '3a'];
+  zichtbareLeerlingen = signal<any[]>([]);
+  selectedStudent = signal<any | null>(null);
 
   ngOnInit(): void {
     this.haalLeerlingenOp();
   }
 
   haalLeerlingenOp() {
-    this.leerlingService.getLeerlingen().subscribe({
-      next: (data) => {
-        this.students.set(data);
+    this.leerlingService.getLeerlingen(
+      this.huidigePagina(), 
+      this.itemsPerPagina, 
+      this.selectedClass(),
+      this.zoekterm()
+    ).subscribe({
+      next: (response) => {
+        // Spring Boot stuurt de data in de 'content' property
+        this.zichtbareLeerlingen.set(response.content);
+        this.totaalAantalPaginas.set(response.totalPages);
       },
-      error: (err) => console.error('Fout bij ophalen leerlingen:', err)
+      error: (err) => console.error('fout bij ophalen leerlingen:', err)
     });
   }
 
-  // 1. computed signal: filter op zoekterm en klas
-  filteredStudents = computed(() => {
-    const query = this.searchQuery().toLowerCase();
-    const klasFilter = this.selectedClass();
+  onSearch() {
+    this.huidigePagina.set(0);
+    this.haalLeerlingenOp();
+  }
 
-    return this.students().filter(student => {
-      const fullName = `${student.firstName} ${student.lastName}`.toLowerCase();
-      const matchesName = fullName.includes(query);
-      const matchesClass = klasFilter ? student.className === klasFilter : true;
-
-      return matchesName && matchesClass;
-    });
-  });
-
-  // 2. computed signal: bereken totaal aantal pagina's
-  totaalAantalPaginas = computed(() => {
-    const totaal = Math.ceil(this.filteredStudents().length / this.itemsPerPagina);
-    return totaal === 0 ? 1 : totaal;
-  });
-
-  // 3. computed signal: knip de lijst op voor de huidige pagina
-  zichtbareLeerlingen = computed(() => {
-    const startIndex = (this.huidigePagina() - 1) * this.itemsPerPagina;
-    const eindIndex = startIndex + this.itemsPerPagina;
-    return this.filteredStudents().slice(startIndex, eindIndex);
-  });
-
-  // reset paginering als filters veranderen
   onFilterChange() {
-    this.huidigePagina.set(1);
+    this.huidigePagina.set(0);
+    this.haalLeerlingenOp();
   }
 
   vorigePagina(): void {
-    if (this.huidigePagina() > 1) {
+    if (this.huidigePagina() > 0) {
       this.huidigePagina.update(p => p - 1);
+      this.haalLeerlingenOp();
     }
   }
 
   volgendePagina(): void {
-    if (this.huidigePagina() < this.totaalAantalPaginas()) {
+    if (this.huidigePagina() < this.totaalAantalPaginas() - 1) {
       this.huidigePagina.update(p => p + 1);
+      this.haalLeerlingenOp();
     }
   }
 

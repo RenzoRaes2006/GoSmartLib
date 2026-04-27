@@ -1,68 +1,60 @@
 <div class="teacher-dashboard">
   <header class="teacher-hero">
     <div>
-      <p class="hero-kicker">Leerkrachtportaal</p>
+      <p class="hero-kicker">leerkrachtportaal</p>
       <h1>Dashboard van de klas</h1>
     </div>
-    <div class="hero-badge">Overzicht</div>
+    <div class="hero-badge">overzicht</div>
   </header>
 
   <section class="tile-grid">
     <article class="tile tile-search">
       <h2>Zoek leerling</h2>
 
-      <div class="search-row">
-        <select [(ngModel)]="selectedClass" (change)="onFilterChange()" aria-label="Filter op klas">
-          <option value="">Alle klassen</option>
-          @for (klas of availableClasses; track klas) {
-            <option [value]="klas">Klas {{ klas | uppercase }}</option>
-          }
-        </select>
-
+      <div class="search-row" style="display: flex; gap: 10px; margin-bottom: 20px;">
         <input 
           type="text" 
-          [(ngModel)]="searchQuery"
-          (input)="onFilterChange()"
-          placeholder="Zoek op naam..." 
-          aria-label="Zoek een leerling"
+          [(ngModel)]="zoekterm" 
+          (ngModelChange)="onSearch()" 
+          placeholder="zoek op naam..."
+          style="flex: 1; padding: 10px; border-radius: 6px; border: 1px solid #ddd;"
         >
+        
+        <select [(ngModel)]="selectedClass" (ngModelChange)="onFilterChange()" aria-label="filter op klas">
+          <option value="">alle klassen</option>
+          <option value="1a">klas 1A</option>
+          <option value="1b">klas 1B</option>
+          <option value="2a">klas 2A</option>
+          <option value="2b">klas 2B</option>
+          <option value="3a">klas 3A</option>
+        </select>
       </div>
 
       <div class="result-list">
         @for (student of zichtbareLeerlingen(); track student.id) {
           <div class="result-card" (click)="openHistory(student)">
             <div class="avatar">
-              {{ student.firstName.charAt(0) }}{{ student.lastName.charAt(0) }}
+              {{ student.voorNaam ? student.voorNaam.charAt(0) : '' }}{{ student.achternaam ? student.achternaam.charAt(0) : '' }}
             </div>
             <div>
-              <h3>{{ student.firstName }} {{ student.lastName }}</h3>
-              <p>
-                Klas {{ student.className | uppercase }} • {{ student.activeLoans }} actieve leningen
-              </p>
+              <h3>{{ student.voorNaam }} {{ student.achternaam }}</h3>
+              <p>Klas {{ student.klas | uppercase }}</p>
             </div>
           </div>
         } @empty {
-          <p class="tile-intro">Geen leerlingen gevonden voor deze selectie.</p>
+          <p class="tile-intro">geen leerlingen gevonden.</p>
         }
 
-        @if (filteredStudents().length > itemsPerPagina) {
+        @if (totaalAantalPaginas() > 1) {
           <div class="pagination-bar">
-            <button 
-              class="pag-btn" 
-              (click)="vorigePagina()" 
-              [disabled]="huidigePagina() === 1">
-              &larr; Vorige
+            <button class="pag-btn" (click)="vorigePagina()" [disabled]="huidigePagina() === 0">
+              &larr; vorige
             </button>
-            
             <span class="pag-info">
-              Pagina {{ huidigePagina() }} van {{ totaalAantalPaginas() }}
+              pagina {{ huidigePagina() + 1 }} van {{ totaalAantalPaginas() }}
             </span>
-            
-            <button 
-              class="pag-btn" 
-              (click)="volgendePagina()" 
-              [disabled]="huidigePagina() === totaalAantalPaginas()">
-              Volgende &rarr;
+            <button class="pag-btn" (click)="volgendePagina()" [disabled]="huidigePagina() === totaalAantalPaginas() - 1">
+              volgende &rarr;
             </button>
           </div>
         }
@@ -72,50 +64,40 @@
 
   <section class="function-section">
     <h2 class="section-title">Functies</h2>
-
     <div class="function-grid">
       <article class="tile function-tile">
         <h3>Bulk-ontleningen</h3>
         <p>Start een groepsuitleen voor een volledige klas.</p>
-        <button type="button" class="function-btn">
-          Bulk ontlenen
-        </button>
+        <button type="button" class="function-btn">bulk ontlenen</button>
       </article>
 
       <article class="tile function-tile">
         <h3>Leeslijsten beheren</h3>
         <p>Beheer klassikale leeslijsten en opdrachten.</p>
-        <button type="button" class="function-btn">
-          Beheer leeslijsten
-        </button>
+        <button type="button" class="function-btn">beheer leeslijsten</button>
       </article>
 
       <article class="tile function-tile">
         <h3>Didactische collectie</h3>
         <p>Toegang tot de didactische collectie en bijhorende titels.</p>
-        <button type="button" class="function-btn">
-          Open collectie
-        </button>
+        <button type="button" class="function-btn">open collectie</button>
       </article>
 
       <article class="tile function-tile catalogus-tile">
         <h3>Catalogus voor leerkracht</h3>
         <p>Bekijk boeken in de catalogus en start meteen met zoeken.</p>
-        <a class="function-btn catalogus-btn" href="/catalogus">
-          Open catalogus
-        </a>
+        <a class="function-btn catalogus-btn" href="/catalogus">open catalogus</a>
       </article>
     </div>
   </section>
 
   <section class="insights-section">
     <h2 class="section-title">Statistieken</h2>
-
     <div class="teacher-stats-grid">
       <article class="tile stats-card">
         <div class="stats-head">
           <h3>Leesfrequentie</h3>
-          <span class="stat-chip">Per week</span>
+          <span class="stat-chip">per week</span>
         </div>
         <div class="stat-visual">
           <div class="stat-donut donut-read">
@@ -128,7 +110,7 @@
       <article class="tile stats-card stats-list">
         <div class="stats-head">
           <h3>Populairste boeken</h3>
-          <span class="stat-chip">Top 3</span>
+          <span class="stat-chip">top 3</span>
         </div>
         <ol class="top-books">
           <li>Oorlogswinter</li>
@@ -144,29 +126,11 @@
 @if (selectedStudent()) {
   <div class="modal-overlay" (click)="closeHistory()">
     <div class="modal-box" (click)="$event.stopPropagation()">
-      
       <div class="modal-header">
-        <h3>Leengeschiedenis van {{ selectedStudent().firstName }}</h3>
+        <h3>Leengeschiedenis van {{ selectedStudent().voorNaam }}</h3>
         <button class="modal-close" (click)="closeHistory()">✕</button>
       </div>
-
-      @if (selectedStudent().history.length === 0) {
-        <p class="history-empty">Deze leerling heeft nog geen boeken geleend.</p>
-      } @else {
-        <ul class="history-list">
-          @for (item of selectedStudent().history; track $index) {
-            <li class="history-item">
-              <div class="history-item-details">
-                <strong>{{ item.titel }}</strong>
-                <span>Datum: {{ item.datum }}</span>
-              </div>
-              <span class="history-status">
-                {{ item.status }}
-              </span>
-            </li>
-          }
-        </ul>
-      }
+      <p class="history-empty">deze leerling heeft nog geen boeken geleend.</p>
     </div>
   </div>
 }
