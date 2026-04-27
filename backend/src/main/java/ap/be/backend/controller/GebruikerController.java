@@ -12,18 +12,20 @@ import org.springframework.web.bind.annotation.RestController;
 import ap.be.backend.repository.LeeslijstMapRepository;
 import ap.be.backend.service.GebruikerService;
 import ap.be.backend.dto.LeenStatusResponse;
+import ap.be.backend.entity.Gebruiker;
 import ap.be.backend.entity.LeeslijstMap;
 import ap.be.backend.entity.Uitlening;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 
 @RestController
 @RequestMapping("/api/gebruiker")
-// @CrossOrigin(origins = { "http://frontend.localhost",
-// "http://localhost:4200", "http://frontend-sp09.cloud-ap.be" })
+// @CrossOrigin(origins = { "https://frontend.localhost",
+// "http://localhost:4200", "https://frontend-sp09.cloud-ap.be" })
 public class GebruikerController {
     private final LeeslijstMapRepository leeslijstMapRepository;
     private final GebruikerService gebruikerService;
@@ -105,9 +107,24 @@ public class GebruikerController {
         return ResponseEntity.ok("Lening succesvol verwijderd en voorraad hersteld.");
     }
 
+    @PatchMapping("/leningen/{uitleningId}/verlengen")
+            @CrossOrigin(origins = { "https://frontend.localhost",
+                "http://localhost:4200", "https://localhost:4200",
+                "https://frontend-sp09.cloud-ap.be" }, allowedHeaders = "*")
+    public ResponseEntity<String> verlengLening(@PathVariable("uitleningId") Long uitleningId) {
+        gebruikerService.verlengUitlening(uitleningId);
+        return ResponseEntity.ok("Uitleentermijn succesvol verlengd met 14 dagen.");
+    }
+
     @GetMapping("/{gebruikerId}/geschiedenis")
     public ResponseEntity<List<Uitlening>> getLeengeschiedenis(@PathVariable Long gebruikerId) {
         return ResponseEntity.ok(gebruikerService.getLeengeschiedenisVanGebruiker(gebruikerId));
+    }
+
+    @GetMapping("/schoolid/{schoolId}")
+    public ResponseEntity<Gebruiker> getLeerlingBySchoolId(@PathVariable long schoolId) {
+        Gebruiker leerling = gebruikerService.getLeerlingBySchoolId(schoolId);
+        return ResponseEntity.ok(leerling);
     }
 
 }

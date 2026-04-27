@@ -1,5 +1,5 @@
 export interface Gebruiker {
-  gebruikerId?: number;
+  gebruikerID?: number;
   schoolId: number;
   voorNaam: string;
   achterNaam: string;

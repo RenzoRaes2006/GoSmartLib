@@ -9,27 +9,35 @@ services:
       - proxy
     ports:
       - "80:80"
+      - "443:443" # <-- NIEUW: Poort voor HTTPS
       - "8080:8080"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./letsencrypt:/letsencrypt # <-- NIEUW: Map om certificaten in op te slaan
     command:
       - "--log.level=DEBUG"
-      - "--entrypoints.web.address=:80"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--providers.docker.network=proxy"
       - "--api.dashboard=true"
       - "--api.insecure=false"
+      # AANGEPAST: HTTP instellen en direct doorsturen naar HTTPS
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure" # <-- NIEUW
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https" # <-- NIEUW
+      # NIEUW: HTTPS instellen en Let's Encrypt activeren
+      - "--entrypoints.websecure.address=:443" # <-- NIEUW
+      - "--certificatesresolvers.myresolver.acme.tlschallenge=true" # <-- NIEUW
+      - "--certificatesresolvers.myresolver.acme.email=jouw.email@student.ap.be" # <-- NIEUW (vul je echte mail in!)
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json" # <-- NIEUW
     labels:
       - "traefik.enable=true"
-      # - "traefik.http.routers.dashboard.rule=Host(`dashboard.docker.localhost`)"
-      - "traefik.http.routers.dashboard.rule=Host(`dashboard.195.201.38.27.nip.io`) || Host(`dashboard.docker.localhost`)"
-      - "traefik.http.routers.dashboard.entrypoints=web"
+      - "traefik.http.routers.dashboard.rule=Host(`dashboard.195.201.38.27.nip.io`)"
+      - "traefik.http.routers.dashboard.entrypoints=websecure" # <-- AANGEPAST
+      - "traefik.http.routers.dashboard.tls=true" # <-- NIEUW (expliciet TLS)
+      - "traefik.http.routers.dashboard.tls.certresolver=myresolver" # <-- NIEUW
       - "traefik.http.routers.dashboard.service=api@internal"
 
-# networks:
-#   proxy:
-#     name: proxy
 networks:
   proxy:
     external: true

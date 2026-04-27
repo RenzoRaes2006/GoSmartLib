@@ -106,31 +106,30 @@ public class GebruikerService {
         if (boek == null)
             return new LeenStatusResponse(false, "Boek niet gevonden");
 
-        // is boek op voorraad in de bib
+        // Check if book is in stock in the library
         if (boek.getAantalExemplaren() <= 0) {
             return new LeenStatusResponse(false, "Boek is momenteel niet beschikbaar.");
-
         }
 
-        // Heeft gebruiker dit zelfde boek al geleend of is al in aanvraag
+        // Check if the user already borrowed this book or if it is pending
         if (uitleningRepository.existsByGebruiker_GebruikerIDAndBoek_IdAndIsIngeleverdFalse(gebruikerId, boekId)) {
             return new LeenStatusResponse(false, "Je hebt dit boek al geleend of in aanvraag.");
         }
 
-        // heeft de gebruiker boeken die te laat zijn
+        // Check if the user has overdue books
         if (uitleningRepository.existsByGebruiker_GebruikerIDAndIsIngeleverdFalseAndInleverDatumBefore(gebruikerId,
                 LocalDate.now())) {
             return new LeenStatusResponse(false, "Je hebt nog boeken die te laat zijn. Lever deze eerst in!");
         }
-        // De limiet check
 
+        // Limit check
         List<Uitlening> actieveLeningen = uitleningRepository
                 .findByGebruiker_GebruikerIDAndIsIngeleverdFalse(gebruikerId);
         if (actieveLeningen.size() >= 3) {
             return new LeenStatusResponse(false, "Je hebt je limiet van 3 boeken bereikt (inclusief aanvragen).");
         }
 
-        // boek lenen
+        // Available to borrow
         return new LeenStatusResponse(true, "Beschikbaar om te reserveren");
     }
 
@@ -180,7 +179,7 @@ public class GebruikerService {
                 .orElseThrow(() -> new UitleningNotFoundException("Uitlening niet gevonden"));
 
         uitlening.setStatus("GEWEIGERD");
-        uitlening.setIngeleverd(true); // Zodat het niet meer meetelt voor zijn limiet van 3
+        uitlening.setIngeleverd(true); // So it no longer counts towards the limit of 3
 
         Boek boek = uitlening.getBoek();
         boek.setAantalExemplaren(boek.getAantalExemplaren() + 1);
@@ -194,21 +193,56 @@ public class GebruikerService {
     }
 
     public void verwijderLening(Long uitleningId) {
-        // find the loan in the database
+        // Find the loan in the database
         Uitlening uitlening = uitleningRepository.findById(uitleningId)
                 .orElseThrow(() -> new UitleningNotFoundException("Uitlening niet gevonden"));
 
-        // restore the book stock before deleting the loan
+        // Restore the book stock before deleting the loan
         Boek boek = uitlening.getBoek();
         boek.setAantalExemplaren(boek.getAantalExemplaren() + 1);
         boekRepository.save(boek);
 
-        // delete the loan completely from the database
+        // Delete the loan completely from the database
         uitleningRepository.delete(uitlening);
     }
 
     public List<Uitlening> getLeengeschiedenisVanGebruiker(Long gebruikerId) {
-        // Haalt alle leningen op, inclusief ingeleverde en afgewezen boeken
+        // Fetches all loans, including returned and rejected books
         return uitleningRepository.findByGebruiker_GebruikerIDOrderByUitleenDatumDesc(gebruikerId);
+    }
+
+    public void verlengUitlening(Long uitleningId) {
+        Uitlening uitlening = uitleningRepository.findById(uitleningId)
+                .orElseThrow(() -> new UitleningNotFoundException("Uitlening niet gevonden"));
+
+        if (uitlening.isIngeleverd()) {
+            throw new IllegalArgumentException("Dit boek is al ingeleverd.");
+        }
+        if (uitlening.isVerlengd()) {
+            throw new IllegalArgumentException("Je hebt dit boek al een keer verlengd.");
+        }
+        if ("AANGEVRAAGD".equals(uitlening.getStatus())) {
+            throw new IllegalArgumentException("Je kunt een boek dat nog in aanvraag is niet verlengen.");
+        }
+
+        uitlening.setInleverDatum(uitlening.getInleverDatum().plusDays(14));
+        uitlening.setVerlengd(true);
+
+        uitleningRepository.save(uitlening);
+    }
+
+    public Gebruiker getLeerlingBySchoolId(long schoolId) {
+        Gebruiker gebruiker = gebruikerRepository.findBySchoolId(schoolId)
+                .orElseThrow(
+                        () -> new GebruikerNotFoundException("Leerling met school ID " + schoolId + " niet gevonden"));
+        if (gebruiker.getRol() != Rol.LEERLING) {
+            throw new GebruikerNotFoundException("Leerling met school ID " + schoolId + " niet gevonden");
+        }
+        return gebruiker;
+    }
+
+    // Fetch all active loans across the entire system for the librarian
+    public List<Uitlening> getAlleActieveLeningenSysteem() {
+        return uitleningRepository.findByIsIngeleverdFalseOrderByUitleenDatumDesc();
     }
 }

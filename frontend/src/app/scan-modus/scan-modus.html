@@ -1,0 +1,110 @@
+<div class="scan-container">
+  <h1>Uitleenbalie</h1>
+
+  @if (stap() === 'LEERLING') {
+    <div class="stap">
+      <h2>Geef je leerlingkaart in</h2>
+      <input
+        type="text"
+        placeholder="Scan je leerlingkaart (of typ het)"
+        [ngModel]="leerlingInput()"
+        (ngModelChange)="leerlingInput.set($event)"
+        (keyup.enter)="zoekLeerling()"
+        autofocus
+      />
+      @if (leerlingFout()) {
+        <p class="fout">{{ leerlingFout() }}</p>
+      }
+    </div>
+  }
+
+  @if (stap() === 'MODUS') {
+    <div class="stap">
+      <h2>Hoi {{ naamOpScherm() }} — wat wil je doen?</h2>
+      <div class="modus-knoppen">
+        <button class="actie-knop" (click)="kiesModus('UITLENING')">Boeken lenen</button>
+        <button class="actie-knop" (click)="kiesModus('RETOUR')">Boeken terugbrengen</button>
+      </div>
+      <button class="terug-knop" (click)="terugNaarLeerling()">← Andere leerling</button>
+    </div>
+  }
+
+  @if (stap() === 'SCAN') {
+    <div class="stap">
+      <h2>{{ modus() === 'UITLENING' ? 'Lenen' : 'Terugbrengen' }} — {{ naamOpScherm() }}</h2>
+      <input
+        type="text"
+        placeholder="Scan ISBN (of typ het)"
+        [ngModel]="isbnInput()"
+        (ngModelChange)="isbnInput.set($event)"
+        (keyup.enter)="scanIsbn()"
+        #isbnVeld
+        autofocus
+      />
+      @if (scanFout()) {
+        <p class="fout">{{ scanFout() }}</p>
+      }
+
+      <h3 class="lijst-titel">
+        Geselecteerde boeken ({{ mandje().length }}
+        {{ modus() === 'UITLENING' ? 'te lenen' : 'terug te brengen' }})
+      </h3>
+      @for (item of mandje(); track item.isbn) {
+        <div class="lijst-item" [class]="'actie-' + modus()!.toLowerCase()">
+          <span class="titel">{{ item.titel }}</span>
+          <span class="isbn">{{ item.isbn }}</span>
+          <button class="verwijder-knop" (click)="verwijderUitMandje(item.isbn)">✕</button>
+        </div>
+      } @empty {
+        <p class="leeg">Scan een boek om toe te voegen.</p>
+      }
+
+      <button class="terug-knop" (click)="terugNaarModus()">← Terug naar keuze</button>
+    </div>
+
+    <button class="klaar-knop" (click)="vraagKlaarBevestiging()" [disabled]="bezig()">
+      {{ bezig() ? 'Bezig...' : 'Klaar' }}
+    </button>
+
+    @if (toonKlaarBevestiging()) {
+      <div class="modal-overlay" (click)="annuleerKlaar()">
+        <div class="modal" (click)="$event.stopPropagation()">
+          <h2>Bevestigen?</h2>
+          <p>
+            Je staat op het punt om {{ mandje().length }}
+            {{ modus() === 'UITLENING' ? 'boek(en) te lenen' : 'boek(en) terug te brengen' }}.
+          </p>
+          <div class="modal-knoppen">
+            <button class="secundair" (click)="annuleerKlaar()">Annuleren</button>
+            <button class="primair" (click)="bevestigKlaar()">Ja, bevestigen</button>
+          </div>
+        </div>
+      </div>
+    }
+  }
+
+  @if (stap() === 'RESULTAAT') {
+    <div class="stap">
+      <h2>Overzicht</h2>
+      <p class="samenvatting">
+        ✓ {{ succesvolCount() }} geslaagd
+        @if (fouteCount() > 0) {
+          · ✗ {{ fouteCount() }} mislukt
+        }
+      </p>
+      @for (r of resultaten(); track r.isbn) {
+        <div class="lijst-item" [class]="r.status === 'OK' ? 'status-ok' : 'status-fout'">
+          <span class="titel">{{ r.titel ?? r.isbn }}</span>
+          <span>
+            @if (r.status === 'OK') {
+              ✓ {{ modus() === 'UITLENING' ? 'Uitgeleend' : 'Teruggebracht' }}
+            } @else {
+              ✗ {{ r.foutReden }}
+            }
+          </span>
+        </div>
+      }
+      <button class="klaar-knop" (click)="nieuweSessie()">Nieuwe sessie</button>
+    </div>
+  }
+</div>

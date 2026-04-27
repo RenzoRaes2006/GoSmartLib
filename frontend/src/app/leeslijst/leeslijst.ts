@@ -12,15 +12,19 @@ import { LeeslijstService } from '../services/leeslijstService';
 })
 export class Leeslijst implements OnInit {
   leeslijstService = inject(LeeslijstService);
+  private route = inject(ActivatedRoute);
   mappen: any[] = [];
   geselecteerdeMap: any = null;
   isLoading: boolean = true;
 
   ngOnInit(): void {
-    this.haalMappenOp();
+    this.route.paramMap.subscribe((params) => {
+      const autoOpenId = params.get('id');
+      this.haalMappenOp(autoOpenId);
+    });
   }
 
-  haalMappenOp() {
+  haalMappenOp(autoOpenMapId: string | null = null) {
     const gebruikerId = 1;
     this.isLoading = true;
     this.leeslijstService.getMappenVanGebruiker(gebruikerId).subscribe({
@@ -41,6 +45,13 @@ export class Leeslijst implements OnInit {
 
         this.mappen = gefilterdeMappen;
         this.isLoading = false;
+
+        if (autoOpenMapId) {
+          const gevonden = this.mappen.find((m: any) => String(m.id) === String(autoOpenMapId));
+          if (gevonden) {
+            this.geselecteerdeMap = gevonden;
+          }
+        }
       },
       error: (err) => {
         console.error('Fout bij ophalen mappen', err);

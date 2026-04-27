@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.data.domain.Sort;
 
 @RestController
-// @CrossOrigin(origins = { "http://frontend.localhost", "http://localhost:4200"
+// @CrossOrigin(origins = { "https://frontend.localhost", "http://localhost:4200"
 // })
 public class BoekController {
     private final BoekService boekService;

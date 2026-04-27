@@ -20,6 +20,7 @@ export const appConfig: ApplicationConfig = {
       }),
     ),
     // Activeer de HTTP client én koppel jouw interceptor
-    provideHttpClient(withInterceptors([authInterceptor]))
+    // provideHttpClient(withInterceptors([authInterceptor]))
+    provideHttpClient(),
   ],
 };
