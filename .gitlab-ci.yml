@@ -44,4 +44,4 @@ deploy-to-server:
     - docker compose pull
     - docker compose up -d --build
   rules:
-    - if: $CI_COMMIT_BRANCH == "feature-47-Inloggen"
+    - if: $CI_COMMIT_BRANCH == "feature-47-Inloggen" 
