@@ -9,6 +9,7 @@ import ap.be.backend.repository.BoekRepository;
 import ap.be.backend.repository.LeeslijstMapRepository;
 import ap.be.backend.repository.UitleningRepository;
 import ap.be.backend.service.GebruikerService;
+import ap.be.backend.service.InstellingService;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,6 +41,8 @@ public class GebruikerServiceTest {
 
     @Mock
     private BoekRepository boekRepository;
+    @Mock
+    private InstellingService instellingService;
 
     @Mock
     private UitleningRepository uitleningRepository;
@@ -306,14 +309,15 @@ public class GebruikerServiceTest {
         // ARRANGE (Setup)
         Long userId = 1L;
         Long bookId = 2L;
-        
+
         Boek mockBoek = new Boek();
         mockBoek.setAantalExemplaren(5); // Zorg dat het boek wel op voorraad is, anders faalt de test te vroeg
-        
+
         // Vertel de neppe database dat het boek bestaat
         given(boekRepository.findById(bookId)).willReturn(Optional.of(mockBoek));
-        
-        // Vertel de neppe database: "Ja, deze specifieke gebruiker heeft een boek dat te laat is!"
+
+        // Vertel de neppe database: "Ja, deze specifieke gebruiker heeft een boek dat
+        // te laat is!"
         given(uitleningRepository.existsByGebruiker_GebruikerIDAndIsIngeleverdFalseAndInleverDatumBefore(
                 eq(userId), any(LocalDate.class))).willReturn(true);
 
@@ -323,9 +327,10 @@ public class GebruikerServiceTest {
         // ASSERT (Controleer het resultaat)
         assertFalse(response.isMagLenen(), "De gebruiker mag niet lenen omdat hij een te laat boek heeft.");
         assertEquals("Je hebt nog boeken die te laat zijn. Lever deze eerst in!", response.getReden());
-        
+
         // Verifieer dat de juiste repository methode ook echt is aangeroepen
-        then(uitleningRepository).should().existsByGebruiker_GebruikerIDAndIsIngeleverdFalseAndInleverDatumBefore(eq(userId), any(LocalDate.class));
+        then(uitleningRepository).should().existsByGebruiker_GebruikerIDAndIsIngeleverdFalseAndInleverDatumBefore(
+                eq(userId), any(LocalDate.class));
     }
 
     @Test
@@ -333,19 +338,25 @@ public class GebruikerServiceTest {
         // ARRANGE (Setup)
         Long userId = 1L;
         Long bookId = 2L;
-        
+
         Boek mockBoek = new Boek();
-        mockBoek.setAantalExemplaren(5); 
-        
+        mockBoek.setAantalExemplaren(5);
+
         given(boekRepository.findById(bookId)).willReturn(Optional.of(mockBoek));
-        
+
         // Nu zeggen we: "Nee, deze gebruiker heeft KEEN te late boeken"
         given(uitleningRepository.existsByGebruiker_GebruikerIDAndIsIngeleverdFalseAndInleverDatumBefore(
                 eq(userId), any(LocalDate.class))).willReturn(false);
-                
-        // We moeten ook zorgen dat hij het boek nog niet heeft en onder de limiet van 3 zit
-        given(uitleningRepository.existsByGebruiker_GebruikerIDAndBoek_IdAndIsIngeleverdFalse(userId, bookId)).willReturn(false);
-        given(uitleningRepository.findByGebruiker_GebruikerIDAndIsIngeleverdFalse(userId)).willReturn(List.of()); // Lege lijst (0 actieve leningen)
+
+        // We moeten ook zorgen dat hij het boek nog niet heeft en onder de limiet van 3
+        // zit
+        given(uitleningRepository.existsByGebruiker_GebruikerIDAndBoek_IdAndIsIngeleverdFalse(userId, bookId))
+                .willReturn(false);
+        given(uitleningRepository.findByGebruiker_GebruikerIDAndIsIngeleverdFalse(userId)).willReturn(List.of()); // Lege
+                                                                                                                  // lijst
+                                                                                                                  // (0
+                                                                                                                  // actieve
+                                                                                                                  // leningen)
 
         // ACT
         LeenStatusResponse response = gebruikerService.checkLeenStatus(userId, bookId);
@@ -353,5 +364,71 @@ public class GebruikerServiceTest {
         // ASSERT
         assertTrue(response.isMagLenen(), "De gebruiker moet mogen lenen.");
         assertEquals("Beschikbaar om te reserveren", response.getReden());
+    }
+
+    @Test
+    void givenLimietIsDrieEnGebruikerHeeftDrieLeningen_whenCheckLeenStatus_thenReturnsFalse() {
+        // Given
+        Long gebruikerId = 1L;
+        Long boekId = 100L;
+
+        Boek boek = new Boek();
+        boek.setId(boekId);
+        boek.setAantalExemplaren(5); // Boek is op voorraad
+
+        when(boekRepository.findById(boekId)).thenReturn(Optional.of(boek));
+        // Simuleer dat de gebruiker DIT specifieke boek nog niet heeft, en geen boeken
+        // te laat heeft
+        when(uitleningRepository.existsByGebruiker_GebruikerIDAndBoek_IdAndIsIngeleverdFalse(gebruikerId, boekId))
+                .thenReturn(false);
+        when(uitleningRepository.existsByGebruiker_GebruikerIDAndIsIngeleverdFalseAndInleverDatumBefore(eq(gebruikerId),
+                any())).thenReturn(false);
+
+        // Hier stellen we onze nieuwe feature in: de limiet is 3
+        when(instellingService.getLeenLimiet()).thenReturn(3);
+
+        // Simuleer dat de gebruiker al 3 andere boeken heeft geleend
+        List<Uitlening> actieveLeningen = Arrays.asList(new Uitlening(), new Uitlening(), new Uitlening());
+        when(uitleningRepository.findByGebruiker_GebruikerIDAndIsIngeleverdFalse(gebruikerId))
+                .thenReturn(actieveLeningen);
+
+        // When
+        LeenStatusResponse response = gebruikerService.checkLeenStatus(gebruikerId, boekId);
+
+        // Then
+        assertFalse(response.isMagLenen(), "De gebruiker mag niet lenen omdat de limiet is bereikt.");
+        assertTrue(response.getReden().contains("limiet van 3 boeken bereikt"));
+    }
+
+    @Test
+    void givenLimietIsNulEnGebruikerHeeftTienLeningen_whenCheckLeenStatus_thenReturnsTrueEnSlaatQueryOver() {
+        // Given
+        Long gebruikerId = 1L;
+        Long boekId = 100L;
+
+        Boek boek = new Boek();
+        boek.setId(boekId);
+        boek.setAantalExemplaren(5); // Boek is op voorraad
+
+        when(boekRepository.findById(boekId)).thenReturn(Optional.of(boek));
+        when(uitleningRepository.existsByGebruiker_GebruikerIDAndBoek_IdAndIsIngeleverdFalse(gebruikerId, boekId))
+                .thenReturn(false);
+        when(uitleningRepository.existsByGebruiker_GebruikerIDAndIsIngeleverdFalseAndInleverDatumBefore(eq(gebruikerId),
+                any())).thenReturn(false);
+
+        // De admin heeft onbeperkt lenen (0) ingesteld
+        when(instellingService.getLeenLimiet()).thenReturn(0);
+
+        // When
+        LeenStatusResponse response = gebruikerService.checkLeenStatus(gebruikerId, boekId);
+
+        // Then
+        assertTrue(response.isMagLenen(), "De gebruiker mag lenen want de limiet is onbeperkt (0).");
+
+        // CLEAN CODE CHECK: Omdat de limiet 0 is, hoeft de applicatie niet de database
+        // in
+        // om alle actieve leningen te tellen. We verifiëren hier of we die onnodige
+        // belasting daadwerkelijk overslaan!
+        verify(uitleningRepository, never()).findByGebruiker_GebruikerIDAndIsIngeleverdFalse(gebruikerId);
     }
 }
