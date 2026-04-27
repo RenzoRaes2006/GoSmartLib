@@ -4,15 +4,15 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 @Component({
   selector: 'app-login-success',
   template: '<p>Bezig met inloggen, even geduld...</p>',
-  styleUrl: './login-success.css'
+  styleUrl: './login-success.css',
 })
 export class LoginSuccessComponent implements OnInit {
   route = inject(ActivatedRoute);
   router = inject(Router);
 
-  ngOnInit(): void {s
+  ngOnInit(): void {
     // Lees de parameters uit de URL
-    this.route.queryParams.subscribe(params => {
+    this.route.queryParams.subscribe((params) => {
       const token = params['token'];
 
       if (token) {
