@@ -34,6 +34,8 @@ export class Detail implements OnInit {
   form!: FormGroup;
   submissionError: string = '';
   beoordelingen: Beoordeling[] = [];
+  // COPILOT TOEVOEGING: Houdt bij welke spoiler-reviews de gebruiker bewust heeft opengeklikt.
+  zichtbareSpoilers: Set<number> = new Set();
 
   isModalOpen: boolean = false;
   isFavoriet: boolean = false;
@@ -67,6 +69,8 @@ export class Detail implements OnInit {
       waardering: ['', [Validators.required]],
       inhoud: ['', [Validators.required, Validators.maxLength(500)]],
       isAnoniem: [false],
+      // COPILOT TOEVOEGING: Checkbox-waarde voor "bevat spoilers" bij het posten van een review.
+      isSpoiler: [false],
     });
 
     this.route.paramMap.subscribe((params) => {
@@ -104,6 +108,9 @@ export class Detail implements OnInit {
     this.reviewService.getBeoordelingenOpBoekId(this.boekId).subscribe({
       next: (beoordelingen) => {
         this.beoordelingen = beoordelingen;
+        // COPILOT TOEVOEGING: Bij herladen resetten we opengeklikte spoilers,
+        // zodat de gebruiker opnieuw bewust moet kiezen om spoilers te lezen.
+        this.zichtbareSpoilers.clear();
         this.updateBoekWaardering();
       },
       // Jouw error handling hersteld!
@@ -182,11 +189,19 @@ export class Detail implements OnInit {
       inhoud: raw.inhoud,
       isAnoniem: raw.isAnoniem,
       gerapporteerd: false,
+      // COPILOT TOEVOEGING: Stuurt spoiler-flag mee naar de backend bij create.
+      isSpoiler: raw.isSpoiler,
     };
 
     this.reviewService.voegBeoordelingToe(beoordeling).subscribe({
       next: () => {
-        this.form.reset();
+        this.form.reset({
+          waardering: '',
+          inhoud: '',
+          isAnoniem: false,
+          // COPILOT TOEVOEGING: Na submit default terug op false voor voorspelbaar gedrag.
+          isSpoiler: false,
+        });
         this.submissionError = '';
         this.laadBeoordelingenVanBoek();
       },
@@ -200,6 +215,17 @@ export class Detail implements OnInit {
       },
     });
   }
+
+  // COPILOT TOEVOEGING: True betekent "spoiler en nog niet vrijgegeven" -> inhoud verbergen.
+  isSpoilerVerborgen(beoordeling: Beoordeling): boolean {
+    return beoordeling.isSpoiler && !this.zichtbareSpoilers.has(beoordeling.id);
+  }
+
+  // COPILOT TOEVOEGING: Gebruiker kiest expliciet om 1 specifieke spoiler-review te tonen.
+  toonSpoiler(beoordelingId: number) {
+    this.zichtbareSpoilers.add(beoordelingId);
+  }
+
   // Jouw ongewijzigde functie hersteld!
   bevestigRapport() {
     const customReden = this.rapporteerReden.trim();

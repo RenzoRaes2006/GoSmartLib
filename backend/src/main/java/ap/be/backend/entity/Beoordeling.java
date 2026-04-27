@@ -44,6 +44,9 @@ public class Beoordeling {
     @Column(name = "content", length = 1000)
     String inhoud;
 
+    @Column(name = "is_spoiler", nullable = false)
+    private boolean isSpoiler;
+
     public Beoordeling() {
     }
 
@@ -100,6 +103,14 @@ public class Beoordeling {
 
     public void setAnoniem(boolean isAnoniem) {
         this.isAnoniem = isAnoniem;
+    }
+
+    public boolean isSpoiler() {
+        return isSpoiler;
+    }
+
+    public void setSpoiler(boolean isSpoiler) {
+        this.isSpoiler = isSpoiler;
     }
 
 
