@@ -220,3 +220,47 @@
     background: #3b82f6; /* Mooie blauwe kleur voor de datum */
     position: static;
 }
+/* =========================================
+   TOAST NOTIFICATIONS (Mooie meldingen)
+========================================= */
+.toast-notification {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 24px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  color: white;
+  font-weight: 600;
+  z-index: 9999; /* Zorgt dat hij altijd bovenop ligt */
+  animation: slideInUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.toast-succes {
+  background-color: #2f855a; /* Diep groen voor succes */
+  border-left: 6px solid #22543d;
+}
+
+.toast-fout {
+  background-color: #c53030; /* Rood voor fouten */
+  border-left: 6px solid #9b2c2c;
+}
+
+.toast-icon {
+  font-size: 1.3rem;
+}
+
+/* De Slide-in Animatie */
+@keyframes slideInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(40px) scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}

@@ -77,23 +77,73 @@
     <div class="loan-item" *ngFor="let lening of recenteLeningen">
       <div>
         <strong class="loan-item-title">{{ lening.boek.titel }}</strong>
-        <span class="loan-item-subtitle">Geleend door: {{ lening.gebruiker.voorNaam }} {{ lening.gebruiker.achternaam }}</span>
+        <span class="loan-item-subtitle"
+          >Geleend door: {{ lening.gebruiker.voorNaam }} {{ lening.gebruiker.achternaam }}</span
+        >
       </div>
       <div class="loan-item-right">
         <span class="loan-item-label">Inleveren voor:</span>
-        <span class="badge bg-blue-alt">{{ lening.inleverDatum | date:'dd/MM/yyyy' }}</span>
+        <span class="badge bg-blue-alt">{{ lening.inleverDatum | date: 'dd/MM/yyyy' }}</span>
       </div>
     </div>
   </div>
 
-  <div class="card">
-    <h3 class="section-title">Data importeren en exporteren</h3>
-    <p class="text-muted">Importeer nieuwe collecties via CSV of Excel.</p>
-    <a
-      routerLink="/boek-import"
-      class="btn-primary"
-      style="text-decoration: none; display: inline-block; margin-top: 0.5rem;"
-      >Start import</a
-    >
+  <div class="bottom-grid">
+    <div class="card">
+      <h3 class="section-title">Data importeren en exporteren</h3>
+      <p class="text-muted">Importeer nieuwe collecties via CSV of Excel.</p>
+      <a
+        routerLink="/boek-import"
+        class="btn-primary"
+        style="text-decoration: none; display: inline-block; margin-top: 0.5rem"
+      >
+        Start import
+      </a>
+    </div>
+
+    <div class="card">
+      <h3 class="section-title">Systeemconfiguratie</h3>
+      <p class="text-muted" style="margin-bottom: 15px">
+        Beheer het uitleenbeleid voor de leerlingen op school.
+      </p>
+
+      <label
+        for="leenlimiet"
+        style="display: block; margin-bottom: 10px; font-weight: 600; color: #4a5568"
+      >
+        Maximum te lenen boeken
+        <span style="font-weight: 400; color: #718096">(0 = Geen limiet)</span>:
+      </label>
+
+      <div style="display: flex; gap: 15px; align-items: center">
+        <input
+          type="number"
+          id="leenlimiet"
+          [value]="huidigeLimiet()"
+          #limietInput
+          min="0"
+          style="
+            padding: 12px;
+            width: 90px;
+            border: 1px solid var(--admin-border);
+            border-radius: 8px;
+            font-size: 1.1rem;
+            text-align: center;
+            font-weight: 600;
+            color: var(--admin-text);
+          "
+        />
+        <button class="btn-primary" (click)="opslaanLimiet(limietInput.value)">Opslaan</button>
+      </div>
+    </div>
   </div>
 </div>
+@if (toastActief()) {
+  <div
+    class="toast-notification"
+    [ngClass]="toastType() === 'succes' ? 'toast-succes' : 'toast-fout'"
+  >
+    <span class="toast-icon">{{ toastType() === 'succes' ? '✅' : '⚠️' }}</span>
+    <span class="toast-tekst">{{ toastBericht() }}</span>
+  </div>
+}

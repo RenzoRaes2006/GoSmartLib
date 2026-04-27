@@ -11,7 +11,38 @@
 
   <div class="layout-grid">
     <div class="mandje-sectie">
-      <h2 class="sectie-titel">Geselecteerde boeken ({{ boekenInMandje.length }}/3)</h2>
+      <div class="leen-limiet-info">
+        @if (maxLeenLimiet() > 0) {
+          <p>
+            📚 Je hebt al <strong>{{ actieveLeningen() }} / {{ maxLeenLimiet() }}</strong> boeken
+            geleend of in aanvraag.
+          </p>
+
+          @if (actieveLeningen() + boekenInMandje.length > maxLeenLimiet()) {
+            <p class="limiet-waarschuwing">
+              Je limiet wordt overschreden. Verwijder boeken uit je mandje of lever boeken in.
+            </p>
+          }
+        } @else {
+          <p>
+            📚 Je hebt momenteel <strong>{{ actieveLeningen() }}</strong> boeken geleend of in
+            aanvraag (Onbeperkt lenen is actief).
+          </p>
+        }
+      </div>
+
+      <button
+        class="btn-bevestig"
+        [disabled]="
+          isBezig ||
+          boekenInMandje.length === 0 ||
+          isSucces ||
+          (maxLeenLimiet() > 0 && actieveLeningen() + boekenInMandje.length > maxLeenLimiet())
+        "
+        (click)="bevestigReservering()"
+      >
+        {{ isBezig ? 'Bezig met versturen...' : 'Stuur naar bibbeheerder' }}
+      </button>
 
       @if (boekenInMandje.length === 0 && !isSucces) {
         <div class="leeg-mandje">
@@ -69,16 +100,33 @@
         <hr class="divider-line" />
 
         <div class="leen-limiet-info">
-          <p>📚 Je hebt al <strong>{{ actieveLeningen() }} / 3</strong> boeken geleend of in aanvraag.</p>
-          
-          @if (actieveLeningen() + boekenInMandje.length > 3) {
-            <p class="limiet-waarschuwing">Je limiet wordt overschreden. Verwijder boeken uit je mandje of lever boeken in.</p>
+          @if (maxLeenLimiet() > 0) {
+            <p>
+              📚 Je hebt al <strong>{{ actieveLeningen() }} / {{ maxLeenLimiet() }}</strong> boeken
+              geleend of in aanvraag.
+            </p>
+
+            @if (actieveLeningen() + boekenInMandje.length > maxLeenLimiet()) {
+              <p class="limiet-waarschuwing">
+                Je limiet wordt overschreden. Verwijder boeken uit je mandje of lever boeken in.
+              </p>
+            }
+          } @else {
+            <p>
+              📚 Je hebt momenteel <strong>{{ actieveLeningen() }}</strong> boeken geleend of in
+              aanvraag (Onbeperkt lenen is actief).
+            </p>
           }
         </div>
 
         <button
           class="btn-bevestig"
-          [disabled]="isBezig || boekenInMandje.length === 0 || isSucces || (actieveLeningen() + boekenInMandje.length > 3)"
+          [disabled]="
+            isBezig ||
+            boekenInMandje.length === 0 ||
+            isSucces ||
+            (maxLeenLimiet() > 0 && actieveLeningen() + boekenInMandje.length > maxLeenLimiet())
+          "
           (click)="bevestigReservering()"
         >
           {{ isBezig ? 'Bezig met versturen...' : 'Stuur naar bibbeheerder' }}

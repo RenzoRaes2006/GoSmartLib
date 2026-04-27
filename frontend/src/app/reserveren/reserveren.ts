@@ -4,6 +4,7 @@ import { RouterLink } from '@angular/router';
 import { LeenMandjeService } from '../services/leen-mandje.service';
 import { BoekService } from '../services/boek.service';
 import { Boek } from '../models/Boek';
+import { InstellingService } from '../services/instelling-service';
 
 @Component({
   selector: 'app-reserveren',
@@ -15,6 +16,7 @@ import { Boek } from '../models/Boek';
 export class ReserverenComponent implements OnInit {
   mandjeService = inject(LeenMandjeService);
   boekService = inject(BoekService);
+  instellingService = inject(InstellingService);
 
   boekenInMandje: Boek[] = [];
 
@@ -27,6 +29,7 @@ export class ReserverenComponent implements OnInit {
   isBezig = false;
   statusMelding = '';
   isSucces = false;
+  maxLeenLimiet = signal<number>(0);
 
   ngOnInit() {
     this.mandjeService.mandje$.subscribe((boeken) => {
@@ -38,7 +41,11 @@ export class ReserverenComponent implements OnInit {
       next: (leningen) => {
         this.actieveLeningen.set(leningen.length);
       },
-      error: (err) => console.error('Fout bij ophalen teller', err)
+      error: (err) => console.error('Fout bij ophalen teller', err),
+    });
+    this.instellingService.getLeenLimiet().subscribe({
+      next: (limiet) => this.maxLeenLimiet.set(limiet),
+      error: (err) => console.error('Kon limiet niet ophalen', err),
     });
   }
 
@@ -85,9 +92,9 @@ export class ReserverenComponent implements OnInit {
         this.statusMelding = 'Aanvraag succesvol verstuurd! De bibbeheerder zet je boeken klaar.';
         this.isSucces = true;
         this.mandjeService.maakMandjeLeeg();
-        
+
         // update the counter visually after a successful request
-        this.actieveLeningen.update(count => count + aantalKlaar);
+        this.actieveLeningen.update((count) => count + aantalKlaar);
       }
     }
   }
