@@ -1,11 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { LeerlingService } from '../services/Leerling.service';
 
 @Component({
   selector: 'app-leerkrachtdashboard',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './leerkrachtdashboard.html',
   styleUrl: './leerkrachtdashboard.css',
 })

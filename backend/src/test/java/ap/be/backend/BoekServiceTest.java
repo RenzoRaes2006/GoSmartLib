@@ -55,7 +55,7 @@ public class BoekServiceTest {
                 "A handbook of agile software craftsmanship",
                 3,
                 "A1",
-                "", null, null);
+                "", null, null, true);
 
         when(boekRepository.findByIsbn("9780132350884")).thenReturn(Optional.empty());
 
@@ -67,10 +67,12 @@ public class BoekServiceTest {
         assertEquals("9780132350884", result.getIsbn());
         assertEquals("Clean Code", result.getTitel());
         assertEquals("Robert C. Martin", result.getAuteur());
+        assertTrue(result.isDidactischMateriaal());
 
         verify(boekRepository, times(1)).findByIsbn("9780132350884");
         verify(boekRepository, times(1)).save(boekCaptor.getValue());
         assertEquals("9780132350884", boekCaptor.getValue().getIsbn());
+        assertTrue(boekCaptor.getValue().isDidactischMateriaal());
     }
 
     @Test
@@ -90,7 +92,8 @@ public class BoekServiceTest {
                 "",    // locatie leeg
                 null,  // afbeelding null
                 null,
-                "");   // leesniveau leeg
+                "",    // leesniveau leeg
+                null);  // didactischMateriaal null
 
         when(boekRepository.findByIsbn("9780132350884")).thenReturn(Optional.empty());
 
@@ -106,6 +109,7 @@ public class BoekServiceTest {
         assertEquals("Geen locatie", opgeslagen.getLocatie());
         assertEquals("", opgeslagen.getAfbeelding());
         assertEquals("Geen leesniveau", opgeslagen.getLeesniveau());
+        assertFalse(opgeslagen.isDidactischMateriaal());
     }
 
     @Test
@@ -123,7 +127,7 @@ public class BoekServiceTest {
                 "DDD blue book",
                 2,
                 "B2",
-                "", null, null);
+                "", null, null, false);
 
         when(boekRepository.findByIsbn("9780321125217")).thenReturn(Optional.of(new Boek()));
 
@@ -180,7 +184,7 @@ public class BoekServiceTest {
                 "Updated description",
                 7,
                 "C3",
-                "", null, null);
+                "", null, null, true);
 
         when(boekRepository.findById(boekId)).thenReturn(Optional.of(bestaandBoek));
         when(boekRepository.save(bestaandBoek)).thenReturn(bestaandBoek);
@@ -197,6 +201,7 @@ public class BoekServiceTest {
         assertEquals("Updated description", result.getBeschrijving());
         assertEquals(7, result.getAantalExemplaren());
         assertEquals("C3", result.getLocatie());
+        assertTrue(result.isDidactischMateriaal());
 
         verify(boekRepository, times(1)).findById(boekId);
         verify(boekRepository, times(1)).save(bestaandBoek);
@@ -218,7 +223,7 @@ public class BoekServiceTest {
                 "Any",
                 1,
                 "Z1",
-                "", null, null);
+                "", null, null, false);
 
         when(boekRepository.findById(boekId)).thenReturn(Optional.empty());
 
@@ -327,5 +332,23 @@ public class BoekServiceTest {
         assertEquals(7, result.getTotalElements());
         assertEquals(1, result.getContent().size());
         assertEquals(1, result.getNumber());
+    }
+
+    @Test
+    void givenDidactischeBoeken_whenGetDidactischeBoekenPaged_thenGeeftPaginaTerug() {
+        Boek boek1 = new Boek("Didactisch A", "Auteur A");
+        boek1.setDidactischMateriaal(true);
+        Boek boek2 = new Boek("Didactisch B", "Auteur B");
+        boek2.setDidactischMateriaal(true);
+
+        PageRequest pageRequest = PageRequest.of(0, 12, Sort.by("titel").ascending());
+        Page<Boek> verwacht = new PageImpl<>(List.of(boek1, boek2), pageRequest, 2);
+        when(boekRepository.findByDidactischMateriaalTrue(pageRequest)).thenReturn(verwacht);
+
+        Page<Boek> result = boekService.getDidactischeBoekenPaged(0, 12);
+
+        assertEquals(2, result.getTotalElements());
+        assertTrue(result.getContent().stream().allMatch(Boek::isDidactischMateriaal));
+        verify(boekRepository, times(1)).findByDidactischMateriaalTrue(pageRequest);
     }
 }
