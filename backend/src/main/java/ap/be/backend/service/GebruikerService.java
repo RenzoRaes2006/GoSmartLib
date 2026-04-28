@@ -28,13 +28,16 @@ public class GebruikerService {
     private final LeeslijstMapRepository leeslijstMapRepository;
     private final BoekRepository boekRepository;
     private final UitleningRepository uitleningRepository;
+    private final InstellingService instellingService;
 
     public GebruikerService(GebruikerRepository gebruikerRepository, LeeslijstMapRepository leeslijstMapRepository,
-            BoekRepository boekRepository, UitleningRepository uitleningRepository) {
+            BoekRepository boekRepository, UitleningRepository uitleningRepository,
+            InstellingService instellingService) {
         this.gebruikerRepository = gebruikerRepository;
         this.leeslijstMapRepository = leeslijstMapRepository;
         this.boekRepository = boekRepository;
         this.uitleningRepository = uitleningRepository;
+        this.instellingService = instellingService;
     }
 
     public GebruikerDTO mapToDTO(Gebruiker gebruiker) {
@@ -123,10 +126,15 @@ public class GebruikerService {
         }
 
         // Limit check
-        List<Uitlening> actieveLeningen = uitleningRepository
-                .findByGebruiker_GebruikerIDAndIsIngeleverdFalse(gebruikerId);
-        if (actieveLeningen.size() >= 3) {
-            return new LeenStatusResponse(false, "Je hebt je limiet van 3 boeken bereikt (inclusief aanvragen).");
+        int maxLimiet = instellingService.getLeenLimiet();
+
+        if (maxLimiet > 0) {
+            List<Uitlening> actieveLeningen = uitleningRepository
+                    .findByGebruiker_GebruikerIDAndIsIngeleverdFalse(gebruikerId);
+            if (actieveLeningen.size() >= maxLimiet) {
+                return new LeenStatusResponse(false,
+                        "Je hebt je limiet van " + maxLimiet + " boeken bereikt (inclusief aanvragen).");
+            }
         }
 
         // Available to borrow

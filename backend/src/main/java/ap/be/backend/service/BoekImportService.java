@@ -20,6 +20,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import ap.be.backend.entity.Boek;
 import ap.be.backend.repository.BoekRepository;
+import ap.be.backend.exception.DuplicateBoekException;
+import ap.be.backend.exception.InvalidImportDataException;
 import ap.be.backend.exception.IsbnAlreadyExistsException;
 
 @Service
@@ -56,6 +58,7 @@ public class BoekImportService {
             while (rows.hasNext()) {
                 Row currentRow = rows.next();
 
+                // 1. Process the header row to dynamically map column names to indexes
                 if (isHeader) {
                     for (Cell cell : currentRow) {
                         headerMap.put(dataFormatter.formatCellValue(cell).trim(), cell.getColumnIndex());
@@ -66,6 +69,7 @@ public class BoekImportService {
 
                 rijNummer++;
 
+                // 2. Skip completely empty rows to prevent null reference errors
                 boolean isEmptyRow = true;
                 for (int c = currentRow.getFirstCellNum(); c < currentRow.getLastCellNum(); c++) {
                     Cell cell = currentRow.getCell(c);
@@ -80,17 +84,32 @@ public class BoekImportService {
                 try {
                     Boek boek = new Boek();
 
-                    boek.setTitel(getWaarde(currentRow, headerMap.get("Titel"), dataFormatter));
-                    boek.setAuteur(getWaarde(currentRow, headerMap.get("Auteur"), dataFormatter));
-                    String isbn = getWaarde(currentRow, headerMap.get("ISBN"), dataFormatter);
+                    String titel = getWaarde(currentRow, headerMap.get("Titel"), dataFormatter);
+                    String auteur = getWaarde(currentRow, headerMap.get("Auteur"), dataFormatter);
 
-                    if (isbn == null || isbn.isEmpty()) {
-                        throw new IllegalArgumentException("ISBN ontbreekt.");
+                    if (titel == null || titel.isEmpty()) {
+                        throw new InvalidImportDataException("Titel ontbreekt in rij " + rijNummer);
                     }
-                    if (boekRepository.findByIsbn(isbn).isPresent()) {
-                        throw new IsbnAlreadyExistsException("ISBN " + isbn + " bestaat al in de database.");
+                    if (auteur == null || auteur.isEmpty()) {
+                        throw new InvalidImportDataException("Auteur ontbreekt in rij " + rijNummer);
                     }
-                    boek.setIsbn(isbn);
+
+                    if (boekRepository.findByTitelAndAuteur(titel, auteur).isPresent()) {
+                        throw new DuplicateBoekException("Het boek '" + titel + "' van '" + auteur
+                                + "' bestaat al in de database (Rij " + rijNummer + ").");
+                    }
+
+                    boek.setTitel(titel);
+                    boek.setAuteur(auteur);
+
+                    String isbn = getWaarde(currentRow, headerMap.get("ISBN"), dataFormatter);
+                    if (isbn != null && !isbn.isEmpty()) {
+                        if (boekRepository.findByIsbn(isbn).isPresent()) {
+                            throw new IsbnAlreadyExistsException(
+                                    "ISBN " + isbn + " in rij " + rijNummer + " bestaat al in de database.");
+                        }
+                        boek.setIsbn(isbn);
+                    }
 
                     boek.setUitgever(getWaarde(currentRow, headerMap.get("Uitgever"), dataFormatter));
                     boek.setUitgaveJaar(getWaarde(currentRow, headerMap.get("Uitgavejaar"), dataFormatter));
@@ -109,6 +128,19 @@ public class BoekImportService {
                         boek.setGenre(new ArrayList<>());
                     }
 
+                    String thematischeTagString = getWaarde(currentRow, headerMap.get("Thematische tags"),
+                            dataFormatter);
+                    if (thematischeTagString != null && !thematischeTagString.isEmpty()) {
+                        boek.setThematischeTag(new ArrayList<>(List.of(thematischeTagString.split("\\s*,\\s*"))));
+                    } else {
+                        boek.setThematischeTag(new ArrayList<>());
+                    }
+
+                    String populariteitStr = getWaarde(currentRow, headerMap.get("Populariteit"), dataFormatter);
+                    boek.setPopulariteit((populariteitStr != null && !populariteitStr.isEmpty())
+                            ? Double.parseDouble(populariteitStr)
+                            : 0.0);
+
                     boek.setBeschrijving(getWaarde(currentRow, headerMap.get("Beschrijving"), dataFormatter));
                     boek.setLocatie(getWaarde(currentRow, headerMap.get("Locatie"), dataFormatter));
                     boek.setAfbeelding(getWaarde(currentRow, headerMap.get("Afbeelding URL"), dataFormatter));
@@ -116,21 +148,21 @@ public class BoekImportService {
 
                     boekenOmOpTeSlaan.add(boek);
 
-                } catch (IsbnAlreadyExistsException e) {
+                } catch (IsbnAlreadyExistsException | DuplicateBoekException | InvalidImportDataException e) {
                     throw e;
                 } catch (Exception e) {
-                    throw new IllegalArgumentException("Fout in rij " + rijNummer + ": " + e.getMessage());
+                    throw new InvalidImportDataException(
+                            "Onverwachte fout in rij " + rijNummer + ": " + e.getMessage());
                 }
             }
 
             boekRepository.saveAll(boekenOmOpTeSlaan);
             return boekenOmOpTeSlaan.size();
 
+        } catch (InvalidImportDataException | IsbnAlreadyExistsException | DuplicateBoekException e) {
+            throw e;
         } catch (Exception e) {
-            if (e instanceof IllegalArgumentException || e instanceof IsbnAlreadyExistsException) {
-                throw (RuntimeException) e;
-            }
-            throw new IllegalArgumentException(
+            throw new InvalidImportDataException(
                     "Kan bestand niet inlezen. Controleer of het een geldig Excel-bestand is.");
         }
     }

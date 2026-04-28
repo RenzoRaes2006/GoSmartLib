@@ -34,6 +34,13 @@ export class HomePage implements OnInit {
   // Leningen uit de database
   leningen = signal<any[]>([]);
 
+  // Variabelen voor de Verleng-Modal
+  isVerlengModalOpen = signal<boolean>(false);
+  teVerlengenLeningId = signal<number | null>(null);
+  teVerlengenBoekTitel = signal<string>('');
+  verlengFout = signal<string>('');
+  isVerlengenBezig = signal<boolean>(false);
+
   // Automatisch sorteren van leningen (minste dagen bovenaan)
   gesorteerdeLeningen = computed(() => {
     return [...this.leningen()].sort((a, b) => a.resterendeDagen - b.resterendeDagen);
@@ -143,18 +150,45 @@ export class HomePage implements OnInit {
     this.isEditModalOpen.set(false);
   }
 
-  verlengBoek(leningId: number) {
+  openVerlengModal(leningId: number) {
+    const lening = this.leningen().find((l) => l.id === leningId);
+    if (lening) {
+      this.teVerlengenLeningId.set(lening.id);
+      this.teVerlengenBoekTitel.set(lening.titel);
+      this.verlengFout.set(''); // Reset eventuele oude fouten
+      this.isVerlengModalOpen.set(true);
+    }
+  }
+
+  // 2. Sluit de pop-up als de gebruiker annuleert
+  sluitVerlengModal() {
+    this.isVerlengModalOpen.set(false);
+    this.teVerlengenLeningId.set(null);
+    this.teVerlengenBoekTitel.set('');
+    this.verlengFout.set('');
+  }
+
+  // 3. Voert de effectieve backend call uit als men op "Ja, verlengen" klikt
+  bevestigVerlengen() {
+    const leningId = this.teVerlengenLeningId();
+    if (leningId === null) return;
+
+    this.isVerlengenBezig.set(true);
+    this.verlengFout.set('');
+
     this.boekService.verlengLening(leningId).subscribe({
-      next: (bericht) => {
-        alert(bericht || 'Boek succesvol verlengd.');
-        this.haalLeningenOp();
+      next: () => {
+        this.isVerlengenBezig.set(false);
+        this.sluitVerlengModal(); // Sluit de pop-up bij succes
+        this.haalLeningenOp(); // Herlaad de lijst zodat de dagen visueel opschuiven
       },
       error: (err) => {
+        this.isVerlengenBezig.set(false);
         console.error('Fout bij verlengen:', err);
-        if (err.error instanceof ProgressEvent) {
-          alert('Kan de server niet bereiken. Controleer of de backend draait.');
+        if (err && err.name === 'HttpErrorResponse' && err.status === 0) {
+          this.verlengFout.set('Kan de server niet bereiken. Controleer of de backend draait.');
         } else {
-          alert(err.error || 'Er ging iets mis bij het verlengen.');
+          this.verlengFout.set(err.error || 'Er ging iets mis bij het verlengen.');
         }
       },
     });

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, ElementRef, OnInit, signal, viewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import {
   FormBuilder,
@@ -26,6 +26,7 @@ import { FilterOptions } from '../models/FilterOptions';
 export class BoekBeheer implements OnInit {
   // Mode management
   mode = signal<'toevoegen' | 'wijzigen'>('wijzigen');
+  toonModeSelector = signal(true);
 
   // Formulier en statusberichten
   boekForm;
@@ -53,6 +54,8 @@ export class BoekBeheer implements OnInit {
 
   // Debounce timer voor live zoeken
   private zoekDebounceTimer: any = null;
+
+  private zoekIsbnVeld = viewChild<ElementRef<HTMLInputElement>>('zoekIsbnVeld');
 
   uploadModus = signal<'url' | 'bestand'>('url');
   uploadBezig = signal(false);
@@ -139,9 +142,13 @@ export class BoekBeheer implements OnInit {
     this.route.queryParams.subscribe((params) => {
       const urlMode = params['mode'];
       if (urlMode === 'toevoegen' || urlMode === 'wijzigen') {
+        this.toonModeSelector.set(false);
         this.setMode(urlMode);
-      } else if (this.mode() === 'wijzigen') {
-        this.laadBoekenPagina(0);
+      } else {
+        this.toonModeSelector.set(true);
+        if (this.mode() === 'wijzigen') {
+          this.laadBoekenPagina(0);
+        }
       }
     });
   }
@@ -266,11 +273,19 @@ export class BoekBeheer implements OnInit {
     this.boekForm.patchValue({ isbn: value }, { emitEvent: false });
   }
 
+  onZoekIsbnInput(value: string) {
+    this.zoekTerm.set(value.replace(/[^0-9]/g, '').slice(0, 13));
+  }
+
   // Zet de ISBN zoekmodus aan/uit
   toggleIsbnZoek() {
-    this.toonIsbnZoek.set(!this.toonIsbnZoek());
+    const opent = !this.toonIsbnZoek();
+    this.toonIsbnZoek.set(opent);
     this.zoekTerm.set('');
     this.zoekMessage.set('');
+    if (opent) {
+      setTimeout(() => this.zoekIsbnVeld()?.nativeElement.focus(), 0);
+    }
   }
 
   // Zoek een boek op ISBN via Google Books API

@@ -161,7 +161,21 @@
                 }}</span>
                 <span class="reviewer-name">- {{ beoordeling.gebruikerNaam }}</span>
               </div>
-              <p class="review-content">{{ beoordeling.inhoud }}</p>
+
+              @if (isSpoilerVerborgen(beoordeling)) {
+                <div class="spoiler-warning">
+                  <strong>Spoilerwaarschuwing</strong>
+                  <p>Deze review bevat mogelijk belangrijke plotinformatie.</p>
+                  <button type="button" class="spoiler-btn" (click)="toonSpoiler(beoordeling.id!)">
+                    Toch bekijken
+                  </button>
+                </div>
+              } @else {
+                @if (beoordeling.isSpoiler) {
+                  <span class="spoiler-badge">Spoiler</span>
+                }
+                <p class="review-content">{{ beoordeling.inhoud }}</p>
+              }
 
               @if (!beoordeling.gerapporteerd) {
                 <button class="rapporteer-btn" (click)="openRapporteerModal(beoordeling.id!)">
@@ -204,6 +218,11 @@
               <label style="display: block; margin-top: 10px; margin-bottom: 10px; font-size: 14px">
                 <input type="checkbox" formControlName="isAnoniem" />
                 Plaats deze review anoniem
+              </label>
+
+              <label style="display: block; margin-top: 10px; margin-bottom: 10px; font-size: 14px">
+                <input type="checkbox" formControlName="isSpoiler" />
+                Deze review bevat spoilers
               </label>
 
               <button type="submit" class="submit-btn">Verzenden</button>

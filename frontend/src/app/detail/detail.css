@@ -271,6 +271,43 @@
 .review-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
 .review-rating { color: #8c1b3f; font-size: 14px; } 
 
+.spoiler-warning {
+    background: #fff4e5;
+    border: 1px solid #f6c994;
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+}
+
+.spoiler-warning p {
+    margin: 6px 0 10px 0;
+    font-size: 13px;
+    color: #6b4a1f;
+}
+
+.spoiler-btn {
+    background: #fff;
+    border: 1px solid #ea580c;
+    color: #ea580c;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 10px;
+    cursor: pointer;
+}
+
+.spoiler-badge {
+    display: inline-block;
+    background: #fff7ed;
+    color: #b45309;
+    border: 1px solid #fdba74;
+    border-radius: 999px;
+    padding: 2px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
 /* Moderne Formulier Styling */
 .form-textarea, .form-select {
     width: 100%;

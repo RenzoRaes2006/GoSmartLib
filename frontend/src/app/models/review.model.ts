@@ -6,4 +6,5 @@ export interface Beoordeling {
     inhoud: string;
     isAnoniem: boolean;
     gerapporteerd: boolean;
+    isSpoiler: boolean;
 }

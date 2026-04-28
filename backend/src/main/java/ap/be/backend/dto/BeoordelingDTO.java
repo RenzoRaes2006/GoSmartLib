@@ -20,5 +20,7 @@ public record BeoordelingDTO(
 
                 @JsonProperty("isAnoniem") boolean isAnoniem,
                 
-                @JsonProperty("gerapporteerd") boolean gerapporteerd) {
+                @JsonProperty("gerapporteerd") boolean gerapporteerd,
+
+                @JsonProperty("isSpoiler") boolean isSpoiler) {
 }

@@ -88,4 +88,14 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
 
+    @ExceptionHandler(DuplicateBoekException.class)
+    public ResponseEntity<String> handleDuplicateBoek(DuplicateBoekException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(InvalidImportDataException.class)
+    public ResponseEntity<String> handleInvalidImportData(InvalidImportDataException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+    }
+
 }

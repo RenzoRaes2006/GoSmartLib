@@ -20,8 +20,12 @@
    ===================== */
 
 .topbar-messages {
-  flex: 1;
   display: flex;
+  justify-content: center;
+}
+
+.topbar-messages:empty {
+  display: none;
 }
 
 .topbar-messages .message-container {
@@ -35,11 +39,19 @@
 
 .beheer-topbar {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
   gap: 12px;
   margin-bottom: 16px;
 }
+
+.beheer-titel {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #2d3748;
+}
+
 
 .mode-selector {
   display: flex;
