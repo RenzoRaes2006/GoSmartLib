@@ -1,4 +1,12 @@
-import { Component, computed, ElementRef, inject, OnDestroy, signal, viewChild } from '@angular/core';
+import {
+  Component,
+  computed,
+  ElementRef,
+  inject,
+  OnDestroy,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ScanService } from '../services/scan.service';
@@ -6,7 +14,7 @@ import { Gebruiker } from '../models/Gebruiker.mode';
 import { MandjeItem, ScanBatchItemResult, ScanModus as ModusType } from '../models/scan.model';
 
 const IDLE_MS = 60_000;
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 4;
 const ZOEK_DEBOUNCE_MS = 250;
 
 type Stap = 'LEERLING' | 'MODUS' | 'SCAN' | 'RESULTAAT';
