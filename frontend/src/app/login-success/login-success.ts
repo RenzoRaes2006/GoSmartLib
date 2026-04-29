@@ -22,7 +22,7 @@ export class LoginSuccessComponent implements OnInit {
         localStorage.setItem('jwtToken', token);
 
         // 2. Werk direct de huidige gebruiker bij in de app-state
-        this.authService.setUserFromToken(token);
+        // this.authService.setUserFromToken(token);
 
         // 3. Stuur de gebruiker door naar de afgeschermde homepagina of catalogus
         // Dit verwijdert ook direct de token uit de zichtbare adresbalk
