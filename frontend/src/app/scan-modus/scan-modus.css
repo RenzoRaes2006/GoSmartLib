@@ -93,6 +93,59 @@
   font-size: 0.85rem;
 }
 
+.leerling-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  margin-top: 0.5rem;
+  background: white;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  text-align: left;
+  transition: background 0.1s, border-color 0.1s;
+}
+
+.leerling-item:hover {
+  background: #f8fafc;
+  border-color: #8c1b3f;
+}
+
+.leerling-item .naam {
+  font-weight: 500;
+  color: #1e293b;
+}
+
+.leerling-item .schoolid {
+  color: #64748b;
+  font-size: 0.85rem;
+}
+
+.paginatie {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 1rem;
+  gap: 0.5rem;
+}
+
+.paginatie .terug-knop {
+  margin-top: 0;
+}
+
+.paginatie .terug-knop:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagina-info {
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
 .actie-uitlening { background: #f0fdf4; border-left: 4px solid #16a34a; }
 .actie-retour   { background: #eff6ff; border-left: 4px solid #2563eb; }
 .status-ok      { background: #f0fdf4; border-left: 4px solid #16a34a; }
