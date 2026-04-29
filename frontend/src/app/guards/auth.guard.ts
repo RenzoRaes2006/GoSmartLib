@@ -7,9 +7,9 @@ export const authGuard: CanActivateFn = (route, state) => {
   const router = inject(Router);
 
   // Als er een currentUser is, mag je door
-  if (authService.currentUser()) {
-    return true;
-  }
+  // if (authService.currentUser()) {
+  //   return true;
+  // }
 
   // Zo niet? Stuur ze terug naar de homepagina of login
   router.navigate(['/']);
