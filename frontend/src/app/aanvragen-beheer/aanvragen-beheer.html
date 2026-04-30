@@ -1,47 +1,103 @@
 <div class="page-wrapper bg-beige full-width-section">
   <div class="inner-container">
-    
     <div class="header-sectie">
-      <h1 class="page-title">Lening aanvragen beheren</h1>
-      <p class="subtitle">Keur nieuwe aanvragen van leerlingen goed of wijs ze af.</p>
+      <h1 class="page-title">Aanvragen beheren</h1>
+      <p class="subtitle">Keur nieuwe leningen en verlengingen goed of wijs ze af.</p>
     </div>
 
-    @if (aanvragen().length === 0) {
+    @if (aanvragen().length === 0 && verlengAanvragen().length === 0) {
       <div class="empty-state">
         <span class="emoji">✅</span>
         <p>Er zijn momenteel geen openstaande aanvragen. Alles is bijgewerkt!</p>
       </div>
     } @else {
-      <div class="aanvragen-lijst">
-        @for (aanvraag of aanvragen(); track aanvraag.id) {
-          <div class="aanvraag-card">
-            
-            <div class="info-sectie">
-              <img [src]="aanvraag.boek.afbeelding" [alt]="aanvraag.boek.titel" class="boek-cover-small" />
-              
-              <div class="tekst-info">
-                <h3 class="boek-titel">{{ aanvraag.boek.titel }}</h3>
-                <div class="gebruiker-info">
-                  <span>Aangevraagd door: <strong>{{ aanvraag.gebruiker.voorNaam }} {{ aanvraag.gebruiker.achternaam }}</strong></span>
-                  
-                  @if (aanvraag.totaalLeningen !== undefined) {
-                    <span class="teller-badge" [class.limiet-bereikt]="aanvraag.totaalLeningen >= 3">
-                      📚 {{ aanvraag.totaalLeningen }}/3 actief
-                    </span>
-                  }
+      @if (aanvragen().length > 0) {
+        <h2 class="page-title" style="font-size: 1.5rem; margin-top: 20px">Nieuwe Leningen</h2>
+        <div class="aanvragen-lijst">
+          @for (aanvraag of aanvragen(); track aanvraag.id) {
+            <div class="aanvraag-card">
+              <div class="info-sectie">
+                <img
+                  [src]="aanvraag.boek.afbeelding"
+                  [alt]="aanvraag.boek.titel"
+                  class="boek-cover-small"
+                />
+
+                <div class="tekst-info">
+                  <h3 class="boek-titel">{{ aanvraag.boek.titel }}</h3>
+                  <div class="gebruiker-info">
+                    <span
+                      >Aangevraagd door:
+                      <strong
+                        >{{ aanvraag.gebruiker.voorNaam }}
+                        {{ aanvraag.gebruiker.achternaam }}</strong
+                      ></span
+                    >
+
+                    @if (aanvraag.totaalLeningen !== undefined) {
+                      <span
+                        class="teller-badge"
+                        [class.limiet-bereikt]="aanvraag.totaalLeningen >= 3"
+                      >
+                        📚 {{ aanvraag.totaalLeningen }}/3 actief
+                      </span>
+                    }
+                  </div>
                 </div>
               </div>
-            </div>
-            
-            <div class="actie-knoppen">
-              <button class="btn-goedkeuren" (click)="keurGoed(aanvraag.id)">Goedkeuren</button>
-              <button class="btn-afwijzen" (click)="wijsAf(aanvraag.id)">Afwijzen</button>
-            </div>
-            
-          </div>
-        }
-      </div>
-    }
 
+              <div class="actie-knoppen">
+                <button class="btn-goedkeuren" (click)="keurGoed(aanvraag.id)">Uitlenen</button>
+                <button class="btn-afwijzen" (click)="wijsAf(aanvraag.id)">Weigeren</button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      @if (verlengAanvragen().length > 0) {
+        <h2 class="page-title" style="font-size: 1.5rem; margin-top: 40px; color: #00529f">
+          Aanvragen tot Verlenging
+        </h2>
+        <div class="aanvragen-lijst">
+          @for (verlenging of verlengAanvragen(); track verlenging.id) {
+            <div class="aanvraag-card" style="border-left-color: #f6ad55">
+              <div class="info-sectie">
+                <img
+                  [src]="verlenging.boek.afbeelding"
+                  [alt]="verlenging.boek.titel"
+                  class="boek-cover-small"
+                />
+
+                <div class="tekst-info">
+                  <h3 class="boek-titel">{{ verlenging.boek.titel }}</h3>
+                  <div class="gebruiker-info">
+                    <span
+                      >Verlenging door:
+                      <strong
+                        >{{ verlenging.gebruiker.voorNaam }}
+                        {{ verlenging.gebruiker.achternaam }}</strong
+                      ></span
+                    >
+                    <span class="teller-badge" style="background: #ebf8ff; color: #3182ce">
+                      Huidige retour: {{ verlenging.inleverDatum | date: 'dd/MM/yyyy' }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="actie-knoppen">
+                <button class="btn-goedkeuren" (click)="keurVerlengingGoed(verlenging.id)">
+                  + 14 Dagen
+                </button>
+                <button class="btn-afwijzen" (click)="wijsVerlengingAf(verlenging.id)">
+                  Weigeren
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    }
   </div>
 </div>

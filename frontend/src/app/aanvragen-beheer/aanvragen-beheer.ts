@@ -7,52 +7,66 @@ import { BoekService } from '../services/boek.service';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './aanvragen-beheer.html',
-  styleUrl: './aanvragen-beheer.css'
+  styleUrl: './aanvragen-beheer.css',
 })
 export class AanvragenBeheer implements OnInit {
   private boekService = inject(BoekService);
 
-  // signal to hold the pending requests
   aanvragen = signal<any[]>([]);
+  verlengAanvragen = signal<any[]>([]);
 
   ngOnInit(): void {
-    this.haalAanvragenOp();
+    this.haalDataOp();
   }
 
-  haalAanvragenOp() {
+  haalDataOp() {
     this.boekService.getAlleAanvragen().subscribe({
       next: (data) => {
         this.aanvragen.set(data);
 
-        // fetch active loan count for each user in the background
         data.forEach((aanvraag: any) => {
-          const userId = aanvraag.gebruiker.gebruikerID || aanvraag.gebruiker.id; 
+          const userId = aanvraag.gebruiker.gebruikerID || aanvraag.gebruiker.id;
           this.boekService.getActieveLeningen(userId).subscribe({
             next: (leningen) => {
               aanvraag.totaalLeningen = leningen.length;
-            }
+            },
           });
         });
       },
-      error: (err) => console.error('Error fetching requests:', err)
+      error: (err) => console.error('Error fetching regular requests:', err),
+    });
+
+    this.boekService.getAlleVerlengingAanvragen().subscribe({
+      next: (data) => this.verlengAanvragen.set(data),
+      error: (err) => console.error('Error fetching extension requests:', err),
     });
   }
 
   keurGoed(id: number) {
     this.boekService.keurAanvraagGoed(id).subscribe({
-      next: () => {
-        this.haalAanvragenOp(); // refresh the list
-      },
-      error: (err) => alert('Fout bij goedkeuren: ' + err.message)
+      next: () => this.haalDataOp(),
+      error: (err) => alert('Fout bij goedkeuren: ' + err.message),
     });
   }
 
   wijsAf(id: number) {
     this.boekService.weigerAanvraag(id).subscribe({
-      next: () => {
-        this.haalAanvragenOp(); // refresh the list
-      },
-      error: (err) => alert('Fout bij weigeren: ' + err.message)
+      next: () => this.haalDataOp(), // refresh the list
+      error: (err) => alert('Fout bij weigeren: ' + err.message),
+    });
+  }
+
+  keurVerlengingGoed(id: number) {
+    this.boekService.keurVerlengingGoed(id).subscribe({
+      next: () => this.haalDataOp(),
+      error: (err) => alert('Fout bij goedkeuren verlenging: ' + err.message),
+    });
+  }
+
+  wijsVerlengingAf(id: number) {
+    this.boekService.weigerVerlenging(id).subscribe({
+      next: () => this.haalDataOp(),
+      error: (err) => alert('Fout bij weigeren verlenging: ' + err.message),
     });
   }
 }

@@ -22,9 +22,7 @@ export class BoekService {
       : '/api/gebruiker';
 
   private apiBeheerUrl =
-    window.location.hostname === 'localhost'
-      ? 'http://localhost:8081/api/beheer'
-      : '/api/beheer';
+    window.location.hostname === 'localhost' ? 'http://localhost:8081/api/beheer' : '/api/beheer';
 
   private http = inject(HttpClient);
 
@@ -162,8 +160,18 @@ export class BoekService {
     ) as Observable<string>;
   }
 
-  // Fetch all active loans in the system for the admin dashboard
   getAlleActieveLeningenSysteem(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiBeheerUrl}/leningen/actief`);
+  }
+  getAlleVerlengingAanvragen() {
+    return this.http.get<any[]>(`${this.apiBeheerUrl}/verlengingen/aanvragen`);
+  }
+
+  keurVerlengingGoed(id: number) {
+    return this.http.put(`${this.apiBeheerUrl}/${id}/verlenging/goedkeuren`, {});
+  }
+
+  weigerVerlenging(id: number) {
+    return this.http.put(`${this.apiBeheerUrl}/${id}/verlenging/weigeren`, {});
   }
 }
