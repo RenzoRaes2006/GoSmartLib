@@ -2,23 +2,12 @@ package ap.be.backend.entity;
 
 import java.util.HashSet;
 import java.util.Set;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "Gebruikers")
-public class    Gebruiker {
+public class Gebruiker {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long gebruikerID;
@@ -27,6 +16,9 @@ public class    Gebruiker {
     private String VoorNaam;
     private String Achternaam;
     private String Email;
+    
+    // added missing property for pagination and seeder
+    private String klas;
 
     @Enumerated(EnumType.STRING)
     private Rol Rol;
@@ -35,75 +27,46 @@ public class    Gebruiker {
     @JsonIgnore
     private Set<LeeslijstMap> mappen = new HashSet<>();
 
-    public Set<LeeslijstMap> getMappen() {
-        return mappen;
+    // default constructor required by jpa
+    public Gebruiker() {
     }
 
-    public void setMappen(Set<LeeslijstMap> mappen) {
-        this.mappen = mappen;
+    // constructor for the database seeder
+    public Gebruiker(String voorNaam, String achternaam, String klas) {
+        this.VoorNaam = voorNaam;
+        this.Achternaam = achternaam;
+        this.klas = klas;
     }
 
+    // --- getters and setters ---
+    public Set<LeeslijstMap> getMappen() { return mappen; }
+    public void setMappen(Set<LeeslijstMap> mappen) { this.mappen = mappen; }
     public void voegMapToe(LeeslijstMap map) {
         mappen.add(map);
         map.setGebruiker(this);
     }
 
-    public Gebruiker() {
-    }
+    public Long getGebruikerID() { return gebruikerID; }
+    public void setGebruikerID(Long userId) { this.gebruikerID = userId; }
 
-    public Long getGebruikerID() {
-        return gebruikerID;
-    }
+    public String getVoorNaam() { return VoorNaam; }
+    public void setVoorNaam(String voorNaam) { this.VoorNaam = voorNaam; }
 
-    public void setGebruikerID(Long userId) {
-        this.gebruikerID = userId;
-    }
+    public String getAchternaam() { return Achternaam; }
+    public void setAchternaam(String achterNaam) { this.Achternaam = achterNaam; }
 
-    public String getVoorNaam() {
-        return VoorNaam;
-    }
+    public String getEmail() { return Email; }
+    public void setEmail(String email) { this.Email = email; }
 
-    public void setVoorNaam(String voorNaam) {
-        this.VoorNaam = voorNaam;
-    }
+    public String getKlas() { return klas; }
+    public void setKlas(String klas) { this.klas = klas; }
 
-    public String getAchternaam() {
-        return Achternaam;
-    }
+    public Rol getRol() { return Rol; }
+    public void setRol(Rol role) { this.Rol = role; }
 
-    public void setAchternaam(String achterNaam) {
-        this.Achternaam = achterNaam;
-    }
+    public long getSchoolId() { return SchoolId; }
+    public void setSchoolId(long schoolId) { this.SchoolId = schoolId; }
 
-    public String getEmail() {
-        return Email;
-    }
-
-    public void setEmail(String email) {
-        this.Email = email;
-    }
-
-    public Rol getRol() {
-        return Rol;
-    }
-
-    public void setRol(Rol role) {
-        this.Rol = role;
-    }
-
-    public long getSchoolId() {
-        return SchoolId;
-    }
-
-    public void setSchoolId(long schoolId) {
-        this.SchoolId = schoolId;
-    }
-
-    public long getId() {
-        return gebruikerID;
-    }
-
-    public void setId(long id) {
-        this.gebruikerID = id;
-    }
+    public long getId() { return gebruikerID; }
+    public void setId(long id) { this.gebruikerID = id; }
 }

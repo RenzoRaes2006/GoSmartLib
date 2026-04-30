@@ -42,7 +42,7 @@ public class OAuth2LoginSuccessHandlerTest {
     /*** Verifieert dat een nieuwe gebruiker wordt opgeslagen en doorgestuurd met token. */
     @Test
     void givenNewUser_whenOnAuthenticationSuccess_thenUserSavedAndRedirected() throws Exception {
-        ReflectionTestUtils.setField(successHandler, "frontendBaseUrl", "http://localhost:4200");
+        ReflectionTestUtils.setField(successHandler, "frontendBaseUrl", "https://localhost:4200");
 
         OAuth2User oAuth2User = mock(OAuth2User.class);
         when(oAuth2User.getAttribute("id")).thenReturn("ss-123");
@@ -64,13 +64,13 @@ public class OAuth2LoginSuccessHandlerTest {
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         verify(userRepository, times(1)).save(userCaptor.capture());
         assertEquals("ss-123", userCaptor.getValue().getSmartschoolId());
-        verify(response, times(1)).sendRedirect("http://localhost:4200/login-success?token=jwt-token");
+        verify(response, times(1)).sendRedirect("https://localhost:4200/login-success?token=jwt-token");
     }
 
     /*** Verifieert dat een bestaande gebruiker niet opnieuw wordt opgeslagen. */
     @Test
     void givenExistingUser_whenOnAuthenticationSuccess_thenNoSaveAndRedirected() throws Exception {
-        ReflectionTestUtils.setField(successHandler, "frontendBaseUrl", "http://localhost:4200");
+        ReflectionTestUtils.setField(successHandler, "frontendBaseUrl", "https://localhost:4200");
 
         OAuth2User oAuth2User = mock(OAuth2User.class);
         when(oAuth2User.getAttribute("id")).thenReturn("ss-456");
@@ -89,6 +89,6 @@ public class OAuth2LoginSuccessHandlerTest {
         successHandler.onAuthenticationSuccess(request, response, authentication);
 
         verify(userRepository, never()).save(any(User.class));
-        verify(response, times(1)).sendRedirect("http://localhost:4200/login-success?token=jwt-token-2");
+        verify(response, times(1)).sendRedirect("https://localhost:4200/login-success?token=jwt-token-2");
     }
 }
