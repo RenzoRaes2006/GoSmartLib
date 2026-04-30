@@ -50,6 +50,8 @@ public class BoekController {
             @RequestParam(required = false) Integer uitgaveJaarVan,
             @RequestParam(required = false) Integer uitgaveJaarTot,
             @RequestParam(required = false) String leesniveau,
+            @RequestParam(required = false) Boolean didactischMateriaal,
+            @RequestParam(required = false) ap.be.backend.entity.DidactischeSubcategorie didactischeSubcategorie,
             @RequestParam(required = false) Integer page,
             @RequestParam(required = false) Integer size) {
 
@@ -62,7 +64,7 @@ public class BoekController {
 
         return boekService.filterBoeken(zoekterm, genre, thematischeTag, uitgever, minPagina, maxPagina,
                 beschikbaar != null ? Boolean.parseBoolean(beschikbaar) : null, uitgaveJaarVan, uitgaveJaarTot,
-                leesniveau, page, size, sort);
+                leesniveau, didactischMateriaal, didactischeSubcategorie, page, size, sort);
     }
 
     @PostMapping("/api/boeken")

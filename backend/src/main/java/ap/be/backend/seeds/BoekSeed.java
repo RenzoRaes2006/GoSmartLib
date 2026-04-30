@@ -102,6 +102,9 @@ public class BoekSeed implements CommandLineRunner {
                     // Random aantal exemplaren
                     nieuwBoek.setAantalExemplaren(random.nextInt(11));
 
+                    // Ongeveer 1 op 4 boeken markeren als didactisch materiaal.
+                    nieuwBoek.setDidactischMateriaal(random.nextDouble() < 0.25);
+
                     // Random locatie
                     nieuwBoek.setLocatie(locaties[random.nextInt(locaties.length)]);
 

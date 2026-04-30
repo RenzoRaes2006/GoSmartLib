@@ -45,6 +45,8 @@ public class BoekService {
         boek.setLocatie(isNotBlank(boekDTO.locatie()) ? boekDTO.locatie() : "Geen locatie");
         boek.setAfbeelding(isNotBlank(boekDTO.afbeelding()) ? boekDTO.afbeelding() : "");
         boek.setLeesniveau(isNotBlank(boekDTO.leesniveau()) ? boekDTO.leesniveau() : "Geen leesniveau");
+        boek.setDidactischMateriaal(Boolean.TRUE.equals(boekDTO.didactischMateriaal()));
+        boek.setDidactischeSubcategorie(boekDTO.didactischeSubcategorie());
         return boekRepository.save(boek);
     }
 
@@ -68,6 +70,8 @@ public class BoekService {
         boek.setLocatie(isNotBlank(boekDTO.locatie()) ? boekDTO.locatie() : "Geen locatie");
         boek.setAfbeelding(isNotBlank(boekDTO.afbeelding()) ? boekDTO.afbeelding() : "");
         boek.setLeesniveau(isNotBlank(boekDTO.leesniveau()) ? boekDTO.leesniveau() : "Geen leesniveau");
+        boek.setDidactischMateriaal(Boolean.TRUE.equals(boekDTO.didactischMateriaal()));
+        boek.setDidactischeSubcategorie(boekDTO.didactischeSubcategorie());
         return boekRepository.save(boek);
     }
 
@@ -87,7 +91,9 @@ public class BoekService {
     public Page<Boek> filterBoeken(String zoekterm, List<String> genres, List<String> thematischeTags, String uitgever,
             Integer minPagina,
             Integer maxPagina,
-            Boolean beschikbaarheid, Integer uitgaveJaarVan, Integer uitgaveJaarTot, String leesniveau, Integer page,
+            Boolean beschikbaarheid, Integer uitgaveJaarVan, Integer uitgaveJaarTot, String leesniveau,
+            Boolean didactischMateriaal, ap.be.backend.entity.DidactischeSubcategorie didactischeSubcategorie,
+            Integer page,
             Integer size,
             Sort sort) {
         validateYearRange(uitgaveJaarVan, uitgaveJaarTot);
@@ -96,7 +102,7 @@ public class BoekService {
         List<String> tagsParam = (thematischeTags == null || thematischeTags.isEmpty()) ? null : thematischeTags;
         return boekRepository.filterBoeken(zoekterm, genresParam, tagsParam, uitgever, minPagina, maxPagina,
                 beschikbaarheid,
-                uitgaveJaarVan, uitgaveJaarTot, leesniveau, pageable);
+                uitgaveJaarVan, uitgaveJaarTot, leesniveau, didactischMateriaal, didactischeSubcategorie, pageable);
     }
 
     private void validateYearRange(Integer uitgaveJaarVan, Integer uitgaveJaarTot) {

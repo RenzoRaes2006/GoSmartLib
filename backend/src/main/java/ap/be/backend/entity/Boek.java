@@ -62,6 +62,13 @@ public class Boek {
     @Column
     private String leesniveau;
 
+    @Column(nullable = false, columnDefinition = "boolean default false")
+    private boolean didactischMateriaal;
+
+    @Enumerated(EnumType.STRING)
+    @Column
+    private DidactischeSubcategorie didactischeSubcategorie;
+
     @OneToMany(mappedBy = "boek", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Beoordeling> beoordelingen;
 

@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+import ap.be.backend.entity.DidactischeSubcategorie;
 
 public record BoekDTO(
         @JsonProperty("id") Long id,
@@ -23,5 +24,7 @@ public record BoekDTO(
         @JsonProperty("locatie") String locatie,
         @JsonProperty("afbeelding") String afbeelding,
         @JsonProperty("populariteit") Double populariteit,
-        @JsonProperty("leesniveau") String leesniveau) {
+        @JsonProperty("leesniveau") String leesniveau,
+        @JsonProperty("didactischMateriaal") Boolean didactischMateriaal,
+        @JsonProperty("didactischeSubcategorie") DidactischeSubcategorie didactischeSubcategorie) {
 }

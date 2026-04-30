@@ -52,7 +52,6 @@
   color: #2d3748;
 }
 
-
 .mode-selector {
   display: flex;
   gap: 10px;
@@ -298,6 +297,43 @@ form > div > div button[type='button'] {
 form > div > div button[type='button']:hover {
   background: #f0efe4;
   border-color: #8c1b3f;
+}
+
+/* =====================
+   DIDACTISCH MATERIAAL (CHECKBOX & SUBCATEGORIE)
+   ===================== */
+
+.didactisch-optie {
+  display: flex;
+  align-items: center;
+  margin-top: 18px; /* Lijnt uit met de inputvelden van de rest van de rij */
+}
+
+.didactisch-optie label {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #2d3748;
+  text-transform: none;
+  letter-spacing: normal;
+  cursor: pointer;
+  line-height: 1.4;
+}
+
+.didactisch-optie input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  min-width: 16px; /* Voorkomt krimpen als de tekst over 2 lijnen gaat */
+  margin: 2px 0 0 0; /* Subtiele uitlijning bovenaan met de eerste tekstlijn */
+  padding: 0;
+  cursor: pointer;
+  accent-color: #8c1b3f;
+}
+
+.didactisch-optie input[type="checkbox"]:focus {
+  box-shadow: 0 0 0 3px rgba(140, 27, 63, 0.2);
 }
 
 /* =====================

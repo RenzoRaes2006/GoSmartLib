@@ -15,6 +15,8 @@ public interface BoekRepository extends JpaRepository<Boek, Long> {
         Optional<Boek> findByIsbn(String isbn);
 
         @Query("SELECT DISTINCT b FROM Boek b LEFT JOIN b.genre g LEFT JOIN b.thematischeTag t WHERE " +
+                        "(:didactischMateriaal IS NULL OR b.didactischMateriaal = :didactischMateriaal) AND " +
+                        "(:didactischeSubcategorie IS NULL OR b.didactischeSubcategorie = :didactischeSubcategorie) AND " +
                         "(:zoekterm IS NULL OR LOWER(b.titel) LIKE LOWER(CONCAT('%', :zoekterm, '%')) OR " +
                         "LOWER(b.auteur) LIKE LOWER(CONCAT('%', :zoekterm, '%')) OR " +
                         "b.isbn LIKE CONCAT('%', :zoekterm, '%')) AND " +
@@ -39,7 +41,11 @@ public interface BoekRepository extends JpaRepository<Boek, Long> {
                         @Param("uitgaveJaarVan") Integer uitgaveJaarVan,
                         @Param("uitgaveJaarTot") Integer uitgaveJaarTot,
                         @Param("leesniveau") String leesniveau,
+                        @Param("didactischMateriaal") Boolean didactischMateriaal,
+                        @Param("didactischeSubcategorie") ap.be.backend.entity.DidactischeSubcategorie didactischeSubcategorie,
                         Pageable pageable);
+
+        Page<Boek> findByDidactischMateriaalTrue(Pageable pageable);
 
         @Query(value = "SELECT b.* FROM boek b LEFT JOIN leeslijst_map_boeken lmb ON b.id = lmb.boek_id GROUP BY b.id ORDER BY COUNT(lmb.map_id) DESC LIMIT 5", nativeQuery = true)
         List<Boek> findTop5PopulaireBoeken();
