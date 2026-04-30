@@ -37,6 +37,9 @@ export class Catalogus implements OnInit, OnDestroy {
   paginaGrootte = signal<number>(10);
   totaalPaginas = signal<number>(1);
   totaalBoeken = signal<number>(0);
+  // Toegevoegd: filters voor didactisch materiaal
+  toonDidactisch = signal<boolean>(false);
+  selectedDidactischeSubcategorie = signal<string | undefined>(undefined);
 
   // Key voor sessionStorage
   private readonly FILTERS_KEYS = 'catalogus_filters';
@@ -128,6 +131,9 @@ export class Catalogus implements OnInit, OnDestroy {
         this.leesniveau.set(filters.leesniveau);
         this.selectedHoofdGenre.set(filters.selectedHoofdGenre || '');
         this.selectedThematischeTag.set(filters.selectedThematischeTag);
+        // Toegevoegd: laden van didactische filters uit sessie
+        this.toonDidactisch.set(filters.toonDidactisch || false);
+        this.selectedDidactischeSubcategorie.set(filters.selectedDidactischeSubcategorie);
         this.huidigePagina.set(filters.huidigePagina || 0);
 
         this.updateFilters(false);
@@ -184,6 +190,10 @@ export class Catalogus implements OnInit, OnDestroy {
       sorteerOp: this.selectedSorteerOp() || undefined,
       sorteerRichting: this.selectedSorteerRichting() || 'ASC',
       beschikbaarheid: this.beschikbaarheid() === true ? 'true' : undefined,
+      // Toegevoegd: doorgeven van didactische parameters aan de backend
+      // Alleen meesturen als de filter actief is (anders geen filter toepassen)
+      didactischMateriaal: this.toonDidactisch() ? 'true' : undefined,
+      didactischeSubcategorie: this.toonDidactisch() ? this.selectedDidactischeSubcategorie() : undefined,
       uitgaveJaarVan: this.uitgaveJaarVan(),
       uitgaveJaarTot: this.uitgaveJaarTot(),
       leesniveau: this.leesniveau(),
@@ -207,6 +217,9 @@ export class Catalogus implements OnInit, OnDestroy {
       beschikbaarheid: this.beschikbaarheid(),
       uitgaveJaarVan: this.uitgaveJaarVan(),
       uitgaveJaarTot: this.uitgaveJaarTot(),
+      // Toegevoegd: didactische velden opslaan in sessie
+      toonDidactisch: this.toonDidactisch(),
+      selectedDidactischeSubcategorie: this.selectedDidactischeSubcategorie(),
       leesniveau: this.leesniveau(),
       selectedHoofdGenre: this.selectedHoofdGenre(),
       selectedThematischeTag: this.selectedThematischeTag(),
@@ -299,6 +312,9 @@ export class Catalogus implements OnInit, OnDestroy {
       !!this.selectedUitgever()?.trim() ||
       this.minPagina() !== undefined ||
       this.maxPagina() !== undefined ||
+      // Toegevoegd: reset state logic voor didactische filters
+      this.toonDidactisch() !== false ||
+      this.selectedDidactischeSubcategorie() !== undefined ||
       this.selectedSorteerOp() !== undefined ||
       this.beschikbaarheid() !== undefined ||
       this.uitgaveJaarVan() !== undefined ||
@@ -314,6 +330,9 @@ export class Catalogus implements OnInit, OnDestroy {
     this.maxPagina.set(undefined);
     this.selectedSorteerOp.set(undefined);
     this.selectedSorteerRichting.set('ASC');
+    // Toegevoegd: filters daadwerkelijk leegmaken
+    this.toonDidactisch.set(false);
+    this.selectedDidactischeSubcategorie.set(undefined);
     this.beschikbaarheid.set(undefined);
     this.uitgaveJaarVan.set(undefined);
     this.uitgaveJaarTot.set(undefined);

@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import ap.be.backend.entity.Boek;
@@ -13,6 +15,9 @@ import ap.be.backend.entity.Uitlening;
 
 @Repository
 public interface UitleningRepository extends JpaRepository<Uitlening, Long> {
+
+    // Gebruikt exact de ID variabele zoals Spring Boot die verwacht
+    long countByGebruiker_GebruikerID(Long gebruikerId);
 
     // Get active loans of a user
     List<Uitlening> findByGebruiker_GebruikerIDAndIsIngeleverdFalse(Long gebruikerId);
@@ -33,4 +38,9 @@ public interface UitleningRepository extends JpaRepository<Uitlening, Long> {
     Optional<Uitlening> findFirstByGebruikerAndBoekAndIsIngeleverdFalseOrderByUitleenDatumAsc(Gebruiker gebruiker, Boek boek);
 
     List<Uitlening> findByIsIngeleverdFalseOrderByUitleenDatumDesc();
+
+    // Aangepaste query: Omdat we geen inleverdatum kunnen vergelijken in de entity,
+    // tellen we hier simpelweg hoeveel boeken deze leerling al heeft teruggebracht.
+    @Query("SELECT COUNT(u) FROM Uitlening u WHERE u.gebruiker.gebruikerID = :id AND u.isIngeleverd = true")
+    long countOnTime(@Param("id") Long id);
 }

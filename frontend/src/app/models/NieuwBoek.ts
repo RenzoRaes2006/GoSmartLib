@@ -12,4 +12,6 @@ export interface NieuwBoek {
   locatie: string;
   afbeelding: string;
   leesniveau?: string;
+  didactischMateriaal?: boolean;
+  didactischeSubcategorie?: string;
 }

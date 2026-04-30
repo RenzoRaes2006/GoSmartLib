@@ -48,6 +48,11 @@ export class BoekService {
     return this.http.get<PageResponse<Boek>>(this.apiUrl, { params });
   }
 
+  getDidactischeBoeken(page: number = 0, size: number = 12): Observable<PageResponse<Boek>> {
+    const params = new HttpParams().set('page', page.toString()).set('size', size.toString());
+    return this.http.get<PageResponse<Boek>>(`${this.apiUrl}/didactisch`, { params });
+  }
+
   getBoekOpId(id: number): Observable<Boek> {
     return this.http.get<Boek>(`${this.apiUrl}/${id}`);
   }

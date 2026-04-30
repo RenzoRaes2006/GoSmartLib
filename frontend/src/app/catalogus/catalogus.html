@@ -108,6 +108,35 @@
         <option value="D (literair niveau)">D (literair niveau)</option>
       </select>
 
+      <!-- Toegevoegd: Filters voor didactisch materiaal (alleen filter, geen security nog) -->
+      <label>Didactische weergave</label>
+      <div class="checkbox-group" style="margin-bottom: 10px;">
+        <label class="checkbox-option">
+          <input
+            type="checkbox"
+            [(ngModel)]="toonDidactisch"
+            (change)="selectedDidactischeSubcategorie.set(undefined); updateFilters()"
+          />
+          <span>Toon alléén didactisch materiaal</span>
+        </label>
+      </div>
+
+      @if (toonDidactisch()) {
+        <label for="didactische-subcategorie-filter">Subcategorie</label>
+        <select
+          id="didactische-subcategorie-filter"
+          [(ngModel)]="selectedDidactischeSubcategorie"
+          (change)="updateFilters()"
+          class="sidebar-input"
+        >
+          <option [ngValue]="undefined">Alle didactische categorieën</option>
+          <option value="LESMETHODES">Lesmethodes</option>
+          <option value="DIDACTISCHE_HANDBOEKEN">Didactische handboeken</option>
+          <option value="EVALUATIEMATERIAAL">Evaluatiemateriaal</option>
+          <option value="NASLAGWERKEN">Naslagwerken</option>
+        </select>
+      }
+
       <!-- 6. Pagina's -->
       <label>Pagina's</label>
       <div class="pagina-slider">
@@ -181,6 +210,10 @@
     <div class="boeken-grid">
       @for (boek of boekenlijst(); track boek.id) {
         <div class="boek-card" [routerLink]="['/details', boek.id]">
+          <!-- Toegevoegd: Didactische badge -->
+          @if (boek.didactischMateriaal) {
+            <span style="position: absolute; top: 10px; right: 10px; background-color: #8c1b3f; color: white; padding: 4px 8px; font-size: 0.75rem; font-weight: 600; border-radius: 4px; z-index: 10;">Didactisch</span>
+          }
           <div class="image-container">
             <span
               class="status-badge"

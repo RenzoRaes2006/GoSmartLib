@@ -26,4 +26,8 @@ export class LeerlingService {
 
     return this.http.get<any>(this.baseUrl, { params });
   }
+
+  getLeerlingStats(id: number): Observable<any> {
+  return this.http.get<any>(`${this.baseUrl}/${id}/stats`);
+}
 }
