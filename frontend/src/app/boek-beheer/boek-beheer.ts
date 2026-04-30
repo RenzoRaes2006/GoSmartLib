@@ -135,6 +135,7 @@ export class BoekBeheer implements OnInit {
       afbeelding: [''],
       leesniveau: [''],
       didactischMateriaal: [false],
+      didactischeSubcategorie: [''],
     });
   }
 
@@ -219,6 +220,7 @@ export class BoekBeheer implements OnInit {
       afbeelding: boek.afbeelding,
       leesniveau: boek.leesniveau || '',
       didactischMateriaal: !!boek.didactischMateriaal,
+      didactischeSubcategorie: boek.didactischeSubcategorie || '',  
     };
   }
 

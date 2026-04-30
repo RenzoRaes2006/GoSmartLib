@@ -70,8 +70,9 @@
   margin-top: 0;
 }
 
-/* Radio-opties op 1 lijn (overschrijft het bovenstaande) */
-.filter-section .radio-option {
+/* Radio- en checkbox-opties op 1 lijn (overschrijft het bovenstaande) */
+.filter-section .radio-option,
+.filter-section .checkbox-option {
   text-transform: none;
   letter-spacing: normal;
   font-weight: normal;
@@ -117,16 +118,18 @@
 }
 
 /* =====================
-   RADIO GROEPEN
+   RADIO & CHECKBOX GROEPEN
    ===================== */
 
-.radio-group {
+.radio-group,
+.checkbox-group {
   display: flex;
   flex-direction: column;
   gap: 0px;
 }
 
-.radio-option {
+.radio-option,
+.checkbox-option {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -136,7 +139,8 @@
   transition: background-color 0.2s;
 }
 
-.radio-option input[type="radio"] {
+.radio-option input[type="radio"],
+.checkbox-option input[type="checkbox"] {
   margin: 0;              /* reset browser margin */
   width: 16px;
   height: 16px;
@@ -144,11 +148,13 @@
   flex-shrink: 0;
 }
 
-.radio-option:hover {
+.radio-option:hover,
+.checkbox-option:hover {
   background-color: #f0efe4;
 }
 
-.radio-option span {
+.radio-option span,
+.checkbox-option span {
   font-size: 13px;
   font-family: inherit;
   color: #718096;
@@ -156,12 +162,14 @@
   display: block;
 }
 
-.radio-option input[type="radio"]:checked + span {
+.radio-option input[type="radio"]:checked + span,
+.checkbox-option input[type="checkbox"]:checked + span {
   color: #8c1b3f;
   font-weight: 600;
 }
 
-.radio-option:has(input:checked) {
+.radio-option:has(input:checked),
+.checkbox-option:has(input:checked) {
   background-color: rgba(140, 27, 63, 0.06);
 }
 
