@@ -17,7 +17,7 @@
       >
         @if (aanvragen().length > 0) {
           <div class="kolom">
-            <h2 class="page-title" style="font-size: 1.5rem; margin-top: 20px">Nieuwe Leningen</h2>
+            <h2 class="page-title" style="font-size: 1.5rem; margin-top: 20px">Nieuwe leningen</h2>
             <div class="aanvragen-lijst">
               @for (aanvraag of gepagineerdeNieuweAanvragen(); track aanvraag.id) {
                 <div class="aanvraag-card">
@@ -89,7 +89,7 @@
         @if (verlengAanvragen().length > 0) {
           <div class="kolom">
             <h2 class="page-title" style="font-size: 1.5rem; margin-top: 20px; color: #00529f">
-              Aanvragen tot Verlenging
+              Aanvragen tot verlenging
             </h2>
             <div class="aanvragen-lijst">
               @for (verlenging of gepagineerdeVerlengingen(); track verlenging.id) {
