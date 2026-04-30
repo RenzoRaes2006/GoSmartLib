@@ -3,8 +3,8 @@ stages:
   - deploy
 
 variables:
-  BACKEND_IMAGE: $CI_REGISTRY_IMAGE/backend:latest
-  FRONTEND_IMAGE: $CI_REGISTRY_IMAGE/frontend:latest
+  BACKEND_IMAGE: $CI_REGISTRY_IMAGE/backend:$CI_COMMIT_BRANCH
+  FRONTEND_IMAGE: $CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_BRANCH
 
 .docker-build-template:
   image: docker:27.5.1
@@ -44,4 +44,4 @@ deploy-to-server:
     - docker compose pull
     - docker compose up -d --build
   rules:
-    - if: $CI_COMMIT_BRANCH == "feature-47-Inloggen" 
+    - if: $CI_COMMIT_BRANCH == "main"
