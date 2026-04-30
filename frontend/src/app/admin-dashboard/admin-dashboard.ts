@@ -3,6 +3,7 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { BoekService } from '../services/boek.service';
 import { InstellingService } from '../services/instelling-service';
+import { StatistiekService } from '../services/statistiek.service';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -14,6 +15,7 @@ export class AdminDashboard implements OnInit {
   boekService = inject(BoekService);
   huidigeLimiet = signal<number>(0);
   instellingService = inject(InstellingService);
+  statistiekService = inject(StatistiekService);
   recenteLeningen: any[] = [];
 
   toastActief = signal<boolean>(false);
@@ -30,14 +32,14 @@ export class AdminDashboard implements OnInit {
     }, 3000);
   }
 
-  // tijdelijke dummy data — te vervangen door echte statistieken zodra backend-endpoints beschikbaar zijn
-  percentageUitgeleend: number = 42;
-  teLaatIngeleverd: number = 7;
-  populairsteGenre: string = 'Fantasy';
-  gemiddeldeLeenduur: number = 14;
+  percentageUitgeleend = signal<number>(0);
+  teLaatIngeleverd = signal<number>(0);
+  populairsteGenre = signal<string>('—');
+  uitleningenDezeMaand = signal<number>(0);
 
   ngOnInit(): void {
     this.laadLimiet();
+    this.laadStatistieken();
     this.boekService.getAlleActieveLeningenSysteem().subscribe({
       next: (response) => {
         const gesorteerdeLeningen = response.sort((a, b) => {
@@ -54,6 +56,18 @@ export class AdminDashboard implements OnInit {
       },
     });
   }
+  laadStatistieken() {
+    this.statistiekService.getAdminStatistieken().subscribe({
+      next: (stats) => {
+        this.percentageUitgeleend.set(stats.percentageUitgeleend ?? 0);
+        this.teLaatIngeleverd.set(stats.teLaatIngeleverd ?? 0);
+        this.populairsteGenre.set(stats.populairsteGenre ?? '—');
+        this.uitleningenDezeMaand.set(stats.uitleningenDezeMaand ?? 0);
+      },
+      error: (err) => console.error('Fout bij ophalen statistieken:', err),
+    });
+  }
+
   laadLimiet() {
     this.instellingService.getLeenLimiet().subscribe({
       next: (limiet) => this.huidigeLimiet.set(limiet),

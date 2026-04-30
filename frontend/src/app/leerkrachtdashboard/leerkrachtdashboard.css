@@ -231,7 +231,8 @@
 }
 
 .donut-read {
-  background: conic-gradient(var(--teacher-green) 0 62%, #d7dde6 62% 100%);
+  --vulling: 0%;
+  background: conic-gradient(var(--teacher-green) 0 var(--vulling), #d7dde6 var(--vulling) 100%);
 }
 
 .stat-note {
