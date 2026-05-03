@@ -85,4 +85,16 @@ public class Boek {
         this.titel = titel;
         this.auteur = auteur;
     }
+
+    @Transient
+    private boolean bestaatAl;
+
+    public boolean isBestaatAl() {
+        return bestaatAl;
+    }
+
+    public void setBestaatAl(boolean bestaatAl) {
+        this.bestaatAl = bestaatAl;
+    }
+
 }

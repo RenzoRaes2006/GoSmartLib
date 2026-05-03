@@ -5,6 +5,7 @@ import ap.be.backend.entity.Boek;
 import ap.be.backend.entity.Gebruiker;
 import ap.be.backend.entity.LeeslijstMap;
 import ap.be.backend.entity.Uitlening;
+import ap.be.backend.exception.LeenVoorwaardeException;
 import ap.be.backend.repository.BoekRepository;
 import ap.be.backend.repository.LeeslijstMapRepository;
 import ap.be.backend.repository.UitleningRepository;
@@ -430,5 +431,66 @@ public class GebruikerServiceTest {
         // om alle actieve leningen te tellen. We verifiëren hier of we die onnodige
         // belasting daadwerkelijk overslaan!
         verify(uitleningRepository, never()).findByGebruiker_GebruikerIDAndIsIngeleverdFalse(gebruikerId);
+    }
+
+    @Test
+    void givenGeldigeUitlening_whenVerlengUitlening_thenStatusWordtVerlengingAangevraagd() {
+        // Given
+        Long uitleningId = 1L;
+        Uitlening uitlening = new Uitlening();
+        uitlening.setId(uitleningId);
+        uitlening.setIngeleverd(false);
+        uitlening.setVerlengd(false);
+        uitlening.setStatus("GOEDGEKEURD"); // Een normaal uitgeleend boek
+
+        when(uitleningRepository.findById(uitleningId)).thenReturn(Optional.of(uitlening));
+
+        // When
+        gebruikerService.verlengUitlening(uitleningId);
+
+        // Then
+        // Controleer of de status is gewijzigd naar aanvraag, zonder dat de datum al
+        // wordt aangepast
+        assertEquals("VERLENGING_AANGEVRAAGD", uitlening.getStatus(),
+                "De status moet veranderen naar VERLENGING_AANGEVRAAGD");
+        verify(uitleningRepository).save(uitlening);
+    }
+
+    @Test
+    void givenAlVerlengdeUitlening_whenVerlengUitlening_thenThrowsLeenVoorwaardeException() {
+        // Given
+        Long uitleningId = 1L;
+        Uitlening uitlening = new Uitlening();
+        uitlening.setId(uitleningId);
+        uitlening.setVerlengd(true); // Boek is al eens verlengd
+
+        when(uitleningRepository.findById(uitleningId)).thenReturn(Optional.of(uitlening));
+
+        // When & Then
+        LeenVoorwaardeException exception = assertThrows(LeenVoorwaardeException.class, () -> {
+            gebruikerService.verlengUitlening(uitleningId);
+        });
+
+        assertEquals("Je hebt dit boek al een keer verlengd.", exception.getMessage());
+        verify(uitleningRepository, never()).save(any(Uitlening.class));
+    }
+
+    @Test
+    void givenNieuweAanvraag_whenVerlengUitlening_thenThrowsLeenVoorwaardeException() {
+        // Given
+        Long uitleningId = 1L;
+        Uitlening uitlening = new Uitlening();
+        uitlening.setId(uitleningId);
+        uitlening.setStatus("AANGEVRAAGD"); // Boek is nog niet eens uitgeleend
+
+        when(uitleningRepository.findById(uitleningId)).thenReturn(Optional.of(uitlening));
+
+        // When & Then
+        LeenVoorwaardeException exception = assertThrows(LeenVoorwaardeException.class, () -> {
+            gebruikerService.verlengUitlening(uitleningId);
+        });
+
+        assertEquals("Je kunt een boek dat nog in aanvraag is niet verlengen.", exception.getMessage());
+        verify(uitleningRepository, never()).save(any(Uitlening.class));
     }
 }

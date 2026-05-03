@@ -7,52 +7,412 @@
   <div class="import-card">
     <div class="import-header">
       <h3>Bulk import via Excel</h3>
-      <p>
-        Upload een Excel-bestand (.xlsx) om meerdere boeken tegelijk aan de catalogus toe te voegen.
-        Zorg dat de kolomnamen exact overeenkomen met ons systeem.
-        <br /><strong style="color: #8c1b3f"
-          >Let op: Alleen de kolommen "Titel" en "Auteur" zijn verplicht.</strong
-        ><br />
-        De rest mag eventueel leeg gelaten worden.
-      </p>
+      <p>Controleer en bewerk de data vóórdat je definitief importeert.</p>
 
-      <div style="display: flex; gap: 10px; justify-content: center; margin-top: 15px">
+      <div
+        style="
+          display: flex;
+          gap: 10px;
+          justify-content: center;
+          margin-top: 15px;
+          margin-bottom: 5px;
+        "
+      >
         <button type="button" class="btn-secondary" (click)="downloadExcelVoorbeeld()">
-          📊 Download voorbeeld (.xlsx)
+          📊 Download leeg sjabloon (.xlsx)
         </button>
       </div>
     </div>
 
-    <div class="message-container error-message" *ngIf="errorMessage()">
-      {{ errorMessage() }}
-    </div>
+    <div class="message-container error-message" *ngIf="errorMessage()">{{ errorMessage() }}</div>
     <div class="message-container success-message" *ngIf="successMessage()">
       {{ successMessage() }}
     </div>
 
-    <div class="upload-sectie">
-      <label for="fileUpload" class="file-label">Selecteer Excel-bestand</label>
-      <input
-        id="fileUpload"
-        type="file"
-        #fileInput
-        (change)="onFileSelected($event)"
-        accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
-        class="file-input"
-      />
+    @if (previewLijst().length === 0) {
+      <div class="upload-sectie">
+        <label for="fileUpload" class="file-label">Selecteer Excel-bestand</label>
+        <input
+          id="fileUpload"
+          type="file"
+          #fileInput
+          (change)="onFileSelected($event)"
+          accept=".xlsx, .xls"
+          class="file-input"
+        />
 
-      <div class="file-info" *ngIf="selectedFile">
-        Geselecteerd: <strong>{{ selectedFile.name }}</strong>
+        <div class="file-info" *ngIf="selectedFile">
+          Geselecteerd: <strong>{{ selectedFile.name }}</strong>
+        </div>
+
+        <button
+          type="button"
+          class="btn-primary upload-btn"
+          (click)="laadPreview(fileInput)"
+          [disabled]="!selectedFile || isUploading()"
+        >
+          {{ isUploading() ? 'Bestand uitlezen...' : 'Laad preview' }}
+        </button>
       </div>
+    } @else {
+      <div class="preview-container">
+        <div class="preview-header-row">
+          <div class="header-cell col-status" style="flex: 1">Status</div>
+          <div class="header-cell col-titel">Titel (verplicht)</div>
+          <div class="header-cell col-auteur">Auteur (verplicht)</div>
+          <div class="header-cell col-isbn">ISBN</div>
+          <div class="header-cell col-acties">Acties</div>
+        </div>
 
-      <button
-        type="button"
-        class="btn-primary upload-btn"
-        (click)="uploadBestand(fileInput)"
-        [disabled]="!selectedFile || isUploading()"
-      >
-        {{ isUploading() ? 'Bestand aan het verwerken...' : 'Start import' }}
-      </button>
-    </div>
+        <div class="preview-body">
+          @for (boek of gepagineerdePreviewLijst(); track $index) {
+            <div class="preview-row" [class.is-expanded]="expandedRowIndex() === $index">
+              <div class="data-cell col-status" style="flex: 1">
+                @if (boek.bestaatAl) {
+                  <span
+                    style="
+                      background: #ebf8ff;
+                      color: #3182ce;
+                      padding: 4px 8px;
+                      border-radius: 6px;
+                      font-size: 0.8rem;
+                      font-weight: 700;
+                    "
+                    >Update</span
+                  >
+                } @else {
+                  <span
+                    style="
+                      background: #f0fff4;
+                      color: #166534;
+                      padding: 4px 8px;
+                      border-radius: 6px;
+                      font-size: 0.8rem;
+                      font-weight: 700;
+                    "
+                    >Nieuw</span
+                  >
+                }
+              </div>
+
+              <div class="data-cell col-titel">
+                <div style="width: 100%">
+                  <input
+                    type="text"
+                    [(ngModel)]="boek.titel"
+                    class="edit-input"
+                    [class.input-error]="isTitelOngeldig(boek) && !boek.bestaatAl"
+                    placeholder="Titel"
+                    [disabled]="boek.bestaatAl"
+                  />
+
+                  @if (isTitelOngeldig(boek) && !boek.bestaatAl) {
+                    <small class="error-hint">Min. 2 tekens vereist</small>
+                  }
+                </div>
+              </div>
+              <div class="data-cell col-auteur">
+                <div style="width: 100%">
+                  <input
+                    type="text"
+                    [(ngModel)]="boek.auteur"
+                    class="edit-input"
+                    [class.input-error]="isAuteurOngeldig(boek) && !boek.bestaatAl"
+                    placeholder="Auteur"
+                    [disabled]="boek.bestaatAl"
+                  />
+
+                  @if (isAuteurOngeldig(boek) && !boek.bestaatAl) {
+                    <small class="error-hint">Min. 2 tekens vereist</small>
+                  }
+                </div>
+              </div>
+              <div class="data-cell col-isbn">
+                <div style="display: flex; gap: 5px; width: 100%">
+                  <input
+                    type="text"
+                    [(ngModel)]="boek.isbn"
+                    class="edit-input"
+                    placeholder="ISBN"
+                    [disabled]="boek.bestaatAl"
+                  />
+                  @if (
+                    !boek.bestaatAl || (boek.bestaatAl && (!boek.isbn || boek.isbn.trim() === ''))
+                  ) {
+                    <button
+                      class="btn-primary btn-genereer"
+                      (click)="genereerIsbn(boek)"
+                      title="Genereer intern GO-nummer"
+                    >
+                      Genereer
+                    </button>
+                  }
+                </div>
+              </div>
+              <div class="data-cell col-acties">
+                @if (!boek.bestaatAl) {
+                  <button class="btn-expand" (click)="toggleRow($index)" title="Toon alle velden">
+                    {{ expandedRowIndex() === $index ? '▲ Sluiten' : '▼ Meer info' }}
+                  </button>
+                } @else {
+                  <div style="display: flex; align-items: center; gap: 5px">
+                    <span style="font-size: 0.8rem; font-weight: bold">+</span>
+                    <input
+                      type="number"
+                      [(ngModel)]="boek.aantalExemplaren"
+                      class="edit-input"
+                      style="width: 60px; padding: 4px"
+                      min="1"
+                    />
+                  </div>
+                }
+
+                <button
+                  class="btn-delete-row"
+                  (click)="verwijderUitPreview($index, boek.titel)"
+                  title="Verwijder dit boek uit de import"
+                >
+                  &times;
+                </button>
+              </div>
+            </div>
+
+            @if (expandedRowIndex() === $index) {
+              <div class="expanded-details-panel">
+                <div class="details-grid">
+                  <div class="input-group">
+                    <label>Uitgever</label>
+                    <input type="text" [(ngModel)]="boek.uitgever" class="edit-input" />
+                  </div>
+                  <div class="input-group">
+                    <label>Uitgavejaar</label>
+                    <input type="text" [(ngModel)]="boek.uitgaveJaar" class="edit-input" />
+                  </div>
+                  <div class="input-group">
+                    <label>Aantal pagina's</label>
+                    <input type="number" [(ngModel)]="boek.pagina" class="edit-input" />
+                  </div>
+
+                  <div class="input-group">
+                    <label>Exemplaren</label>
+                    <input type="number" [(ngModel)]="boek.aantalExemplaren" class="edit-input" />
+                  </div>
+                  <div class="input-group">
+                    <label>Locatie (kast)</label>
+                    <input type="text" [(ngModel)]="boek.locatie" class="edit-input" />
+                  </div>
+                  <div class="input-group">
+                    <label>Leesniveau</label>
+                    <select [(ngModel)]="boek.leesniveau" class="edit-input">
+                      <option value="">Geen leesniveau</option>
+                      <option value="A (eenvoudig taalgebruik)">A (eenvoudig taalgebruik)</option>
+                      <option value="B (gemiddeld taalgebruik)">B (gemiddeld taalgebruik)</option>
+                      <option value="C (complex taalgebruik)">C (complex taalgebruik)</option>
+                      <option value="D (literair niveau)">D (literair niveau)</option>
+                    </select>
+                  </div>
+
+                  <div class="input-group">
+                    <label>Genre</label>
+                    <div class="genre-dropdown-row">
+                      <select
+                        [(ngModel)]="actiefHoofdGenre"
+                        (change)="actiefSubGenre.set('')"
+                        class="edit-input"
+                      >
+                        <option value="">Kies een genre</option>
+                        @for (genre of hoofdGenres; track genre) {
+                          <option [value]="genre">{{ genre }}</option>
+                        }
+                      </select>
+                      @if (actiefHoofdGenre() && getSubGenres(actiefHoofdGenre()).length > 0) {
+                        <select [(ngModel)]="actiefSubGenre" class="edit-input">
+                          <option value="">Kies subgenre</option>
+                          @for (sub of getSubGenres(actiefHoofdGenre()); track sub) {
+                            <option [value]="sub">{{ sub }}</option>
+                          }
+                        </select>
+                      }
+                      <button
+                        class="btn-primary"
+                        style="padding: 0 12px; font-weight: bold; border-radius: 6px"
+                        (click)="voegGenreToe(boek)"
+                        [disabled]="!actiefHoofdGenre()"
+                      >
+                        +
+                      </button>
+                    </div>
+                    @if (boek.genre && boek.genre.length > 0) {
+                      <div class="genre-tags">
+                        @for (g of boek.genre; track g) {
+                          <span class="genre-tag">
+                            {{ g }}
+                            <button type="button" (click)="verwijderGenre(boek, g)">&times;</button>
+                          </span>
+                        }
+                      </div>
+                    }
+                  </div>
+
+                  <div class="input-group">
+                    <label>Thematische tags</label>
+                    <div class="genre-dropdown-row">
+                      <select [(ngModel)]="actieveTag" class="edit-input">
+                        <option value="">Kies een thematische tag</option>
+                        @for (tag of beschikbareTags; track tag) {
+                          <option [value]="tag">{{ tag }}</option>
+                        }
+                      </select>
+                      <button
+                        class="btn-primary"
+                        style="padding: 0 12px; font-weight: bold; border-radius: 6px"
+                        (click)="voegTagToe(boek)"
+                        [disabled]="!actieveTag()"
+                      >
+                        +
+                      </button>
+                    </div>
+                    @if (boek.thematischeTag && boek.thematischeTag.length > 0) {
+                      <div class="genre-tags">
+                        @for (t of boek.thematischeTag; track t) {
+                          <span class="genre-tag">
+                            {{ t }}
+                            <button type="button" (click)="verwijderTag(boek, t)">&times;</button>
+                          </span>
+                        }
+                      </div>
+                    }
+                  </div>
+
+                  <div class="input-group afbeelding-sectie">
+                    <label>Afbeelding</label>
+                    <div class="afbeelding-row">
+                      <div class="afbeelding-controls">
+                        <div class="image-upload-toggle">
+                          <button
+                            type="button"
+                            (click)="setUploadMode($index, 'url')"
+                            [class.active]="getUploadMode($index) === 'url'"
+                          >
+                            URL
+                          </button>
+                          <button
+                            type="button"
+                            (click)="setUploadMode($index, 'bestand')"
+                            [class.active]="getUploadMode($index) === 'bestand'"
+                          >
+                            Bestand
+                          </button>
+                        </div>
+
+                        <div class="afbeelding-input">
+                          @if (getUploadMode($index) === 'url') {
+                            <input
+                              type="text"
+                              [(ngModel)]="boek.afbeelding"
+                              class="edit-input"
+                              placeholder="https://..."
+                            />
+                          }
+
+                          @if (getUploadMode($index) === 'bestand') {
+                            <label class="file-upload-label">
+                              <input
+                                type="file"
+                                accept="image/jpeg,image/png"
+                                (change)="opBestandGeselecteerd($event, boek, $index)"
+                              />
+                              <span class="file-upload-btn">Kies bestand</span>
+                            </label>
+                          }
+
+                          @if (getUploadBezig($index)) {
+                            <small class="upload-status">Uploaden...</small>
+                          }
+                        </div>
+                      </div>
+
+                      @if (boek.afbeelding) {
+                        <div class="afbeelding-preview">
+                          <button
+                            type="button"
+                            class="afbeelding-verwijder"
+                            (click)="verwijderAfbeelding(boek)"
+                          >
+                            &times;
+                          </button>
+                          <img [src]="boek.afbeelding" alt="Cover preview" />
+                        </div>
+                      }
+                    </div>
+                  </div>
+
+                  <div class="input-group full-width">
+                    <label>Beschrijving</label>
+                    <textarea
+                      [(ngModel)]="boek.beschrijving"
+                      class="edit-input"
+                      rows="3"
+                    ></textarea>
+                  </div>
+                </div>
+              </div>
+            }
+          }
+        </div>
+
+        @if (totaalPaginas() > 1) {
+          <div class="preview-pagination">
+            <button class="btn-secondary" (click)="vorigePagina()" [disabled]="currentPage() === 1">
+              &larr; Vorige
+            </button>
+            <span>Pagina {{ currentPage() }} van {{ totaalPaginas() }}</span>
+            <button
+              class="btn-secondary"
+              (click)="volgendePagina()"
+              [disabled]="currentPage() === totaalPaginas()"
+            >
+              Volgende &rarr;
+            </button>
+          </div>
+        }
+
+        <div
+          style="
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+            justify-content: flex-end;
+            padding-top: 20px;
+            border-top: 1px solid #e2dfd5;
+            align-items: center;
+          "
+        >
+          @if (!isLijstGeldig() && previewLijst().length > 0) {
+            <span style="color: #e53e3e; font-size: 0.9rem; font-weight: 600"
+              >Vul bij alle boeken minstens een geldige Titel, Auteur en ISBN (of genereer een
+              nummer) in!</span
+            >
+          }
+
+          <button class="btn-secondary" (click)="annuleer()" [disabled]="isUploading()">
+            Annuleer (opnieuw)
+          </button>
+
+          <button
+            class="btn-primary upload-btn"
+            style="margin: 0"
+            (click)="bevestigImport()"
+            [disabled]="isUploading() || !isLijstGeldig()"
+          >
+            {{
+              isUploading()
+                ? 'Bezig met opslaan...'
+                : 'Definitief importeren (' + previewLijst().length + ')'
+            }}
+          </button>
+        </div>
+      </div>
+    }
   </div>
 </div>

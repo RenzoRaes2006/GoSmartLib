@@ -18,6 +18,7 @@ export class Leerkrachtdashboard implements OnInit {
   totaalAantalPaginas = signal<number>(0);
   selectedClass = signal<string>('');
   zoekterm = signal<string>('');
+  leerlingStats = signal<any>(null);
 
   zichtbareLeerlingen = signal<any[]>([]);
   selectedStudent = signal<any | null>(null);
@@ -67,10 +68,17 @@ export class Leerkrachtdashboard implements OnInit {
   }
 
   openHistory(student: any) {
-    this.selectedStudent.set(student);
-  }
+  this.selectedStudent.set(student);
+  this.leerlingService.getLeerlingStats(student.id).subscribe({
+    next: (stats) => this.leerlingStats.set(stats),
+    error: (err) => console.error('fout bij laden stats', err)
+  });
+}
 
-  closeHistory() {
-    this.selectedStudent.set(null);
-  }
+closeHistory() {
+  this.selectedStudent.set(null);
+  this.leerlingStats.set(null);
+}
+
+  
 }
