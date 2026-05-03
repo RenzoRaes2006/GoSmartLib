@@ -179,4 +179,13 @@ export class BoekService {
   weigerVerlenging(id: number) {
     return this.http.put(`${this.apiBeheerUrl}/${id}/verlenging/weigeren`, {});
   }
+  uploadVoorPreview(file: File): Observable<any[]> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<any[]>(`${this.apiUrl}/import/preview`, formData);
+  }
+
+  bevestigImport(boeken: any[]): Observable<string> {
+    return this.http.post(`${this.apiUrl}/import/bevestig`, boeken, { responseType: 'text' });
+  }
 }
