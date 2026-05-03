@@ -98,4 +98,9 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }
 
+    @ExceptionHandler(KlassLeeslijstNotFoundException.class)
+    public ResponseEntity<String> handleKlassLeeslijstNotFound(KlassLeeslijstNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
+
 }
