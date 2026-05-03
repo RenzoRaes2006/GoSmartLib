@@ -10,7 +10,10 @@ import { LeeslijstRequest } from '../models/leeslijst-request.model';
 export class KlassLeeslijstService {
 
   // Vervang dit door de daadwerkelijke URL/poort van je Spring Boot backend
-  private apiUrl = 'http://localhost:8081/api/leeslijsten';
+  private apiUrl =
+    window.location.hostname === 'localhost'
+      ? 'http://localhost:8081/api/leeslijsten'
+      : '/api/leeslijsten';
 
   constructor(private http: HttpClient) { }
 
