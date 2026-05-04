@@ -284,24 +284,29 @@ public class GebruikerService {
     @Transactional
     public void bevestigBulkUitlening(Long gebruikerId, List<Long> boekIds) {
         if (boekIds == null || boekIds.isEmpty()) {
-            throw new IllegalArgumentException("Er zijn geen boeken geselecteerd om te lenen.");
+            throw new ap.be.backend.exception.InvalidImportDataException(
+                    "Er zijn geen boeken geselecteerd om te lenen.");
         }
+
         Gebruiker leraar = gebruikerRepository.findById(gebruikerId)
-                .orElseThrow(
-                        () -> new IllegalArgumentException("Leerkracht met ID " + gebruikerId + " niet gevonden."));
+                .orElseThrow(() -> new ap.be.backend.exception.ResourceNotFoundException(
+                        "Leerkracht met ID " + gebruikerId + " niet gevonden."));
 
         for (Long boekId : boekIds) {
             Boek boek = boekRepository.findById(boekId)
-                    .orElseThrow(() -> new IllegalArgumentException("Boek met ID " + boekId + " niet gevonden."));
+                    .orElseThrow(() -> new ap.be.backend.exception.ResourceNotFoundException(
+                            "Boek met ID " + boekId + " niet gevonden."));
 
             if (boek.getAantalExemplaren() <= 0) {
-                throw new IllegalStateException("Niet genoeg voorraad voor: " + boek.getTitel());
+                throw new ap.be.backend.exception.OnvoldoendeVoorraadException(
+                        "Niet genoeg voorraad voor: " + boek.getTitel());
             }
+
             boek.setAantalExemplaren(boek.getAantalExemplaren() - 1);
             boekRepository.save(boek);
 
             Uitlening uitlening = new Uitlening(leraar, boek, LocalDate.now(), LocalDate.now().plusDays(30));
-            uitlening.setStatus("ACTIEF"); // We overrulen de constructor standaard!
+            uitlening.setStatus("ACTIEF");
             uitlening.setUitleenDatum(LocalDate.now());
             uitlening.setInleverDatum(LocalDate.now().plusMonths(1));
 
