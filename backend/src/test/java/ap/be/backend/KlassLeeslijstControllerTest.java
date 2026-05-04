@@ -27,6 +27,10 @@ class KlassLeeslijstControllerTest {
     @InjectMocks
     private KlassLeeslijstController leeslijstController;
 
+    /**
+     * Test of de controller een HTTP 200 OK retourneert met het aangemaakte DTO
+     * nadat de service succesvol een nieuwe leeslijst heeft gegenereerd.
+     */
     @Test
     void createLeeslijst_ReturnsCreatedDTO() {
         KlassLeeslijstRequestDTO request = new KlassLeeslijstRequestDTO("Mijn Lijst");
@@ -40,6 +44,10 @@ class KlassLeeslijstControllerTest {
         assertEquals(expected, response.getBody());
     }
 
+    /**
+     * Test of de controller de correcte lijst met leeslijsten voor een specifieke
+     * leerkracht retourneert samen met een HTTP 200 OK status.
+     */
     @Test
     void getLeeslijstenByLeerkracht_ReturnsList() {
         Long leerkrachtId = 1L;
@@ -54,6 +62,10 @@ class KlassLeeslijstControllerTest {
         assertEquals(HttpStatus.OK, response.getStatusCode());
     }
 
+    /**
+     * Test of de controller een HTTP 200 OK en de bijgewerkte leeslijst retourneert
+     * nadat een boek is toegevoegd.
+     */
     @Test
     void addBoekToLeeslijst_ReturnsUpdatedDTO() {
         Long lijstId = 10L;
@@ -68,6 +80,10 @@ class KlassLeeslijstControllerTest {
         verify(leeslijstService, times(1)).addBoekToLeeslijst(lijstId, boekId);
     }
 
+    /**
+     * Test of de controller de correcte leeslijst ophaalt op basis van ID
+     * en retourneert met een HTTP 200 OK status.
+     */
     @Test
     void getLeeslijstById_ReturnsDTO() {
         Long lijstId = 10L;
@@ -78,9 +94,13 @@ class KlassLeeslijstControllerTest {
         ResponseEntity<KlassLeeslijstResponseDTO> response = leeslijstController.getLeeslijstById(lijstId);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(expected, response.getBody()); // Bevestigt dat de controller het juiste DTO teruggeeft[cite: 9]
+        assertEquals(expected, response.getBody()); // Bevestigt dat de controller het juiste DTO teruggeeft[cite: 11]
     }
 
+    /**
+     * Test of de controller de bijgewerkte leeslijst retourneert na
+     * het succesvol verwijderen van een boek via de service.
+     */
     @Test
     void removeBoekFromLeeslijst_ReturnsUpdatedDTO() {
         Long lijstId = 10L;
@@ -95,9 +115,13 @@ class KlassLeeslijstControllerTest {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         verify(leeslijstService, times(1)).removeBoekFromLeeslijst(lijstId, boekId); // Bevestigt dat de HTTP DELETE het
                                                                                      // boek verwijdert via de
-                                                                                     // service[cite: 9]
+                                                                                     // service[cite: 11]
     }
 
+    /**
+     * Test of de controller de bijgewerkte leeslijst retourneert
+     * na het succesvol aanpassen van de naam.
+     */
     @Test
     void updateLeeslijstNaam_ReturnsUpdatedDTO() {
         Long lijstId = 10L;
@@ -110,9 +134,13 @@ class KlassLeeslijstControllerTest {
                 nieuweNaam);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(expected, response.getBody()); // Controleert de naam update via de HTTP PUT methode[cite: 9]
+        assertEquals(expected, response.getBody()); // Controleert de naam update via de HTTP PUT methode[cite: 11]
     }
 
+    /**
+     * Test of de controller een HTTP 204 No Content retourneert
+     * wanneer een leeslijst succesvol is verwijderd.
+     */
     @Test
     void deleteLeeslijst_ReturnsNoContent() {
         Long lijstId = 10L;
@@ -121,7 +149,24 @@ class KlassLeeslijstControllerTest {
         ResponseEntity<Void> response = leeslijstController.deleteLeeslijst(lijstId);
 
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode()); // Bevestigt dat de status 204 No Content is na
-                                                                       // een succesvolle HTTP DELETE[cite: 9]
+                                                                       // een succesvolle HTTP DELETE[cite: 11]
         verify(leeslijstService, times(1)).deleteLeeslijst(lijstId);
+    }
+
+    /**
+     * Test of de controller een HTTP 200 OK retourneert met de volledige lijst
+     * van alle klassenleeslijsten.
+     */
+    @Test
+    void getAllKlassenLeeslijsten_ReturnsList() {
+        List<KlassLeeslijstResponseDTO> expected = List.of(
+                new KlassLeeslijstResponseDTO(1L, "Lijst 1", List.of()));
+        when(leeslijstService.getAllKlassenLeeslijsten()).thenReturn(expected);
+
+        ResponseEntity<List<KlassLeeslijstResponseDTO>> response = leeslijstController.getAllKlassenLeeslijsten();
+
+        assertEquals(1, response.getBody().size());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        verify(leeslijstService, times(1)).getAllKlassenLeeslijsten();
     }
 }
