@@ -108,8 +108,9 @@ public class GebruikerController {
     }
 
     @PatchMapping("/leningen/{uitleningId}/verlengen")
-    @CrossOrigin(origins = { "http://frontend.localhost", "http://localhost:4200",
-            "http://frontend-sp09.cloud-ap.be" }, allowedHeaders = "*")
+    @CrossOrigin(origins = { "http://localhost:4200", "https://localhost:4200",
+            "https://frontend.localhost", "https://frontend-sp09.cloud-ap.be",
+            "https://api-sp09.cloud-ap.be" }, allowedHeaders = "*", allowCredentials = "true")
 
     public ResponseEntity<String> verlengLening(@PathVariable("uitleningId") Long uitleningId) {
         gebruikerService.verlengUitlening(uitleningId);
