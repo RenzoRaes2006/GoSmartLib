@@ -24,3 +24,4 @@ export class AuthService {
     this.currentUser.set({ id: decoded.sub, name: decoded.name, role: decoded.role });
   }
 }
+ 
