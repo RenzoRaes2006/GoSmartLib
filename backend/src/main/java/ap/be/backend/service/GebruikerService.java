@@ -21,6 +21,7 @@ import ap.be.backend.repository.BoekRepository;
 import ap.be.backend.repository.GebruikerRepository;
 import ap.be.backend.repository.LeeslijstMapRepository;
 import ap.be.backend.repository.UitleningRepository;
+import jakarta.transaction.Transactional;
 
 @Service
 public class GebruikerService {
@@ -278,5 +279,33 @@ public class GebruikerService {
     // Fetch all active loans across the entire system for the librarian
     public List<Uitlening> getAlleActieveLeningenSysteem() {
         return uitleningRepository.findByIsIngeleverdFalseOrderByUitleenDatumDesc();
+    }
+
+    @Transactional
+    public void bevestigBulkUitlening(Long gebruikerId, List<Long> boekIds) {
+        if (boekIds == null || boekIds.isEmpty()) {
+            throw new IllegalArgumentException("Er zijn geen boeken geselecteerd om te lenen.");
+        }
+        Gebruiker leraar = gebruikerRepository.findById(gebruikerId)
+                .orElseThrow(
+                        () -> new IllegalArgumentException("Leerkracht met ID " + gebruikerId + " niet gevonden."));
+
+        for (Long boekId : boekIds) {
+            Boek boek = boekRepository.findById(boekId)
+                    .orElseThrow(() -> new IllegalArgumentException("Boek met ID " + boekId + " niet gevonden."));
+
+            if (boek.getAantalExemplaren() <= 0) {
+                throw new IllegalStateException("Niet genoeg voorraad voor: " + boek.getTitel());
+            }
+            boek.setAantalExemplaren(boek.getAantalExemplaren() - 1);
+            boekRepository.save(boek);
+
+            Uitlening uitlening = new Uitlening(leraar, boek, LocalDate.now(), LocalDate.now().plusDays(30));
+            uitlening.setStatus("ACTIEF"); // We overrulen de constructor standaard!
+            uitlening.setUitleenDatum(LocalDate.now());
+            uitlening.setInleverDatum(LocalDate.now().plusMonths(1));
+
+            uitleningRepository.save(uitlening);
+        }
     }
 }

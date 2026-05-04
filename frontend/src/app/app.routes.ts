@@ -20,6 +20,7 @@ import { authGuard } from './guards/auth.guard';
 import { LeningenBeheerder } from './leningen-beheerder/leningen-beheerder';
 import { KlassLeeslijstenOverzichtComponent } from './klass-leeslijsten-overzicht/klass-leeslijsten-overzicht';
 import { KlassLeeslijstBeheerComponent } from './klass-leeslijst-beheer/klass-leeslijst-beheer';
+import { BulkOntlenenComponent } from './bulk-ontlenen-component/bulk-ontlenen-component';
 
 export const routes: Routes = [
   { path: '', component: HomePage },
@@ -32,6 +33,7 @@ export const routes: Routes = [
   { path: 'reserveren', component: ReserverenComponent },
   { path: 'not-found', component: PageNotFound },
   { path: 'login', component: Login },
+  { path: 'bulk-ontlenen', component: BulkOntlenenComponent },
   { path: 'beheer/aanvragen', component: AanvragenBeheer },
   { path: 'beheer/scan', component: ScanModus },
   { path: 'gerapporteerde-beoordelingen', component: GerapporteerdeReviews },

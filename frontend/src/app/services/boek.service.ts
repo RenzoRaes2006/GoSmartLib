@@ -105,6 +105,12 @@ export class BoekService {
     );
   }
 
+  leenBoekenBulk(gebruikerId: number, boekIds: number[]) {
+    return this.http.post(`${this.apiGebruikerUrl}/${gebruikerId}/lenen/bulk`, boekIds, {
+      responseType: 'text',
+    });
+  }
+
   getActieveLeningen(gebruikerId: number): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiGebruikerUrl}/${gebruikerId}/leningen`);
   }
