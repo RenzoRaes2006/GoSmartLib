@@ -21,6 +21,8 @@ import { LeningenBeheerder } from './leningen-beheerder/leningen-beheerder';
 import { BeheerderDashboard } from './beheerder-dashboard/beheerder-dashboard';
 import { KlassLeeslijstenOverzichtComponent } from './klass-leeslijsten-overzicht/klass-leeslijsten-overzicht';
 import { KlassLeeslijstBeheerComponent } from './klass-leeslijst-beheer/klass-leeslijst-beheer';
+import { KlassenleeslijstenLeerlingComponent } from './klassenleeslijsten-leerling/klassenleeslijsten-leerling';
+import { KlassenleeslijstDetailLeerlingComponent } from './klassenleeslijst-detail-leerling/klassenleeslijst-detail-leerling';
 
 export const routes: Routes = [
   { path: '', component: HomePage },
@@ -44,5 +46,7 @@ export const routes: Routes = [
   {path: 'beheerder', component: BeheerderDashboard},
   { path: 'leeslijsten', component: KlassLeeslijstenOverzichtComponent },
   { path: 'leeslijsten/:id', component: KlassLeeslijstBeheerComponent },
+  { path: 'klassenleeslijsten', component: KlassenleeslijstenLeerlingComponent },
+  { path: 'klassenleeslijsten/:id', component: KlassenleeslijstDetailLeerlingComponent },
   { path: '**', redirectTo: 'not-found' },
 ];
