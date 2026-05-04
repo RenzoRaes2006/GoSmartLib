@@ -130,14 +130,19 @@
                     <span>{{ lening.resterendeDagen }} d</span>
                   }
                 </div>
-                @if (!lening.isAanvraag && !lening.isVerlengd) {
-                  <button
-                    class="btn-verlengen"
-                    (click)="openVerlengModal(lening.id)"
-                    title="Verleng"
-                  >
+                @if (!lening.isAanvraag && !lening.isVerlengd && !lening.isVerlengingAangevraagd) {
+                  <button class="btn-verlengen" (click)="openVerlengModal(lening.id)">
                     Verlengen
                   </button>
+                }
+
+                @if (lening.isVerlengingAangevraagd) {
+                  <span
+                    class="dagen-badge"
+                    style="background: #ebf8ff; color: #3182ce; margin-left: auto"
+                  >
+                    Verlenging in aanvraag ⏳
+                  </span>
                 }
               </div>
             } @empty {

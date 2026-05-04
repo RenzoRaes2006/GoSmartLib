@@ -1,0 +1,406 @@
+/* ==========================================================================
+   1. BASIS LAYOUT & WRAPPER
+   ========================================================================== */
+:host {
+    display: block;
+    background-color: #f0efe4;
+    min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #2d3748;
+}
+
+.page-wrapper {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px 20px 60px 20px;
+}
+
+/* ==========================================================================
+   2. HEADER CARD (Leeslijst info bovenin)
+   ========================================================================== */
+.leeslijst-header-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 24px 30px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e2dfd5;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    gap: 20px;
+    border-top: 5px solid #8c1b3f;
+}
+
+.header-titel {
+    margin: 0 0 5px 0;
+    font-size: 1.8rem;
+    color: #1a202c;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.leeslijst-stats {
+    margin: 0;
+    color: #718096;
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.header-acties {
+    display: flex;
+    gap: 12px;
+}
+
+/* Knoppen in Header */
+.btn-edit-icon {
+    background: #f0efe4;
+    border: 1px solid #e2dfd5;
+    color: #718096;
+    cursor: pointer;
+    font-size: 1.1rem;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.btn-edit-icon:hover {
+    background: #8c1b3f;
+    color: #fff;
+    border-color: #8c1b3f;
+}
+
+.btn-assign {
+    background: #8c1b3f;
+    color: #fff;
+    border: 1px solid #8c1b3f;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: all 0.2s;
+}
+
+.btn-assign:hover {
+    background: #6d1531;
+    transform: translateY(-2px);
+}
+
+.btn-delete-list {
+    background: #fff;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: all 0.2s;
+}
+
+.btn-delete-list:hover {
+    background: #fef2f2;
+}
+
+/* ==========================================================================
+   3. SIDEBAR (Filters)
+   ========================================================================== */
+.main-layout {
+    display: flex;
+    gap: 30px;
+    align-items: flex-start;
+}
+
+.sidebar {
+    width: 280px;
+    flex-shrink: 0;
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e2dfd5;
+    position: sticky;
+    top: 20px;
+}
+
+.sidebar-header {
+    padding-bottom: 10px;
+    border-bottom: 2px solid #8c1b3f;
+    margin-bottom: 15px;
+}
+
+.sidebar-title {
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+.filter-section label {
+    display: block;
+    font-size: 11px;
+    font-weight: bold;
+    margin-bottom: 6px;
+    color: #8c1b3f;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+}
+
+.sidebar-input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #e2dfd5;
+    border-radius: 8px;
+    font-size: 14px;
+    background-color: #fff;
+    transition: all 0.2s;
+}
+
+.sidebar-input:focus {
+    outline: none;
+    border-color: #8c1b3f;
+    box-shadow: 0 0 0 3px rgba(140, 27, 63, 0.1);
+}
+
+/* ==========================================================================
+   4. BOEKENLIJST ITEMS
+   ========================================================================== */
+.catalogus-container {
+    flex: 1;
+    min-width: 0;
+}
+
+.boeken-lijst {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.boek-list-item {
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e2dfd5;
+    display: flex;
+    padding: 16px;
+    gap: 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+    transition: all 0.2s;
+    align-items: center;
+}
+
+.boek-list-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.08);
+}
+
+.list-image-container {
+    width: 90px;
+    height: 135px;
+    flex-shrink: 0;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #f7efe6;
+    border: 1px solid #e2dfd5;
+}
+
+.list-image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.list-boek-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+}
+
+.boek-tekst {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 15px; /* Ruimte tussen ISBN en de knop */
+}
+
+.titel {
+    margin: 0 0 6px 0;
+    font-size: 1.15rem;
+    color: #1a202c;
+    font-weight: 600;
+}
+
+.auteur {
+    margin: 0 0 6px 0;
+    font-size: 0.95rem;
+    color: #718096;
+    font-style: italic;
+}
+
+.isbn {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #a0aec0;
+}
+
+/* ==========================================================================
+   5. ACTIEKNOPPEN (Kaarten)
+   ========================================================================== */
+.actie-knoppen {
+    width: auto;
+}
+
+.btn-add-boek {
+    background: #fff;
+    color: #8c1b3f;
+    border: 1px solid #8c1b3f;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.btn-add-boek:hover {
+    background: #8c1b3f;
+    color: #fff;
+}
+
+.btn-remove-boek {
+    background: #fff;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+}
+
+.btn-remove-boek:hover {
+    background: #fef2f2;
+}
+
+/* ==========================================================================
+   6. MODALS
+   ========================================================================== */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.modal-box {
+    background: #f7efe6;
+    padding: 30px;
+    border-radius: 16px;
+    width: 400px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    text-align: center;
+    border-top: 4px solid #8c1b3f;
+}
+
+.modal-box h3 {
+    color: #8c1b3f;
+    margin-top: 0;
+}
+
+.form-input {
+    width: 90%;
+    padding: 12px;
+    margin: 10px 0 20px 0;
+    border: 1px solid #dccfb8;
+    border-radius: 8px;
+    background-color: #eee3d3;
+    font-family: inherit;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding-top: 16px;
+    border-top: 1px solid #dccfb8;
+    margin-top: 16px;
+}
+
+.modal-actions button {
+    padding: 9px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 13px;
+    border: 1px solid;
+}
+
+.cancel-btn { background: #fff; color: #333; border-color: #dccfb8; }
+.save-btn { background: #8c1b3f !important; color: #fff !important; border-color: #8c1b3f !important; }
+
+/* ==========================================================================
+   7. RESPONSIVITEIT (MOBIELE FIXES)
+   ========================================================================== */
+@media (max-width: 900px) {
+    .main-layout { flex-direction: column; }
+    .sidebar { width: 100%; position: static; }
+}
+
+@media (max-width: 600px) {
+    .boek-list-item {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 20px;
+    }
+
+    .list-image-container {
+        width: 120px;
+        height: 175px;
+        margin-bottom: 15px;
+    }
+
+    .list-boek-info {
+        align-items: center;
+        width: 100%;
+    }
+
+    .boek-tekst {
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .actie-knoppen {
+        width: 100%;
+    }
+
+    .btn-add-boek, .btn-remove-boek {
+        width: 100%;
+        padding: 12px;
+        font-size: 1rem;
+    }
+
+    .leeslijst-header-card {
+        padding: 20px;
+        text-align: center;
+        justify-content: center;
+    }
+
+    .header-acties {
+        width: 100%;
+        flex-direction: column;
+    }
+}

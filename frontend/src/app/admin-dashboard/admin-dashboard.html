@@ -40,25 +40,25 @@
   <div class="kpi-grid">
     <div class="kpi-card">
       <span class="kpi-label">Collectie uitgeleend</span>
-      <strong class="kpi-value text-blue">{{ percentageUitgeleend }}%</strong>
+      <strong class="kpi-value text-blue">{{ percentageUitgeleend() }}%</strong>
       <div class="progress-bar">
-        <div class="progress-fill bg-blue" [style.width.%]="percentageUitgeleend"></div>
+        <div class="progress-fill bg-blue" [style.width.%]="percentageUitgeleend()"></div>
       </div>
     </div>
     <div class="kpi-card">
       <span class="kpi-label">Te laat ingeleverd</span>
-      <strong class="kpi-value text-bordeaux">{{ teLaatIngeleverd }}</strong>
+      <strong class="kpi-value text-bordeaux">{{ teLaatIngeleverd() }}</strong>
       <span class="kpi-trend">boeken over inleverdatum</span>
     </div>
     <div class="kpi-card">
       <span class="kpi-label">Populairste genre</span>
-      <strong class="kpi-value text-green">{{ populairsteGenre }}</strong>
+      <strong class="kpi-value text-green">{{ populairsteGenre() }}</strong>
       <span class="kpi-trend">meest geleend deze maand</span>
     </div>
     <div class="kpi-card">
-      <span class="kpi-label">Gemiddelde leenduur</span>
-      <strong class="kpi-value">{{ gemiddeldeLeenduur }} dagen</strong>
-      <span class="kpi-trend">per uitlening</span>
+      <span class="kpi-label">Uitleningen deze maand</span>
+      <strong class="kpi-value">{{ uitleningenDezeMaand() }}</strong>
+      <span class="kpi-trend">sinds begin van de maand</span>
     </div>
   </div>
 

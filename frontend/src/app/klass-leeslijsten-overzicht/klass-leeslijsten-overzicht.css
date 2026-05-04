@@ -1,0 +1,213 @@
+/* leeslijsten-overzicht.component.css */
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 40px;
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: var(--admin-text, #2d3748);
+}
+
+.container h2 {
+    color: var(--admin-bordeaux, #8c1b3f);
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 25px;
+    letter-spacing: -0.5px;
+}
+
+hr {
+    border: none;
+    height: 2px;
+    background-color: var(--admin-border, #c4bead);
+    margin: 30px 0;
+}
+
+.btn-primary {
+    background: var(--admin-bordeaux, #8c1b3f);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+    box-shadow: 0 4px 10px rgba(140, 27, 63, 0.2);
+}
+
+.btn-primary:hover {
+    background: #6d1531;
+    transform: translateY(-2px);
+}
+
+.empty-state {
+    padding: 40px 20px;
+    text-align: center;
+    color: #718096;
+    background: var(--admin-card-bg, #efefe3);
+    border: 1px dashed var(--admin-border, #c4bead);
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+.list-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 25px;
+}
+
+.card {
+    background-color: var(--admin-card-bg, #efefe3);
+    border: 1px solid var(--admin-border, #c4bead);
+    border-top: 5px solid var(--admin-bordeaux, #8c1b3f);
+    border-radius: 12px;
+    padding: 25px;
+    cursor: pointer;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+    border-color: var(--admin-bordeaux, #8c1b3f);
+}
+
+.card h3 {
+    color: var(--admin-bordeaux, #8c1b3f);
+    font-size: 1.3rem;
+    margin: 0 0 10px 0;
+    font-weight: 700;
+}
+
+.card p {
+    color: #4b5563;
+    font-size: 1rem;
+    margin: 0 0 15px 0;
+    font-weight: 600;
+}
+
+.card small {
+    color: #6b7280;
+    font-size: 0.85rem;
+    margin-top: auto;
+    border-top: 1px solid rgba(196, 190, 173, 0.5);
+    padding-top: 10px;
+}
+
+/* ==========================================================================
+   MODAL STYLING
+   ========================================================================== */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.modal-box {
+    background: #f7efe6;
+    padding: 30px;
+    border-radius: 16px;
+    width: 400px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    text-align: center;
+    border-top: 4px solid var(--admin-bordeaux, #8c1b3f);
+}
+
+.modal-box h3 {
+    color: var(--admin-bordeaux, #8c1b3f);
+    margin-top: 0;
+    margin-bottom: 20px;
+}
+
+.modal-label {
+    margin-bottom: 5px;
+    font-weight: bold;
+    font-size: 14px;
+    color: #4a5568;
+    display: block;
+}
+
+.form-input {
+    width: 90%;
+    padding: 12px;
+    margin: 10px 0 20px 0;
+    border: 1px solid #dccfb8;
+    border-radius: 8px;
+    font-size: 16px;
+    background-color: #eee3d3;
+    color: #2d3748;
+    font-family: inherit;
+    transition: all 0.2s ease;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--admin-bordeaux, #8c1b3f);
+    background-color: #f7efe6;
+    box-shadow: 0 0 0 3px rgba(140, 27, 63, 0.1);
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding-top: 16px;
+    border-top: 1px solid #dccfb8;
+    margin-top: 16px;
+}
+
+.modal-actions button {
+    padding: 9px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 13px;
+    transition: all 0.2s ease;
+    border: 1px solid;
+}
+
+.cancel-btn {
+    background: #fff;
+    color: #333;
+    border-color: #dccfb8;
+}
+
+.cancel-btn:hover {
+    background: #f9fafb;
+}
+
+.save-btn {
+    background: var(--admin-bordeaux, #8c1b3f) !important;
+    color: #fff !important;
+    border-color: var(--admin-bordeaux, #8c1b3f) !important;
+}
+
+.save-btn:hover:not(:disabled) {
+    background: #6d1531 !important;
+}
+
+.save-btn:disabled {
+    background: #a0aec0 !important;
+    border-color: #a0aec0 !important;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+@media (max-width: 600px) {
+    .modal-box {
+        width: 90%;
+        padding: 20px;
+    }
+}

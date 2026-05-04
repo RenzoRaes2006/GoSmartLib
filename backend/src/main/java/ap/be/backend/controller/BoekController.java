@@ -24,7 +24,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.data.domain.Sort;
 
 @RestController
-// @CrossOrigin(origins = { "https://frontend.localhost", "http://localhost:4200"
+// @CrossOrigin(origins = { "https://frontend.localhost",
+// "http://localhost:4200"
 // })
 public class BoekController {
     private final BoekService boekService;
@@ -117,16 +118,32 @@ public class BoekController {
         return ResponseEntity.ok(populaireBoeken);
     }
 
-    @PostMapping("/api/boeken/import")
+    @PostMapping("/api/boeken/import/preview")
     @CrossOrigin(origins = "*", allowedHeaders = "*")
-    public ResponseEntity<?> importeerBoeken(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<?> previewImporteerBoeken(@RequestParam("file") MultipartFile file) {
         if (file.isEmpty()) {
-            throw new IllegalArgumentException("Het geüploade bestand is leeg.");
+            return ResponseEntity.badRequest().body("Het geüploade bestand is leeg.");
         }
 
-        int aantalGeimporteerd = boekImportService.importeerBestand(file);
+        try {
+            List<Boek> previewLijst = boekImportService.parseerVoorPreview(file);
+            return ResponseEntity.ok(previewLijst);
+        } catch (ap.be.backend.exception.InvalidImportDataException e) {
 
-        return ResponseEntity.ok("Aantal geïmporteerde boeken: " + aantalGeimporteerd);
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Er is een onverwachte systeemfout opgetreden.");
+        }
+    }
+
+    @PostMapping("/api/boeken/import/bevestig")
+    @CrossOrigin(origins = "*", allowedHeaders = "*")
+    public ResponseEntity<String> bevestigImport(@RequestBody List<Boek> boekenLijst) {
+        if (boekenLijst == null || boekenLijst.isEmpty()) {
+            return ResponseEntity.badRequest().body("Lijst om te importeren is leeg.");
+        }
+        int totaalGeimporteerd = boekImportService.bevestigImport(boekenLijst);
+        return ResponseEntity.ok("Succesvol " + totaalGeimporteerd + " boeken geïmporteerd!");
     }
 
 }

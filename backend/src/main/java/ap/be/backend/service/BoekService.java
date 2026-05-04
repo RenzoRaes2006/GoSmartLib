@@ -38,7 +38,9 @@ public class BoekService {
         boek.setUitgever(isNotBlank(boekDTO.uitgever()) ? boekDTO.uitgever() : "Geen uitgever");
         boek.setUitgaveJaar(isNotBlank(boekDTO.uitgaveJaar()) ? boekDTO.uitgaveJaar() : "Geen uitgavejaar");
         boek.setGenre(boekDTO.genre() != null && !boekDTO.genre().isEmpty() ? boekDTO.genre() : new ArrayList<>());
-        boek.setThematischeTag(boekDTO.thematischeTag() != null && !boekDTO.thematischeTag().isEmpty() ? boekDTO.thematischeTag() : new ArrayList<>());
+        boek.setThematischeTag(
+                boekDTO.thematischeTag() != null && !boekDTO.thematischeTag().isEmpty() ? boekDTO.thematischeTag()
+                        : new ArrayList<>());
         boek.setPagina(boekDTO.pagina());
         boek.setBeschrijving(boekDTO.beschrijving());
         boek.setAantalExemplaren(boekDTO.aantalExemplaren());
@@ -63,7 +65,9 @@ public class BoekService {
         boek.setUitgever(isNotBlank(boekDTO.uitgever()) ? boekDTO.uitgever() : "Geen uitgever");
         boek.setUitgaveJaar(isNotBlank(boekDTO.uitgaveJaar()) ? boekDTO.uitgaveJaar() : "Geen uitgavejaar");
         boek.setGenre(boekDTO.genre() != null && !boekDTO.genre().isEmpty() ? boekDTO.genre() : new ArrayList<>());
-        boek.setThematischeTag(boekDTO.thematischeTag() != null && !boekDTO.thematischeTag().isEmpty() ? boekDTO.thematischeTag() : new ArrayList<>());
+        boek.setThematischeTag(
+                boekDTO.thematischeTag() != null && !boekDTO.thematischeTag().isEmpty() ? boekDTO.thematischeTag()
+                        : new ArrayList<>());
         boek.setPagina(boekDTO.pagina());
         boek.setBeschrijving(boekDTO.beschrijving());
         boek.setAantalExemplaren(boekDTO.aantalExemplaren());

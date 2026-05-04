@@ -1,7 +1,7 @@
 package ap.be.backend;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import java.io.ByteArrayOutputStream;
@@ -24,7 +24,6 @@ import org.springframework.mock.web.MockMultipartFile;
 import ap.be.backend.entity.Boek;
 import ap.be.backend.repository.BoekRepository;
 import ap.be.backend.service.BoekImportService;
-import ap.be.backend.exception.DuplicateBoekException;
 import ap.be.backend.exception.InvalidImportDataException;
 
 @ExtendWith(MockitoExtension.class)
@@ -54,76 +53,95 @@ public class BoekImportServiceTest {
         }
     }
 
+    // --- TESTEN VOOR FASE 1: DE PREVIEW PARSER ---
+
     @Test
-    void givenGeldigBestandZonderIsbn_whenImporteerBestand_thenReturnsAantalGeimporteerdEnSlaatOp() throws Exception {
-        // Given
+    void givenGeldigBestand_whenParseerVoorPreview_thenReturnsLijstMetBoeken() throws Exception {
+        // Given: Een Excel met 1 geldig boek
         List<String[]> excelData = Arrays.asList(
                 new String[] { "Titel", "Auteur", "ISBN", "Aantal exemplaren" },
-                new String[] { "Zelfgemaakt Boek", "De Leerkracht", "", "2" });
+                new String[] { "Clean Code", "Robert C. Martin", "9780132350884", "3" });
         MockMultipartFile file = createMockExcelFile(excelData);
 
-        when(boekRepository.findByTitelAndAuteur("Zelfgemaakt Boek", "De Leerkracht")).thenReturn(Optional.empty());
+        // De repository vindt niets, dus het boek is 'Nieuw'
+        when(boekRepository.findByIsbn("9780132350884")).thenReturn(Optional.empty());
+        when(boekRepository.findByTitelAndAuteur("Clean Code", "Robert C. Martin")).thenReturn(Optional.empty());
 
         // When
-        int result = boekImportService.importeerBestand(file);
+        List<Boek> previewLijst = boekImportService.parseerVoorPreview(file);
 
         // Then
-        assertEquals(1, result);
-        verify(boekRepository, times(1)).saveAll(anyList());
+        assertEquals(1, previewLijst.size(), "Er moet exact 1 boek geparseerd zijn");
+        Boek geparseerdBoek = previewLijst.get(0);
+        assertEquals("Clean Code", geparseerdBoek.getTitel());
+        assertEquals(3, geparseerdBoek.getAantalExemplaren());
+        assertFalse(geparseerdBoek.isBestaatAl(), "Het boek is nieuw, dus bestaatAl moet false zijn");
     }
 
     @Test
-    void givenBestandZonderTitel_whenImporteerBestand_thenThrowsInvalidImportDataException() throws Exception {
-        // Given
+    void givenBestandZonderTitel_whenParseerVoorPreview_thenThrowsInvalidImportDataException() throws Exception {
+        // Given: Een Excel waar de titel leeg is op rij 2
         List<String[]> excelData = Arrays.asList(
                 new String[] { "Titel", "Auteur", "ISBN" },
                 new String[] { "", "J.K. Rowling", "1234567890" });
         MockMultipartFile file = createMockExcelFile(excelData);
 
-        // When & Then
+        // When & Then: Er moet een InvalidImportDataException gegooid worden
         InvalidImportDataException ex = assertThrows(InvalidImportDataException.class, () -> {
-            boekImportService.importeerBestand(file);
+            boekImportService.parseerVoorPreview(file);
         });
 
-        String errorMessage = ex.getMessage().toLowerCase();
-        assertTrue(errorMessage.contains("titel") || errorMessage.contains("verplicht"),
-                "Foutmelding was: " + ex.getMessage());
+        assertTrue(ex.getMessage().contains("Titel ontbreekt in rij 2"),
+                "De error message moet specifiek de rij noemen");
+    }
+
+    // --- TESTEN VOOR FASE 2: DE BEVESTIGING (UPSERT) ---
+
+    @Test
+    void givenNieuwBoek_whenBevestigImport_thenSavesNewBookAndReturnsCount() {
+        // Given: Een goedgekeurd boek vanuit de frontend
+        Boek nieuwBoek = new Boek();
+        nieuwBoek.setTitel("Spring Boot in Action");
+        nieuwBoek.setAuteur("Craig Walls");
+        nieuwBoek.setIsbn("9781617292545");
+        nieuwBoek.setAantalExemplaren(2);
+
+        when(boekRepository.findByIsbn("9781617292545")).thenReturn(Optional.empty());
+        when(boekRepository.findByTitelAndAuteur("Spring Boot in Action", "Craig Walls")).thenReturn(Optional.empty());
+
+        // When
+        int result = boekImportService.bevestigImport(List.of(nieuwBoek));
+
+        // Then
+        assertEquals(2, result, "Het totaal aantal toegevoegde exemplaren moet 2 zijn");
+        verify(boekRepository, times(1)).save(nieuwBoek); // Controleer of save() is aangeroepen
     }
 
     @Test
-    void givenBestandZonderAuteur_whenImporteerBestand_thenThrowsInvalidImportDataException() throws Exception {
-        // Given
-        List<String[]> excelData = Arrays.asList(
-                new String[] { "Titel", "Auteur", "ISBN" },
-                new String[] { "Harry Potter", "", "1234567890" });
-        MockMultipartFile file = createMockExcelFile(excelData);
+    void givenBestaandBoek_whenBevestigImport_thenUpdatesStockOnly() {
+        // Given: Een boek dat AL in de database zit met 3 exemplaren
+        Boek dbBoek = new Boek();
+        dbBoek.setId(1L);
+        dbBoek.setTitel("De Hobbit");
+        dbBoek.setAuteur("Tolkien");
+        dbBoek.setIsbn("12345");
+        dbBoek.setAantalExemplaren(3);
 
-        // When & Then
-        InvalidImportDataException ex = assertThrows(InvalidImportDataException.class, () -> {
-            boekImportService.importeerBestand(file);
-        });
+        // Het boek dat via de import binnenkomt heeft 2 extra exemplaren
+        Boek importBoek = new Boek();
+        importBoek.setTitel("De Hobbit");
+        importBoek.setAuteur("Tolkien");
+        importBoek.setIsbn("12345");
+        importBoek.setAantalExemplaren(2);
 
-        String errorMessage = ex.getMessage().toLowerCase();
-        assertTrue(errorMessage.contains("auteur") || errorMessage.contains("verplicht"),
-                "Foutmelding was: " + ex.getMessage());
-    }
+        when(boekRepository.findByIsbn("12345")).thenReturn(Optional.of(dbBoek));
 
-    @Test
-    void givenBestandMetBestaandeTitelEnAuteur_whenImporteerBestand_thenThrowsDuplicateBoekException()
-            throws Exception {
-        // Given
-        List<String[]> excelData = Arrays.asList(
-                new String[] { "Titel", "Auteur", "ISBN" },
-                new String[] { "De Hobbit", "Tolkien", "" });
-        MockMultipartFile file = createMockExcelFile(excelData);
+        // When
+        int result = boekImportService.bevestigImport(List.of(importBoek));
 
-        when(boekRepository.findByTitelAndAuteur("De Hobbit", "Tolkien")).thenReturn(Optional.of(new Boek()));
-
-        // When & Then
-        DuplicateBoekException ex = assertThrows(DuplicateBoekException.class, () -> {
-            boekImportService.importeerBestand(file);
-        });
-
-        assertTrue(ex.getMessage().toLowerCase().contains("bestaat al"));
+        // Then
+        assertEquals(2, result, "De methode moet 2 extra exemplaren rapporteren");
+        assertEquals(5, dbBoek.getAantalExemplaren(), "De voorraad in het DB object moet verhoogd zijn naar 5 (3+2)");
+        verify(boekRepository, times(1)).save(dbBoek); // We slaan het geüpdatete DB boek op, geen nieuwe!
     }
 }

@@ -1,0 +1,48 @@
+<div class="container">
+  <h2>Mijn Leeslijsten</h2>
+  
+ <button (click)="openNieuweLijstModal()" class="btn-primary">
+  + Nieuwe leeslijst maken
+</button>
+
+  <hr>
+
+  @if (leeslijsten.length === 0) {
+    <!-- Toon dit als er geen lijsten zijn[cite: 2] -->
+    <div class="empty-state">
+      <p>Je hebt nog geen leeslijsten gemaakt. Klik op de knop hierboven om te starten.</p>
+    </div>
+  } @else {
+    <!-- Toon de bestaande lijsten[cite: 2] -->
+    <div class="list-container">
+      @for (lijst of leeslijsten; track lijst.id) {
+        <div class="card" [routerLink]="['/leeslijsten', lijst.id]">
+          <h3>{{ lijst.naam }}</h3>
+          <p>{{ lijst.boeken.length }} boeken op deze lijst</p>
+          <small>Klik om boeken toe te voegen of te wijzigen</small>
+        </div>
+      }
+    </div>
+  }
+</div>
+
+@if (showCreateModal) {
+<div class="modal-overlay">
+  <div class="modal-box">
+    <h3>Nieuwe leeslijst maken</h3>
+    <p class="modal-label" style="text-align: left; margin-left: 5%;">Geef je lijst een naam:</p>
+    <input 
+      type="text" 
+      [(ngModel)]="nieuweLijstNaam" 
+      class="form-input" 
+      placeholder="Bv. Literatuurlijst 5A..." 
+      (keyup.enter)="bevestigNieuweLijst()" 
+      autofocus
+    />
+    <div class="modal-actions">
+      <button class="cancel-btn" (click)="sluitModal()">Annuleren</button>
+      <button class="save-btn" [disabled]="!nieuweLijstNaam.trim()" (click)="bevestigNieuweLijst()">Aanmaken</button>
+    </div>
+  </div>
+</div>
+}

@@ -224,17 +224,43 @@ public class GebruikerService {
                 .orElseThrow(() -> new UitleningNotFoundException("Uitlening niet gevonden"));
 
         if (uitlening.isIngeleverd()) {
-            throw new IllegalArgumentException("Dit boek is al ingeleverd.");
+            throw new LeenVoorwaardeException("Dit boek is al ingeleverd.");
         }
         if (uitlening.isVerlengd()) {
-            throw new IllegalArgumentException("Je hebt dit boek al een keer verlengd.");
+            throw new LeenVoorwaardeException("Je hebt dit boek al een keer verlengd.");
         }
         if ("AANGEVRAAGD".equals(uitlening.getStatus())) {
-            throw new IllegalArgumentException("Je kunt een boek dat nog in aanvraag is niet verlengen.");
+            throw new LeenVoorwaardeException("Je kunt een boek dat nog in aanvraag is niet verlengen.");
         }
+        if ("VERLENGING_AANGEVRAAGD".equals(uitlening.getStatus())) {
+            throw new LeenVoorwaardeException("Verlenging is al aangevraagd.");
+        }
+
+        uitlening.setStatus("VERLENGING_AANGEVRAAGD");
+        uitleningRepository.save(uitlening);
+    }
+
+    public List<Uitlening> getAlleVerlengingAanvragen() {
+        return uitleningRepository.findByStatus("VERLENGING_AANGEVRAAGD");
+    }
+
+    public void keurVerlengingGoed(Long uitleningId) {
+        Uitlening uitlening = uitleningRepository.findById(uitleningId)
+                .orElseThrow(() -> new UitleningNotFoundException("Uitlening niet gevonden"));
 
         uitlening.setInleverDatum(uitlening.getInleverDatum().plusDays(14));
         uitlening.setVerlengd(true);
+        uitlening.setStatus("GOEDGEKEURD");
+
+        uitleningRepository.save(uitlening);
+    }
+
+    public void weigerVerlenging(Long uitleningId) {
+        Uitlening uitlening = uitleningRepository.findById(uitleningId)
+                .orElseThrow(() -> new UitleningNotFoundException("Uitlening niet gevonden"));
+
+        uitlening.setVerlengd(true);
+        uitlening.setStatus("GOEDGEKEURD");
 
         uitleningRepository.save(uitlening);
     }

@@ -13,7 +13,8 @@
 }
 
 .import-page-container {
-  max-width: 800px;
+ width: 95%; /* Gebruik bijna de volledige breedte van het scherm */
+  max-width: 1400px; /* Zorgt dat het op ultra-wide schermen niet té extreem wordt */
   margin: 0 auto;
 }
 
@@ -57,11 +58,11 @@
    IMPORT KAART
    ===================== */
 .import-card {
-  background: #ffffff;
+background: #ffffff;
   border: 1px solid #c4bead;
   border-top: 5px solid #8c1b3f;
   border-radius: 16px;
-  padding: 40px;
+  padding: 40px 50px; /* Extra padding aan de zijkanten (van 40px naar 50px) */
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
 }
 
@@ -155,6 +156,17 @@
   cursor: pointer;
   transition: background 0.2s, transform 0.2s;
 }
+.btn-genereer {
+  padding: 0 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: 6px;
+  white-space: nowrap; /* Zorgt dat het woord 'Genereer' nooit op twee regels breekt */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0; /* Voorkomt dat standaard marges de boel scheef trekken */
+}
 
 .btn-primary:hover:not(:disabled) {
   background: #6d1531;
@@ -208,7 +220,393 @@
   background: #f0fff4;
   border: 1px solid #c6f6d5;
 }
+/* =====================
+   PREVIEW TABEL
+   ===================== */
+.preview-container {
+  width: 100%;
+  overflow-x: auto;
+  margin-top: 20px;
+}
 
+.preview-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.preview-table th {
+  background-color: #f0efe4;
+  color: #8c1b3f;
+  padding: 12px;
+  text-align: left;
+  border-radius: 6px 6px 0 0;
+}
+
+.preview-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid #e2dfd5;
+}
+
+.edit-input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #c4bead;
+  border-radius: 6px;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+
+.edit-input:focus {
+  border-color: #8c1b3f;
+  outline: none;
+}
+/* =====================
+   EXPANDABLE PREVIEW LIST
+   ===================== */
+.preview-container {
+  width: 100%;
+  margin-top: 20px;
+}
+
+/* Header Row */
+.preview-header-row {
+  display: flex;
+  background-color: #f0efe4;
+  border-radius: 8px 8px 0 0;
+  border: 1px solid #e2dfd5;
+  border-bottom: 2px solid #8c1b3f;
+}
+
+.header-cell {
+  padding: 12px;
+  color: #8c1b3f;
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Data Rows */
+.preview-body {
+  border: 1px solid #e2dfd5;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  background: #ffffff;
+}
+
+.preview-row {
+  display: flex;
+  border-bottom: 1px solid #f0efe4;
+  background: #ffffff;
+  transition: background-color 0.2s;
+}
+
+.preview-row:hover {
+  background-color: #faf9f5;
+}
+
+.preview-row.is-expanded {
+  background-color: #faf9f5;
+  border-bottom: none; /* Removed so it connects visually to the panel */
+}
+
+.data-cell {
+ padding: 12px 15px; /* Meer ruimte rondom de elementen in de cellen */
+  display: flex;
+  align-items: center;
+}
+/* Column Widths */
+.col-titel { flex: 3; }
+.col-auteur { flex: 2.5; }
+.col-isbn { flex: 2; }
+.col-acties { 
+  flex: 2; /* Meer ruimte voor de knoppen */
+  display: flex; 
+  justify-content: flex-end; 
+  gap: 12px; /* Vergroot de ruimte tussen de 'Meer info' en 'X' knop */
+}
+
+/* Inputs within the table */
+.edit-input {
+  width: 100%;
+  padding: 10px 12px; /* Iets hogere velden voelen moderner aan */
+  border: 1px solid #c4bead;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 0.95rem; /* Lettertype fractie groter */
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.edit-input:focus {
+  border-color: #8c1b3f;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(140, 27, 63, 0.1);
+}
+
+/* Action Buttons */
+.btn-expand {
+  background: #ffffff;
+  border: 1px solid #c4bead;
+  color: #2d3748;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn-expand:hover {
+  background: #f0efe4;
+  border-color: #8c1b3f;
+  color: #8c1b3f;
+}
+
+.btn-delete-row {
+  background: #fff5f5;
+  border: 1px solid #fecaca;
+  color: #e53e3e;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.btn-delete-row:hover {
+  background: #e53e3e;
+  color: #ffffff;
+}
+
+/* Expanded Panel */
+.expanded-details-panel {
+  background-color: #faf9f5;
+  padding: 15px 20px;
+  border-bottom: 2px solid #e2dfd5;
+  box-shadow: inset 0 3px 6px -3px rgba(0,0,0,0.05);
+}
+
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.input-group.full-width {
+  grid-column: 1 / -1;
+}
+
+.input-group label {
+  font-size: 0.75rem;
+  color: #8c1b3f;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+/* Pagination Footer */
+.preview-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  padding: 15px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #718096;
+}
+.data-cell.col-isbn {
+  display: flex;
+  gap: 8px;
+  align-items: stretch; /* Belangrijk: rekt de knop uit tot exact dezelfde hoogte als het inputveld */
+}
+.data-cell.col-isbn .btn-primary {
+  padding: 0 12px !important; /* Maak de dobbelsteenknop iets breder */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/* =====================
+   GENRES & TAGS STYLING
+   ===================== */
+.genre-dropdown-row {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.genre-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.genre-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #f0efe4;
+  border: 1px solid #e2dfd5;
+  border-radius: 20px;
+  padding: 4px 10px;
+  font-size: 12px;
+  color: #8c1b3f;
+  font-weight: 600;
+}
+
+.genre-tag button {
+  background: none;
+  border: none;
+  color: #a0aec0;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 0 2px;
+  line-height: 1;
+}
+
+.genre-tag button:hover {
+  color: #e53e3e;
+}
+
+/* =====================
+   AFBEELDING UPLOAD SECTIE
+   ===================== */
+.afbeelding-sectie {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.afbeelding-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.afbeelding-controls {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.image-upload-toggle {
+  display: flex;
+  gap: 6px;
+  background: #ffffff;
+  padding: 2px;
+  border-radius: 8px;
+  border: 1px solid #c4bead;
+}
+
+.image-upload-toggle button {
+  flex: 1;
+  padding: 6px 8px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #718096;
+  border-radius: 6px;
+}
+
+.image-upload-toggle button.active {
+  background: #8c1b3f;
+  color: #fff;
+}
+
+.afbeelding-input {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.file-upload-label { cursor: pointer; }
+.file-upload-label input[type="file"] { display: none; }
+
+.file-upload-btn {
+  display: block;
+  padding: 6px 12px;
+  background: #ffffff;
+  border: 1px dashed #8c1b3f;
+  border-radius: 6px;
+  color: #8c1b3f;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+}
+
+.file-upload-btn:hover { background: #f0efe4; }
+
+.afbeelding-preview {
+  position: relative;
+  width: 48px;
+  height: 72px;
+  border: 1px solid #c4bead;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #f0efe4;
+}
+
+.afbeelding-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.afbeelding-verwijder {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #8c1b3f;
+  border: none;
+  color: #fff;
+  font-size: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.upload-status {
+  color: #8c1b3f;
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+
+/* =====================
+   INLINE VALIDATIE STYLING
+   ===================== */
+.input-error {
+  border-color: #e53e3e !important; /* Maak de rand rood */
+  background-color: #fff5f5; /* Geef het veld een hele lichte rode tint */
+}
+
+.input-error:focus {
+  box-shadow: 0 0 0 2px rgba(229, 62, 62, 0.2) !important; /* Rode gloed bij typen */
+}
+
+.error-hint {
+  display: block;
+  color: #e53e3e;
+  font-size: 0.75rem;
+  font-weight: 700;
+  margin-top: 4px;
+  line-height: 1;
+}
 /* =====================
    RESPONSIVE
    ===================== */
@@ -230,4 +628,5 @@
   .verlaat-button {
     align-self: flex-start;
   }
+  
 }

@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LeerlingService } from '../services/Leerling.service'; // Let op: kleine letter l bij leerling.service
+import { StatistiekService } from '../services/statistiek.service';
 
 @Component({
   selector: 'app-leerkrachtdashboard',
@@ -12,6 +13,17 @@ import { LeerlingService } from '../services/Leerling.service'; // Let op: klein
 })
 export class Leerkrachtdashboard implements OnInit {
   private leerlingService = inject(LeerlingService);
+  private statistiekService = inject(StatistiekService);
+
+  boekenAfgelopenWeek = signal<number>(0);
+  topBoeken = signal<string[]>([]);
+  aantalActieveLeningen = signal<number>(0);
+  aantalTeLaat = signal<number>(0);
+  aantalLeerlingen = signal<number>(0);
+  weekDoel = 25;
+  donutVulling = computed(() =>
+    Math.min(Math.round((this.boekenAfgelopenWeek() / this.weekDoel) * 100), 100) + '%'
+  );
 
   huidigePagina = signal<number>(0);
   itemsPerPagina = 5;
@@ -25,6 +37,20 @@ export class Leerkrachtdashboard implements OnInit {
 
   ngOnInit(): void {
     this.haalLeerlingenOp();
+    this.haalStatistiekenOp();
+  }
+
+  haalStatistiekenOp() {
+    this.statistiekService.getLeerkrachtStatistieken(this.selectedClass() || undefined).subscribe({
+      next: (stats) => {
+        this.boekenAfgelopenWeek.set(stats.boekenAfgelopenWeek ?? 0);
+        this.topBoeken.set(stats.topBoeken ?? []);
+        this.aantalActieveLeningen.set(stats.aantalActieveLeningen ?? 0);
+        this.aantalTeLaat.set(stats.aantalTeLaat ?? 0);
+        this.aantalLeerlingen.set(stats.aantalLeerlingen ?? 0);
+      },
+      error: (err) => console.error('fout bij ophalen leerkracht-statistieken:', err),
+    });
   }
 
   haalLeerlingenOp() {
@@ -51,6 +77,7 @@ export class Leerkrachtdashboard implements OnInit {
   onFilterChange() {
     this.huidigePagina.set(0);
     this.haalLeerlingenOp();
+    this.haalStatistiekenOp();
   }
 
   vorigePagina(): void {

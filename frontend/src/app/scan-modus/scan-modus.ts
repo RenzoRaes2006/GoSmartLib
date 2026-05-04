@@ -1,4 +1,12 @@
-import { Component, computed, ElementRef, inject, signal, viewChild } from '@angular/core';
+import {
+  Component,
+  computed,
+  ElementRef,
+  inject,
+  OnDestroy,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ScanService } from '../services/scan.service';
@@ -6,6 +14,8 @@ import { Gebruiker } from '../models/Gebruiker.mode';
 import { MandjeItem, ScanBatchItemResult, ScanModus as ModusType } from '../models/scan.model';
 
 const IDLE_MS = 60_000;
+const PAGE_SIZE = 4;
+const ZOEK_DEBOUNCE_MS = 250;
 
 type Stap = 'LEERLING' | 'MODUS' | 'SCAN' | 'RESULTAAT';
 
@@ -16,14 +26,20 @@ type Stap = 'LEERLING' | 'MODUS' | 'SCAN' | 'RESULTAAT';
   templateUrl: './scan-modus.html',
   styleUrl: './scan-modus.css',
 })
-export class ScanModus {
+export class ScanModus implements OnDestroy {
   private scanService = inject(ScanService);
 
   stap = signal<Stap>('LEERLING');
 
-  leerlingInput = signal('');
+  zoekterm = signal('');
+  leerlingen = signal<Gebruiker[]>([]);
+  huidigePagina = signal(0);
+  totaalPaginas = signal(0);
+  bezigMetZoeken = signal(false);
   geselecteerdeLeerling = signal<Gebruiker | null>(null);
   leerlingFout = signal('');
+
+  private zoekDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 
   modus = signal<ModusType | null>(null);
 
@@ -49,25 +65,58 @@ export class ScanModus {
   private isbnVeld = viewChild<ElementRef<HTMLInputElement>>('isbnVeld');
   private idleTimer: ReturnType<typeof setTimeout> | null = null;
 
-  zoekLeerling(): void {
-    const invoer = this.leerlingInput().trim();
+  constructor() {
+    this.laadLeerlingen();
+  }
+
+  ngOnDestroy(): void {
+    if (this.zoekDebounceTimer) clearTimeout(this.zoekDebounceTimer);
+    this.clearIdleTimer();
+  }
+
+  opZoektermChange(waarde: string): void {
+    this.zoekterm.set(waarde);
+    this.huidigePagina.set(0);
+    if (this.zoekDebounceTimer) clearTimeout(this.zoekDebounceTimer);
+    this.zoekDebounceTimer = setTimeout(() => this.laadLeerlingen(), ZOEK_DEBOUNCE_MS);
+  }
+
+  vorigePagina(): void {
+    if (this.huidigePagina() === 0) return;
+    this.huidigePagina.update((p) => p - 1);
+    this.laadLeerlingen();
+  }
+
+  volgendePagina(): void {
+    if (this.huidigePagina() >= this.totaalPaginas() - 1) return;
+    this.huidigePagina.update((p) => p + 1);
+    this.laadLeerlingen();
+  }
+
+  private laadLeerlingen(): void {
+    this.bezigMetZoeken.set(true);
     this.leerlingFout.set('');
-    if (!invoer) return;
+    this.scanService
+      .zoekLeerlingen(this.zoekterm().trim(), this.huidigePagina(), PAGE_SIZE)
+      .subscribe({
+        next: (page) => {
+          this.leerlingen.set(page.content);
+          this.totaalPaginas.set(page.totalPages);
+          this.bezigMetZoeken.set(false);
+        },
+        error: () => {
+          this.leerlingen.set([]);
+          this.totaalPaginas.set(0);
+          this.bezigMetZoeken.set(false);
+          this.leerlingFout.set('Kan leerlingen niet laden.');
+        },
+      });
+  }
 
-    if (!/^\d+$/.test(invoer)) {
-      this.leerlingFout.set('Typ of scan een SchoolId (alleen cijfers).');
-      return;
-    }
-
-    this.scanService.zoekLeerlingOpSchoolId(Number(invoer)).subscribe({
-      next: (leerling) => {
-        this.geselecteerdeLeerling.set(leerling);
-        this.leerlingInput.set('');
-        this.stap.set('MODUS');
-        this.resetIdleTimer();
-      },
-      error: () => this.leerlingFout.set('Leerling niet gevonden.'),
-    });
+  kiesLeerling(leerling: Gebruiker): void {
+    this.geselecteerdeLeerling.set(leerling);
+    this.stap.set('MODUS');
+    this.resetIdleTimer();
   }
 
   kiesModus(m: ModusType): void {
@@ -174,7 +223,8 @@ export class ScanModus {
 
   private sessieReset(): void {
     this.stap.set('LEERLING');
-    this.leerlingInput.set('');
+    this.zoekterm.set('');
+    this.huidigePagina.set(0);
     this.geselecteerdeLeerling.set(null);
     this.leerlingFout.set('');
     this.modus.set(null);
@@ -184,6 +234,7 @@ export class ScanModus {
     this.resultaten.set([]);
     this.toonKlaarBevestiging.set(false);
     this.clearIdleTimer();
+    this.laadLeerlingen();
   }
 
   private resetIdleTimer(): void {

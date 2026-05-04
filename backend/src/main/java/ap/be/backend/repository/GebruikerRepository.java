@@ -25,7 +25,9 @@ public interface GebruikerRepository extends JpaRepository<Gebruiker, Long> {
            "LOWER(g.VoorNaam) LIKE LOWER(CONCAT('%', :zoekterm, '%')) OR " +
            "LOWER(g.Achternaam) LIKE LOWER(CONCAT('%', :zoekterm, '%')))")
     Page<Gebruiker> findLeerlingenMetFilters(
-            @Param("klas") String klas, 
-            @Param("zoekterm") String zoekterm, 
+            @Param("klas") String klas,
+            @Param("zoekterm") String zoekterm,
             Pageable pageable);
+
+    long countByKlasIgnoreCase(String klas);
 }

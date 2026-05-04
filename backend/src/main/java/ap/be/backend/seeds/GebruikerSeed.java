@@ -21,48 +21,39 @@ public class GebruikerSeed implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        if (gebruikerRepository.count() == 0) {
+        Gebruiker test = ensureLeerling(12345L, "Test", "Gebruiker", "test@gosmartlib.be");
+        ensureLeerling(12346L, "Jan", "Jansen", "jan.jansen@gosmartlib.be");
+        ensureLeerling(12347L, "Piet", "Pieters", "piet.pieters@gosmartlib.be");
+        ensureLeerling(12348L, "Klaas", "Klaassen", "klaas.klaassen@gosmartlib.be");
+        ensureLeerling(12349L, "Sofie", "Vermeulen", "sofie.vermeulen@gosmartlib.be");
+        ensureLeerling(12350L, "Lucas", "De Smet", "lucas.desmet@gosmartlib.be");
+        ensureLeerling(12351L, "Emma", "Peeters", "emma.peeters@gosmartlib.be");
+        ensureLeerling(12352L, "Noah", "Maes", "noah.maes@gosmartlib.be");
+        ensureLeerling(12353L, "Lien", "Willems", "lien.willems@gosmartlib.be");
+        ensureLeerling(12354L, "Daan", "Claes", "daan.claes@gosmartlib.be");
+        ensureLeerling(12355L, "Fien", "Hermans", "fien.hermans@gosmartlib.be");
+        ensureLeerling(12356L, "Sam", "Wouters", "sam.wouters@gosmartlib.be");
+        ensureLeerling(12357L, "Lotte", "Janssens", "lotte.janssens@gosmartlib.be");
+        ensureLeerling(12358L, "Milan", "De Vos", "milan.devos@gosmartlib.be");
+        ensureLeerling(12359L, "Nora", "Smeets", "nora.smeets@gosmartlib.be");
+        ensureLeerling(12360L, "Tuur", "Van Damme", "tuur.vandamme@gosmartlib.be");
 
-            Gebruiker testGebruiker = new Gebruiker();
-            testGebruiker.setVoorNaam("Test");
-            testGebruiker.setAchternaam("Gebruiker");
-            testGebruiker.setEmail("test@gosmartlib.be");
-            testGebruiker.setSchoolId(12345L);
-            testGebruiker.setRol(Rol.LEERLING);
-
-            // voeg 3 - 4 extra gebruikers toe
-            Gebruiker gebruiker2 = new Gebruiker();
-            gebruiker2.setVoorNaam("Jan");
-            gebruiker2.setAchternaam("Jansen");
-            gebruiker2.setEmail("jan.jansen@gosmartlib.be");
-            gebruiker2.setSchoolId(12346L);
-            gebruiker2.setRol(Rol.LEERLING);
-
-            Gebruiker gebruiker3 = new Gebruiker();
-            gebruiker3.setVoorNaam("Piet");
-            gebruiker3.setAchternaam("Pieters");
-            gebruiker3.setEmail("piet.pieters@gosmartlib.be");
-            gebruiker3.setSchoolId(12347L);
-            gebruiker3.setRol(Rol.LEERLING);
-
-            Gebruiker gebruiker4 = new Gebruiker();
-            gebruiker4.setVoorNaam("Klaas");
-            gebruiker4.setAchternaam("Klaassen");
-            gebruiker4.setEmail("klaas.klaassen@gosmartlib.be");
-            gebruiker4.setSchoolId(12348L);
-            gebruiker4.setRol(Rol.LEERLING);
-            
-            Gebruiker opgeslagenGebruiker = gebruikerRepository.save(testGebruiker);
-
-            gebruikerRepository.save(gebruiker2);
-            gebruikerRepository.save(gebruiker3);
-            gebruikerRepository.save(gebruiker4);
-
-            
-            LeeslijstMap favorietenMap = new LeeslijstMap("Favorieten", opgeslagenGebruiker);
-            mapRepository.save(favorietenMap);
-
-            System.out.println("Test Gebruiker (ID 1) is succesvol toegevoegd aan de database!");
+        if (test != null && mapRepository.findByGebruiker_GebruikerID(test.getGebruikerID()).isEmpty()) {
+            mapRepository.save(new LeeslijstMap("Favorieten", test));
         }
+    }
+
+    private Gebruiker ensureLeerling(long schoolId, String voorNaam, String achternaam, String email) {
+        return gebruikerRepository.findBySchoolId(schoolId).orElseGet(() -> {
+            Gebruiker g = new Gebruiker();
+            g.setVoorNaam(voorNaam);
+            g.setAchternaam(achternaam);
+            g.setEmail(email);
+            g.setSchoolId(schoolId);
+            g.setRol(Rol.LEERLING);
+            Gebruiker opgeslagen = gebruikerRepository.save(g);
+            System.out.println("Leerling " + voorNaam + " " + achternaam + " (SchoolId " + schoolId + ") toegevoegd.");
+            return opgeslagen;
+        });
     }
 }

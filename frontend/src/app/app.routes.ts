@@ -19,6 +19,8 @@ import { adminGuard } from './guards/admin-guard';
 import { authGuard } from './guards/auth.guard';
 import { LeningenBeheerder } from './leningen-beheerder/leningen-beheerder';
 import { BeheerderDashboard } from './beheerder-dashboard/beheerder-dashboard';
+import { KlassLeeslijstenOverzichtComponent } from './klass-leeslijsten-overzicht/klass-leeslijsten-overzicht';
+import { KlassLeeslijstBeheerComponent } from './klass-leeslijst-beheer/klass-leeslijst-beheer';
 
 export const routes: Routes = [
   { path: '', component: HomePage },
@@ -40,5 +42,7 @@ export const routes: Routes = [
   { path: 'admin', component: AdminDashboard },
   { path: 'boek-import', component: BoekImport },
   {path: 'beheerder', component: BeheerderDashboard},
-  { path: '**', redirectTo: 'not-found' }
+  { path: 'leeslijsten', component: KlassLeeslijstenOverzichtComponent },
+  { path: 'leeslijsten/:id', component: KlassLeeslijstBeheerComponent },
+  { path: '**', redirectTo: 'not-found' },
 ];
