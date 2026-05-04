@@ -31,19 +31,6 @@
         }
       </div>
 
-      <button
-        class="btn-bevestig"
-        [disabled]="
-          isBezig ||
-          boekenInMandje.length === 0 ||
-          isSucces ||
-          (maxLeenLimiet() > 0 && actieveLeningen() + boekenInMandje.length > maxLeenLimiet())
-        "
-        (click)="bevestigReservering()"
-      >
-        {{ isBezig ? 'Bezig met versturen...' : 'Stuur naar bibbeheerder' }}
-      </button>
-
       @if (boekenInMandje.length === 0 && !isSucces) {
         <div class="leeg-mandje">
           <span class="icon">🛒</span>

@@ -86,17 +86,19 @@ export class HomePage implements OnInit {
     this.boekService.getActieveLeningen(this.gebruikerId).subscribe({
       next: (data) => {
         const verwerkteLeningen = data.map((uitlening) => {
-          // Check of de lening nog goedgekeurd moet worden
+          // 1. Check of de lening een gloednieuwe aanvraag is (nog niet uitgeleend)
           if (uitlening.status === 'AANGEVRAAGD' || !uitlening.inleverDatum) {
             return {
               id: uitlening.id,
               titel: uitlening.boek.titel,
-              resterendeDagen: 999, // Zet ze helemaal onderaan in de sortering
+              resterendeDagen: 0, // Geen dagen want de termijn is nog niet gestart
               isAanvraag: true,
+              isVerlengd: uitlening.verlengd || false,
+              isVerlengingAangevraagd: false, // Een nieuwe lening kan geen verlenging zijn
             };
           }
 
-          // Datum berekening voor goedgekeurde leningen
+          // 2. Datum berekening voor actieve leningen (inclusief leningen waarvan verlenging is aangevraagd)
           const inleverDatum = new Date(uitlening.inleverDatum);
           const vandaag = new Date();
 
@@ -112,7 +114,8 @@ export class HomePage implements OnInit {
             titel: uitlening.boek.titel,
             resterendeDagen: verschilDagen,
             isAanvraag: false,
-            isVerlengd: uitlening.verlengd,
+            isVerlengd: uitlening.verlengd || false,
+            isVerlengingAangevraagd: uitlening.status === 'VERLENGING_AANGEVRAAGD',
           };
         });
 
@@ -124,6 +127,7 @@ export class HomePage implements OnInit {
 
   // Berekent breedte van de progress bar
   get progressPercentage(): number {
+    if (this.leesDoel() === 0) return 0;
     return Math.min((this.gelezenBoeken() / this.leesDoel()) * 100, 100);
   }
 
@@ -144,7 +148,7 @@ export class HomePage implements OnInit {
     if (veiligDoel < 1) {
       veiligDoel = 1;
     } else if (veiligDoel > 10) {
-      veiligDoel = 10; // Je kunt hier 10 veranderen in wat jij een logisch maximum vindt
+      veiligDoel = 10;
     }
 
     // 3. Sla de veilige waarde op
@@ -159,12 +163,11 @@ export class HomePage implements OnInit {
     if (lening) {
       this.teVerlengenLeningId.set(lening.id);
       this.teVerlengenBoekTitel.set(lening.titel);
-      this.verlengFout.set(''); // Reset eventuele oude fouten
+      this.verlengFout.set('');
       this.isVerlengModalOpen.set(true);
     }
   }
 
-  // 2. Sluit de pop-up als de gebruiker annuleert
   sluitVerlengModal() {
     this.isVerlengModalOpen.set(false);
     this.teVerlengenLeningId.set(null);
@@ -172,7 +175,6 @@ export class HomePage implements OnInit {
     this.verlengFout.set('');
   }
 
-  // 3. Voert de effectieve backend call uit als men op "Ja, verlengen" klikt
   bevestigVerlengen() {
     const leningId = this.teVerlengenLeningId();
     if (leningId === null) return;
@@ -183,8 +185,8 @@ export class HomePage implements OnInit {
     this.boekService.verlengLening(leningId).subscribe({
       next: () => {
         this.isVerlengenBezig.set(false);
-        this.sluitVerlengModal(); // Sluit de pop-up bij succes
-        this.haalLeningenOp(); // Herlaad de lijst zodat de dagen visueel opschuiven
+        this.sluitVerlengModal();
+        this.haalLeningenOp();
       },
       error: (err) => {
         this.isVerlengenBezig.set(false);

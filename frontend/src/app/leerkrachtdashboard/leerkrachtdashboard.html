@@ -1,8 +1,8 @@
 <div class="teacher-dashboard">
   <header class="teacher-hero">
     <div>
-      <p class="hero-kicker">leerkrachtportaal</p>
-      <h1>Dashboard van de klas</h1>
+      <h1>Leerkrachtendashboard</h1>
+      <p class="hero-kicker">GO! SmartLib Antwerpen</p>
     </div>
     <div class="hero-badge">overzicht</div>
   </header>
@@ -77,12 +77,6 @@
         <button type="button" class="function-btn">beheer leeslijsten</button>
       </article>
 
-      <article class="tile function-tile">
-        <h3>Didactische collectie</h3>
-        <p>Toegang tot de didactische collectie en bijhorende titels.</p>
-        <button type="button" class="function-btn">open collectie</button>
-      </article>
-
       <article class="tile function-tile catalogus-tile">
         <h3>Catalogus voor leerkracht</h3>
         <p>Bekijk boeken in de catalogus en start meteen met zoeken.</p>
@@ -129,10 +123,36 @@
   <div class="modal-overlay" (click)="closeHistory()">
     <div class="modal-box" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h3>Leengeschiedenis van {{ selectedStudent().voorNaam }}</h3>
+        <h3>Details van {{ selectedStudent().voorNaam }} {{ selectedStudent().achternaam }}</h3>
         <button class="modal-close" (click)="closeHistory()">✕</button>
       </div>
-      <p class="history-empty">deze leerling heeft nog geen boeken geleend.</p>
+
+      @if (leerlingStats()) {
+        <div class="stats-overview" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px;">
+          <div class="stat-item" style="background: #f0f7ff; padding: 15px; border-radius: 8px; text-align: center;">
+            <span style="display: block; font-size: 24px; font-weight: bold; color: #007bff;">
+              {{ leerlingStats().totaalGeleend }}
+            </span>
+            <small>boeken geleend</small>
+          </div>
+          
+          <div class="stat-item" style="background: #e6fffa; padding: 15px; border-radius: 8px; text-align: center;">
+            <span style="display: block; font-size: 24px; font-weight: bold; color: #38a169;">
+              {{ leerlingStats().opTijdTerug }}
+            </span>
+            <small>op tijd terug</small>
+          </div>
+        </div>
+
+        <div class="history-section" style="margin-top: 25px;">
+          <h4>recente activiteit</h4>
+          <p style="color: #666; font-style: italic;">
+            Van de {{ leerlingStats().totaalGeleend }} boeken zijn er {{ leerlingStats().teLaat }} te laat ingeleverd.
+          </p>
+        </div>
+      } @else {
+        <p>statistieken laden...</p>
+      }
     </div>
   </div>
 }

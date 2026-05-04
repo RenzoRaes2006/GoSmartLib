@@ -1,6 +1,7 @@
 package ap.be.backend;
 
 import ap.be.backend.entity.Boek;
+import ap.be.backend.entity.DidactischeSubcategorie;
 import ap.be.backend.repository.BoekRepository;
 
 import org.junit.jupiter.api.Test;
@@ -86,8 +87,8 @@ class BoekRepositoryTest {
         boekRepository.saveAll(List.of(b1, b2));
         Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Direction.ASC, "locatie"));
 
-        // When
-        Page<Boek> result = boekRepository.filterBoeken("java", null, null, null, null, null, null, null, null, null,
+        // When - Aangepast naar 12 filter parameters + pageable
+        Page<Boek> result = boekRepository.filterBoeken("java", null, null, null, null, null, null, null, null, null, null, null,
                 pageable);
 
         // Then
@@ -105,13 +106,53 @@ class BoekRepositoryTest {
         boekRepository.save(b1);
         Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Direction.ASC, "locatie"));
 
-        // When
-        Page<Boek> result = boekRepository.filterBoeken("Bloch", null, null, null, null, null, null, null, null, null,
+        // When - Aangepast naar 12 filter parameters + pageable
+        Page<Boek> result = boekRepository.filterBoeken("Bloch", null, null, null, null, null, null, null, null, null, null, null,
                 pageable);
 
         // Then
         assertThat(result.getContent()).isNotEmpty();
         assertThat(result.getContent().get(0).getAuteur()).isEqualTo("Joshua Bloch");
+    }
+
+    // --- DIDACTISCH MATERIAAL FILTERS ---
+
+    @Test
+    void givenDidactischMateriaal_whenFilteredOnDidactischTrue_thenReturnsOnlyDidactisch() {
+        // Given
+        Boek d1 = new Boek();
+        d1.setTitel("Didactisch Materiaal 1");
+        d1.setDidactischMateriaal(true);
+        Boek n1 = new Boek();
+        n1.setTitel("Normaal Boek 1");
+        n1.setDidactischMateriaal(false);
+        boekRepository.saveAll(List.of(d1, n1));
+        Pageable pageable = PageRequest.of(0, 100);
+
+        // When
+        Page<Boek> result = boekRepository.filterBoeken(null, null, null, null, null, null, null, null, null, null, true, null, pageable);
+
+        // Then
+        assertThat(result.getContent().stream().map(Boek::getTitel)).contains("Didactisch Materiaal 1");
+        assertThat(result.getContent().stream().map(Boek::getTitel)).doesNotContain("Normaal Boek 1");
+    }
+
+    @Test
+    void givenBoekMetDidactischeSubcategorie_whenFilteredOnSubcategorie_thenReturnsMatch() {
+        // Given
+        Boek b = new Boek();
+        b.setTitel("Handboek Engels");
+        b.setDidactischMateriaal(true);
+        b.setDidactischeSubcategorie(DidactischeSubcategorie.DIDACTISCHE_HANDBOEKEN);
+        boekRepository.save(b);
+        Pageable pageable = PageRequest.of(0, 100);
+
+        // When
+        Page<Boek> result = boekRepository.filterBoeken(null, null, null, null, null, null, null, null, null, null, null, DidactischeSubcategorie.DIDACTISCHE_HANDBOEKEN, pageable);
+
+        // Then
+        assertThat(result.getContent()).isNotEmpty();
+        assertThat(result.getContent().get(0).getDidactischeSubcategorie()).isEqualTo(DidactischeSubcategorie.DIDACTISCHE_HANDBOEKEN);
     }
 
     // --- FIND BY ISBN ---

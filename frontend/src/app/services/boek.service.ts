@@ -22,9 +22,7 @@ export class BoekService {
       : '/api/gebruiker';
 
   private apiBeheerUrl =
-    window.location.hostname === 'localhost'
-      ? 'http://localhost:8081/api/beheer'
-      : '/api/beheer';
+    window.location.hostname === 'localhost' ? 'http://localhost:8081/api/beheer' : '/api/beheer';
 
   private http = inject(HttpClient);
 
@@ -48,6 +46,11 @@ export class BoekService {
     });
 
     return this.http.get<PageResponse<Boek>>(this.apiUrl, { params });
+  }
+
+  getDidactischeBoeken(page: number = 0, size: number = 12): Observable<PageResponse<Boek>> {
+    const params = new HttpParams().set('page', page.toString()).set('size', size.toString());
+    return this.http.get<PageResponse<Boek>>(`${this.apiUrl}/didactisch`, { params });
   }
 
   getBoekOpId(id: number): Observable<Boek> {
@@ -162,8 +165,27 @@ export class BoekService {
     ) as Observable<string>;
   }
 
-  // Fetch all active loans in the system for the admin dashboard
   getAlleActieveLeningenSysteem(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiBeheerUrl}/leningen/actief`);
+  }
+  getAlleVerlengingAanvragen() {
+    return this.http.get<any[]>(`${this.apiBeheerUrl}/verlengingen/aanvragen`);
+  }
+
+  keurVerlengingGoed(id: number) {
+    return this.http.put(`${this.apiBeheerUrl}/${id}/verlenging/goedkeuren`, {});
+  }
+
+  weigerVerlenging(id: number) {
+    return this.http.put(`${this.apiBeheerUrl}/${id}/verlenging/weigeren`, {});
+  }
+  uploadVoorPreview(file: File): Observable<any[]> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<any[]>(`${this.apiUrl}/import/preview`, formData);
+  }
+
+  bevestigImport(boeken: any[]): Observable<string> {
+    return this.http.post(`${this.apiUrl}/import/bevestig`, boeken, { responseType: 'text' });
   }
 }

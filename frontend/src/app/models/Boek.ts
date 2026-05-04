@@ -13,4 +13,6 @@ export interface Boek {
   aantalExemplaren: number;
   locatie: string;
   leesniveau?: string;
+  didactischMateriaal?: boolean;
+  didactischeSubcategorie?: string;
 }

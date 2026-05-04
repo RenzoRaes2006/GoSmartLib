@@ -1,0 +1,99 @@
+<div class="page-wrapper">
+    <!-- Info over de actuele leeslijst -->
+    @if (lijst()) {
+    <div class="leeslijst-header-card">
+        <div class="header-info">
+            <h1 class="header-titel">
+                Beheer: {{ lijst()!.naam }}
+                <button class="btn-edit-icon" (click)="openEditModal()" title="Naam wijzigen">✎</button>
+            </h1>
+            <p class="leeslijst-stats">Er zitten momenteel {{ lijst()!.boeken.length }} boeken in deze lijst.</p>
+        </div>
+
+        <div class="header-acties">
+            <button class="btn-assign" (click)="wijsToeAanKlas()"> Toewijzen aan klas</button>
+            <button class="btn-delete-list" (click)="openDeleteModal()"> Lijst verwijderen</button>
+        </div>
+    </div>
+    }
+
+    <div class="main-layout">
+        <!-- Sidebar Filters -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2 class="sidebar-title">Filters</h2>
+            </div>
+            <div class="filter-section mt-3">
+                <label>Zoekopdracht</label>
+                <input type="text" placeholder="Titel, auteur of ISBN..." [(ngModel)]="zoekTerm"
+                    (input)="updateFilters()" class="sidebar-input" />
+            </div>
+        </aside>
+
+        <!-- Boekenlijst Resultaten -->
+        <div class="catalogus-container">
+            <div class="boeken-lijst">
+                @for (boek of zoekResultaten(); track boek.id) {
+                <div class="boek-list-item">
+                    <div class="list-image-container">
+                        <img [src]="boek.afbeelding || 'https://bookshow.blurb.com/bookshow/cache/P11360640/md/cover_2.jpeg?access_key=675523b769268bce5b0b710b3d0e7841'"
+                            alt="Cover" />
+                    </div>
+
+                    <div class="list-boek-info">
+                        <div class="boek-tekst">
+                            <h4 class="titel">{{ boek.titel }}</h4>
+                            <p class="auteur">door {{ boek.auteur }}</p>
+                            <p class="isbn"><small>ISBN: {{ boek.isbn }}</small></p>
+                        </div>
+
+                        <div class="actie-knoppen">
+                            @if (isAlToegevoegd(boek.id!)) {
+                            <button class="btn-remove-boek" (click)="verwijderBoek(boek.id!)">Verwijderen</button>
+                            } @else {
+                            <button class="btn-add-boek" (click)="voegBoekToe(boek.id!)">+ Voeg toe</button>
+                            }
+                        </div>
+                    </div>
+                </div>
+                } @empty {
+                <p class="no-results">Geen boeken gevonden. Probeer een andere zoekopdracht.</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: Naam wijzigen (Exacte detail.html styling) -->
+@if (showEditModal()) {
+<div class="modal-overlay">
+    <div class="modal-box">
+        <h3>Leeslijst naam wijzigen</h3>
+        <p class="modal-label" style="text-align: left; margin-left: 5%;">Geef je lijst een nieuwe naam:</p>
+        <input type="text" [(ngModel)]="bewerkNaam" class="form-input" placeholder="Nieuwe naam..." />
+        <div class="modal-actions">
+            <button class="cancel-btn" (click)="closeModals()">Annuleren</button>
+            <button class="save-btn" [disabled]="!bewerkNaam().trim()" (click)="slaNaamOp()">Opslaan</button>
+        </div>
+    </div>
+</div>
+}
+
+<!-- MODAL: Verwijderen bevestigen (Exacte detail.html styling) -->
+@if (showDeleteModal()) {
+<div class="modal-overlay">
+    <div class="modal-box">
+        <h3 style="color: #dc2626;">Leeslijst verwijderen?</h3>
+        <p style="margin: 15px 0 25px 0; color: #4a5568;">
+            Weet je zeker dat je "<strong>{{ lijst()?.naam }}</strong>" wilt verwijderen? Dit kan niet ongedaan worden
+            gemaakt.
+        </p>
+        <div class="modal-actions">
+            <button class="cancel-btn" (click)="closeModals()">Annuleren</button>
+            <button class="save-btn"
+                style="background: #dc2626 !important; border-color: #b91c1c !important; color: white !important;"
+                (click)="bevestigVerwijderen()">Ja, verwijderen</button>
+        </div>
+    </div>
+</div>
+}
