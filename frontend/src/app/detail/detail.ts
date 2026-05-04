@@ -1,4 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
+import { Location } from '@angular/common';
 import {
   FormBuilder,
   FormGroup,
@@ -32,6 +33,7 @@ export class Detail implements OnInit {
   route = inject(ActivatedRoute);
   leeslijstService = inject(LeeslijstService);
   leenMandjeService = inject(LeenMandjeService);
+  location = inject(Location);
 
   boek: Boek | null = null;
   gelijkaardigeBoeken: Boek[] = [];
@@ -353,5 +355,9 @@ export class Detail implements OnInit {
         : resultaat;
     this.isLeenModalOpen = true;
     setTimeout(() => this.sluitLeenModal(), 2500);
+  }
+
+  goBack(): void {
+    this.location.back();
   }
 }

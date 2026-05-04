@@ -1,19 +1,32 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { LeerlingService } from '../services/Leerling.service';
 import { BoekService } from '../services/boek.service';
+import { StatistiekService } from '../services/statistiek.service';
 
 @Component({
   selector: 'app-leerkrachtdashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './leerkrachtdashboard.html',
   styleUrl: './leerkrachtdashboard.css',
 })
 export class Leerkrachtdashboard implements OnInit {
   private leerlingService = inject(LeerlingService);
   private boekService = inject(BoekService);
+  private statistiekService = inject(StatistiekService);
+
+  boekenAfgelopenWeek = signal<number>(0);
+  topBoeken = signal<string[]>([]);
+  aantalActieveLeningen = signal<number>(0);
+  aantalTeLaat = signal<number>(0);
+  aantalLeerlingen = signal<number>(0);
+  weekDoel = 25;
+  donutVulling = computed(
+    () => Math.min(Math.round((this.boekenAfgelopenWeek() / this.weekDoel) * 100), 100) + '%',
+  );
 
   huidigePagina = signal<number>(0);
   itemsPerPagina = 5;
@@ -30,6 +43,7 @@ export class Leerkrachtdashboard implements OnInit {
   ngOnInit(): void {
     this.haalLeerlingenOp();
     this.haalKlassenLeningenOp();
+    this.haalStatistiekenOp();
   }
 
   haalKlassenLeningenOp() {
@@ -78,6 +92,19 @@ export class Leerkrachtdashboard implements OnInit {
     return verschilInDagen <= 7 && verschilInDagen >= 0;
   }
 
+  haalStatistiekenOp() {
+    this.statistiekService.getLeerkrachtStatistieken(this.selectedClass() || undefined).subscribe({
+      next: (stats) => {
+        this.boekenAfgelopenWeek.set(stats.boekenAfgelopenWeek ?? 0);
+        this.topBoeken.set(stats.topBoeken ?? []);
+        this.aantalActieveLeningen.set(stats.aantalActieveLeningen ?? 0);
+        this.aantalTeLaat.set(stats.aantalTeLaat ?? 0);
+        this.aantalLeerlingen.set(stats.aantalLeerlingen ?? 0);
+      },
+      error: (err) => console.error('fout bij ophalen leerkracht-statistieken:', err),
+    });
+  }
+
   haalLeerlingenOp() {
     this.leerlingService
       .getLeerlingen(
@@ -103,6 +130,7 @@ export class Leerkrachtdashboard implements OnInit {
   onFilterChange() {
     this.huidigePagina.set(0);
     this.haalLeerlingenOp();
+    this.haalStatistiekenOp(); // Haalt ook direct de juiste stats voor deze klas op!
   }
 
   vorigePagina(): void {

@@ -3,24 +3,58 @@
 
   @if (stap() === 'LEERLING') {
     <div class="stap">
-      <h2>Geef je leerlingkaart in</h2>
+      <h2>Selecteer een leerling</h2>
       <input
         type="text"
-        placeholder="Scan je leerlingkaart (of typ het)"
-        [ngModel]="leerlingInput()"
-        (ngModelChange)="leerlingInput.set($event)"
-        (keyup.enter)="zoekLeerling()"
+        placeholder="Zoek op naam..."
+        [ngModel]="zoekterm()"
+        (ngModelChange)="opZoektermChange($event)"
         autofocus
       />
       @if (leerlingFout()) {
         <p class="fout">{{ leerlingFout() }}</p>
+      }
+
+      @if (bezigMetZoeken()) {
+        <p class="leeg">Bezig met laden...</p>
+      } @else {
+        @for (l of leerlingen(); track l.gebruikerID) {
+          <button class="leerling-item" (click)="kiesLeerling(l)">
+            <span class="naam">{{ l.voorNaam }} {{ l.achterNaam }}</span>
+            <span class="schoolid">#{{ l.schoolId }}</span>
+          </button>
+        } @empty {
+          <p class="leeg">Geen leerlingen gevonden.</p>
+        }
+
+        @if (totaalPaginas() > 1) {
+          <div class="paginatie">
+            <button
+              class="terug-knop"
+              (click)="vorigePagina()"
+              [disabled]="huidigePagina() === 0"
+            >
+              ← Vorige
+            </button>
+            <span class="pagina-info">
+              Pagina {{ huidigePagina() + 1 }} van {{ totaalPaginas() }}
+            </span>
+            <button
+              class="terug-knop"
+              (click)="volgendePagina()"
+              [disabled]="huidigePagina() >= totaalPaginas() - 1"
+            >
+              Volgende →
+            </button>
+          </div>
+        }
       }
     </div>
   }
 
   @if (stap() === 'MODUS') {
     <div class="stap">
-      <h2>Hoi {{ naamOpScherm() }} — wat wil je doen?</h2>
+      <h2>Leerling: {{ naamOpScherm() }} — kies actie</h2>
       <div class="modus-knoppen">
         <button class="actie-knop" (click)="kiesModus('UITLENING')">Boeken lenen</button>
         <button class="actie-knop" (click)="kiesModus('RETOUR')">Boeken terugbrengen</button>
@@ -31,7 +65,7 @@
 
   @if (stap() === 'SCAN') {
     <div class="stap">
-      <h2>{{ modus() === 'UITLENING' ? 'Lenen' : 'Terugbrengen' }} — {{ naamOpScherm() }}</h2>
+      <h2>{{ modus() === 'UITLENING' ? 'Boeken lenen' : 'Boeken terugbrengen' }} — {{ naamOpScherm() }}</h2>
       <input
         type="text"
         placeholder="Scan ISBN (of typ het)"

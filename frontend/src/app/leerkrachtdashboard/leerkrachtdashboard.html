@@ -4,7 +4,6 @@
       <h1>Leerkrachtendashboard</h1>
       <p class="hero-kicker">GO! SmartLib Antwerpen</p>
     </div>
-    <div class="hero-badge">overzicht</div>
   </header>
 
   <section class="tile-grid">
@@ -83,7 +82,7 @@
       <article class="tile function-tile">
         <h3>Leeslijsten beheren</h3>
         <p>Beheer klassikale leeslijsten en opdrachten.</p>
-        <button type="button" class="function-btn">beheer leeslijsten</button>
+        <a routerLink="/leeslijsten" class="function-btn">beheer leeslijsten</a>
       </article>
 
       <article class="tile function-tile catalogus-tile">
@@ -134,14 +133,14 @@
       <article class="tile stats-card">
         <div class="stats-head">
           <h3>Leesfrequentie</h3>
-          <span class="stat-chip">per week</span>
+          <span class="stat-chip">laatste 7 dagen</span>
         </div>
         <div class="stat-visual">
-          <div class="stat-donut donut-read">
-            <span>32</span>
+          <div class="stat-donut donut-read" [style.--vulling]="donutVulling()">
+            <span>{{ boekenAfgelopenWeek() }}</span>
           </div>
         </div>
-        <p class="stat-note">Boeken per week.</p>
+        <p class="stat-note">Boeken uitgeleend de afgelopen week.</p>
       </article>
 
       <article class="tile stats-card stats-list">
@@ -150,11 +149,13 @@
           <span class="stat-chip">top 3</span>
         </div>
         <ol class="top-books">
-          <li>Oorlogswinter</li>
-          <li>Het gouden ei</li>
-          <li>De brief voor de koning</li>
+          @for (titel of topBoeken(); track titel) {
+            <li>{{ titel }}</li>
+          } @empty {
+            <li class="stat-note">Nog geen uitleningen.</li>
+          }
         </ol>
-        <p class="stat-note">Meest gekozen titels in de klas.</p>
+        <p class="stat-note">Meest gekozen titels {{ selectedClass() ? 'in de klas' : 'op school' }}.</p>
       </article>
     </div>
   </section>

@@ -52,4 +52,7 @@ public interface BoekRepository extends JpaRepository<Boek, Long> {
 
         Optional<Boek> findByTitelAndAuteur(String titel, String auteur);
 
+        @Query("SELECT COALESCE(SUM(b.aantalExemplaren), 0) FROM Boek b")
+        long sumTotaalAantalExemplaren();
+
 }

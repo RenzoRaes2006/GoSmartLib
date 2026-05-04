@@ -5,6 +5,14 @@ import { Gebruiker } from '../models/Gebruiker.mode';
 import { Boek } from '../models/Boek';
 import { ScanBatchRequest, ScanBatchResponse } from '../models/scan.model';
 
+export interface LeerlingenPage {
+  content: Gebruiker[];
+  totalPages: number;
+  totalElements: number;
+  number: number;
+  size: number;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -16,6 +24,15 @@ export class ScanService {
 
   zoekLeerlingOpSchoolId(schoolId: number): Observable<Gebruiker> {
     return this.http.get<Gebruiker>(`${this.apiBase}/gebruiker/schoolid/${schoolId}`);
+  }
+
+  zoekLeerlingen(zoekterm: string, page: number, size: number): Observable<LeerlingenPage> {
+    const params: Record<string, string> = {
+      page: String(page),
+      size: String(size),
+    };
+    if (zoekterm) params['zoekterm'] = zoekterm;
+    return this.http.get<LeerlingenPage>(`${this.apiBase}/leerlingen`, { params });
   }
 
   zoekBoekOpIsbn(isbn: string): Observable<Boek> {

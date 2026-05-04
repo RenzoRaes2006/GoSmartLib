@@ -1,0 +1,17 @@
+<div class="container">
+    <h2>Leeslijsten van leerkrachten</h2>
+    <hr>
+
+    @if (leeslijsten.length === 0) {
+    <p>Er zijn nog geen leeslijsten beschikbaar.</p>
+    } @else {
+    <div class="list-container">
+        @for (lijst of leeslijsten; track lijst.id) {
+        <div class="card" [routerLink]="['/klassenleeslijsten', lijst.id]" style="cursor: pointer;">
+            <h3>{{ lijst.naam }}</h3>
+            <p>{{ lijst.boeken.length }} boeken in deze lijst</p>
+        </div>
+        }
+    </div>
+    }
+</div>

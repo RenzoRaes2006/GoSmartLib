@@ -67,4 +67,8 @@ export class KlassLeeslijstService {
   deleteLeeslijst(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
+
+  getAllKlassenLeeslijsten(): Observable<KlassLeeslijst[]> {
+    return this.http.get<KlassLeeslijst[]>(`${this.apiUrl}/alle`);
+  }
 }

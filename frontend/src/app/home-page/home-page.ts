@@ -5,6 +5,7 @@ import { BoekService } from '../services/boek.service';
 import { Boek } from '../models/Boek';
 import { LeeslijstService } from '../services/leeslijstService';
 import { FormsModule } from '@angular/forms';
+import { StatistiekService } from '../services/statistiek.service';
 
 @Component({
   selector: 'app-home-page-leerling',
@@ -15,13 +16,17 @@ import { FormsModule } from '@angular/forms';
 export class HomePage implements OnInit {
   private boekService = inject(BoekService);
   private leeslijstService = inject(LeeslijstService);
+  private statistiekService = inject(StatistiekService);
 
   // Gebruikersinfo & Gamification
   naam = signal<string>('Jeroen');
   gebruikerId = 1; // Tijdelijk hardcoded, pas aan naar ingelogde gebruiker
+  schoolId = '12345'; // Tijdelijk hardcoded — komt later uit AuthService/Smartschool
 
   gelezenBoeken = signal<number>(0);
   leesDoel = signal<number>(10);
+  aantalActieveLeningen = signal<number>(0);
+  aantalTeLaat = signal<number>(0);
 
   // Variabelen voor de pop-up (Modal)
   isEditModalOpen = signal<boolean>(false);
@@ -66,15 +71,14 @@ export class HomePage implements OnInit {
     // 3. Haal de actieve leningen op
     this.haalLeningenOp();
 
-    this.boekService.getLeengeschiedenis(this.gebruikerId).subscribe({
-      next: (geschiedenis) => {
-        // Tel alle leningen, behalve degene die door de bibbeheerder zijn geweigerd
-        const geldigeLeningen = geschiedenis.filter((lening) => lening.status !== 'GEWEIGERD');
-
-        // Update de meter op het scherm!
-        this.gelezenBoeken.set(geldigeLeningen.length);
+    this.statistiekService.getLeerlingStatistieken(this.schoolId).subscribe({
+      next: (stats) => {
+        this.gelezenBoeken.set(stats.gelezenBoeken ?? 0);
+        this.leesDoel.set(stats.leesDoel ?? 10);
+        this.aantalActieveLeningen.set(stats.aantalActieveLeningen ?? 0);
+        this.aantalTeLaat.set(stats.aantalTeLaat ?? 0);
       },
-      error: (err) => console.error('Kon leengeschiedenis niet laden voor teller:', err),
+      error: (err) => console.error('Kon leerling-statistieken niet laden:', err),
     });
   }
 

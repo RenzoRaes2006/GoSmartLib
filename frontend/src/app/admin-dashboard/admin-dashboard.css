@@ -89,6 +89,7 @@
 
 .kpi-label { color: #6b7280; font-size: 0.95rem; font-weight: 600; margin-bottom: 15px; display: block; text-transform: uppercase; letter-spacing: 1px; }
 .kpi-value { font-size: 2.8rem; font-weight: 800; color: #6d1531; margin-bottom: 20px; display: block; }
+.kpi-value-text { font-size: 1.6rem; line-height: 1.2; word-break: break-word; }
 
 .text-blue { color: var(--admin-gold) !important; }
 .text-green { color: var(--admin-gold) !important; }
