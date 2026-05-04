@@ -17,12 +17,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import ap.be.backend.dto.KlassLeeslijstResponseDTO;
 import ap.be.backend.entity.Boek;
 import ap.be.backend.entity.KlassLeeslijst;
-import ap.be.backend.entity.User;
+import ap.be.backend.entity.Gebruiker;
 import ap.be.backend.exception.GebruikerNotFoundException;
 import ap.be.backend.exception.KlassLeeslijstNotFoundException;
 import ap.be.backend.repository.BoekRepository;
 import ap.be.backend.repository.KlassLeeslijstRepository;
-import ap.be.backend.repository.UserRepository;
+import ap.be.backend.repository.GebruikerRepository;
 import ap.be.backend.service.KlassLeeslijstService;
 
 @ExtendWith(MockitoExtension.class)
@@ -31,21 +31,21 @@ public class KlassLeeslijstServiceTest {
     @Mock
     private KlassLeeslijstRepository leeslijstRepository;
     @Mock
-    private UserRepository userRepository;
+    private GebruikerRepository gebruikerRepository;
     @Mock
     private BoekRepository boekRepository;
 
     @InjectMocks
     private KlassLeeslijstService leeslijstService;
 
-    private User testLeerkracht;
+    private Gebruiker testLeerkracht;
     private KlassLeeslijst testLijst;
     private Boek testBoek;
 
     @BeforeEach
     void setUp() {
-        testLeerkracht = new User();
-        testLeerkracht.setId(1L);
+        testLeerkracht = new Gebruiker();
+        testLeerkracht.setGebruikerID(1L);
 
         testLijst = new KlassLeeslijst();
         testLijst.setId(10L);
@@ -60,7 +60,7 @@ public class KlassLeeslijstServiceTest {
 
     @Test
     void givenGeldigeData_whenCreateLeeslijst_thenSavesAndReturnsDTO() {
-        when(userRepository.findById(1L)).thenReturn(Optional.of(testLeerkracht));
+        when(gebruikerRepository.findById(1L)).thenReturn(Optional.of(testLeerkracht));
         when(leeslijstRepository.save(any(KlassLeeslijst.class))).thenReturn(testLijst);
 
         KlassLeeslijstResponseDTO result = leeslijstService.createLeeslijst("Testlijst", 1L);
@@ -72,7 +72,7 @@ public class KlassLeeslijstServiceTest {
 
     @Test
     void givenLeerkrachtNietGevonden_whenCreateLeeslijst_thenThrowsGebruikerNotFoundException() {
-        when(userRepository.findById(1L)).thenReturn(Optional.empty());
+        when(gebruikerRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThrows(GebruikerNotFoundException.class, () -> {
             leeslijstService.createLeeslijst("Naam", 1L);
