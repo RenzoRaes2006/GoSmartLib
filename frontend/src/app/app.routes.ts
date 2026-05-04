@@ -18,6 +18,7 @@ import { LoginSuccessComponent } from './login-success/login-success';
 import { adminGuard } from './guards/admin-guard';
 import { authGuard } from './guards/auth.guard';
 import { LeningenBeheerder } from './leningen-beheerder/leningen-beheerder';
+import { BeheerderDashboard } from './beheerder-dashboard/beheerder-dashboard';
 
 export const routes: Routes = [
   { path: '', component: HomePage },
@@ -38,5 +39,6 @@ export const routes: Routes = [
   { path: 'leerkracht-dashboard', component: Leerkrachtdashboard },
   { path: 'admin', component: AdminDashboard },
   { path: 'boek-import', component: BoekImport },
+  {path: 'beheerder', component: BeheerderDashboard},
   { path: '**', redirectTo: 'not-found' }
 ];
