@@ -29,7 +29,10 @@ export interface LeerlingStatistiek {
 })
 export class StatistiekService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:8081/api/statistieken';
+  private apiUrl =
+    window.location.hostname === 'localhost'
+      ? 'http://localhost:8081/api/statistieken'
+      : '/api/statistieken';
 
   getAdminStatistieken(): Observable<AdminStatistiek> {
     return this.http.get<AdminStatistiek>(`${this.apiUrl}/admin`);
