@@ -33,8 +33,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
 
-        // Debug: log alle attributen zodat we de juiste veldnamen kennen (alleen aanzetten bij debuggen)
-        // System.out.println("[Smartschool userinfo] attributes = " + oAuth2User.getAttributes());
+        System.out.println("[Smartschool userinfo] attributes = " + oAuth2User.getAttributes());
 
         // Smartschool gebruikt 'userID' als unieke identifier (zie user-name-attribute config)
         Object idAttr = oAuth2User.getAttribute("userID");
