@@ -14,7 +14,6 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/scholen")
-@CrossOrigin(origins = "*") // allow angular to communicate with this backend
 public class SchoolController {
 
     @Autowired

@@ -5,7 +5,6 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -37,7 +36,6 @@ public class BoekController {
     }
 
     @GetMapping("/api/boeken")
-    @CrossOrigin(origins = "*", allowedHeaders = "*")
     public Page<Boek> getAlleBoeken(
             @RequestParam(required = false) String zoekterm,
             @RequestParam(required = false) List<String> genre,
@@ -119,7 +117,6 @@ public class BoekController {
     }
 
     @PostMapping("/api/boeken/import/preview")
-    @CrossOrigin(origins = "*", allowedHeaders = "*")
     public ResponseEntity<?> previewImporteerBoeken(@RequestParam("file") MultipartFile file) {
         if (file.isEmpty()) {
             return ResponseEntity.badRequest().body("Het geüploade bestand is leeg.");
@@ -137,7 +134,6 @@ public class BoekController {
     }
 
     @PostMapping("/api/boeken/import/bevestig")
-    @CrossOrigin(origins = "*", allowedHeaders = "*")
     public ResponseEntity<String> bevestigImport(@RequestBody List<Boek> boekenLijst) {
         if (boekenLijst == null || boekenLijst.isEmpty()) {
             return ResponseEntity.badRequest().body("Lijst om te importeren is leeg.");

@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/leerlingen")
-@CrossOrigin(origins = "*") // replace with your frontend url in production
 public class LeerlingController {
 
     private final GebruikerRepository repo;

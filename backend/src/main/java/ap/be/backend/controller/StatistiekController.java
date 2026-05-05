@@ -1,7 +1,6 @@
 package ap.be.backend.controller;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,7 +14,6 @@ import ap.be.backend.service.StatistiekService;
 
 @RestController
 @RequestMapping("/api/statistieken")
-@CrossOrigin(origins = "*", allowedHeaders = "*")
 public class StatistiekController {
     private final StatistiekService statistiekService;
 

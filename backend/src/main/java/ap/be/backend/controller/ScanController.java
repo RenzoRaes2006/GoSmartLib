@@ -7,7 +7,6 @@ import ap.be.backend.dto.ScanBatchResponseDTO;
 import ap.be.backend.service.ScanService;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -19,7 +18,6 @@ public class ScanController {
         this.scanService = scanService;
     }
 
-    @CrossOrigin(origins = "*", allowedHeaders = "*")
     @PostMapping("/api/scan/batch")
     public ResponseEntity<ScanBatchResponseDTO> verwerkBatch(@RequestBody ScanBatchRequestDTO batchRequest) {
         ScanBatchResponseDTO response = scanService.verwerkBatch(batchRequest);
