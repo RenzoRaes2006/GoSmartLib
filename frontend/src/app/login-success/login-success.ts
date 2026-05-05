@@ -13,22 +13,19 @@ export class LoginSuccessComponent implements OnInit {
   authService = inject(AuthService);
 
   ngOnInit(): void {
-    // Lees de parameters uit de URL
     this.route.queryParams.subscribe((params) => {
       const token = params['token'];
 
       if (token) {
-        // 1. Sla de token op in de browser (localStorage)
+        // 1. Sla de token op in de browser zodat die bewaard blijft na een refresh
         localStorage.setItem('jwtToken', token);
 
-        // 2. Werk direct de huidige gebruiker bij in de app-state
-        // this.authService.setUserFromToken(token);
+        // 2. Werk de ingelogde gebruiker bij in de app-state (signals)
+        this.authService.setUserFromToken(token);
 
-        // 3. Stuur de gebruiker door naar de afgeschermde homepagina of catalogus
-        // Dit verwijdert ook direct de token uit de zichtbare adresbalk
+        // 3. Stuur door naar de homepagina (token verdwijnt ook uit de adresbalk)
         this.router.navigate(['/']);
       } else {
-        // Als er iets misging en er is geen token, stuur terug naar de login
         this.router.navigate(['/login']);
       }
     });
