@@ -19,8 +19,6 @@ export const appConfig: ApplicationConfig = {
         scrollPositionRestoration: 'enabled',
       }),
     ),
-    // Activeer de HTTP client én koppel jouw interceptor
-    // provideHttpClient(withInterceptors([authInterceptor]))
-    provideHttpClient(),
+    provideHttpClient(withInterceptors([authInterceptor])),
   ],
 };
