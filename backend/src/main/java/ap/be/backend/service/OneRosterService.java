@@ -8,7 +8,6 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 
@@ -57,24 +56,21 @@ public class OneRosterService {
     /***
      * Haalt een nieuw access token op bij het OneRoster /token endpoint.
      *
-     * Stuurt: client_id + client_secret (als Basic Auth) + grant_type=client_credentials
+     * Stuurt: client_id + client_secret + grant_type allemaal in de body
      * Krijgt terug: een access_token dat tijdelijk toegang geeft tot de API
      ***/
     private String fetchNewAccessToken() {
         try {
             String tokenUrl = baseUrl + "/token";
 
-            // Basic Auth header: base64(client_id:client_secret)
-            String encoded = Base64.getEncoder()
-                    .encodeToString((clientId + ":" + clientSecret).getBytes());
-
             HttpHeaders headers = new HttpHeaders();
-            headers.set("Authorization", "Basic " + encoded);
             headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
-            // Body: verplicht veld dat aangeeft welk type authenticatie we gebruiken
+            // Alle credentials in de body — sommige servers willen dit in plaats van een header
             MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
             body.add("grant_type", "client_credentials");
+            body.add("client_id", clientId);
+            body.add("client_secret", clientSecret);
 
             ResponseEntity<Map> response = restTemplate.exchange(
                     tokenUrl, HttpMethod.POST, new HttpEntity<>(body, headers), Map.class);
