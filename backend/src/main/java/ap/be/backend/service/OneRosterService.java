@@ -66,14 +66,16 @@ public class OneRosterService {
         try {
             System.out.println("[OneRoster] Token ophalen via: " + tokenUrl);
 
+            // Credentials als Basic Auth header: base64(client_id:client_secret)
+            String encoded = java.util.Base64.getEncoder()
+                    .encodeToString((clientId + ":" + clientSecret).getBytes());
+
             HttpHeaders headers = new HttpHeaders();
+            headers.set("Authorization", "Basic " + encoded);
             headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
-            // Alle credentials in de body — sommige servers willen dit in plaats van een header
             MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
             body.add("grant_type", "client_credentials");
-            body.add("client_id", clientId);
-            body.add("client_secret", clientSecret);
 
             ResponseEntity<Map> response = restTemplate.exchange(
                     tokenUrl, HttpMethod.POST, new HttpEntity<>(body, headers), Map.class);
