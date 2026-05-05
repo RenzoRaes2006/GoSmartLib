@@ -25,6 +25,9 @@ public class OneRosterService {
     @Value("${oneroster.base-url}")
     private String baseUrl;
 
+    @Value("${oneroster.token-url}")
+    private String tokenUrl;
+
     @Value("${oneroster.username}")
     private String clientId;
 
@@ -59,7 +62,6 @@ public class OneRosterService {
      ***/
     private String fetchNewAccessToken() {
         try {
-            String tokenUrl = baseUrl + "/token";
             System.out.println("[OneRoster] Token ophalen via: " + tokenUrl);
 
             HttpHeaders headers = new HttpHeaders();
