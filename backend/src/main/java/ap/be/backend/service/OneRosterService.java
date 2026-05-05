@@ -92,10 +92,12 @@ public class OneRosterService {
 
     /***
      * Stuurt het Bearer token mee als Authorization header bij elk API-verzoek.
+     * Accept: application/json vertelt de server dat we JSON willen terug, geen HTML.
      ***/
     private HttpHeaders buildBearerHeaders(String accessToken) {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + accessToken);
+        headers.set("Accept", "application/json");
         return headers;
     }
 
