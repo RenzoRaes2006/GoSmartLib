@@ -4,6 +4,8 @@ import ap.be.backend.dto.OneRosterUser;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Base64;
@@ -18,22 +20,26 @@ import java.util.Map;
  *   - welke rol iemand heeft (student / teacher)
  *   - in welke klas iemand zit (bv. "2SOF")
  *
- * WAAROM HEBBEN WE DIT NODIG?
- * Smartschool vertelt ons WIE de gebruiker is (naam, ID),
- * maar NIET betrouwbaar WAT zijn rol is of in welke klas hij zit.
- * OneRoster vult dat gat op.
+ * HOE WERKT DE AUTHENTICATIE (OAuth2 Client Credentials)?
+ * OneRoster gebruikt GEEN gewone username/password per verzoek.
+ * In plaats daarvan werkt het in twee stappen:
  *
- * HOE WERKT ONEROSTER AUTHENTICATIE?
- * OneRoster gebruikt "Basic Auth": je stuurt een username en wachtwoord
- * mee bij elk verzoek, versleuteld als Base64.
+ *   STAP 1 — Token ophalen:
+ *     POST naar /token
+ *     Met: client_id + client_secret (als Basic Auth header)
+ *     En:  grant_type=client_credentials (in de body)
+ *     Terug: een tijdelijk access_token (geldig voor bv. 1 uur)
  *
- * Voorbeeld:
- *   username = "school"
- *   password = "geheim"
- *   base64("school:geheim") = "c2Nob29sOmdlaGVpbQ=="
- *   Authorization header: "Basic c2Nob29sOmdlaGVpbQ=="
+ *   STAP 2 — API aanroepen met dat token:
+ *     GET /users?filter=...
+ *     Authorization: Bearer <access_token>
+ *     Terug: gebruikersdata als JSON
  *
- * TWEE FUNCTIES IN DEZE SERVICE:
+ * Vergelijk het met een dagpas in een pretpark:
+ *   Je betaalt aan de ingang (stap 1) en krijgt een polsbandje (token).
+ *   Daarna kan je alle attracties in zonder opnieuw te betalen (stap 2).
+ *
+ * TWEE PUBLIEKE FUNCTIES:
  *   1. getUserByUsername()   -> Wie is deze gebruiker? (rol + sourcedId)
  *   2. getKlasBySourcedId()  -> In welke klas zit hij?
  ***/
@@ -41,89 +47,181 @@ import java.util.Map;
 public class OneRosterService {
 
     /***
-     * De basis-URL van de OneRoster API van de school.
-     * Voorbeeld: https://school.oneroster.be/ims/oneroster/v1p1
+     * De basis-URL van de OneRoster API.
+     * Voorbeeld: https://aphogeschool.smartschool.be/ims/oneroster/v1p1
      * Gelezen uit application.properties: oneroster.base-url
      ***/
     @Value("${oneroster.base-url}")
     private String baseUrl;
 
     /***
-     * De gebruikersnaam voor de OneRoster API (Basic Auth).
+     * De client_id: de "gebruikersnaam" waarmee we een token ophalen.
      * Gelezen uit application.properties: oneroster.username
      ***/
     @Value("${oneroster.username}")
-    private String apiUsername;
+    private String clientId;
 
     /***
-     * Het wachtwoord voor de OneRoster API (Basic Auth).
+     * De client_secret: het "wachtwoord" waarmee we een token ophalen.
      * Gelezen uit application.properties: oneroster.password
      ***/
     @Value("${oneroster.password}")
-    private String apiPassword;
+    private String clientSecret;
 
     /***
-     * RestTemplate is de Spring-klasse waarmee we HTTP-verzoeken versturen.
-     * Vergelijk het met fetch() in JavaScript, of axios in Angular.
-     * Hier maken we één instance aan voor hergebruik.
+     * RestTemplate: de Spring-klasse om HTTP-verzoeken mee te versturen.
+     * Vergelijk met fetch() in JavaScript.
      ***/
     private final RestTemplate restTemplate = new RestTemplate();
 
     /***
-     * HULPMETHODE: bouw de Authorization header voor OneRoster.
+     * TOKEN CACHE: we slaan het opgehaalde token tijdelijk op.
      *
-     * HOE WERKT BASIC AUTH?
-     * 1. Combineer username en password met een dubbele punt: "username:password"
-     * 2. Versleutel die string naar Base64
-     * 3. Zet "Basic " ervoor
+     * WAAROM CACHEN?
+     * Een token is typisch 1 uur geldig. Als we bij elke login een nieuw token
+     * zouden ophalen, doen we onnodige verzoeken naar de server.
+     * Door het token te bewaren en hergebruiken is de login sneller.
      *
-     * Voorbeeld:
-     *   "school:geheim" -> Base64 -> "c2Nob29sOmdlaGVpbQ=="
-     *   Header: "Authorization: Basic c2Nob29sOmdlaGVpbQ=="
-     *
-     * Dit is de standaard manier om in te loggen bij REST API's die Basic Auth gebruiken.
+     * cachedAccessToken:  het token zelf (lange string)
+     * tokenExpiresAt:     het tijdstip (milliseconden) waarop het token vervalt
      ***/
-    private HttpHeaders buildAuthHeaders() {
-        String credentials = apiUsername + ":" + apiPassword;
-        String encoded = Base64.getEncoder().encodeToString(credentials.getBytes());
+    private String cachedAccessToken = null;
+    private long tokenExpiresAt = 0;
 
+    /***
+     * HULPMETHODE: geef een geldig access token terug.
+     *
+     * Controleer eerst of het gecachede token nog geldig is.
+     * Als het bijna vervalt (binnen 30 seconden) of er nog geen is:
+     * haal dan een nieuw token op via fetchNewAccessToken().
+     ***/
+    private String getAccessToken() {
+        // System.currentTimeMillis() geeft de huidige tijd in milliseconden.
+        // We vergelijken met tokenExpiresAt min 30 seconden veiligheidsmarge.
+        boolean tokenIsStillValid = cachedAccessToken != null
+                && System.currentTimeMillis() < tokenExpiresAt - 30_000;
+
+        if (tokenIsStillValid) {
+            System.out.println("[OneRoster] Gecached token hergebruikt.");
+            return cachedAccessToken;
+        }
+
+        // Token is verlopen of er is nog geen: haal een nieuw op
+        return fetchNewAccessToken();
+    }
+
+    /***
+     * HULPMETHODE: haal een nieuw access token op bij de OneRoster token-endpoint.
+     *
+     * WAT VERSTUREN WE?
+     *   POST {baseUrl}/token
+     *   Header: Authorization: Basic base64(client_id:client_secret)
+     *   Body:   grant_type=client_credentials  (form-encoded, niet JSON)
+     *
+     * WAT KRIJGEN WE TERUG?
+     *   {
+     *     "access_token": "eyJhbGci...",
+     *     "token_type":   "Bearer",
+     *     "expires_in":   3600        <- geldig voor 3600 seconden = 1 uur
+     *   }
+     ***/
+    private String fetchNewAccessToken() {
+        try {
+            String tokenUrl = baseUrl + "/token";
+
+            // Basic Auth header: base64(client_id:client_secret)
+            String credentials = clientId + ":" + clientSecret;
+            String encoded = Base64.getEncoder().encodeToString(credentials.getBytes());
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Authorization", "Basic " + encoded);
+            // De body van een token-verzoek is form-encoded (geen JSON)
+            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+            // Body: grant_type=client_credentials
+            // MultiValueMap is de Spring-manier om form-data te sturen
+            MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+            body.add("grant_type", "client_credentials");
+
+            HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
+
+            // Verstuur het POST-verzoek en lees het antwoord
+            ResponseEntity<Map> response = restTemplate.exchange(
+                    tokenUrl,
+                    HttpMethod.POST,
+                    request,
+                    Map.class
+            );
+
+            // Haal het token en de geldigheidsduur uit het antwoord
+            String accessToken = (String) response.getBody().get("access_token");
+            Object expiresInObj = response.getBody().get("expires_in");
+
+            // expires_in is het aantal seconden dat het token geldig is
+            // We rekenen om naar milliseconden en tellen op bij de huidige tijd
+            long expiresInSeconds = expiresInObj != null
+                    ? Long.parseLong(expiresInObj.toString())
+                    : 3600; // standaard 1 uur als de server dit niet meegeeft
+
+            // Sla token en vervaltijd op in de cache
+            cachedAccessToken = accessToken;
+            tokenExpiresAt = System.currentTimeMillis() + (expiresInSeconds * 1000);
+
+            System.out.println("[OneRoster] Nieuw access token opgehaald (geldig voor " + expiresInSeconds + " seconden).");
+            return accessToken;
+
+        } catch (Exception e) {
+            System.err.println("[OneRoster] Fout bij ophalen access token: " + e.getMessage());
+            return null;
+        }
+    }
+
+    /***
+     * HULPMETHODE: bouw een Authorization-header met het Bearer token.
+     *
+     * Bearer token = "draag dit token mee als bewijs van toegang".
+     * De server controleert het token bij elk verzoek.
+     *
+     * Voorbeeld header: "Authorization: Bearer eyJhbGci..."
+     ***/
+    private HttpHeaders buildBearerHeaders(String accessToken) {
         HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "Basic " + encoded);
+        headers.set("Authorization", "Bearer " + accessToken);
         return headers;
     }
 
     /***
      * FUNCTIE 1: Haal de gebruiker op uit OneRoster via zijn Smartschool-username.
      *
-     * WAT STUURT DIT NAAR ONEROSTER?
+     * WAT VERSTUREN WE?
      *   GET {baseUrl}/users?filter=username='sof2.haitam.samire'
-     *   Authorization: Basic <token>
+     *   Authorization: Bearer <access_token>
      *
-     * WAT GEEFT ONEROSTER TERUG? (vereenvoudigd)
+     * WAT KRIJGEN WE TERUG?
      *   {
      *     "users": [
      *       { "sourcedId": "abc123", "role": "student", "username": "sof2.haitam.samire" }
      *     ]
      *   }
      *
-     * WAT GEEFT DEZE METHODE TERUG?
-     *   - Een OneRosterUser object met sourcedId en role
-     *   - null als de gebruiker niet gevonden werd of de API niet bereikbaar is
-     *
      * @param username  de Smartschool-username, bv. "sof2.haitam.samire"
      * @return          OneRosterUser met sourcedId + role, of null bij mislukking
      ***/
     public OneRosterUser getUserByUsername(String username) {
         try {
-            // Bouw de URL op met het filter. De enkele aanhalingstekens rond de username
-            // zijn verplicht door de OneRoster filter-syntax.
+            // Stap 1: zorg dat we een geldig access token hebben
+            String accessToken = getAccessToken();
+            if (accessToken == null) {
+                System.err.println("[OneRoster] Geen access token beschikbaar, kan gebruiker niet ophalen.");
+                return null;
+            }
+
+            // Stap 2: bouw de URL met het filter
+            // OneRoster filter-syntax vereist enkele aanhalingstekens rond de waarde
             String url = baseUrl + "/users?filter=username='" + username + "'";
 
-            // Maak een HTTP-verzoek aan met de Authorization header
-            HttpEntity<Void> request = new HttpEntity<>(buildAuthHeaders());
+            HttpEntity<Void> request = new HttpEntity<>(buildBearerHeaders(accessToken));
 
-            // Verstuur het GET-verzoek en lees het antwoord als een Map
-            // Map<String, Object> = een JSON-object als sleutel-waarde paren
             ResponseEntity<Map> response = restTemplate.exchange(
                     url,
                     HttpMethod.GET,
@@ -131,19 +229,15 @@ public class OneRosterService {
                     Map.class
             );
 
-            // Het antwoord bevat een "users" lijst. We casten naar de juiste types.
-            // Dit is veilig omdat we weten hoe de OneRoster JSON eruit ziet.
             @SuppressWarnings("unchecked")
             List<Map<String, Object>> users =
                     (List<Map<String, Object>>) response.getBody().get("users");
 
-            // Controleer of er effectief een gebruiker gevonden werd
             if (users == null || users.isEmpty()) {
                 System.out.println("[OneRoster] Geen gebruiker gevonden voor username: " + username);
                 return null;
             }
 
-            // Pak de eerste (en enige) gebruiker uit de lijst
             Map<String, Object> user = users.get(0);
             String sourcedId = (String) user.get("sourcedId");
             String role = (String) user.get("role");
@@ -152,8 +246,6 @@ public class OneRosterService {
             return new OneRosterUser(sourcedId, role);
 
         } catch (Exception e) {
-            // Als de API niet bereikbaar is of iets anders misgaat, loggen we de fout
-            // en geven we null terug zodat de login niet volledig crasht.
             System.err.println("[OneRoster] Fout bij ophalen gebruiker '" + username + "': " + e.getMessage());
             return null;
         }
@@ -162,34 +254,32 @@ public class OneRosterService {
     /***
      * FUNCTIE 2: Haal de klas op voor een gebruiker via zijn OneRoster sourcedId.
      *
-     * WAT STUURT DIT NAAR ONEROSTER?
+     * WAT VERSTUREN WE?
      *   GET {baseUrl}/users/abc123/classes
-     *   Authorization: Basic <token>
+     *   Authorization: Bearer <access_token>
      *
-     * WAT GEEFT ONEROSTER TERUG? (vereenvoudigd)
+     * WAT KRIJGEN WE TERUG?
      *   {
      *     "classes": [
-     *       { "title": "2SOF", ... },
-     *       { "title": "2SOF-gym", ... }   <- meerdere klassen mogelijk
+     *       { "title": "2SOF", ... }
      *     ]
      *   }
      *
-     * WAT GEEFT DEZE METHODE TERUG?
-     *   - De titel van de eerste klas, bv. "2SOF"
-     *   - "onbekend" als de gebruiker geen klassen heeft of de API faalt
-     *
      * @param sourcedId  de OneRoster-ID van de gebruiker, bv. "abc123"
-     * @return           de klasnaam als String, bv. "2SOF"
+     * @return           de klasnaam als String, bv. "2SOF", of "onbekend" bij mislukking
      ***/
     public String getKlasBySourcedId(String sourcedId) {
         try {
-            // Bouw de URL op: .../users/{sourcedId}/classes
+            String accessToken = getAccessToken();
+            if (accessToken == null) {
+                System.err.println("[OneRoster] Geen access token beschikbaar, kan klas niet ophalen.");
+                return "onbekend";
+            }
+
             String url = baseUrl + "/users/" + sourcedId + "/classes";
 
-            // Maak het HTTP-verzoek met de Authorization header
-            HttpEntity<Void> request = new HttpEntity<>(buildAuthHeaders());
+            HttpEntity<Void> request = new HttpEntity<>(buildBearerHeaders(accessToken));
 
-            // Verstuur en lees het antwoord
             ResponseEntity<Map> response = restTemplate.exchange(
                     url,
                     HttpMethod.GET,
@@ -197,19 +287,15 @@ public class OneRosterService {
                     Map.class
             );
 
-            // Het antwoord bevat een "classes" lijst
             @SuppressWarnings("unchecked")
             List<Map<String, Object>> classes =
                     (List<Map<String, Object>>) response.getBody().get("classes");
 
-            // Controleer of er klassen gevonden werden
             if (classes == null || classes.isEmpty()) {
                 System.out.println("[OneRoster] Geen klassen gevonden voor sourcedId: " + sourcedId);
                 return "onbekend";
             }
 
-            // Pak de titel van de eerste klas
-            // (een leerling zit normaal in slechts één klas)
             String klasnaam = (String) classes.get(0).get("title");
             System.out.println("[OneRoster] Klas gevonden: " + klasnaam);
             return klasnaam;
