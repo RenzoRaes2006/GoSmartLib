@@ -138,23 +138,72 @@ public class OneRosterService {
     /***
      * Zoekt de klas op via de sourcedId van de gebruiker.
      * Geeft de klasnaam terug (bv. "2SOF"), of "onbekend" bij mislukking.
+     *
+     * Flow (3 stappen want /users/{id}/classes bestaat niet in Smartschool):
+     *   1. /students/{sourcedId}                         → haal school-sourcedId op uit orgs
+     *   2. /schools/{schoolId}/enrollments?filter=...    → haal class-sourcedId op
+     *   3. /classes/{classSourcedId}                     → haal klasnaam op
      ***/
     public String getKlasBySourcedId(String sourcedId) {
         try {
             String accessToken = getAccessToken();
             if (accessToken == null) return "onbekend";
 
-            String url = baseUrl + "/users/" + sourcedId + "/classes";
-            System.out.println("[OneRoster] Klas ophalen via: " + url);
+            // Stap 1: haal de student op om de school-sourcedId te vinden
+            String studentUrl = baseUrl + "/students/" + sourcedId;
+            System.out.println("[OneRoster] Stap 1 - Student ophalen via: " + studentUrl);
 
-            // Tijdelijk als String ophalen om te zien wat de server exact teruggeeft
-            ResponseEntity<String> response = restTemplate.exchange(
-                    url, HttpMethod.GET, new HttpEntity<>(buildBearerHeaders(accessToken)), String.class);
+            ResponseEntity<Map> studentResponse = restTemplate.exchange(
+                    studentUrl, HttpMethod.GET, new HttpEntity<>(buildBearerHeaders(accessToken)), Map.class);
 
-            System.out.println("[OneRoster] Status: " + response.getStatusCode());
-            System.out.println("[OneRoster] Raw response: " + response.getBody());
+            @SuppressWarnings("unchecked")
+            Map<String, Object> student = (Map<String, Object>) studentResponse.getBody().get("user");
+            @SuppressWarnings("unchecked")
+            List<Map<String, Object>> orgs = (List<Map<String, Object>>) student.get("orgs");
 
-            return "onbekend";
+            if (orgs == null || orgs.isEmpty()) {
+                System.out.println("[OneRoster] Geen school gevonden voor student: " + sourcedId);
+                return "onbekend";
+            }
+
+            String schoolSourcedId = (String) orgs.get(0).get("sourcedId");
+            System.out.println("[OneRoster] School gevonden: " + schoolSourcedId);
+
+            // Stap 2: haal enrollments op voor die school, gefilterd op deze student
+            String enrollmentsUrl = baseUrl + "/schools/" + schoolSourcedId
+                    + "/enrollments?filter=user.sourcedId='" + sourcedId + "'";
+            System.out.println("[OneRoster] Stap 2 - Enrollments ophalen via: " + enrollmentsUrl);
+
+            ResponseEntity<Map> enrollmentsResponse = restTemplate.exchange(
+                    enrollmentsUrl, HttpMethod.GET, new HttpEntity<>(buildBearerHeaders(accessToken)), Map.class);
+
+            @SuppressWarnings("unchecked")
+            List<Map<String, Object>> enrollments =
+                    (List<Map<String, Object>>) enrollmentsResponse.getBody().get("enrollments");
+
+            if (enrollments == null || enrollments.isEmpty()) {
+                System.out.println("[OneRoster] Geen enrollments gevonden voor: " + sourcedId);
+                return "onbekend";
+            }
+
+            @SuppressWarnings("unchecked")
+            Map<String, Object> classRef = (Map<String, Object>) enrollments.get(0).get("class");
+            String classSourcedId = (String) classRef.get("sourcedId");
+            System.out.println("[OneRoster] Class sourcedId gevonden: " + classSourcedId);
+
+            // Stap 3: haal de klasnaam op via de class-sourcedId
+            String classUrl = baseUrl + "/classes/" + classSourcedId;
+            System.out.println("[OneRoster] Stap 3 - Klas ophalen via: " + classUrl);
+
+            ResponseEntity<Map> classResponse = restTemplate.exchange(
+                    classUrl, HttpMethod.GET, new HttpEntity<>(buildBearerHeaders(accessToken)), Map.class);
+
+            @SuppressWarnings("unchecked")
+            Map<String, Object> klas = (Map<String, Object>) classResponse.getBody().get("class");
+            String klasnaam = (String) klas.get("title");
+
+            System.out.println("[OneRoster] Klas gevonden: " + klasnaam);
+            return klasnaam;
 
         } catch (Exception e) {
             System.err.println("[OneRoster] Fout bij ophalen klas voor '" + sourcedId + "': " + e.getMessage());
