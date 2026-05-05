@@ -99,7 +99,7 @@ public class OneRosterService {
         headers.set("Authorization", "Bearer " + accessToken);
         headers.set("Accept", "application/json");
         return headers;
-    }
+    } 
 
     /***
      * Zoekt een gebruiker op via zijn Smartschool-username.
@@ -147,21 +147,14 @@ public class OneRosterService {
             String url = baseUrl + "/users/" + sourcedId + "/classes";
             System.out.println("[OneRoster] Klas ophalen via: " + url);
 
-            ResponseEntity<Map> response = restTemplate.exchange(
-                    url, HttpMethod.GET, new HttpEntity<>(buildBearerHeaders(accessToken)), Map.class);
+            // Tijdelijk als String ophalen om te zien wat de server exact teruggeeft
+            ResponseEntity<String> response = restTemplate.exchange(
+                    url, HttpMethod.GET, new HttpEntity<>(buildBearerHeaders(accessToken)), String.class);
 
-            @SuppressWarnings("unchecked")
-            List<Map<String, Object>> classes =
-                    (List<Map<String, Object>>) response.getBody().get("classes");
+            System.out.println("[OneRoster] Status: " + response.getStatusCode());
+            System.out.println("[OneRoster] Raw response: " + response.getBody());
 
-            if (classes == null || classes.isEmpty()) {
-                System.out.println("[OneRoster] Geen klas gevonden voor sourcedId: " + sourcedId);
-                return "onbekend";
-            }
-
-            String klasnaam = (String) classes.get(0).get("title");
-            System.out.println("[OneRoster] Klas gevonden: " + klasnaam);
-            return klasnaam;
+            return "onbekend";
 
         } catch (Exception e) {
             System.err.println("[OneRoster] Fout bij ophalen klas voor '" + sourcedId + "': " + e.getMessage());
