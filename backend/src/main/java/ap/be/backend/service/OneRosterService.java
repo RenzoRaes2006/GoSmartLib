@@ -4,29 +4,26 @@ import ap.be.backend.dto.OneRosterUser;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 
 /***
  * Haalt via de OneRoster API de rol en klas op van een ingelogde gebruiker.
  *
+ * Authenticatie: Basic Auth — client_id en client_secret worden bij elk verzoek meegestuurd.
+ *
  * Flow:
- *   1. fetchNewAccessToken() — vraag een tijdelijk toegangstoken op
- *   2. getUserByUsername()   — zoek de gebruiker op, geeft rol + sourcedId terug
- *   3. getKlasBySourcedId()  — zoek de klas op via de sourcedId
+ *   1. getUserByUsername()   — zoek de gebruiker op, geeft rol + sourcedId terug
+ *   2. getKlasBySourcedId()  — zoek de klas op via de sourcedId
  ***/
 @Service
 public class OneRosterService {
 
     @Value("${oneroster.base-url}")
     private String baseUrl;
-
-    @Value("${oneroster.token-url}")
-    private String tokenUrl;
 
     @Value("${oneroster.username}")
     private String clientId;
@@ -36,72 +33,15 @@ public class OneRosterService {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
-    // Cache: bewaar het token zodat we het niet bij elke login opnieuw hoeven op te halen.
-    private String cachedAccessToken = null;
-    private long tokenExpiresAt = 0;
-
     /***
-     * Geeft een geldig access token terug.
-     * Hergebruikt het gecachede token als het nog geldig is, anders haalt het een nieuw op.
+     * Bouwt een Authorization header met Basic Auth: base64(client_id:client_secret).
+     * Wordt meegestuurd bij elk verzoek naar de OneRoster API.
      ***/
-    private String getAccessToken() {
-        boolean tokenIsStillValid = cachedAccessToken != null
-                && System.currentTimeMillis() < tokenExpiresAt - 30_000;
-
-        if (tokenIsStillValid) {
-            System.out.println("[OneRoster] Gecached token hergebruikt.");
-            return cachedAccessToken;
-        }
-
-        return fetchNewAccessToken();
-    }
-
-    /***
-     * Haalt een nieuw access token op bij het OneRoster /token endpoint.
-     *
-     * Stuurt: client_id + client_secret + grant_type allemaal in de body
-     * Krijgt terug: een access_token dat tijdelijk toegang geeft tot de API
-     ***/
-    private String fetchNewAccessToken() {
-        try {
-            System.out.println("[OneRoster] Token ophalen via: " + tokenUrl);
-
-            // Credentials als Basic Auth header: base64(client_id:client_secret)
-            String encoded = java.util.Base64.getEncoder()
-                    .encodeToString((clientId + ":" + clientSecret).getBytes());
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.set("Authorization", "Basic " + encoded);
-            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-
-            MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
-            body.add("grant_type", "client_credentials");
-
-            ResponseEntity<Map> response = restTemplate.exchange(
-                    tokenUrl, HttpMethod.POST, new HttpEntity<>(body, headers), Map.class);
-
-            String accessToken = (String) response.getBody().get("access_token");
-            long expiresIn = Long.parseLong(response.getBody().getOrDefault("expires_in", 3600).toString());
-
-            // Sla het token en de vervaltijd op in de cache
-            cachedAccessToken = accessToken;
-            tokenExpiresAt = System.currentTimeMillis() + (expiresIn * 1000);
-
-            System.out.println("[OneRoster] Nieuw access token opgehaald (geldig voor " + expiresIn + "s).");
-            return accessToken;
-
-        } catch (Exception e) {
-            System.err.println("[OneRoster] Fout bij ophalen access token: " + e.getMessage());
-            return null;
-        }
-    }
-
-    /***
-     * Stuurt de Bearer token mee als Authorization header bij elk API-verzoek.
-     ***/
-    private HttpHeaders buildBearerHeaders(String accessToken) {
+    private HttpHeaders buildAuthHeaders() {
+        String encoded = Base64.getEncoder()
+                .encodeToString((clientId + ":" + clientSecret).getBytes());
         HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "Bearer " + accessToken);
+        headers.set("Authorization", "Basic " + encoded);
         return headers;
     }
 
@@ -111,12 +51,11 @@ public class OneRosterService {
      ***/
     public OneRosterUser getUserByUsername(String username) {
         try {
-            String accessToken = getAccessToken();
-            if (accessToken == null) return null;
-
             String url = baseUrl + "/users?filter=username='" + username + "'";
+            System.out.println("[OneRoster] Gebruiker ophalen via: " + url);
+
             ResponseEntity<Map> response = restTemplate.exchange(
-                    url, HttpMethod.GET, new HttpEntity<>(buildBearerHeaders(accessToken)), Map.class);
+                    url, HttpMethod.GET, new HttpEntity<>(buildAuthHeaders()), Map.class);
 
             @SuppressWarnings("unchecked")
             List<Map<String, Object>> users =
@@ -143,12 +82,11 @@ public class OneRosterService {
      ***/
     public String getKlasBySourcedId(String sourcedId) {
         try {
-            String accessToken = getAccessToken();
-            if (accessToken == null) return "onbekend";
-
             String url = baseUrl + "/users/" + sourcedId + "/classes";
+            System.out.println("[OneRoster] Klas ophalen via: " + url);
+
             ResponseEntity<Map> response = restTemplate.exchange(
-                    url, HttpMethod.GET, new HttpEntity<>(buildBearerHeaders(accessToken)), Map.class);
+                    url, HttpMethod.GET, new HttpEntity<>(buildAuthHeaders()), Map.class);
 
             @SuppressWarnings("unchecked")
             List<Map<String, Object>> classes =
