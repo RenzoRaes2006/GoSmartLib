@@ -54,8 +54,8 @@ export class AuthService {
       role: decoded.role,   // "student" of "teacher" van OneRoster
       klas: decoded.klas ?? 'onbekend'  // klasnaam van OneRoster, fallback naar "onbekend"
     });
-    console.log('[Auth] Token decoded:', decoded);
-    console.log('[Auth] Ingelogde gebruiker:', this.currentUser());
+    // [DEBUG] console.log('[Auth] Token decoded:', decoded);
+    // [DEBUG] console.log('[Auth] Ingelogde gebruiker:', this.currentUser());
   }
 
   logout() {

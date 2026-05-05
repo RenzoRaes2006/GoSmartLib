@@ -49,7 +49,7 @@ public class OneRosterService {
                 && System.currentTimeMillis() < tokenExpiresAt - 30_000;
 
         if (tokenIsStillValid) {
-            System.out.println("[OneRoster] Gecached token hergebruikt.");
+            // [DEBUG] System.out.println("[OneRoster] Gecached token hergebruikt.");
             return cachedAccessToken;
         }
         return fetchNewAccessToken();
@@ -62,7 +62,7 @@ public class OneRosterService {
      ***/
     private String fetchNewAccessToken() {
         try {
-            System.out.println("[OneRoster] Token ophalen via: " + tokenUrl);
+            // [DEBUG] System.out.println("[OneRoster] Token ophalen via: " + tokenUrl);
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -81,7 +81,7 @@ public class OneRosterService {
             cachedAccessToken = accessToken;
             tokenExpiresAt = System.currentTimeMillis() + (expiresIn * 1000);
 
-            System.out.println("[OneRoster] Nieuw access token opgehaald (geldig voor " + expiresIn + "s).");
+            // [DEBUG] System.out.println("[OneRoster] Nieuw access token opgehaald (geldig voor " + expiresIn + "s).");
             return accessToken;
 
         } catch (Exception e) {
@@ -99,7 +99,7 @@ public class OneRosterService {
         headers.set("Authorization", "Bearer " + accessToken);
         headers.set("Accept", "application/json");
         return headers;
-    } 
+    }
 
     /***
      * Zoekt een gebruiker op via zijn Smartschool-username.
@@ -111,7 +111,7 @@ public class OneRosterService {
             if (accessToken == null) return null;
 
             String url = baseUrl + "/users?filter=username='" + username + "'";
-            System.out.println("[OneRoster] Gebruiker ophalen via: " + url);
+            // [DEBUG] System.out.println("[OneRoster] Gebruiker ophalen via: " + url);
 
             ResponseEntity<Map> response = restTemplate.exchange(
                     url, HttpMethod.GET, new HttpEntity<>(buildBearerHeaders(accessToken)), Map.class);
@@ -121,12 +121,12 @@ public class OneRosterService {
                     (List<Map<String, Object>>) response.getBody().get("users");
 
             if (users == null || users.isEmpty()) {
-                System.out.println("[OneRoster] Geen gebruiker gevonden voor: " + username);
+                // [DEBUG] System.out.println("[OneRoster] Geen gebruiker gevonden voor: " + username);
                 return null;
             }
 
             Map<String, Object> user = users.get(0);
-            System.out.println("[OneRoster] Gebruiker gevonden: " + user.get("sourcedId") + ", rol: " + user.get("role"));
+            // [DEBUG] System.out.println("[OneRoster] Gebruiker gevonden: " + user.get("sourcedId") + ", rol: " + user.get("role"));
             return new OneRosterUser((String) user.get("sourcedId"), (String) user.get("role"));
 
         } catch (Exception e) {
@@ -151,7 +151,7 @@ public class OneRosterService {
 
             // Stap 1: haal de student op om de school-sourcedId te vinden
             String studentUrl = baseUrl + "/students/" + sourcedId;
-            System.out.println("[OneRoster] Stap 1 - Student ophalen via: " + studentUrl);
+            // [DEBUG] System.out.println("[OneRoster] Stap 1 - Student ophalen via: " + studentUrl);
 
             ResponseEntity<Map> studentResponse = restTemplate.exchange(
                     studentUrl, HttpMethod.GET, new HttpEntity<>(buildBearerHeaders(accessToken)), Map.class);
@@ -162,17 +162,17 @@ public class OneRosterService {
             List<Map<String, Object>> orgs = (List<Map<String, Object>>) student.get("orgs");
 
             if (orgs == null || orgs.isEmpty()) {
-                System.out.println("[OneRoster] Geen school gevonden voor student: " + sourcedId);
+                // [DEBUG] System.out.println("[OneRoster] Geen school gevonden voor student: " + sourcedId);
                 return "onbekend";
             }
 
             String schoolSourcedId = (String) orgs.get(0).get("sourcedId");
-            System.out.println("[OneRoster] School gevonden: " + schoolSourcedId);
+            // [DEBUG] System.out.println("[OneRoster] School gevonden: " + schoolSourcedId);
 
             // Stap 2: haal enrollments op voor die school, gefilterd op deze student
             String enrollmentsUrl = baseUrl + "/schools/" + schoolSourcedId
                     + "/enrollments?filter=user.sourcedId='" + sourcedId + "'";
-            System.out.println("[OneRoster] Stap 2 - Enrollments ophalen via: " + enrollmentsUrl);
+            // [DEBUG] System.out.println("[OneRoster] Stap 2 - Enrollments ophalen via: " + enrollmentsUrl);
 
             ResponseEntity<Map> enrollmentsResponse = restTemplate.exchange(
                     enrollmentsUrl, HttpMethod.GET, new HttpEntity<>(buildBearerHeaders(accessToken)), Map.class);
@@ -182,18 +182,18 @@ public class OneRosterService {
                     (List<Map<String, Object>>) enrollmentsResponse.getBody().get("enrollments");
 
             if (enrollments == null || enrollments.isEmpty()) {
-                System.out.println("[OneRoster] Geen enrollments gevonden voor: " + sourcedId);
+                // [DEBUG] System.out.println("[OneRoster] Geen enrollments gevonden voor: " + sourcedId);
                 return "onbekend";
             }
 
             @SuppressWarnings("unchecked")
             Map<String, Object> classRef = (Map<String, Object>) enrollments.get(0).get("class");
             String classSourcedId = (String) classRef.get("sourcedId");
-            System.out.println("[OneRoster] Class sourcedId gevonden: " + classSourcedId);
+            // [DEBUG] System.out.println("[OneRoster] Class sourcedId gevonden: " + classSourcedId);
 
             // Stap 3: haal de klasnaam op via de class-sourcedId
             String classUrl = baseUrl + "/classes/" + classSourcedId;
-            System.out.println("[OneRoster] Stap 3 - Klas ophalen via: " + classUrl);
+            // [DEBUG] System.out.println("[OneRoster] Stap 3 - Klas ophalen via: " + classUrl);
 
             ResponseEntity<Map> classResponse = restTemplate.exchange(
                     classUrl, HttpMethod.GET, new HttpEntity<>(buildBearerHeaders(accessToken)), Map.class);
@@ -202,7 +202,7 @@ public class OneRosterService {
             Map<String, Object> klas = (Map<String, Object>) classResponse.getBody().get("class");
             String klasnaam = (String) klas.get("title");
 
-            System.out.println("[OneRoster] Klas gevonden: " + klasnaam);
+            // [DEBUG] System.out.println("[OneRoster] Klas gevonden: " + klasnaam);
             return klasnaam;
 
         } catch (Exception e) {
