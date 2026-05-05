@@ -23,8 +23,15 @@ export class LoginSuccessComponent implements OnInit {
         // 2. Werk de ingelogde gebruiker bij in de app-state (signals)
         this.authService.setUserFromToken(token);
 
-        // 3. Stuur door naar de homepagina (token verdwijnt ook uit de adresbalk)
-        this.router.navigate(['/']);
+        // 3. Stuur door op basis van rol
+        const role = this.authService.currentUser()?.role;
+        if (role === 'teacher') {
+          this.router.navigate(['/leerkracht-dashboard']);
+        } else if (role === 'beheerder') {
+          this.router.navigate(['/admin']);
+        } else {
+          this.router.navigate(['/']);
+        }
       } else {
         this.router.navigate(['/login']);
       }
