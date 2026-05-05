@@ -25,7 +25,7 @@ export class GoogleBookService {
             pagina: boekInfo.pageCount ? boekInfo.pageCount.toString() : '',
             genre: boekInfo.categories ? boekInfo.categories.join(', ') : '',
             beschrijving: boekInfo.description || '',
-            afbeelding: boekInfo.imageLinks ? boekInfo.imageLinks.thumbnail : '',
+            afbeelding: boekInfo.imageLinks ? boekInfo.imageLinks.thumbnail.replace('http://', 'https://') : '',
           };
         }
         return null;
