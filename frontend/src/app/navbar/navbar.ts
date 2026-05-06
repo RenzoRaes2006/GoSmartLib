@@ -31,13 +31,8 @@ export class Navbar implements OnInit {
     this.toegankelijkheidService.toggleDyslexieFont();
   }
 
-  navigateHome() {
-    const role = this.authService.currentUser()?.role;
-    if (role === 'teacher') {
-      this.router.navigate(['/leerkracht-dashboard']);
-    } else {
-      this.router.navigate(['/']);
-    }
+  get homeRoute(): string {
+    return this.authService.currentUser()?.role === 'teacher' ? '/leerkracht-dashboard' : '/';
   }
 
   logout() {

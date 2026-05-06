@@ -7,11 +7,17 @@ import { AuthService } from '../services/AuthService';
 export const authGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
   const router = inject(Router);
+  const user = authService.currentUser();
 
-  if (authService.currentUser()) {
-    return true;
+  if (!user) {
+    router.navigate(['/login']);
+    return false;
   }
 
-  router.navigate(['/login']);
-  return false;
+  if (user.role === 'teacher' && state.url === '/') {
+    router.navigate(['/leerkracht-dashboard']);
+    return false;
+  }
+
+  return true;
 };
