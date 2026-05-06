@@ -31,6 +31,10 @@ export class Navbar implements OnInit {
     this.toegankelijkheidService.toggleDyslexieFont();
   }
 
+  get homeRoute(): string {
+    return this.authService.currentUser()?.role === 'teacher' ? '/leerkracht-dashboard' : '/';
+  }
+
   logout() {
     this.authService.logout();
     this.router.navigate(['/login']);
