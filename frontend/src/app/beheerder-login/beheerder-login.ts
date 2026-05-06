@@ -16,7 +16,9 @@ export class BeheerderLogin {
   foutmelding = '';
   bezig = false;
 
-  private apiUrl = 'https://api-sp09.cloud-ap.be';
+  private apiUrl = window.location.hostname === 'localhost'
+    ? 'http://localhost:8081'
+    : 'https://api-sp09.cloud-ap.be';
 
   constructor(
     private http: HttpClient,
