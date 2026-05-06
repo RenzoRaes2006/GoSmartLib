@@ -45,3 +45,16 @@
 .smartschool-btn:hover {
   background-color: #e67300;
 }
+
+.beheerder-link {
+  display: block;
+  margin-top: 16px;
+  font-size: 13px;
+  color: #999;
+  text-decoration: none;
+}
+
+.beheerder-link:hover {
+  color: #555;
+  text-decoration: underline;
+}

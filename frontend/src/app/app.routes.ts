@@ -24,10 +24,12 @@ import { KlassLeeslijstenOverzichtComponent } from './klass-leeslijsten-overzich
 import { KlassLeeslijstBeheerComponent } from './klass-leeslijst-beheer/klass-leeslijst-beheer';
 import { KlassenleeslijstenLeerlingComponent } from './klassenleeslijsten-leerling/klassenleeslijsten-leerling';
 import { KlassenleeslijstDetailLeerlingComponent } from './klassenleeslijst-detail-leerling/klassenleeslijst-detail-leerling';
+import { BeheerderLogin } from './beheerder-login/beheerder-login';
 
 export const routes: Routes = [
   // Geen guard
   { path: 'login', component: Login },
+  { path: 'beheerder-login', component: BeheerderLogin },
   { path: 'login-success', component: LoginSuccessComponent },
   { path: 'not-found', component: PageNotFound },
 
