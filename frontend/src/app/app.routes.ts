@@ -22,6 +22,7 @@ import { LeningenBeheerder } from './leningen-beheerder/leningen-beheerder';
 import { BeheerderDashboard } from './beheerder-dashboard/beheerder-dashboard';
 import { KlassLeeslijstenOverzichtComponent } from './klass-leeslijsten-overzicht/klass-leeslijsten-overzicht';
 import { KlassLeeslijstBeheerComponent } from './klass-leeslijst-beheer/klass-leeslijst-beheer';
+import { BulkOntlenenComponent } from './bulk-ontlenen-component/bulk-ontlenen-component';
 import { KlassenleeslijstenLeerlingComponent } from './klassenleeslijsten-leerling/klassenleeslijsten-leerling';
 import { KlassenleeslijstDetailLeerlingComponent } from './klassenleeslijst-detail-leerling/klassenleeslijst-detail-leerling';
 
@@ -46,6 +47,7 @@ export const routes: Routes = [
   { path: 'leerkracht-dashboard', component: Leerkrachtdashboard, canActivate: [teacherGuard] },
   { path: 'leeslijsten', component: KlassLeeslijstenOverzichtComponent, canActivate: [teacherGuard] },
   { path: 'leeslijsten/:id', component: KlassLeeslijstBeheerComponent, canActivate: [teacherGuard] },
+  { path: 'bulk-ontlenen', component: BulkOntlenenComponent, canActivate: [teacherGuard] },
 
   // adminGuard — enkel beheerders
   { path: 'admin', component: AdminDashboard, canActivate: [adminGuard] },

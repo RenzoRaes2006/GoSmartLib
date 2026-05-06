@@ -5,8 +5,12 @@ import ap.be.backend.entity.Boek;
 import ap.be.backend.entity.Gebruiker;
 import ap.be.backend.entity.LeeslijstMap;
 import ap.be.backend.entity.Uitlening;
+import ap.be.backend.exception.InvalidImportDataException;
 import ap.be.backend.exception.LeenVoorwaardeException;
+import ap.be.backend.exception.OnvoldoendeVoorraadException;
+import ap.be.backend.exception.ResourceNotFoundException;
 import ap.be.backend.repository.BoekRepository;
+import ap.be.backend.repository.GebruikerRepository;
 import ap.be.backend.repository.LeeslijstMapRepository;
 import ap.be.backend.repository.UitleningRepository;
 import ap.be.backend.service.GebruikerService;
@@ -37,6 +41,8 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class GebruikerServiceTest {
 
+    @Mock
+    private GebruikerRepository gebruikerRepository;
     @Mock
     private LeeslijstMapRepository leeslijstMapRepository;
 
@@ -492,5 +498,78 @@ public class GebruikerServiceTest {
 
         assertEquals("Je kunt een boek dat nog in aanvraag is niet verlengen.", exception.getMessage());
         verify(uitleningRepository, never()).save(any(Uitlening.class));
+    }
+
+    @Test
+    void givenValidData_whenBevestigBulkUitlening_thenSavesUitleningenAndUpdateStock() {
+        // Arrange
+        Long leraarId = 1L;
+        List<Long> boekIds = Arrays.asList(10L, 11L);
+
+        Gebruiker leraar = new Gebruiker();
+        leraar.setId(leraarId);
+
+        Boek boek1 = new Boek("De Hobbit", "Tolkien");
+        boek1.setId(10L);
+        boek1.setAantalExemplaren(3);
+
+        Boek boek2 = new Boek("1984", "Orwell");
+        boek2.setId(11L);
+        boek2.setAantalExemplaren(1);
+
+        when(gebruikerRepository.findById(leraarId)).thenReturn(Optional.of(leraar));
+        when(boekRepository.findById(10L)).thenReturn(Optional.of(boek1));
+        when(boekRepository.findById(11L)).thenReturn(Optional.of(boek2));
+
+        // Act
+        gebruikerService.bevestigBulkUitlening(leraarId, boekIds);
+
+        // Assert
+        assertEquals(2, boek1.getAantalExemplaren(), "Voorraad boek 1 moet met 1 verminderd zijn");
+        assertEquals(0, boek2.getAantalExemplaren(), "Voorraad boek 2 moet met 1 verminderd zijn");
+
+        verify(boekRepository, times(2)).save(any(Boek.class));
+        verify(uitleningRepository, times(2)).save(any(Uitlening.class));
+    }
+
+    @Test
+    void givenEmptyList_whenBevestigBulkUitlening_thenThrowsInvalidImportDataException() {
+        // Act & Assert
+        assertThrows(InvalidImportDataException.class, () -> {
+            gebruikerService.bevestigBulkUitlening(1L, Collections.emptyList());
+        });
+
+        verify(uitleningRepository, never()).save(any());
+    }
+
+    @Test
+    void givenNonExistingTeacher_whenBevestigBulkUitlening_thenThrowsResourceNotFoundException() {
+        // Arrange
+        when(gebruikerRepository.findById(99L)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(ResourceNotFoundException.class, () -> {
+            gebruikerService.bevestigBulkUitlening(99L, Arrays.asList(1L));
+        });
+    }
+
+    @Test
+    void givenOutOfStockBook_whenBevestigBulkUitlening_thenThrowsOnvoldoendeVoorraadException() {
+        // Arrange
+        Long leraarId = 1L;
+        Gebruiker leraar = new Gebruiker();
+        leraar.setId(leraarId);
+
+        Boek boekUitVerkocht = new Boek("Clean Code", "Robert C. Martin");
+        boekUitVerkocht.setId(5L);
+        boekUitVerkocht.setAantalExemplaren(0); // OUT OF STOCK
+
+        when(gebruikerRepository.findById(leraarId)).thenReturn(Optional.of(leraar));
+        when(boekRepository.findById(5L)).thenReturn(Optional.of(boekUitVerkocht));
+
+        // Act & Assert
+        assertThrows(OnvoldoendeVoorraadException.class, () -> {
+            gebruikerService.bevestigBulkUitlening(leraarId, Arrays.asList(5L));
+        });
     }
 }

@@ -10,16 +10,20 @@
     <article class="tile tile-search">
       <h2>Zoek leerling</h2>
 
-      <div class="search-row" style="display: flex; gap: 10px; margin-bottom: 20px;">
-        <input 
-          type="text" 
-          [(ngModel)]="zoekterm" 
-          (ngModelChange)="onSearch()" 
+      <div class="search-row" style="display: flex; gap: 10px; margin-bottom: 20px">
+        <input
+          type="text"
+          [(ngModel)]="zoekterm"
+          (ngModelChange)="onSearch()"
           placeholder="zoek op naam..."
-          style="flex: 1; padding: 10px; border-radius: 6px; border: 1px solid #ddd;"
+          style="flex: 1; padding: 10px; border-radius: 6px; border: 1px solid #ddd"
+        />
+
+        <select
+          [(ngModel)]="selectedClass"
+          (ngModelChange)="onFilterChange()"
+          aria-label="filter op klas"
         >
-        
-        <select [(ngModel)]="selectedClass" (ngModelChange)="onFilterChange()" aria-label="filter op klas">
           <option value="">alle klassen</option>
           <option value="1a">klas 1A</option>
           <option value="1b">klas 1B</option>
@@ -33,7 +37,8 @@
         @for (student of zichtbareLeerlingen(); track student.id) {
           <div class="result-card" (click)="openHistory(student)">
             <div class="avatar">
-              {{ student.voorNaam ? student.voorNaam.charAt(0) : '' }}{{ student.achternaam ? student.achternaam.charAt(0) : '' }}
+              {{ student.voorNaam ? student.voorNaam.charAt(0) : ''
+              }}{{ student.achternaam ? student.achternaam.charAt(0) : '' }}
             </div>
             <div>
               <h3>{{ student.voorNaam }} {{ student.achternaam }}</h3>
@@ -52,7 +57,11 @@
             <span class="pag-info">
               pagina {{ huidigePagina() + 1 }} van {{ totaalAantalPaginas() }}
             </span>
-            <button class="pag-btn" (click)="volgendePagina()" [disabled]="huidigePagina() === totaalAantalPaginas() - 1">
+            <button
+              class="pag-btn"
+              (click)="volgendePagina()"
+              [disabled]="huidigePagina() === totaalAantalPaginas() - 1"
+            >
               volgende &rarr;
             </button>
           </div>
@@ -67,7 +76,7 @@
       <article class="tile function-tile">
         <h3>Bulk-ontleningen</h3>
         <p>Start een groepsuitleen voor een volledige klas.</p>
-        <button type="button" class="function-btn">bulk ontlenen</button>
+        <a class="function-btn" href="/bulk-ontlenen"> bulk ontlenen </a>
       </article>
 
       <article class="tile function-tile">
@@ -82,6 +91,40 @@
         <a class="function-btn catalogus-btn" href="/catalogus">open catalogus</a>
       </article>
     </div>
+    <section class="class-loans-section" style="margin-top: 10px; margin-bottom: 32px">
+      <h2 class="section-title">Actieve bulk ontleningen</h2>
+
+      <div class="loans-grid">
+        @for (lening of actieveKlassenLeningen(); track lening.boek.id) {
+          <article class="tile loan-card" [class.warning-border]="lening.vervaltBinnenkort">
+            <div class="loan-header">
+              <h3>{{ lening.boek.titel }}</h3>
+              <span class="loan-count">{{ lening.aantal }}x</span>
+            </div>
+            <p class="loan-author">{{ lening.boek.auteur }}</p>
+
+            <div class="loan-footer">
+              <span class="loan-date"
+                >Inleveren voor:
+                <strong>{{ lening.inleverDatum | date: 'dd MMM yyyy' }}</strong></span
+              >
+              @if (lening.vervaltBinnenkort) {
+                <span class="alert-badge">Binnenkort inleveren</span>
+              }
+            </div>
+          </article>
+        } @empty {
+          <article
+            class="tile empty-loan-tile"
+            style="grid-column: span 12; text-align: center; padding: 30px"
+          >
+            <p style="color: #6b7280; font-size: 1.05rem; margin: 0">
+              Je hebt momenteel geen boeken in bulk ontleend voor de klas.
+            </p>
+          </article>
+        }
+      </div>
+    </section>
   </section>
 
   <section class="insights-section">
@@ -127,26 +170,36 @@
       </div>
 
       @if (leerlingStats()) {
-        <div class="stats-overview" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px;">
-          <div class="stat-item" style="background: #f0f7ff; padding: 15px; border-radius: 8px; text-align: center;">
-            <span style="display: block; font-size: 24px; font-weight: bold; color: #007bff;">
+        <div
+          class="stats-overview"
+          style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px"
+        >
+          <div
+            class="stat-item"
+            style="background: #f0f7ff; padding: 15px; border-radius: 8px; text-align: center"
+          >
+            <span style="display: block; font-size: 24px; font-weight: bold; color: #007bff">
               {{ leerlingStats().totaalGeleend }}
             </span>
             <small>boeken geleend</small>
           </div>
-          
-          <div class="stat-item" style="background: #e6fffa; padding: 15px; border-radius: 8px; text-align: center;">
-            <span style="display: block; font-size: 24px; font-weight: bold; color: #38a169;">
+
+          <div
+            class="stat-item"
+            style="background: #e6fffa; padding: 15px; border-radius: 8px; text-align: center"
+          >
+            <span style="display: block; font-size: 24px; font-weight: bold; color: #38a169">
               {{ leerlingStats().opTijdTerug }}
             </span>
             <small>op tijd terug</small>
           </div>
         </div>
 
-        <div class="history-section" style="margin-top: 25px;">
+        <div class="history-section" style="margin-top: 25px">
           <h4>recente activiteit</h4>
-          <p style="color: #666; font-style: italic;">
-            Van de {{ leerlingStats().totaalGeleend }} boeken zijn er {{ leerlingStats().teLaat }} te laat ingeleverd.
+          <p style="color: #666; font-style: italic">
+            Van de {{ leerlingStats().totaalGeleend }} boeken zijn er
+            {{ leerlingStats().teLaat }} te laat ingeleverd.
           </p>
         </div>
       } @else {

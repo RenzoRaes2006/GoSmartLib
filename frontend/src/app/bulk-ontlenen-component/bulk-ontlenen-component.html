@@ -1,0 +1,151 @@
+<div class="bulk-container">
+  <header class="page-header">
+    <h2>Bulk Ontlenen</h2>
+    <p>Selecteer boeken en kies het gewenste aantal exemplaren voor in de klas.</p>
+  </header>
+
+  <div class="messages">
+    @if (errorMessage()) {
+      <div class="message error">{{ errorMessage() }}</div>
+    }
+    @if (successMessage()) {
+      <div class="message success">{{ successMessage() }}</div>
+    }
+  </div>
+
+  <div class="layout-grid">
+    <section class="search-section">
+      <div class="search-bar">
+        <input
+          type="text"
+          [(ngModel)]="zoekterm"
+          (keyup.enter)="onFilterChange()"
+          placeholder="Zoek op titel, auteur of ISBN..."
+          class="search-input"
+        />
+        <select [(ngModel)]="selectedGenre" (change)="onFilterChange()" class="filter-select">
+          <option value="">Alle genres</option>
+          @for (genre of beschikbareGenres; track genre) {
+            <option [value]="genre">{{ genre }}</option>
+          }
+        </select>
+        <button class="btn-primary" (click)="onFilterChange()">Zoeken</button>
+      </div>
+
+      <div class="results-grid">
+        @if (isSearching()) {
+          <div class="loading-state">
+            <div class="spinner"></div>
+            <p>Boeken laden...</p>
+          </div>
+        } @else {
+          @for (boek of zoekResultaten(); track boek.id) {
+            <div class="book-card" [class.in-cart]="mandjeIds().includes(boek.id!)">
+              <div class="book-info">
+                <div class="book-header">
+                  <h4>{{ boek.titel }}</h4>
+                  <span class="stock-badge">{{ boek.aantalExemplaren }} op voorraad</span>
+                </div>
+                <p class="author">{{ boek.auteur }}</p>
+                <div class="tags">
+                  @if (boek.genre && boek.genre.length > 0) {
+                    <span class="genre-tag">{{ boek.genre[0] }}</span>
+                  }
+                </div>
+              </div>
+              <button class="btn-add" (click)="voegToeAanMandje(boek)">
+                {{ mandjeIds().includes(boek.id!) ? '+ Extra toevoegen' : '+ In mandje' }}
+              </button>
+            </div>
+          } @empty {
+            <div class="empty-state">
+              <span class="empty-icon">📚</span>
+              <p>Geen beschikbare boeken gevonden voor deze zoekopdracht.</p>
+            </div>
+          }
+        }
+      </div>
+    </section>
+
+    <aside class="cart-sidebar">
+      <div class="cart-header">
+        <h3>Jouw Selectie</h3>
+        <span class="cart-count">{{ totaalAantalBoeken() }} exemplaren</span>
+      </div>
+
+      <div class="cart-items">
+        @for (item of mandje(); track item.boek.id) {
+          <div class="cart-item">
+            <div class="item-main">
+              <span class="item-title" [title]="item.boek.titel">{{ item.boek.titel }}</span>
+              <span class="item-author">{{ item.boek.auteur }}</span>
+            </div>
+
+            <div class="item-actions">
+              <div class="quantity-controls">
+                <button
+                  class="btn-qty"
+                  (click)="updateAantal(item.boek.id!, item.aantal - 1)"
+                  [disabled]="item.aantal <= 1"
+                >
+                  -
+                </button>
+                <span class="qty-display">{{ item.aantal }}</span>
+                <button
+                  class="btn-qty"
+                  (click)="updateAantal(item.boek.id!, item.aantal + 1)"
+                  [disabled]="item.aantal >= item.boek.aantalExemplaren"
+                >
+                  +
+                </button>
+              </div>
+              <button
+                class="btn-remove"
+                (click)="verwijderUitMandje(item.boek.id!)"
+                title="Verwijder dit boek"
+              >
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path
+                    d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+                  ></path>
+                  <line x1="10" y1="11" x2="10" y2="17"></line>
+                  <line x1="14" y1="11" x2="14" y2="17"></line>
+                </svg>
+              </button>
+            </div>
+          </div>
+        } @empty {
+          <div class="cart-empty">
+            <div class="empty-cart-icon">🛒</div>
+            <p>Je mandje is nog leeg.</p>
+            <small>Zoek links naar boeken en voeg ze toe.</small>
+          </div>
+        }
+      </div>
+
+      <div class="cart-footer">
+        <button
+          class="btn-confirm"
+          [disabled]="mandje().length === 0 || isSubmitting()"
+          (click)="bevestigBulkOntlening()"
+        >
+          {{
+            isSubmitting()
+              ? 'Bezig met verwerken...'
+              : 'Bevestig Ontlening (' + totaalAantalBoeken() + ')'
+          }}
+        </button>
+      </div>
+    </aside>
+  </div>
+</div>

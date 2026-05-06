@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
 @RequestMapping("/api/gebruiker")
@@ -76,6 +77,16 @@ public class GebruikerController {
             @PathVariable Long boekId) {
         gebruikerService.bevestigUitlening(gebruikerId, boekId);
         return ResponseEntity.ok("Boek succesvol geleend! Je hebt 1 maand de tijd om het terug te brengen.");
+    }
+
+    @PostMapping("/{gebruikerId}/lenen/bulk")
+    public ResponseEntity<String> leenBoekenBulk(
+            @PathVariable Long gebruikerId,
+            @RequestBody List<Long> boekIds) {
+
+        gebruikerService.bevestigBulkUitlening(gebruikerId, boekIds);
+        return ResponseEntity
+                .ok(boekIds.size() + " boeken succesvol geleend! Je hebt 1 maand de tijd om ze terug te brengen.");
     }
 
     @GetMapping("/aanvragen")
