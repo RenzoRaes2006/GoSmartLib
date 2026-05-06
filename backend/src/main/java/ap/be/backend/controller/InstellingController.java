@@ -1,6 +1,7 @@
 package ap.be.backend.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,6 +24,7 @@ public class InstellingController {
         return ResponseEntity.ok(instellingService.getLeenLimiet());
     }
 
+    @PreAuthorize("hasRole('BEHEERDER')")
     @PutMapping("/leenlimiet")
     public ResponseEntity<String> updateLeenLimiet(@RequestBody int nieuweLimiet) {
         if (nieuweLimiet < 0) {

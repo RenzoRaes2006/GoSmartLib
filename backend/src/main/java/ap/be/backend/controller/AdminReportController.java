@@ -3,6 +3,7 @@ package ap.be.backend.controller;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,6 +15,7 @@ import ap.be.backend.service.GerapporteerdeBeoordelingService;
 
 @RestController
 @RequestMapping("/api")
+@PreAuthorize("hasRole('BEHEERDER')")
 public class AdminReportController {
     private final GerapporteerdeBeoordelingService gerapporteerdeBeoordelingService;
 

@@ -5,6 +5,7 @@ import ap.be.backend.dto.KlassLeeslijstResponseDTO;
 import ap.be.backend.service.KlassLeeslijstService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,6 +27,7 @@ public class KlassLeeslijstController {
      * De leerkracht-ID komt uit de URL (identificatie),
      * de naam uit de body (form-data).
      */
+    @PreAuthorize("hasRole('TEACHER')")
     @PostMapping("/leerkracht/{leerkrachtId}")
     public ResponseEntity<KlassLeeslijstResponseDTO> createLeeslijst(
             @PathVariable Long leerkrachtId,
@@ -51,6 +53,7 @@ public class KlassLeeslijstController {
      * Voegt een boek toe aan een bestaande lijst (1-per-1 flow).
      * Gebruikt de BoekMapper voor de conversie naar DTO.
      */
+    @PreAuthorize("hasRole('TEACHER')")
     @PostMapping("/{leeslijstId}/boeken/{boekId}")
     public ResponseEntity<KlassLeeslijstResponseDTO> addBoekToLeeslijst(
             @PathVariable Long leeslijstId,
@@ -65,6 +68,7 @@ public class KlassLeeslijstController {
         return ResponseEntity.ok(leeslijstService.getLeeslijstById(id));
     }
 
+    @PreAuthorize("hasRole('TEACHER')")
     @DeleteMapping("/{leeslijstId}/boeken/{boekId}")
     public ResponseEntity<KlassLeeslijstResponseDTO> removeBoekFromLeeslijst(
             @PathVariable Long leeslijstId,
@@ -72,6 +76,7 @@ public class KlassLeeslijstController {
         return ResponseEntity.ok(leeslijstService.removeBoekFromLeeslijst(leeslijstId, boekId));
     }
 
+    @PreAuthorize("hasRole('TEACHER')")
     @PutMapping("/{id}/naam")
     public ResponseEntity<KlassLeeslijstResponseDTO> updateLeeslijstNaam(
             @PathVariable Long id,
@@ -79,6 +84,7 @@ public class KlassLeeslijstController {
         return ResponseEntity.ok(leeslijstService.updateLeeslijstNaam(id, nieuweNaam));
     }
 
+    @PreAuthorize("hasRole('TEACHER')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteLeeslijst(@PathVariable Long id) {
         leeslijstService.deleteLeeslijst(id);

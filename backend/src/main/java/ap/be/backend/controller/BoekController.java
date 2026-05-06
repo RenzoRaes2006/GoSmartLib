@@ -19,6 +19,7 @@ import ap.be.backend.entity.Boek;
 import ap.be.backend.service.BoekImportService;
 import ap.be.backend.service.BoekService;
 import jakarta.validation.Valid;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.data.domain.Sort;
 
@@ -66,6 +67,7 @@ public class BoekController {
                 leesniveau, didactischMateriaal, didactischeSubcategorie, page, size, sort);
     }
 
+    @PreAuthorize("hasRole('BEHEERDER')")
     @PostMapping("/api/boeken")
     public ResponseEntity<Boek> postBoek(@Valid @RequestBody BoekDTO boekDTO) {
         Boek nieuwBoek = boekService.addBoek(boekDTO);
@@ -86,6 +88,7 @@ public class BoekController {
         return ResponseEntity.ok(boek);
     }
 
+    @PreAuthorize("hasRole('BEHEERDER')")
     @PutMapping("/api/boeken/{id}")
     public ResponseEntity<Boek> updateBoek(@PathVariable Long id, @Valid @RequestBody BoekDTO boekDTO) {
         Boek geupdate = boekService.updateBoek(id, boekDTO);
@@ -95,6 +98,7 @@ public class BoekController {
         return ResponseEntity.ok(geupdate);
     }
 
+    @PreAuthorize("hasRole('BEHEERDER')")
     @DeleteMapping("/api/boeken/{id}")
     public ResponseEntity<String> deleteBoek(@PathVariable Long id) {
         boolean deleted = boekService.deleteBoek(id);
@@ -116,6 +120,7 @@ public class BoekController {
         return ResponseEntity.ok(populaireBoeken);
     }
 
+    @PreAuthorize("hasRole('BEHEERDER')")
     @PostMapping("/api/boeken/import/preview")
     public ResponseEntity<?> previewImporteerBoeken(@RequestParam("file") MultipartFile file) {
         if (file.isEmpty()) {
@@ -133,6 +138,7 @@ public class BoekController {
         }
     }
 
+    @PreAuthorize("hasRole('BEHEERDER')")
     @PostMapping("/api/boeken/import/bevestig")
     public ResponseEntity<String> bevestigImport(@RequestBody List<Boek> boekenLijst) {
         if (boekenLijst == null || boekenLijst.isEmpty()) {

@@ -106,6 +106,15 @@ public class JwtService {
                 .getSubject();
     }
 
+    public String extractRole(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .get("role", String.class);
+    }
+
     /***
      * TOKEN GELDIGHEID CONTROLEREN
      *

@@ -1,6 +1,7 @@
 package ap.be.backend.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,11 +22,13 @@ public class StatistiekController {
         this.statistiekService = statistiekService;
     }
 
+    @PreAuthorize("hasRole('BEHEERDER')")
     @GetMapping("/admin")
     public ResponseEntity<AdminStatistiekDTO> getAdminStatistieken() {
         return ResponseEntity.ok(statistiekService.getAdminStatistieken());
     }
 
+    @PreAuthorize("hasRole('TEACHER')")
     @GetMapping("/leerkracht")
     public ResponseEntity<LeerkrachtStatistiekDTO> getLeerkrachtStatistieken(@RequestParam(required = false) String klasId) {
         return ResponseEntity.ok(statistiekService.getLeerkrachtStatistieken(klasId));

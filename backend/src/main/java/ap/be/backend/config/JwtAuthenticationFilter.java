@@ -11,7 +11,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Collections;
+import java.util.List;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 /***
  * BESTAND: JwtAuthenticationFilter.java
@@ -81,20 +82,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                  * aanmaken van de token hebben opgeslagen als "subject".
                  ***/
                 String smartschoolId = jwtService.extractSmartschoolId(token);
+                String role = jwtService.extractRole(token);
 
-                /***
-                 * Vertel Spring Security wie de ingelogde gebruiker is.
-                 * UsernamePasswordAuthenticationToken is de klasse die Spring gebruikt
-                 * om een "ingelogde gebruiker" voor te stellen.
-                 *
-                 * Parameters:
-                 *   - smartschoolId: de identifier van de gebruiker (= "principal")
-                 *   - null: geen wachtwoord nodig (we vertrouwen de JWT-token al)
-                 *   - Collections.emptyList(): geen specifieke rollen/permissions voor Spring
-                 *     (we beheren rollen zelf via de "role" claim in de token)
-                 ***/
+                List<SimpleGrantedAuthority> authorities = List.of(
+                        new SimpleGrantedAuthority("ROLE_" + role.toUpperCase())
+                );
+
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        smartschoolId, null, Collections.emptyList());
+                        smartschoolId, null, authorities);
 
                 /***
                  * Sla de herkende gebruiker op in de SecurityContext.

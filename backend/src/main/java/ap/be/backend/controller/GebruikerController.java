@@ -3,6 +3,7 @@ package ap.be.backend.controller;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -89,17 +90,20 @@ public class GebruikerController {
                 .ok(boekIds.size() + " boeken succesvol geleend! Je hebt 1 maand de tijd om ze terug te brengen.");
     }
 
+    @PreAuthorize("hasAnyRole('TEACHER', 'BEHEERDER')")
     @GetMapping("/aanvragen")
     public ResponseEntity<List<Uitlening>> getAlleAanvragen() {
         return ResponseEntity.ok(gebruikerService.getAlleAanvragen());
     }
 
+    @PreAuthorize("hasAnyRole('TEACHER', 'BEHEERDER')")
     @PutMapping("/aanvragen/{uitleningId}/goedkeuren")
     public ResponseEntity<String> keurGoed(@PathVariable Long uitleningId) {
         gebruikerService.keurAanvraagGoed(uitleningId);
         return ResponseEntity.ok("Aanvraag goedgekeurd. Uitleentermijn is gestart!");
     }
 
+    @PreAuthorize("hasAnyRole('TEACHER', 'BEHEERDER')")
     @PutMapping("/aanvragen/{uitleningId}/weigeren")
     public ResponseEntity<String> weiger(@PathVariable Long uitleningId) {
         gebruikerService.weigerAanvraag(uitleningId);

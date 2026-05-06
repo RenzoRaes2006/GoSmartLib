@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -15,6 +16,7 @@ import ap.be.backend.entity.Uitlening;
 
 @RestController
 @RequestMapping("/api/beheer")
+@PreAuthorize("hasRole('BEHEERDER')")
 public class BeheerController {
 
     private final GebruikerService gebruikerService;
