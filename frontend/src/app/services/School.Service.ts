@@ -8,8 +8,9 @@ import { Observable } from 'rxjs';
 export class SchoolService {
   private http = inject(HttpClient);
   
-  // point exactly to the schools endpoint on port 8081
-  private apiUrl = true ? 'http://localhost:8081/api/scholen' : 'https://api-sp09.cloud-ap.be/api/scholen';
+  private apiUrl = window.location.hostname === 'localhost'
+    ? 'http://localhost:8081/api/scholen'
+    : 'https://api-sp09.cloud-ap.be/api/scholen';
 
   // fetch the school "coat hooks" (basic info)
   getAlleScholen(): Observable<any[]> {
