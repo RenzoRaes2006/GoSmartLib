@@ -16,6 +16,11 @@ public class KlassLeeslijstController {
 
     private final KlassLeeslijstService leeslijstService;
 
+    @GetMapping("/alle")
+    public ResponseEntity<List<KlassLeeslijstResponseDTO>> getAllKlassenLeeslijsten() {
+        return ResponseEntity.ok(leeslijstService.getAllKlassenLeeslijsten());
+    }
+
     /**
      * Maakt een nieuwe leeslijst aan voor een specifieke leerkracht.
      * De leerkracht-ID komt uit de URL (identificatie),

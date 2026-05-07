@@ -16,23 +16,23 @@
 .back-link {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    margin-bottom: 20px;
-    background-color: #fff;
-    color: #333;
-    border: 1px solid #dccfb8;
-    padding: 8px 14px;
-    border-radius: 8px;
+    gap: 6px;
+    margin-bottom: 25px;
+    background-color: transparent;
+    color: #64748b;
+    border: none;
+    padding: 10px 0;
+    border-radius: 0;
     text-decoration: none;
-    font-size: 13px;
-    font-weight: 500;
-    transition: background-color 0.2s;
+    font-size: 15px;
+    font-weight: 600;
+    transition: color 0.2s ease;
+    cursor: pointer;
 }
 
 .back-link:hover {
-    text-decoration: underline;
-    background-color: #f9fafb;
-    color: #333;
+    color: #8c1b3f;
+    text-decoration: none;
 }
 
 .action-buttons {

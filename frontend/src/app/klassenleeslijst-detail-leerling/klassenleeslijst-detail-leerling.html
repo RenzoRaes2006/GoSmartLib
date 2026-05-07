@@ -1,0 +1,19 @@
+<div class="container">
+  @if (lijst()) {
+    <h2>{{ lijst()!.naam }}</h2>
+    <p>Deze lijst bevat {{ lijst()!.boeken.length }} boeken.</p>
+    <hr>
+
+    <div class="boeken-lijst">
+      @for (boek of lijst()!.boeken; track boek.id) {
+        <a [routerLink]="['/details', boek.id]" class="boek-card">
+          <img [src]="boek.afbeelding || 'standaard-cover.jpg'" alt="Cover" width="100"/>
+          <h4>{{ boek.titel }}</h4>
+          <p>{{ boek.auteur }}</p>
+        </a>
+      }
+    </div>
+  } @else {
+    <p>Lijst laden...</p>
+  }
+</div>
