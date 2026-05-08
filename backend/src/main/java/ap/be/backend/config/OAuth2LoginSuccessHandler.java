@@ -3,7 +3,6 @@ package ap.be.backend.config;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -38,39 +37,23 @@ import java.io.IOException;
  * 3. We maken een JWT-token aan (een versleuteld "paspoort" voor de frontend)
  * 4. We sturen de gebruiker door naar de frontend met de token in de URL
  *
- * TODO MORGEN: Hier OneRoster aanroepen om klas en rol op te halen
  ***/
 @Component
 public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
-    /***
-     * JwtService: de service die JWT-tokens kan aanmaken en lezen.
-     * (zie JwtService.java)
-     ***/
-    @Autowired
-    private JwtService jwtService;
+    private final JwtService jwtService;
+    private final UserRepository userRepository;
+    private final OneRosterService oneRosterService;
 
-    /***
-     * UserRepository: de verbinding met de "users" tabel in onze eigen database.
-     * Hiermee kunnen we gebruikers opzoeken en opslaan.
-     ***/
-    @Autowired
-    private UserRepository userRepository;
-
-    /***
-     * OneRosterService: haalt de officiële rol en klas op via de OneRoster API.
-     * Wordt gebruikt nadat Smartschool ons heeft verteld WIE de gebruiker is.
-     ***/
-    @Autowired
-    private OneRosterService oneRosterService;
-
-    /***
-     * frontendBaseUrl: de URL van de Angular frontend, gelezen uit application.properties.
-     * Voorbeeld: https://frontend-sp09.cloud-ap.be
-     * We hebben dit nodig om de gebruiker na het inloggen naar de juiste plek door te sturen.
-     ***/
     @Value("${app.frontend.url}")
     private String frontendBaseUrl;
+
+    public OAuth2LoginSuccessHandler(JwtService jwtService, UserRepository userRepository,
+            OneRosterService oneRosterService) {
+        this.jwtService = jwtService;
+        this.userRepository = userRepository;
+        this.oneRosterService = oneRosterService;
+    }
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
@@ -87,9 +70,6 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
          *   role      = "student" (of "teacher", maar dit komt van Smartschool zelf)
          ***/
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
-
-        // Log alle attributen naar de console (handig om te debuggen)
-        // System.out.println("[Smartschool userinfo] attributes = " + oAuth2User.getAttributes());
 
         /***
          * De "userID" van Smartschool is de unieke identifier per gebruiker.
@@ -135,9 +115,6 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
              * Bv. "abc123" -> klas "2SOF"
              ***/
             klas = oneRosterService.getKlasBySourcedId(orUser.getSourcedId());
-        } else {
-            System.out.println("[Login] OneRoster kon gebruiker niet vinden voor username: " + username
-                    + " -> rol en klas blijven 'onbekend'");
         }
 
         /***

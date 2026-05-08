@@ -15,7 +15,6 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -26,8 +25,11 @@ import ap.be.backend.exception.InvalidImportDataException;
 @Service
 public class BoekImportService {
 
-    @Autowired
-    private BoekRepository boekRepository;
+    private final BoekRepository boekRepository;
+
+    public BoekImportService(BoekRepository boekRepository) {
+        this.boekRepository = boekRepository;
+    }
 
     /**
      * Parses the Excel file and returns a list for the frontend preview.

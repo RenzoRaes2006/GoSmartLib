@@ -2,7 +2,6 @@ package ap.be.backend.seeds;
 
 import ap.be.backend.entity.AdminGebruiker;
 import ap.be.backend.repository.AdminGebruikerRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -12,11 +11,13 @@ import org.springframework.stereotype.Component;
 @Order(1)
 public class AdminGebruikerSeed implements CommandLineRunner {
 
-    @Autowired
-    private AdminGebruikerRepository adminGebruikerRepository;
+    private final AdminGebruikerRepository adminGebruikerRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    public AdminGebruikerSeed(AdminGebruikerRepository adminGebruikerRepository, PasswordEncoder passwordEncoder) {
+        this.adminGebruikerRepository = adminGebruikerRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @Override
     public void run(String... args) {

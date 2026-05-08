@@ -1,6 +1,5 @@
 package ap.be.backend.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -35,23 +34,13 @@ import org.springframework.security.config.Customizer;
 @EnableMethodSecurity
 public class SecurityConfig {
 
-        /***
-         * OAuth2LoginSuccessHandler = jouw eigen code die uitgevoerd wordt
-         * NADAT Smartschool succesvol heeft bevestigd wie de gebruiker is.
-         * (zie OAuth2LoginSuccessHandler.java voor wat er daar gebeurt)
-         ***/
-        @Autowired
-        private OAuth2LoginSuccessHandler successHandler;
+        private final OAuth2LoginSuccessHandler successHandler;
+        private final JwtAuthenticationFilter jwtAuthFilter;
 
-        /***
-         * JwtAuthenticationFilter = een filter die bij ELKE request kijkt:
-         * "Heeft deze request een geldig JWT-token in de Authorization header?"
-         * Zo ja -> de gebruiker wordt herkend en mag verder.
-         * Zo nee -> de request gaat verder zonder herkende gebruiker.
-         * (zie JwtAuthenticationFilter.java voor de details)
-         ***/
-        @Autowired
-        private JwtAuthenticationFilter jwtAuthFilter;
+        public SecurityConfig(OAuth2LoginSuccessHandler successHandler, JwtAuthenticationFilter jwtAuthFilter) {
+            this.successHandler = successHandler;
+            this.jwtAuthFilter = jwtAuthFilter;
+        }
 
         /***
          * filterChain = de volledige beveiligingsconfiguratie als één aaneengesloten keten.

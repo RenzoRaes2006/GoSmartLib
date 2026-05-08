@@ -38,7 +38,6 @@ public class LeerlingenSeed implements CommandLineRunner {
                     new Gebruiker("Emma", "Wouters", "1b"),
                     new Gebruiker("Lucas", "Mertens", "2b"),
                     new Gebruiker("Olivia", "Jacobs", "3a")));
-            System.out.println("Mock students successfully seeded!");
         }
     }
 }

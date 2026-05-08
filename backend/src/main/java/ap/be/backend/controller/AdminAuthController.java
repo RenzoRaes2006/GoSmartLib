@@ -4,7 +4,6 @@ import ap.be.backend.config.JwtService;
 import ap.be.backend.dto.AdminLoginRequest;
 import ap.be.backend.entity.AdminGebruiker;
 import ap.be.backend.repository.AdminGebruikerRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -17,14 +16,16 @@ import java.util.Optional;
 @RequestMapping("/api/auth")
 public class AdminAuthController {
 
-    @Autowired
-    private AdminGebruikerRepository adminGebruikerRepository;
+    private final AdminGebruikerRepository adminGebruikerRepository;
+    private final JwtService jwtService;
+    private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private JwtService jwtService;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    public AdminAuthController(AdminGebruikerRepository adminGebruikerRepository, JwtService jwtService,
+            PasswordEncoder passwordEncoder) {
+        this.adminGebruikerRepository = adminGebruikerRepository;
+        this.jwtService = jwtService;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @PostMapping("/admin/login")
     public ResponseEntity<?> adminLogin(@RequestBody AdminLoginRequest request) {

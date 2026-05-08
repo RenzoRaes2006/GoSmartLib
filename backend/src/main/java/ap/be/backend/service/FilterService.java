@@ -5,7 +5,6 @@ import jakarta.annotation.PostConstruct;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.Buffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -24,7 +23,6 @@ public class FilterService {
             // Zoek het bestand in de resources map
             InputStream is = getClass().getResourceAsStream("/scheldwoorden.txt");
             if (is == null) {
-                System.out.println("Bestand 'scheldwoorden.txt' niet gevonden in resources.");
                 return;
             }
 

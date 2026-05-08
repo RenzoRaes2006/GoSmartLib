@@ -51,9 +51,7 @@ public class GebruikerSeed implements CommandLineRunner {
             g.setEmail(email);
             g.setSchoolId(schoolId);
             g.setRol(Rol.LEERLING);
-            Gebruiker opgeslagen = gebruikerRepository.save(g);
-            System.out.println("Leerling " + voorNaam + " " + achternaam + " (SchoolId " + schoolId + ") toegevoegd.");
-            return opgeslagen;
+            return gebruikerRepository.save(g);
         });
     }
 }

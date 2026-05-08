@@ -1,7 +1,6 @@
 package ap.be.backend.controller;
 
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,8 +15,11 @@ import java.util.Optional;
 @RequestMapping("/api/scholen")
 public class SchoolController {
 
-    @Autowired
-    private SchoolRepository schoolRepository;
+    private final SchoolRepository schoolRepository;
+
+    public SchoolController(SchoolRepository schoolRepository) {
+        this.schoolRepository = schoolRepository;
+    }
 
     // 1. fetch all registered schools for the dashboard table
     @GetMapping
@@ -29,7 +31,6 @@ public class SchoolController {
     @PostMapping
     public ResponseEntity<School> maakSchoolAan(@RequestBody School nieuweSchool) {
         School opgeslagenSchool = schoolRepository.save(nieuweSchool);
-        System.out.println("New school saved: " + opgeslagenSchool.getNaam());
         return ResponseEntity.ok(opgeslagenSchool);
     }
 
@@ -46,8 +47,6 @@ public class SchoolController {
         School school = schoolOpt.get();
         String smartschoolSleutel = school.getApiCode();
 
-        System.out.println("Connecting to smartschool api for " + school.getNaam() + " with key: " + smartschoolSleutel);
-        
         // simulation of the smartschool data that gets generated on-the-fly
         List<Map<String, Object>> liveKlassen = List.of(
                 Map.of("id", 101, "naam", "1A"),
@@ -79,7 +78,6 @@ public class SchoolController {
             return ResponseEntity.notFound().build();
         }
         
-        System.out.println("Deleting school with ID: " + id);
         schoolRepository.deleteById(id);
         
         // return 204 no content (successful deletion)
