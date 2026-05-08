@@ -15,6 +15,8 @@ public interface GebruikerRepository extends JpaRepository<Gebruiker, Long> {
     @Query("select g from Gebruiker g where g.SchoolId = :schoolId")
     Optional<Gebruiker> findBySchoolId(@Param("schoolId") long schoolId);
 
+    Optional<Gebruiker> findBySmartschoolId(String smartschoolId);
+
     // simple filter by class
     @Query("SELECT g FROM Gebruiker g WHERE (:klas IS NULL OR :klas = '' OR g.klas = :klas)")
     Page<Gebruiker> findByKlas(@Param("klas") String klas, Pageable pageable);

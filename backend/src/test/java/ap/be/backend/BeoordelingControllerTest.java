@@ -7,16 +7,22 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Optional;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import ap.be.backend.controller.BeoordelingController;
 import ap.be.backend.dto.BeoordelingDTO;
+import ap.be.backend.entity.Gebruiker;
+import ap.be.backend.repository.GebruikerRepository;
 import ap.be.backend.service.BeoordelingService;
 import ap.be.backend.service.GerapporteerdeBeoordelingService;
 
@@ -29,8 +35,16 @@ class BeoordelingControllerTest {
     @Mock
     private GerapporteerdeBeoordelingService gerapporteerdeBeoordelingService;
 
+    @Mock
+    private GebruikerRepository gebruikerRepository;
+
     @InjectMocks
     private BeoordelingController beoordelingController;
+
+    @AfterEach
+    void clearSecurityContext() {
+        SecurityContextHolder.clearContext();
+    }
 
     @Test
     void getBeoordelingenOpBoekIdGeeftLijstTerug() {
@@ -58,14 +72,21 @@ class BeoordelingControllerTest {
     }
 
     @Test
-    void rapporteerBeoordelingGebruiktTijdelijkeGebruikerId1() {
+    void rapporteerBeoordelingGebruiktAuthContextSmartschoolId() {
         Long beoordelingId = 7L;
         String reden = "spoiler";
+
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken("ss-42", null, List.of()));
+
+        Gebruiker melder = new Gebruiker();
+        melder.setId(99L);
+        when(gebruikerRepository.findBySmartschoolId("ss-42")).thenReturn(Optional.of(melder));
 
         beoordelingController.rapporteerBeoordeling(beoordelingId, reden);
 
         verify(gerapporteerdeBeoordelingService, times(1))
-                .rapporteerBeoordeling(beoordelingId, 1L, reden);
+                .rapporteerBeoordeling(beoordelingId, 99L, reden);
     }
 
     @Test

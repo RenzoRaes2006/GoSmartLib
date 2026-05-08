@@ -10,7 +10,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.beans.factory.annotation.Value;
 
 import ap.be.backend.dto.OneRosterUser;
+import ap.be.backend.entity.Gebruiker;
+import ap.be.backend.entity.Rol;
 import ap.be.backend.entity.User;
+import ap.be.backend.repository.GebruikerRepository;
 import ap.be.backend.repository.UserRepository;
 import ap.be.backend.service.OneRosterService;
 
@@ -43,15 +46,17 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
     private final JwtService jwtService;
     private final UserRepository userRepository;
+    private final GebruikerRepository gebruikerRepository;
     private final OneRosterService oneRosterService;
 
     @Value("${app.frontend.url}")
     private String frontendBaseUrl;
 
     public OAuth2LoginSuccessHandler(JwtService jwtService, UserRepository userRepository,
-            OneRosterService oneRosterService) {
+            GebruikerRepository gebruikerRepository, OneRosterService oneRosterService) {
         this.jwtService = jwtService;
         this.userRepository = userRepository;
+        this.gebruikerRepository = gebruikerRepository;
         this.oneRosterService = oneRosterService;
     }
 
@@ -126,6 +131,13 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         userRepository.findBySmartschoolId(smartschoolId)
                 .orElseGet(() -> userRepository.save(new User(smartschoolId)));
 
+        // Maak ook een Gebruiker-record aan zodat reviews/leningen aan deze auth-user gekoppeld kunnen worden.
+        // Bewust GEEN voornaam/achternaam/email opslaan (GDPR — display-data komt uit de JWT).
+        final String klasFinal = klas;
+        final Rol rolEnum = mapRol(rol);
+        gebruikerRepository.findBySmartschoolId(smartschoolId)
+                .orElseGet(() -> gebruikerRepository.save(new Gebruiker(smartschoolId, klasFinal, rolEnum)));
+
         /***
          * Maak een JWT-token aan met alle info die we hebben verzameld:
          *   - smartschoolId: wie is de gebruiker (van Smartschool)
@@ -148,5 +160,14 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         String redirectUrl = frontendBaseUrl + "/login-success?token=" + jwtToken;
 
         response.sendRedirect(redirectUrl);
+    }
+
+    private Rol mapRol(String oneRosterRole) {
+        if (oneRosterRole == null) return null;
+        return switch (oneRosterRole.toLowerCase()) {
+            case "student" -> Rol.LEERLING;
+            case "teacher" -> Rol.LEERKRACHT;
+            default -> null;
+        };
     }
 }

@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import ap.be.backend.config.SecurityUtils;
 import ap.be.backend.dto.BeoordelingDTO;
 import ap.be.backend.entity.Beoordeling;
 import ap.be.backend.entity.Boek;
@@ -39,12 +40,11 @@ public class BeoordelingService {
         }
 
         List<Beoordeling> beoordelingen = beoordelingRepository.findByBoekId(bookId);
-        Long tijdelijkGebruikerId = 1L; // TODO: Vervang dit met de daadwerkelijke gebruiker ID uit de
-                                        // beveiligingscontext of sessie
+        Long huidigeGebruikerId = SecurityUtils.getCurrentGebruiker(gebruikerRepository).getId();
 
         return beoordelingen.stream().map(beoordeling -> {
             boolean isGerapporteerd = gerapporteerdeBeoordelingRepository
-                    .existsByBeoordelingIdAndGebruikerMelder_GebruikerID(beoordeling.getId(), tijdelijkGebruikerId);
+                    .existsByBeoordelingIdAndGebruikerMelder_GebruikerID(beoordeling.getId(), huidigeGebruikerId);
             return BeoordelingMapper.toDTO(beoordeling, isGerapporteerd);
         }).toList();
     }
@@ -58,16 +58,9 @@ public class BeoordelingService {
                 () -> new BoekNotFoundException(
                         "Kan beoordeling niet opslaan: Boek met id " + dto.boekId() + " is niet gevonden."));
 
-        // TIJDELIJKE ID (TODO: later vervangen door ID uit Spring Security context)
-        Long tijdelijkGebruikerId = 1L;
+        Gebruiker gebruiker = SecurityUtils.getCurrentGebruiker(gebruikerRepository);
 
-        // OPHALEN UIT DB
-        Gebruiker gebruiker = gebruikerRepository.findById(tijdelijkGebruikerId).orElseThrow(
-                () -> new RuntimeException("Gebruiker niet gevonden met id: " + tijdelijkGebruikerId));
-
-        Beoordeling beoordeling = BeoordelingMapper.toEntity(dto, boek, gebruiker); // TODO: Vervang null met
-                                                                                    // daadwerkelijke Gebruiker object
-                                                                                    // op basis van dto.gebruikerId()
+        Beoordeling beoordeling = BeoordelingMapper.toEntity(dto, boek, gebruiker);
         beoordelingRepository.save(beoordeling);
 
         double gemiddelde = beoordelingRepository.findByBoekId(boek.getId()).stream()

@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -27,8 +26,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
 @RequestMapping("/api/gebruiker")
-// @CrossOrigin(origins = { "https://frontend.localhost",
-// "http://localhost:4200", "https://frontend-sp09.cloud-ap.be" })
 public class GebruikerController {
     private final GebruikerService gebruikerService;
 
@@ -120,10 +117,6 @@ public class GebruikerController {
     }
 
     @PatchMapping("/leningen/{uitleningId}/verlengen")
-    @CrossOrigin(origins = { "http://localhost:4200", "https://localhost:4200",
-            "https://frontend.localhost", "https://frontend-sp09.cloud-ap.be",
-            "https://api-sp09.cloud-ap.be" }, allowedHeaders = "*", allowCredentials = "true")
-
     public ResponseEntity<String> verlengLening(@PathVariable("uitleningId") Long uitleningId) {
         gebruikerService.verlengUitlening(uitleningId);
         return ResponseEntity.ok("Uitleentermijn succesvol verlengd met 14 dagen.");

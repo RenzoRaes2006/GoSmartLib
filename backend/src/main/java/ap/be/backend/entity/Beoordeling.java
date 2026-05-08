@@ -33,7 +33,7 @@ public class Beoordeling {
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    private Gebruiker gebruiker;
+    private User user;
 
     @Column(name = "is_anonymous", nullable = false)
     private boolean isAnoniem;

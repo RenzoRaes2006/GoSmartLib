@@ -11,7 +11,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import ap.be.backend.config.SecurityUtils;
 import ap.be.backend.dto.BeoordelingDTO;
+import ap.be.backend.entity.Gebruiker;
+import ap.be.backend.repository.GebruikerRepository;
 import ap.be.backend.service.BeoordelingService;
 import ap.be.backend.service.GerapporteerdeBeoordelingService;
 import jakarta.validation.Valid;
@@ -21,11 +24,14 @@ import jakarta.validation.Valid;
 public class BeoordelingController {
     private final BeoordelingService beoordelingService;
     private final GerapporteerdeBeoordelingService gerapporteerdeBeoordelingService;
+    private final GebruikerRepository gebruikerRepository;
 
     public BeoordelingController(BeoordelingService beoordelingService,
-            GerapporteerdeBeoordelingService gerapporteerdeBeoordelingService) {
+            GerapporteerdeBeoordelingService gerapporteerdeBeoordelingService,
+            GebruikerRepository gebruikerRepository) {
         this.beoordelingService = beoordelingService;
         this.gerapporteerdeBeoordelingService = gerapporteerdeBeoordelingService;
+        this.gebruikerRepository = gebruikerRepository;
     }
 
     @GetMapping("/books/{id}/reviews")
@@ -43,9 +49,8 @@ public class BeoordelingController {
 
     @PostMapping("/reviews/{id}/report")
     public void rapporteerBeoordeling(@PathVariable("id") Long beoordelingId, @RequestBody String reden) {
-        Long tijdelijkeGebruikerId = 1L; // tijdelijke gebruiker ID, dit moet vervangen worden door de daadwerkelijke
-                                         // gebruiker ID uit de authenticatie context
-        gerapporteerdeBeoordelingService.rapporteerBeoordeling(beoordelingId, tijdelijkeGebruikerId, reden);
+        Gebruiker melder = SecurityUtils.getCurrentGebruiker(gebruikerRepository);
+        gerapporteerdeBeoordelingService.rapporteerBeoordeling(beoordelingId, melder.getId(), reden);
     }
 
     

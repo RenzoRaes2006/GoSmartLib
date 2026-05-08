@@ -23,6 +23,10 @@ public class Gebruiker {
     private Long gebruikerID;
 
     private long SchoolId;
+
+    @Column(unique = true)
+    private String smartschoolId;
+
     private String VoorNaam;
     private String Achternaam;
     private String Email;
@@ -40,6 +44,13 @@ public class Gebruiker {
         this.VoorNaam = voorNaam;
         this.Achternaam = achternaam;
         this.klas = klas;
+    }
+
+    // constructor voor OAuth2-login (nieuwe Smartschool-gebruiker, geen persoonsdata)
+    public Gebruiker(String smartschoolId, String klas, Rol rol) {
+        this.smartschoolId = smartschoolId;
+        this.klas = klas;
+        this.Rol = rol;
     }
 
     public void voegMapToe(LeeslijstMap map) {
