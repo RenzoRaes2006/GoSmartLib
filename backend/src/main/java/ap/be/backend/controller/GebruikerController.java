@@ -9,12 +9,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import ap.be.backend.repository.LeeslijstMapRepository;
 import ap.be.backend.service.GebruikerService;
+import ap.be.backend.dto.GebruikerDTO;
 import ap.be.backend.dto.LeenStatusResponse;
+import ap.be.backend.dto.LeeslijstMapDTO;
+import ap.be.backend.dto.UitleningDTO;
 import ap.be.backend.entity.Gebruiker;
-import ap.be.backend.entity.LeeslijstMap;
-import ap.be.backend.entity.Uitlening;
+import ap.be.backend.mappers.GebruikerMapper;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -28,20 +29,16 @@ import org.springframework.web.bind.annotation.RequestBody;
 // @CrossOrigin(origins = { "https://frontend.localhost",
 // "http://localhost:4200", "https://frontend-sp09.cloud-ap.be" })
 public class GebruikerController {
-    private final LeeslijstMapRepository leeslijstMapRepository;
     private final GebruikerService gebruikerService;
 
-    public GebruikerController(LeeslijstMapRepository leeslijstMapRepository, GebruikerService gebruikerService) {
-        this.leeslijstMapRepository = leeslijstMapRepository;
+    public GebruikerController(GebruikerService gebruikerService) {
         this.gebruikerService = gebruikerService;
     }
 
     // mappen ophalen
     @GetMapping("/{id}/mappen")
-    public ResponseEntity<List<LeeslijstMap>> getAlleMappenVanGebruiker(@PathVariable Long id) {
-        List<LeeslijstMap> mappen = leeslijstMapRepository.findByGebruiker_GebruikerID(id);
-
-        return ResponseEntity.ok(mappen);
+    public ResponseEntity<List<LeeslijstMapDTO>> getAlleMappenVanGebruiker(@PathVariable Long id) {
+        return ResponseEntity.ok(gebruikerService.getMappenVoorGebruiker(id));
     }
 
     @PostMapping("/{gebruikerId}/mappen/{mapNaam}/boeken/{boekId}")
@@ -90,8 +87,8 @@ public class GebruikerController {
     }
 
     @GetMapping("/aanvragen")
-    public ResponseEntity<List<Uitlening>> getAlleAanvragen() {
-        return ResponseEntity.ok(gebruikerService.getAlleAanvragen());
+    public ResponseEntity<List<UitleningDTO>> getAlleAanvragen() {
+        return ResponseEntity.ok(gebruikerService.getAlleAanvragenDTO());
     }
 
     @PutMapping("/aanvragen/{uitleningId}/goedkeuren")
@@ -107,8 +104,8 @@ public class GebruikerController {
     }
 
     @GetMapping("/{gebruikerId}/leningen")
-    public ResponseEntity<List<Uitlening>> getActieveLeningen(@PathVariable Long gebruikerId) {
-        return ResponseEntity.ok(gebruikerService.getActieveLeningenVanGebruiker(gebruikerId));
+    public ResponseEntity<List<UitleningDTO>> getActieveLeningen(@PathVariable Long gebruikerId) {
+        return ResponseEntity.ok(gebruikerService.getActieveLeningenVanGebruikerDTO(gebruikerId));
     }
 
     @DeleteMapping("/leningen/{uitleningId}")
@@ -128,14 +125,14 @@ public class GebruikerController {
     }
 
     @GetMapping("/{gebruikerId}/geschiedenis")
-    public ResponseEntity<List<Uitlening>> getLeengeschiedenis(@PathVariable Long gebruikerId) {
-        return ResponseEntity.ok(gebruikerService.getLeengeschiedenisVanGebruiker(gebruikerId));
+    public ResponseEntity<List<UitleningDTO>> getLeengeschiedenis(@PathVariable Long gebruikerId) {
+        return ResponseEntity.ok(gebruikerService.getLeengeschiedenisDTO(gebruikerId));
     }
 
     @GetMapping("/schoolid/{schoolId}")
-    public ResponseEntity<Gebruiker> getLeerlingBySchoolId(@PathVariable long schoolId) {
+    public ResponseEntity<GebruikerDTO> getLeerlingBySchoolId(@PathVariable long schoolId) {
         Gebruiker leerling = gebruikerService.getLeerlingBySchoolId(schoolId);
-        return ResponseEntity.ok(leerling);
+        return ResponseEntity.ok(GebruikerMapper.toDTO(leerling));
     }
 
 }

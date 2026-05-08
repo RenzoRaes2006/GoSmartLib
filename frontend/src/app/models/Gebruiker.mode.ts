@@ -4,5 +4,6 @@ export interface Gebruiker {
   voorNaam: string;
   achterNaam: string;
   email: string;
+  klas?: string;
   rol: 'LEERLING' | 'LEERKRACHT' | 'BEHEERDER';
 }

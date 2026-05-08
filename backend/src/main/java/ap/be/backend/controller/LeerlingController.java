@@ -1,6 +1,7 @@
 package ap.be.backend.controller;
 
-import ap.be.backend.entity.Gebruiker;
+import ap.be.backend.dto.GebruikerDTO;
+import ap.be.backend.mappers.GebruikerMapper;
 import ap.be.backend.repository.GebruikerRepository;
 import ap.be.backend.repository.UitleningRepository;
 
@@ -24,12 +25,13 @@ public class LeerlingController {
     }
 
     @GetMapping
-    public Page<Gebruiker> getLeerlingen(
+    public Page<GebruikerDTO> getLeerlingen(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size,
             @RequestParam(required = false) String klas,
             @RequestParam(required = false) String zoekterm) {
-        return repo.findLeerlingenMetFilters(klas, zoekterm, PageRequest.of(page, size));
+        return repo.findLeerlingenMetFilters(klas, zoekterm, PageRequest.of(page, size))
+                .map(GebruikerMapper::toDTO);
     }
 
     @GetMapping("/{id}/stats")

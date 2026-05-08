@@ -12,5 +12,6 @@ public record GebruikerDTO(
         @JsonProperty("voorNaam") @NotBlank(message = "Voornaam mag niet leeg zijn") String voorNaam,
         @JsonProperty("achternaam") @NotBlank(message = "Achternaam mag niet leeg zijn") String achternaam,
         @JsonProperty("email") @NotBlank(message = "Email mag niet leeg zijn") @Email(message = "Email moet geldig zijn") String email,
+        @JsonProperty("klas") String klas,
         @JsonProperty("rol") @NotBlank(message = "Rol mag niet leeg zijn") String rol) {
 }
