@@ -1,9 +1,17 @@
 package ap.be.backend.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "admin_gebruikers")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class AdminGebruiker {
 
     @Id
@@ -18,22 +26,9 @@ public class AdminGebruiker {
 
     private String naam;
 
-    public AdminGebruiker() {}
-
     public AdminGebruiker(String gebruikersnaam, String wachtwoordHash, String naam) {
         this.gebruikersnaam = gebruikersnaam;
         this.wachtwoordHash = wachtwoordHash;
         this.naam = naam;
     }
-
-    public Long getId() { return id; }
-
-    public String getGebruikersnaam() { return gebruikersnaam; }
-    public void setGebruikersnaam(String gebruikersnaam) { this.gebruikersnaam = gebruikersnaam; }
-
-    public String getWachtwoordHash() { return wachtwoordHash; }
-    public void setWachtwoordHash(String wachtwoordHash) { this.wachtwoordHash = wachtwoordHash; }
-
-    public String getNaam() { return naam; }
-    public void setNaam(String naam) { this.naam = naam; }
 }

@@ -14,17 +14,26 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "reviews")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Beoordeling {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    Gebruiker gebruiker;
+    private Gebruiker gebruiker;
 
     @Column(name = "is_anonymous", nullable = false)
     private boolean isAnoniem;
@@ -39,91 +48,11 @@ public class Beoordeling {
     private List<GerapporteerdeBeoordeling> gerapporteerdeBeoordelingen;
 
     @Column(name = "rating", nullable = false)
-    int waardering;
+    private int waardering;
 
     @Column(name = "content", length = 1000)
-    String inhoud;
+    private String inhoud;
 
     @Column(name = "is_spoiler", nullable = false)
     private boolean isSpoiler;
-
-    public Beoordeling() {
-    }
-
-    public Beoordeling(Gebruiker gebruiker, Boek boek, int waardering, String content) {
-        this.gebruiker = gebruiker;
-        this.boek = boek;
-        this.waardering = waardering;
-        this.inhoud = content;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public Gebruiker getGebruiker() {
-        return gebruiker;
-    }
-
-    public Boek getBoek() {
-        return boek;
-    }
-
-    public int getWaardering() {
-        return waardering;
-    }
-
-    public String getInhoud() {
-        return inhoud;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public void setGebruiker(Gebruiker gebruiker) {
-        this.gebruiker = gebruiker;
-    }
-
-    public void setBoek(Boek boek) {
-        this.boek = boek;
-    }
-
-    public void setWaardering(int waardering) {
-        this.waardering = waardering;
-    }
-
-    public void setInhoud(String content) {
-        this.inhoud = content;
-    }
-
-    public boolean isAnoniem() {
-        return isAnoniem;
-    }
-
-    public void setAnoniem(boolean isAnoniem) {
-        this.isAnoniem = isAnoniem;
-    }
-
-    public boolean isSpoiler() {
-        return isSpoiler;
-    }
-
-    public void setSpoiler(boolean isSpoiler) {
-        this.isSpoiler = isSpoiler;
-    }
-
-
-
-    @Override
-    public String toString() {
-        return "Review{" +
-                "id=" + id +
-                ", userId=" + gebruiker.getId() +
-                ", isAnonymous=" + isAnoniem +
-                ", boek=" + boek +
-                ", waardering=" + waardering +
-                ", content='" + inhoud + '\'' +
-                '}';
-    }
 }

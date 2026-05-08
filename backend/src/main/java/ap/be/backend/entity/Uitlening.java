@@ -8,12 +8,16 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Uitlening {
 
     @Id
@@ -23,21 +27,16 @@ public class Uitlening {
     @ManyToOne
     @JoinColumn(name = "gebruiker_id", nullable = false)
     private Gebruiker gebruiker;
+
     @ManyToOne
     @JoinColumn(name = "boek_id", nullable = false)
     private Boek boek;
 
     private LocalDate uitleenDatum;
     private LocalDate inleverDatum;
-
     private boolean isIngeleverd;
-
     private String status;
-
     private boolean isVerlengd;
-
-    public Uitlening() {
-    }
 
     public Uitlening(Gebruiker gebruiker, Boek boek, LocalDate uitleenDatum, LocalDate inleverDatum) {
         this.gebruiker = gebruiker;
