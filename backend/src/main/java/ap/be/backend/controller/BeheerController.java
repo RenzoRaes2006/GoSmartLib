@@ -2,7 +2,6 @@ package ap.be.backend.controller;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,8 +10,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import ap.be.backend.dto.UitleningSummaryDTO;
 import ap.be.backend.service.GebruikerService;
-import ap.be.backend.entity.Uitlening;
 
 @RestController
 @RequestMapping("/api/beheer")
@@ -26,13 +25,13 @@ public class BeheerController {
     }
 
     @GetMapping("/leningen/actief")
-    public ResponseEntity<List<Uitlening>> getAlleActieveLeningenSysteem() {
-        return ResponseEntity.ok(gebruikerService.getAlleActieveLeningenSysteem());
+    public ResponseEntity<List<UitleningSummaryDTO>> getAlleActieveLeningenSysteem() {
+        return ResponseEntity.ok(gebruikerService.getAlleActieveLeningenSysteemDTO());
     }
 
     @GetMapping("/verlengingen/aanvragen")
-    public ResponseEntity<List<Uitlening>> getAlleVerlengingAanvragen() {
-        return ResponseEntity.ok(gebruikerService.getAlleVerlengingAanvragen());
+    public ResponseEntity<List<UitleningSummaryDTO>> getAlleVerlengingAanvragen() {
+        return ResponseEntity.ok(gebruikerService.getAlleVerlengingAanvragenDTO());
     }
 
     @PutMapping("/{id}/verlenging/goedkeuren")

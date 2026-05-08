@@ -7,6 +7,11 @@ import org.springframework.stereotype.Service;
 
 import ap.be.backend.dto.GebruikerDTO;
 import ap.be.backend.dto.LeenStatusResponse;
+import ap.be.backend.dto.LeeslijstMapDTO;
+import ap.be.backend.dto.UitleningDTO;
+import ap.be.backend.dto.UitleningSummaryDTO;
+import ap.be.backend.mappers.LeeslijstMapMapper;
+import ap.be.backend.mappers.UitleningMapper;
 import ap.be.backend.entity.Boek;
 import ap.be.backend.entity.Gebruiker;
 import ap.be.backend.entity.LeeslijstMap;
@@ -48,7 +53,8 @@ public class GebruikerService {
                 gebruiker.getVoorNaam(),
                 gebruiker.getAchternaam(),
                 gebruiker.getEmail(),
-                gebruiker.getRol().toString());
+                gebruiker.getKlas(),
+                gebruiker.getRol() != null ? gebruiker.getRol().toString() : null);
     }
 
     public Gebruiker maakGebruiker(GebruikerDTO nieuwGebruikerDTO) {
@@ -66,6 +72,42 @@ public class GebruikerService {
         leeslijstMapRepository.save(favorietenMap);
 
         return opgeslagenGebruiker;
+    }
+
+    public List<LeeslijstMapDTO> getMappenVoorGebruiker(Long gebruikerId) {
+        return leeslijstMapRepository.findByGebruiker_GebruikerID(gebruikerId).stream()
+                .map(LeeslijstMapMapper::toDTO)
+                .toList();
+    }
+
+    public List<UitleningDTO> getActieveLeningenVanGebruikerDTO(Long gebruikerId) {
+        return uitleningRepository.findByGebruiker_GebruikerIDAndIsIngeleverdFalse(gebruikerId).stream()
+                .map(UitleningMapper::toDTO)
+                .toList();
+    }
+
+    public List<UitleningDTO> getAlleAanvragenDTO() {
+        return uitleningRepository.findByStatus("AANGEVRAAGD").stream()
+                .map(UitleningMapper::toDTO)
+                .toList();
+    }
+
+    public List<UitleningDTO> getLeengeschiedenisDTO(Long gebruikerId) {
+        return uitleningRepository.findByGebruiker_GebruikerIDOrderByUitleenDatumDesc(gebruikerId).stream()
+                .map(UitleningMapper::toDTO)
+                .toList();
+    }
+
+    public List<UitleningSummaryDTO> getAlleActieveLeningenSysteemDTO() {
+        return uitleningRepository.findByIsIngeleverdFalseOrderByUitleenDatumDesc().stream()
+                .map(UitleningMapper::toSummaryDTO)
+                .toList();
+    }
+
+    public List<UitleningSummaryDTO> getAlleVerlengingAanvragenDTO() {
+        return uitleningRepository.findByStatus("VERLENGING_AANGEVRAAGD").stream()
+                .map(UitleningMapper::toSummaryDTO)
+                .toList();
     }
 
     public Gebruiker getGebruikerById(Long id) {

@@ -4,7 +4,9 @@ package ap.be.backend.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import ap.be.backend.dto.SchoolDTO;
 import ap.be.backend.entity.School;
+import ap.be.backend.mappers.SchoolMapper;
 import ap.be.backend.repository.SchoolRepository;
 
 import java.util.List;
@@ -23,15 +25,15 @@ public class SchoolController {
 
     // 1. fetch all registered schools for the dashboard table
     @GetMapping
-    public List<School> getAlleScholen() {
-        return schoolRepository.findAll();
+    public List<SchoolDTO> getAlleScholen() {
+        return schoolRepository.findAll().stream().map(SchoolMapper::toDTO).toList();
     }
 
     // 2. save a new school (only the basic info, no students)
     @PostMapping
-    public ResponseEntity<School> maakSchoolAan(@RequestBody School nieuweSchool) {
+    public ResponseEntity<SchoolDTO> maakSchoolAan(@RequestBody School nieuweSchool) {
         School opgeslagenSchool = schoolRepository.save(nieuweSchool);
-        return ResponseEntity.ok(opgeslagenSchool);
+        return ResponseEntity.ok(SchoolMapper.toDTO(opgeslagenSchool));
     }
 
     // 3. fetch live data (single source of truth - this is never saved to our database)
