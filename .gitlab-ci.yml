@@ -3,8 +3,8 @@ stages:
   - deploy
 
 variables:
-  BACKEND_IMAGE: $CI_REGISTRY_IMAGE/backend:$CI_COMMIT_BRANCH
-  FRONTEND_IMAGE: $CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_BRANCH
+  BACKEND_IMAGE: $CI_REGISTRY_IMAGE/backend:$CI_COMMIT_REF_SLUG
+  FRONTEND_IMAGE: $CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_REF_SLUG
 
 .docker-build-template:
   image: docker:27.5.1
@@ -44,4 +44,4 @@ deploy-to-server:
     - docker compose pull
     - docker compose up -d --build
   rules:
-    - if: $CI_COMMIT_BRANCH == "feature-77-Rollen"
+    - if: $CI_COMMIT_BRANCH == "refactor-130-GroteOpruim"

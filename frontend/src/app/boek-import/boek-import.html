@@ -7,7 +7,25 @@
   <div class="import-card">
     <div class="import-header">
       <h3>Bulk import via Excel</h3>
-      <p>Controleer en bewerk de data vóórdat je definitief importeert.</p>
+      <p>Controleer de ingelezen gegevens en pas aan waar nodig.</p>
+
+      <div
+        style="
+          background-color: #f0f7ff;
+          border-left: 4px solid #3182ce;
+          padding: 10px 15px;
+          margin-top: 15px;
+          text-align: left;
+          font-size: 0.9rem;
+          color: #2d3748;
+        "
+      >
+        <strong>Hoe werkt de import?</strong><br />
+        Staat een boek al in onze database? Dan krijgt het de status
+        <span style="color: #3182ce; font-weight: bold">Extra exemplaren</span> en verhogen we na
+        goedkeuring alleen de voorraad. Volledig nieuwe boeken krijgen de status
+        <span style="color: #166534; font-weight: bold">Nieuw</span>.
+      </div>
 
       <div
         style="
@@ -78,7 +96,7 @@
                       font-size: 0.8rem;
                       font-weight: 700;
                     "
-                    >Update</span
+                    >Extra exemplaren</span
                   >
                 } @else {
                   <span
@@ -389,14 +407,14 @@
           "
         >
           @if (!isLijstGeldig() && previewLijst().length > 0) {
-            <span style="color: #e53e3e; font-size: 0.9rem; font-weight: 600"
-              >Vul bij alle boeken minstens een geldige Titel, Auteur en ISBN (of genereer een
-              nummer) in!</span
-            >
+            <span style="color: #e53e3e; font-size: 0.9rem; font-weight: 600">
+              Actie vereist: Zorg dat elk boek minstens een titel, auteur en ISBN (of GO-nummer)
+              heeft.
+            </span>
           }
 
           <button class="btn-secondary" (click)="annuleer()" [disabled]="isUploading()">
-            Annuleer (opnieuw)
+            Lijst wissen en annuleren
           </button>
 
           <button
