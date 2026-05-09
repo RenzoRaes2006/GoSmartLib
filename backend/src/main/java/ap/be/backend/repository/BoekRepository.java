@@ -47,7 +47,7 @@ public interface BoekRepository extends JpaRepository<Boek, Long> {
 
         Page<Boek> findByDidactischMateriaalTrue(Pageable pageable);
 
-        @Query(value = "SELECT b.* FROM boek b LEFT JOIN leeslijst_map_boeken lmb ON b.id = lmb.boek_id GROUP BY b.id ORDER BY COUNT(lmb.map_id) DESC LIMIT 5", nativeQuery = true)
+        @Query(value = "SELECT b.* FROM boeken b LEFT JOIN leeslijst_map_boeken lmb ON b.id = lmb.boek_id GROUP BY b.id ORDER BY COUNT(lmb.map_id) DESC LIMIT 5", nativeQuery = true)
         List<Boek> findTop5PopulaireBoeken();
 
         Optional<Boek> findByTitelAndAuteur(String titel, String auteur);
