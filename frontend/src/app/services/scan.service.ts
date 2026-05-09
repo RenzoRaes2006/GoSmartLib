@@ -22,8 +22,8 @@ export class ScanService {
 
   private http = inject(HttpClient);
 
-  zoekLeerlingOpSchoolId(schoolId: number): Observable<Gebruiker> {
-    return this.http.get<Gebruiker>(`${this.apiBase}/gebruiker/schoolid/${schoolId}`);
+  zoekLeerlingOpSmartschoolId(smartschoolId: string): Observable<Gebruiker> {
+    return this.http.get<Gebruiker>(`${this.apiBase}/gebruiker/by-smartschool/${smartschoolId}`);
   }
 
   zoekLeerlingen(zoekterm: string, page: number, size: number): Observable<LeerlingenPage> {
