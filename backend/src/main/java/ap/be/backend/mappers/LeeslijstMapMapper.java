@@ -16,7 +16,7 @@ public class LeeslijstMapMapper {
                 map.getId(),
                 map.getNaam(),
                 map.getEmoji(),
-                map.getGebruiker() != null ? map.getGebruiker().getGebruikerID() : null,
+                map.getUser() != null ? map.getUser().getId() : null,
                 map.getBoeken() != null
                         ? map.getBoeken().stream().map(BoekMapper::toDTO).collect(Collectors.toList())
                         : List.of());

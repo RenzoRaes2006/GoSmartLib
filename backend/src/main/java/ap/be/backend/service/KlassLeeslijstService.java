@@ -2,7 +2,6 @@ package ap.be.backend.service;
 
 import ap.be.backend.dto.KlassLeeslijstResponseDTO;
 import ap.be.backend.entity.Boek;
-import ap.be.backend.entity.Gebruiker;
 import ap.be.backend.entity.KlassLeeslijst;
 import ap.be.backend.entity.User;
 import ap.be.backend.exception.BoekNotFoundException;
@@ -10,7 +9,6 @@ import ap.be.backend.exception.GebruikerNotFoundException;
 import ap.be.backend.exception.KlassLeeslijstNotFoundException;
 import ap.be.backend.mappers.KlassLeeslijstMapper;
 import ap.be.backend.repository.BoekRepository;
-import ap.be.backend.repository.GebruikerRepository;
 import ap.be.backend.repository.KlassLeeslijstRepository;
 import ap.be.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,12 +22,12 @@ import java.util.List;
 public class KlassLeeslijstService {
 
         private final KlassLeeslijstRepository leeslijstRepository;
-        private final GebruikerRepository gebruikerRepository;
+        private final UserRepository userRepository;
         private final BoekRepository boekRepository;
 
         @Transactional
         public KlassLeeslijstResponseDTO createLeeslijst(String naam, Long leerkrachtId) {
-                Gebruiker leerkracht = gebruikerRepository.findById(leerkrachtId)
+                User leerkracht = userRepository.findById(leerkrachtId)
                                 .orElseThrow(() -> new GebruikerNotFoundException("Leerkracht niet gevonden"));
 
                 KlassLeeslijst leeslijst = new KlassLeeslijst();

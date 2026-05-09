@@ -8,29 +8,29 @@ import ap.be.backend.config.SecurityUtils;
 import ap.be.backend.dto.BeoordelingDTO;
 import ap.be.backend.entity.Beoordeling;
 import ap.be.backend.entity.Boek;
-import ap.be.backend.entity.Gebruiker;
+import ap.be.backend.entity.User;
 import ap.be.backend.exception.BoekNotFoundException;
 import ap.be.backend.mappers.BeoordelingMapper;
 import ap.be.backend.repository.BeoordelingRepository;
 import ap.be.backend.repository.BoekRepository;
-import ap.be.backend.repository.GebruikerRepository;
 import ap.be.backend.repository.GerapporteerdeBeoordelingRepository;
+import ap.be.backend.repository.UserRepository;
 
 @Service
 public class BeoordelingService {
     private final BeoordelingRepository beoordelingRepository;
     private final BoekRepository boekRepository;
     private final GerapporteerdeBeoordelingRepository gerapporteerdeBeoordelingRepository;
-    private final GebruikerRepository gebruikerRepository;
+    private final UserRepository userRepository;
     private final FilterService filterService;
 
     public BeoordelingService(BeoordelingRepository beoordelingRepository, BoekRepository boekRepository,
             GerapporteerdeBeoordelingRepository gerapporteerdeBeoordelingRepository,
-            GebruikerRepository gebruikerRepository, FilterService filterService) {
+            UserRepository userRepository, FilterService filterService) {
         this.beoordelingRepository = beoordelingRepository;
         this.boekRepository = boekRepository;
         this.gerapporteerdeBeoordelingRepository = gerapporteerdeBeoordelingRepository;
-        this.gebruikerRepository = gebruikerRepository;
+        this.userRepository = userRepository;
         this.filterService = filterService;
     }
 
@@ -40,11 +40,11 @@ public class BeoordelingService {
         }
 
         List<Beoordeling> beoordelingen = beoordelingRepository.findByBoekId(bookId);
-        Long huidigeGebruikerId = SecurityUtils.getCurrentGebruiker(gebruikerRepository).getId();
+        Long huidigeUserId = SecurityUtils.getCurrentUser(userRepository).getId();
 
         return beoordelingen.stream().map(beoordeling -> {
             boolean isGerapporteerd = gerapporteerdeBeoordelingRepository
-                    .existsByBeoordelingIdAndGebruikerMelder_GebruikerID(beoordeling.getId(), huidigeGebruikerId);
+                    .existsByBeoordelingIdAndUserMelder_Id(beoordeling.getId(), huidigeUserId);
             return BeoordelingMapper.toDTO(beoordeling, isGerapporteerd);
         }).toList();
     }
@@ -58,9 +58,9 @@ public class BeoordelingService {
                 () -> new BoekNotFoundException(
                         "Kan beoordeling niet opslaan: Boek met id " + dto.boekId() + " is niet gevonden."));
 
-        Gebruiker gebruiker = SecurityUtils.getCurrentGebruiker(gebruikerRepository);
+        User user = SecurityUtils.getCurrentUser(userRepository);
 
-        Beoordeling beoordeling = BeoordelingMapper.toEntity(dto, boek, gebruiker);
+        Beoordeling beoordeling = BeoordelingMapper.toEntity(dto, boek, user);
         beoordelingRepository.save(beoordeling);
 
         double gemiddelde = beoordelingRepository.findByBoekId(boek.getId()).stream()

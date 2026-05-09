@@ -3,7 +3,7 @@ package ap.be.backend.mappers;
 import ap.be.backend.dto.BeoordelingDTO;
 import ap.be.backend.entity.Beoordeling;
 import ap.be.backend.entity.Boek;
-import ap.be.backend.entity.Gebruiker;
+import ap.be.backend.entity.User;
 
 public class BeoordelingMapper {
 
@@ -12,26 +12,27 @@ public class BeoordelingMapper {
     }
 
     public static BeoordelingDTO toDTO(Beoordeling beoordeling, boolean gerapporteerd) {
-        // Logica: als anoniem true is, toon 'Anoniem', anders de echte naam
-        String weergaveNaam = beoordeling.isAnoniem() ? "Anoniem" : "Test Naam"; // TODO: Vervang "Test Gebruiker" met daadwerkelijke naam uit beoordeling.getGebruiker()
+        // Geen naam in DB; alleen smartschoolId of "Anoniem" als isAnoniem=true.
+        String weergaveNaam = beoordeling.isAnoniem()
+                ? "Anoniem"
+                : (beoordeling.getUser() != null ? beoordeling.getUser().getSmartschoolId() : null);
 
         return new BeoordelingDTO(
                 beoordeling.getId(),
-                weergaveNaam, 
+                weergaveNaam,
                 beoordeling.getBoek().getId(),
                 beoordeling.getWaardering(),
                 beoordeling.getInhoud(),
                 beoordeling.isAnoniem(),
-            gerapporteerd,
-            beoordeling.isSpoiler());
+                gerapporteerd,
+                beoordeling.isSpoiler());
     }
 
-    // Nu geven we zowel Boek als Gebruiker mee
-    public static Beoordeling toEntity(BeoordelingDTO dto, Boek boek, Gebruiker gebruiker) {
+    public static Beoordeling toEntity(BeoordelingDTO dto, Boek boek, User user) {
         Beoordeling beoordeling = new Beoordeling();
         beoordeling.setId(dto.id());
-        beoordeling.setGebruiker(gebruiker); // Het hele object
-        beoordeling.setBoek(boek);           // Het hele object
+        beoordeling.setUser(user);
+        beoordeling.setBoek(boek);
         beoordeling.setAnoniem(dto.isAnoniem());
         beoordeling.setWaardering(dto.waardering());
         beoordeling.setInhoud(dto.inhoud());

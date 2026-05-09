@@ -1,46 +1,39 @@
 package ap.be.backend.repository;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-
-import ap.be.backend.entity.User;
-
+import java.util.List;
 import java.util.Optional;
 
-/***
- * BESTAND: UserRepository.java
- *
- * WAT DOET DIT BESTAND?
- * Dit is de "deur" naar de "users" tabel in de database.
- * Via dit interface kan je gebruikers opzoeken, opslaan, en verwijderen
- * zonder zelf SQL te schrijven. Spring Data JPA regelt dat automatisch.
- *
- * HOE WERKT HET?
- * Door "JpaRepository<User, Long>" uit te breiden, krijg je gratis:
- *   - save(user)       -> INSERT of UPDATE in de database
- *   - findById(id)     -> SELECT * FROM users WHERE id = ?
- *   - findAll()        -> SELECT * FROM users
- *   - delete(user)     -> DELETE FROM users WHERE id = ?
- *   - ... en nog meer
- *
- * De <User, Long> parameters betekenen:
- *   - User -> welke entiteit (= welke tabel)
- *   - Long -> het type van de primaire sleutel (id is een Long)
- ***/
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
+import ap.be.backend.entity.Rol;
+import ap.be.backend.entity.User;
+
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    /***
-     * Zoek een gebruiker op basis van zijn Smartschool ID.
-     * Spring Data JPA genereert automatisch de SQL:
-     *   SELECT * FROM users WHERE smartschool_id = ?
-     *
-     * Geeft een Optional<User> terug:
-     *   - Optional.of(user)  -> als de gebruiker gevonden is
-     *   - Optional.empty()   -> als er geen gebruiker is met die smartschoolId
-     *
-     * Gebruikt in OAuth2LoginSuccessHandler.java om te controleren of een
-     * inloggende gebruiker al in de database staat.
-     ***/
     Optional<User> findBySmartschoolId(String smartschoolId);
+
+    @Query("SELECT u FROM User u WHERE (:klas IS NULL OR :klas = '' OR u.klas = :klas)")
+    Page<User> findByKlas(@Param("klas") String klas, Pageable pageable);
+
+    @Query("SELECT u FROM User u WHERE u.rol = :rol AND (:klas IS NULL OR :klas = '' OR u.klas = :klas)")
+    Page<User> findByRolAndKlas(@Param("rol") Rol rol, @Param("klas") String klas, Pageable pageable);
+
+    long countByKlasIgnoreCase(String klas);
+
+    List<User> findByRol(Rol rol);
+
+    @Query("SELECT u FROM User u WHERE u.rol = ap.be.backend.entity.Rol.LEERLING AND " +
+            "(:klas IS NULL OR :klas = '' OR u.klas = :klas) AND " +
+            "(:zoekterm IS NULL OR :zoekterm = '' OR " +
+            "LOWER(u.smartschoolId) LIKE LOWER(CONCAT('%', :zoekterm, '%')))")
+    Page<User> findLeerlingenMetFilters(
+            @Param("klas") String klas,
+            @Param("zoekterm") String zoekterm,
+            Pageable pageable);
 }

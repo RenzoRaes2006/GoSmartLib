@@ -36,8 +36,8 @@ public class LeeslijstMap {
     private String emoji = "📚";
 
     @ManyToOne
-    @JoinColumn(name = "gebruiker_id", nullable = false)
-    private Gebruiker gebruiker;
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @ManyToMany
     @JoinTable(name = "leeslijst_map_boeken",
@@ -45,9 +45,9 @@ public class LeeslijstMap {
             inverseJoinColumns = @JoinColumn(name = "boek_id"))
     private Set<Boek> boeken = new HashSet<>();
 
-    public LeeslijstMap(String naam, Gebruiker gebruiker) {
+    public LeeslijstMap(String naam, User user) {
         this.naam = naam;
-        this.gebruiker = gebruiker;
+        this.user = user;
     }
 
     public void voegBoekToe(Boek boek) {

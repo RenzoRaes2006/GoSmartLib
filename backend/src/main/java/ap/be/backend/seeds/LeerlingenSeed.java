@@ -3,41 +3,51 @@ package ap.be.backend.seeds;
 import java.util.List;
 
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import ap.be.backend.entity.Gebruiker;
-import ap.be.backend.repository.GebruikerRepository;
+import ap.be.backend.entity.Rol;
+import ap.be.backend.entity.User;
+import ap.be.backend.repository.UserRepository;
 
 @Component
+@Order(2)
 public class LeerlingenSeed implements CommandLineRunner {
-    private final GebruikerRepository repo;
+    private final UserRepository repo;
 
-    public LeerlingenSeed(GebruikerRepository repo) {
+    public LeerlingenSeed(UserRepository repo) {
         this.repo = repo;
     }
 
     @Override
     public void run(String... args) {
-        if (repo.count() == 0) {
-            repo.saveAll(List.of(
-                    new Gebruiker("Amira", "El Idrissi", "2a"),
-                    new Gebruiker("Amira", "Sels", "2b"),
-                    new Gebruiker("Bram", "Peeters", "2a"),
-                    new Gebruiker("Céline", "Dupont", "1a"),
-                    new Gebruiker("Daan", "Janssens", "2a"),
-                    new Gebruiker("Eva", "De Smet", "2a"),
-                    new Gebruiker("Fatih", "Yilmaz", "2a"),
-                    new Gebruiker("Gitte", "Vermeulen", "2a"),
-                    new Gebruiker("Lotte", "De Vos", "1a"),
-                    new Gebruiker("Noah", "Maes", "1b"),
-                    new Gebruiker("Lars", "Peeters", "3a"),
-                    new Gebruiker("Mila", "Claes", "2b"),
-                    new Gebruiker("Finn", "Willems", "1a"),
-                    new Gebruiker("Elena", "Desmet", "3a"),
-                    new Gebruiker("Arthur", "Goossens", "2a"),
-                    new Gebruiker("Emma", "Wouters", "1b"),
-                    new Gebruiker("Lucas", "Mertens", "2b"),
-                    new Gebruiker("Olivia", "Jacobs", "3a")));
+        // smartschoolId, klas
+        List<String[]> seeds = List.of(
+                new String[] { "leerling-001", "2a" },
+                new String[] { "leerling-002", "2b" },
+                new String[] { "leerling-003", "2a" },
+                new String[] { "leerling-004", "1a" },
+                new String[] { "leerling-005", "2a" },
+                new String[] { "leerling-006", "2a" },
+                new String[] { "leerling-007", "2a" },
+                new String[] { "leerling-008", "2a" },
+                new String[] { "leerling-009", "1a" },
+                new String[] { "leerling-010", "1b" },
+                new String[] { "leerling-011", "3a" },
+                new String[] { "leerling-012", "2b" },
+                new String[] { "leerling-013", "1a" },
+                new String[] { "leerling-014", "3a" },
+                new String[] { "leerling-015", "2a" },
+                new String[] { "leerling-016", "1b" },
+                new String[] { "leerling-017", "2b" },
+                new String[] { "leerling-018", "3a" });
+
+        for (String[] s : seeds) {
+            String smartschoolId = s[0];
+            String klas = s[1];
+            if (repo.findBySmartschoolId(smartschoolId).isEmpty()) {
+                repo.save(new User(smartschoolId, klas, Rol.LEERLING));
+            }
         }
     }
 }

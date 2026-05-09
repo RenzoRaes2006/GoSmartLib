@@ -24,8 +24,8 @@ public class GerapporteerdeBeoordeling {
     private Beoordeling beoordeling;
 
     @ManyToOne
-    @JoinColumn(name = "gebruiker_id", nullable = false)
-    private Gebruiker gebruikerMelder;
+    @JoinColumn(name = "user_id", nullable = false)
+    private User userMelder;
 
     @Column(nullable = false)
     private String reden;

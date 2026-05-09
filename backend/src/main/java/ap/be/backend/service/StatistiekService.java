@@ -2,6 +2,7 @@ package ap.be.backend.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -9,9 +10,10 @@ import org.springframework.stereotype.Service;
 import ap.be.backend.dto.AdminStatistiekDTO;
 import ap.be.backend.dto.LeerkrachtStatistiekDTO;
 import ap.be.backend.dto.LeerlingStatistiekDTO;
+import ap.be.backend.entity.User;
 import ap.be.backend.repository.BoekRepository;
-import ap.be.backend.repository.GebruikerRepository;
 import ap.be.backend.repository.UitleningRepository;
+import ap.be.backend.repository.UserRepository;
 
 @Service
 public class StatistiekService {
@@ -21,14 +23,14 @@ public class StatistiekService {
 
     private final UitleningRepository uitleningRepository;
     private final BoekRepository boekRepository;
-    private final GebruikerRepository gebruikerRepository;
+    private final UserRepository userRepository;
 
     public StatistiekService(UitleningRepository uitleningRepository,
                              BoekRepository boekRepository,
-                             GebruikerRepository gebruikerRepository) {
+                             UserRepository userRepository) {
         this.uitleningRepository = uitleningRepository;
         this.boekRepository = boekRepository;
-        this.gebruikerRepository = gebruikerRepository;
+        this.userRepository = userRepository;
     }
 
     public AdminStatistiekDTO getAdminStatistieken() {
@@ -56,8 +58,8 @@ public class StatistiekService {
         String klas = (klasId == null || klasId.isBlank()) ? null : klasId;
 
         int aantalLeerlingen = klas == null
-                ? (int) gebruikerRepository.count()
-                : (int) gebruikerRepository.countByKlasIgnoreCase(klas);
+                ? (int) userRepository.count()
+                : (int) userRepository.countByKlasIgnoreCase(klas);
 
         int actief = (int) uitleningRepository.countActieveLeningenVoorKlas(klas, ACTIEVE_STATUSSEN);
         int teLaat = (int) uitleningRepository.countTeLaatVoorKlas(klas, ACTIEVE_STATUSSEN, LocalDate.now());
@@ -70,17 +72,16 @@ public class StatistiekService {
         return new LeerkrachtStatistiekDTO(aantalLeerlingen, actief, teLaat, afgelopenWeek, topBoeken);
     }
 
-    public LeerlingStatistiekDTO getLeerlingStatistieken(String schoolId) {
-        long sid;
-        try {
-            sid = Long.parseLong(schoolId);
-        } catch (NumberFormatException e) {
+    public LeerlingStatistiekDTO getLeerlingStatistieken(String smartschoolId) {
+        Optional<User> userOpt = userRepository.findBySmartschoolId(smartschoolId);
+        if (userOpt.isEmpty()) {
             return new LeerlingStatistiekDTO(0, 10, 0, 0);
         }
+        Long userId = userOpt.get().getId();
 
-        int gelezen = (int) uitleningRepository.countLeengeschiedenisVoorSchoolId(sid, "GEWEIGERD");
-        int actief = (int) uitleningRepository.countActieveLeningenVoorSchoolId(sid, ACTIEVE_STATUSSEN);
-        int teLaat = (int) uitleningRepository.countTeLaatVoorSchoolId(sid, ACTIEVE_STATUSSEN, LocalDate.now());
+        int gelezen = (int) uitleningRepository.countLeengeschiedenisVoorUser(userId, "GEWEIGERD");
+        int actief = (int) uitleningRepository.countActieveLeningenVoorUser(userId, ACTIEVE_STATUSSEN);
+        int teLaat = (int) uitleningRepository.countTeLaatVoorUser(userId, ACTIEVE_STATUSSEN, LocalDate.now());
 
         // leesDoel wordt nog niet persistent opgeslagen; default 10 tot dat er een instelling per leerling is
         return new LeerlingStatistiekDTO(gelezen, 10, actief, teLaat);

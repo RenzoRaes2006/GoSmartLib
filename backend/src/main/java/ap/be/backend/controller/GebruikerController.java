@@ -14,7 +14,7 @@ import ap.be.backend.dto.GebruikerDTO;
 import ap.be.backend.dto.LeenStatusResponse;
 import ap.be.backend.dto.LeeslijstMapDTO;
 import ap.be.backend.dto.UitleningDTO;
-import ap.be.backend.entity.Gebruiker;
+import ap.be.backend.entity.User;
 import ap.be.backend.mappers.GebruikerMapper;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -127,9 +127,9 @@ public class GebruikerController {
         return ResponseEntity.ok(gebruikerService.getLeengeschiedenisDTO(gebruikerId));
     }
 
-    @GetMapping("/schoolid/{schoolId}")
-    public ResponseEntity<GebruikerDTO> getLeerlingBySchoolId(@PathVariable long schoolId) {
-        Gebruiker leerling = gebruikerService.getLeerlingBySchoolId(schoolId);
+    @GetMapping("/by-smartschool/{smartschoolId}")
+    public ResponseEntity<GebruikerDTO> getLeerlingBySmartschoolId(@PathVariable String smartschoolId) {
+        User leerling = gebruikerService.getLeerlingBySmartschoolId(smartschoolId);
         return ResponseEntity.ok(GebruikerMapper.toDTO(leerling));
     }
 

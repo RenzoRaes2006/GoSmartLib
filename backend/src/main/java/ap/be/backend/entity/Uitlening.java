@@ -25,8 +25,8 @@ public class Uitlening {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "gebruiker_id", nullable = false)
-    private Gebruiker gebruiker;
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @ManyToOne
     @JoinColumn(name = "boek_id", nullable = false)
@@ -38,8 +38,8 @@ public class Uitlening {
     private String status;
     private boolean isVerlengd;
 
-    public Uitlening(Gebruiker gebruiker, Boek boek, LocalDate uitleenDatum, LocalDate inleverDatum) {
-        this.gebruiker = gebruiker;
+    public Uitlening(User user, Boek boek, LocalDate uitleenDatum, LocalDate inleverDatum) {
+        this.user = user;
         this.boek = boek;
         this.status = "AANGEVRAAGD";
         this.uitleenDatum = null;
