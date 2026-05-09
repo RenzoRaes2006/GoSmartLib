@@ -23,7 +23,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "LeeslijstMap")
+@Table(name = "leeslijst_mappen")
 public class LeeslijstMap {
 
     @Id

@@ -20,7 +20,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "reviews")
+@Table(name = "beoordelingen")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -35,11 +35,11 @@ public class Beoordeling {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(name = "is_anonymous", nullable = false)
+    @Column(name = "is_anoniem", nullable = false)
     private boolean isAnoniem;
 
     @ManyToOne
-    @JoinColumn(name = "book_id", nullable = false)
+    @JoinColumn(name = "boek_id", nullable = false)
     @JsonIgnore
     private Boek boek;
 
@@ -47,10 +47,10 @@ public class Beoordeling {
     @OneToMany(mappedBy = "beoordeling", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<GerapporteerdeBeoordeling> gerapporteerdeBeoordelingen;
 
-    @Column(name = "rating", nullable = false)
+    @Column(name = "waardering", nullable = false)
     private int waardering;
 
-    @Column(name = "content", length = 1000)
+    @Column(name = "inhoud", length = 1000)
     private String inhoud;
 
     @Column(name = "is_spoiler", nullable = false)

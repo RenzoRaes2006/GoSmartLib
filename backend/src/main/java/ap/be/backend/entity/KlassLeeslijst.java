@@ -11,7 +11,7 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "leeslijsten")
+@Table(name = "klassleeslijsten")
 public class KlassLeeslijst {
 
     @Id
@@ -26,6 +26,6 @@ public class KlassLeeslijst {
     private User leerkracht;
 
     @ManyToMany
-    @JoinTable(name = "leeslijst_boeken", joinColumns = @JoinColumn(name = "leeslijst_id"), inverseJoinColumns = @JoinColumn(name = "boek_id"))
+    @JoinTable(name = "klassleeslijst_boeken", joinColumns = @JoinColumn(name = "klassleeslijst_id"), inverseJoinColumns = @JoinColumn(name = "boek_id"))
     private Set<Boek> boeken = new HashSet<>();
 }
