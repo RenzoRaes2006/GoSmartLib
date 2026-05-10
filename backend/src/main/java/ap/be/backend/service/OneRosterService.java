@@ -11,14 +11,19 @@ import org.springframework.web.client.RestTemplate;
 import java.util.List;
 import java.util.Map;
 
-/***
+/**
  * Haalt via de OneRoster API de rol en klas op van een ingelogde gebruiker.
  *
- * Flow:
- *   1. fetchNewAccessToken()  — vraag een tijdelijk token op via /token
- *   2. getUserByUsername()    — haal gebruiker op met dat token
- *   3. getKlasBySourcedId()   — haal klas op met dat token
- ***/
+ * OneRoster is een externe API die gegevens over leerlingen, leerkrachten en
+ * klassen beheert. Deze service wordt aangeroepen vanuit OAuth2LoginSuccessHandler
+ * tijdens het inlogproces om de rol ("student" of "teacher") en de klasnaam
+ * van de gebruiker op te halen.
+ *
+ * Volgorde van aanroepen:
+ *   1. getAccessToken / fetchNewAccessToken — haal een tijdelijk API-token op.
+ *   2. getUserByUsername — zoek de gebruiker op aan de hand van zijn gebruikersnaam.
+ *   3. getKlasBySourcedId — zoek de klas op aan de hand van de gebruikers-ID.
+ */
 @Service
 public class OneRosterService {
 
@@ -36,14 +41,17 @@ public class OneRosterService {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
-    // Cache: bewaar het token zodat we het niet bij elke login opnieuw ophalen
     private String cachedAccessToken = null;
     private long tokenExpiresAt = 0;
 
-    /***
-     * Geeft een geldig token terug.
-     * Hergebruikt het gecachede token als het nog geldig is, anders haalt het een nieuw op.
-     ***/
+    /**
+     * Geeft een geldig access token terug.
+     *
+     * Hergebruikt het gecachede token als dat nog minstens 30 seconden geldig
+     * is. Anders wordt via fetchNewAccessToken een nieuw token opgehaald.
+     *
+     * @return een geldig access token, of null als het ophalen mislukt
+     */
     private String getAccessToken() {
         boolean tokenIsStillValid = cachedAccessToken != null
                 && System.currentTimeMillis() < tokenExpiresAt - 30_000;
@@ -54,11 +62,16 @@ public class OneRosterService {
         return fetchNewAccessToken();
     }
 
-    /***
-     * Vraagt een nieuw access token op via POST {baseUrl}/token.
-     * Stuurt client_id, client_secret en grant_type in de body (client_secret_post).
-     * Slaat het token op in de cache samen met de vervaltijd.
-     ***/
+    /**
+     * Vraagt een nieuw access token op bij de OneRoster token-endpoint.
+     *
+     * Gebruikt de client_credentials flow: client_id en client_secret worden
+     * meegestuurd in de request-body. Het ontvangen token en zijn vervaltijd
+     * worden opgeslagen in de cache zodat niet bij elke login een nieuw token
+     * hoeft te worden opgevraagd.
+     *
+     * @return het nieuwe access token, of null als het ophalen mislukt
+     */
     private String fetchNewAccessToken() {
         try {
             HttpHeaders headers = new HttpHeaders();
@@ -86,10 +99,15 @@ public class OneRosterService {
         }
     }
 
-    /***
-     * Stuurt het Bearer token mee als Authorization header bij elk API-verzoek.
-     * Accept: application/json vertelt de server dat we JSON willen terug, geen HTML.
-     ***/
+    /**
+     * Bouwt de HTTP-headers op die bij elk OneRoster API-verzoek worden meegestuurd.
+     *
+     * Stuurt het Bearer-token mee voor authenticatie en vraagt JSON terug als
+     * antwoordformaat.
+     *
+     * @param accessToken het geldige access token
+     * @return de ingevulde HttpHeaders
+     */
     private HttpHeaders buildBearerHeaders(String accessToken) {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + accessToken);
@@ -97,10 +115,17 @@ public class OneRosterService {
         return headers;
     }
 
-    /***
-     * Zoekt een gebruiker op via zijn Smartschool-username.
-     * Geeft sourcedId en rol terug, of null bij mislukking.
-     ***/
+    /**
+     * Zoekt een OneRoster-gebruiker op via zijn Smartschool-gebruikersnaam.
+     *
+     * Geeft de sourcedId (unieke OneRoster-ID) en de rol van de gebruiker
+     * terug. Deze gegevens worden gebruikt om daarna de klas op te halen
+     * via getKlasBySourcedId.
+     *
+     * @param username de Smartschool-gebruikersnaam
+     * @return een OneRosterUser met sourcedId en rol, of null als de gebruiker
+     *         niet gevonden wordt of het ophalen mislukt
+     */
     public OneRosterUser getUserByUsername(String username) {
         try {
             String accessToken = getAccessToken();
@@ -128,15 +153,26 @@ public class OneRosterService {
         }
     }
 
-    /***
-     * Zoekt de klas op via de sourcedId van de gebruiker.
-     * Geeft de klasnaam terug (bv. "2SOF"), of "onbekend" bij mislukking.
+    /**
+     * Zoekt de klasnaam op van een leerling via zijn OneRoster sourcedId.
      *
-     * Flow (3 stappen want /users/{id}/classes bestaat niet in Smartschool):
-     *   1. /students/{sourcedId}                         → haal school-sourcedId op uit orgs
-     *   2. /schools/{schoolId}/enrollments?filter=...    → haal class-sourcedId op
-     *   3. /classes/{classSourcedId}                     → haal klasnaam op
-     ***/
+     * De OneRoster API van Smartschool biedt geen directe endpoint om klassen
+     * per leerling op te halen. Daarom worden drie opeenvolgende API-calls
+     * gedaan:
+     *
+     * Stap 1: Haal de student op via /students/{sourcedId} om de school-sourcedId
+     *         te vinden uit de "orgs"-lijst.
+     *
+     * Stap 2: Haal de inschrijvingen op via /schools/{schoolId}/enrollments,
+     *         gefilterd op de sourcedId van de leerling, om de class-sourcedId
+     *         te vinden.
+     *
+     * Stap 3: Haal de klasnaam op via /classes/{classSourcedId}.
+     *
+     * @param sourcedId de unieke OneRoster-ID van de gebruiker
+     * @return de klasnaam (bv. "2SOF"), of "onbekend" als de klas niet
+     *         gevonden wordt of het ophalen mislukt
+     */
     public String getKlasBySourcedId(String sourcedId) {
         try {
             String accessToken = getAccessToken();
@@ -159,7 +195,7 @@ public class OneRosterService {
 
             String schoolSourcedId = (String) orgs.get(0).get("sourcedId");
 
-            // Stap 2: haal enrollments op voor die school, gefilterd op deze student
+            // Stap 2: haal enrollments op voor die school, gefilterd op de leerling
             String enrollmentsUrl = baseUrl + "/schools/" + schoolSourcedId
                     + "/enrollments?filter=user.sourcedId='" + sourcedId + "'";
 
@@ -186,9 +222,8 @@ public class OneRosterService {
 
             @SuppressWarnings("unchecked")
             Map<String, Object> klas = (Map<String, Object>) classResponse.getBody().get("class");
-            String klasnaam = (String) klas.get("title");
 
-            return klasnaam;
+            return (String) klas.get("title");
 
         } catch (Exception e) {
             System.err.println("[OneRoster] Fout bij ophalen klas voor '" + sourcedId + "': " + e.getMessage());

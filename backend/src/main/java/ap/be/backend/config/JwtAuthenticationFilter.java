@@ -13,27 +13,18 @@ import java.io.IOException;
 import java.util.List;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
-/***
- * BESTAND: JwtAuthenticationFilter.java
+/**
+ * Spring Security-filter dat bij elke inkomende HTTP-request de JWT-token
+ * controleert en de identiteit van de gebruiker registreert.
  *
- * WAT DOET DIT BESTAND?
- * Dit is een "filter" — een stuk code dat bij ELKE request naar de backend wordt uitgevoerd,
- * VOORDAT de request bij de eigenlijke controller aankomt (bv. BoekController).
+ * Dit filter wordt uitgevoerd vóór elke controller. Het leest de
+ * Authorization-header, valideert de token via JwtService, en plaatst de
+ * herkende gebruiker in de SecurityContextHolder. Op basis daarvan beslist
+ * SecurityConfig of de request mag doorgaan naar de controller.
  *
- * Het enige doel van dit bestand is:
- *   "Heeft deze request een geldige JWT-token? Zo ja, wie is de gebruiker?"
- *
- * HOE WERKT HET?
- * De Angular frontend stuurt bij elke API-call een header mee:
- *   Authorization: Bearer eyJhbGciOiJIUzI1NiJ9...
- *
- * Dit filter leest die header, valideert de token, en vertelt Spring Security
- * wie de ingelogde gebruiker is. Daarna beslist SecurityConfig.java of die
- * gebruiker de gevraagde URL mag bezoeken.
- *
- * "OncePerRequestFilter" betekent: dit filter wordt maar 1 keer per request uitgevoerd
- * (Spring zou het anders soms meerdere keren aanroepen).
- ***/
+ * Door OncePerRequestFilter te implementeren is gegarandeerd dat het filter
+ * exact één keer per request draait, ook bij interne forwards.
+ */
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
@@ -43,42 +34,36 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         this.jwtService = jwtService;
     }
 
+    /**
+     * Verwerkt de authenticatie voor één HTTP-request.
+     *
+     * Stap 1: Lees de Authorization-header. Ontbreekt deze of begint hij niet
+     *         met "Bearer ", dan blijft de request anoniem en beslist
+     *         SecurityConfig of toegang is toegestaan.
+     *
+     * Stap 2: Knip het voorvoegsel "Bearer " weg om de token zelf over te
+     *         houden.
+     *
+     * Stap 3: Valideer de token via JwtService.isTokenValid.
+     *
+     * Stap 4: Lees bij een geldige token de smartschoolId en de rol uit de
+     *         token. Vertaal de rol naar een Spring-authority (ROLE_STUDENT,
+     *         ROLE_TEACHER of ROLE_BEHEERDER) en sla het authenticatie-object
+     *         op in de SecurityContextHolder.
+     *
+     * Stap 5: Geef de request altijd door aan het volgende filter in de keten,
+     *         ongeacht of authenticatie is gelukt.
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        /***
-         * Lees de "Authorization" header uit de request.
-         * De frontend stuurt dit mee als:
-         *   Authorization: Bearer eyJhbGciOiJIUzI1NiJ9...
-         *
-         * Als er geen Authorization header is, of hij begint niet met "Bearer ",
-         * dan is deze gebruiker niet ingelogd. We gaan dan gewoon verder (filterChain.doFilter)
-         * en SecurityConfig.java zal de request blokkeren als de URL beschermd is.
-         ***/
         String authHeader = request.getHeader("Authorization");
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
-
-            /***
-             * Knip "Bearer " (7 tekens) weg om enkel de token zelf over te houden.
-             * Voorbeeld:
-             *   authHeader = "Bearer eyJhbGci..."
-             *   token      = "eyJhbGci..."
-             ***/
             String token = authHeader.substring(7);
 
-            /***
-             * Controleer of de token geldig is (niet verlopen, niet vervalst).
-             * JwtService.isTokenValid() doet deze controle.
-             ***/
             if (jwtService.isTokenValid(token)) {
-
-                /***
-                 * Haal de smartschoolId op uit de token.
-                 * Dit is de unieke identifier van de gebruiker die we bij het
-                 * aanmaken van de token hebben opgeslagen als "subject".
-                 ***/
                 String smartschoolId = jwtService.extractSmartschoolId(token);
                 String role = jwtService.extractRole(token);
 
@@ -89,20 +74,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         smartschoolId, null, authorities);
 
-                /***
-                 * Sla de herkende gebruiker op in de SecurityContext.
-                 * De SecurityContext is een tijdelijke opslag per request.
-                 * SecurityConfig.java leest hieruit of de gebruiker is ingelogd.
-                 ***/
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         }
 
-        /***
-         * Geef de request door aan het volgende onderdeel in de keten.
-         * Dit is altijd nodig, of de token nu geldig was of niet.
-         * Zonder deze regel zou de request nooit bij de controller aankomen.
-         ***/
         filterChain.doFilter(request, response);
     }
 }

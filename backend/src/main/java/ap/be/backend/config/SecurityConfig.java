@@ -11,92 +11,79 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.config.Customizer;
 
-/***
- * BESTAND: SecurityConfig.java
+/**
+ * Centrale beveiligingsconfiguratie van de applicatie.
  *
- * WAT DOET DIT BESTAND?
- * Dit is het "toegangspoort"-bestand van de backend.
- * Elke HTTP-request die binnenkomt, passeert langs de regels die hier zijn ingesteld.
- * Hier beslis je:
- *   - Welke pagina's mag iedereen zien (zonder in te loggen)?
- *   - Welke pagina's zijn enkel voor ingelogde gebruikers?
- *   - Hoe logt een gebruiker in? (via Smartschool OAuth2)
- *   - Hoe controleer je of iemand al ingelogd is? (via JWT-token)
+ * Elke binnenkomende HTTP-request doorloopt drie stappen:
+ *   1. JwtAuthenticationFilter — controleert of er een geldige JWT-token aanwezig is.
+ *   2. De toegangsregels in filterChain — bepaalt of de gebruiker de gevraagde
+ *      URL mag bezoeken.
+ *   3. De controller — verwerkt de eigenlijke request.
  *
- * VOLGORDE VAN VERWERKING:
- * Elke request doorloopt dit pad:
- *   1. JwtAuthenticationFilter (check: heeft deze request een geldige token?)
- *   2. Spring Security regels (mag deze gebruiker deze URL bezoeken?)
- *   3. De echte controller (bv. BoekController, GebruikerController...)
- ***/
+ * EnableMethodSecurity zorgt ervoor dat @PreAuthorize-annotaties op controllers
+ * en services gerespecteerd worden.
+ */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
 
-        private final OAuth2LoginSuccessHandler successHandler;
-        private final JwtAuthenticationFilter jwtAuthFilter;
+    private final OAuth2LoginSuccessHandler successHandler;
+    private final JwtAuthenticationFilter jwtAuthFilter;
 
-        public SecurityConfig(OAuth2LoginSuccessHandler successHandler, JwtAuthenticationFilter jwtAuthFilter) {
-            this.successHandler = successHandler;
-            this.jwtAuthFilter = jwtAuthFilter;
-        }
+    public SecurityConfig(OAuth2LoginSuccessHandler successHandler, JwtAuthenticationFilter jwtAuthFilter) {
+        this.successHandler = successHandler;
+        this.jwtAuthFilter = jwtAuthFilter;
+    }
 
-        /***
-         * filterChain = de volledige beveiligingsconfiguratie als één aaneengesloten keten.
-         * Spring roept deze methode op bij het opstarten om te weten hoe beveiliging werkt.
-         ***/
-        @Bean
-        public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-                http
-                                /***
-                                 * CORS (Cross-Origin Resource Sharing):
-                                 * De frontend (Angular) draait op een andere URL dan de backend.
-                                 * Zonder CORS zou de browser de requests blokkeren.
-                                 * withDefaults() gebruikt de CORS-instellingen uit CorsConfig.java.
-                                 ***/
-                                .cors(Customizer.withDefaults())
+    /**
+     * Definieert de volledige beveiligingsketen van de applicatie.
+     *
+     * CORS: staat requests toe van de Angular-frontend, die op een andere
+     * URL draait dan de backend. De toegestane origins staan in CorsConfig.
+     *
+     * CSRF: uitgeschakeld omdat de applicatie stateless is en JWT gebruikt.
+     * CSRF-bescherming is alleen nodig bij traditionele sessie-gebaseerde
+     * webapplicaties.
+     *
+     * Toegangsregels:
+     *   - Openbaar toegankelijk: /, /login, /error, /api/boeken/**, /api/auth/admin/login.
+     *   - Alle overige endpoints vereisen een geldige JWT-token.
+     *
+     * OAuth2-login: Spring regelt de redirect naar Smartschool en het ophalen
+     * van de gebruikersgegevens. Na een succesvolle login roept Spring
+     * OAuth2LoginSuccessHandler aan.
+     *
+     * JWT-filter: JwtAuthenticationFilter wordt toegevoegd vóór het standaard
+     * Spring-authenticatiefilter, zodat elke request eerst op een geldige token
+     * wordt gecontroleerd.
+     *
+     * @param http het door Spring geleverde HttpSecurity-object
+     * @return de geconfigureerde SecurityFilterChain
+     */
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+                .cors(Customizer.withDefaults())
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/", "/login", "/error", "/api/boeken/**", "/api/auth/admin/login").permitAll()
+                        .anyRequest().authenticated())
+                .oauth2Login(oauth2 -> oauth2
+                        .successHandler(successHandler))
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
-                                /***
-                                 * CSRF uitschakelen:
-                                 * CSRF-bescherming is bedoeld voor traditionele websites met sessies.
-                                 * Wij gebruiken JWT-tokens (stateless) -> CSRF is niet nodig en zou
-                                 * onze API-calls vanuit Angular blokkeren.
-                                 ***/
-                                .csrf(csrf -> csrf.disable())
+        return http.build();
+    }
 
-                                /***
-                                 * TOEGANGSREGELS per URL:
-                                 * - /api/boeken/** -> iedereen mag dit zien (ook niet-ingelogden)
-                                 * - alle andere URLs -> je moet ingelogd zijn (geldige JWT-token)
-                                 ***/
-                                .authorizeHttpRequests(auth -> auth
-                                                .requestMatchers("/", "/login", "/error", "/api/boeken/**", "/api/auth/admin/login").permitAll()
-                                                .anyRequest().authenticated())
-
-                                /***
-                                 * OAuth2 LOGIN via Smartschool:
-                                 * Spring regelt zelf de redirect naar Smartschool en het ophalen
-                                 * van de gebruikersdata. Zodra dat klaar is, roept Spring onze
-                                 * successHandler aan (OAuth2LoginSuccessHandler.java).
-                                 ***/
-                                .oauth2Login(oauth2 -> oauth2
-                                                .successHandler(successHandler)
-                                )
-
-                                /***
-                                 * JWT FILTER TOEVOEGEN:
-                                 * Voeg onze JwtAuthenticationFilter toe VÓÓR de standaard
-                                 * username/password filter van Spring. Zo wordt bij elke request
-                                 * eerst de JWT-token gecontroleerd.
-                                 ***/
-                                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
-
-                return http.build();
-        }
-
-        @Bean
-        public PasswordEncoder passwordEncoder() {
-                return new BCryptPasswordEncoder();
-        }
+    /**
+     * Levert de BCrypt-wachtwoordversleuteling die gebruikt wordt bij de
+     * beheerder-login.
+     *
+     * @return een BCryptPasswordEncoder-instantie
+     */
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 }

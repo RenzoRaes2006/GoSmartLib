@@ -1,10 +1,11 @@
 package ap.be.backend.exception;
 
+/**
+ * Gegooid wanneer een beoordeling niet voldoet aan de validatieregels,
+ * bijvoorbeeld als de waardering buiten het toegestane bereik valt.
+ */
 public class InvalidBeoordelingException extends RuntimeException {
-    // Constructor die een foutmelding accepteert en doorgeeft aan de superclass
-    // RuntimeException
-    // Deze constructor wordt gebruikt om een specifieke foutmelding te geven
-    // wanneer een beoordeling ongeldig is
+
     public InvalidBeoordelingException(String message) {
         super(message);
     }

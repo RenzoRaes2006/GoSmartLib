@@ -10,6 +10,12 @@ import ap.be.backend.entity.Rol;
 import ap.be.backend.entity.User;
 import ap.be.backend.repository.UserRepository;
 
+/**
+ * Vult de database bij het opstarten met testleerlingen als ze nog niet bestaan.
+ *
+ * Elk record bevat een smartschoolId en een klas. Bestaande gebruikers worden
+ * overgeslagen. Draait als tweede in de volgorde van seeders (@Order(2)).
+ */
 @Component
 @Order(2)
 public class LeerlingenSeed implements CommandLineRunner {
@@ -21,7 +27,6 @@ public class LeerlingenSeed implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        // smartschoolId, klas
         List<String[]> seeds = List.of(
                 new String[] { "leerling-001", "2a" },
                 new String[] { "leerling-002", "2b" },
