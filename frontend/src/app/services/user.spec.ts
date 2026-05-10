@@ -26,7 +26,7 @@ describe('GebruikerService', () => {
 
   it('getUsers stuurt GET naar /api/gebruikers', () => {
     const mock: Gebruiker[] = [
-      { gebruikerID: 1, schoolId: 1, voorNaam: 'A', achterNaam: 'B', email: 'a@b', rol: 'LEERLING' },
+      { id: 1, smartschoolId: 'a.b', rol: 'LEERLING' },
     ];
     service.getUsers().subscribe((result) => expect(result).toEqual(mock));
 

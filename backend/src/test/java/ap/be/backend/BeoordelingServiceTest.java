@@ -13,21 +13,25 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import ap.be.backend.dto.BeoordelingDTO;
 import ap.be.backend.entity.Beoordeling;
 import ap.be.backend.entity.Boek;
-import ap.be.backend.entity.Gebruiker;
+import ap.be.backend.entity.User;
 import ap.be.backend.exception.BoekNotFoundException;
+import ap.be.backend.exception.GebruikerNotFoundException;
 import ap.be.backend.repository.BeoordelingRepository;
 import ap.be.backend.repository.BoekRepository;
-import ap.be.backend.repository.GebruikerRepository;
+import ap.be.backend.repository.UserRepository;
 import ap.be.backend.repository.GerapporteerdeBeoordelingRepository;
 import ap.be.backend.service.BeoordelingService;
 import ap.be.backend.service.FilterService;
@@ -45,7 +49,7 @@ public class BeoordelingServiceTest {
     private GerapporteerdeBeoordelingRepository gerapporteerdeBeoordelingRepository;
 
     @Mock
-    private GebruikerRepository gebruikerRepository;
+    private UserRepository userRepository;
 
     @Mock
     private FilterService filterService;
@@ -55,36 +59,39 @@ public class BeoordelingServiceTest {
 
     private Boek testBoek;
     private Beoordeling testBeoordeling;
-    private Gebruiker testGebruiker;
+    private User testGebruiker;
     private BeoordelingDTO testDto;
     private final Long BOEK_ID = 1L;
+    private static final String SMARTSCHOOL_ID = "ss-test-1";
 
     @BeforeEach
     void setUp() {
         testBoek = new Boek();
         testBoek.setId(BOEK_ID);
 
-        testGebruiker = new Gebruiker();
+        testGebruiker = new User();
         testGebruiker.setId(1L);
-        // testGebruiker.setNaam("Test Gebruiker"); // Optioneel: voeg toe als je entiteit dit toestaat
+        testGebruiker.setSmartschoolId(SMARTSCHOOL_ID);
 
         testBeoordeling = new Beoordeling();
         testBeoordeling.setId(10L);
-        testBeoordeling.setGebruiker(testGebruiker); // Nu geven we het object mee i.p.v. alleen ID
+        testBeoordeling.setUser(testGebruiker);
         testBeoordeling.setBoek(testBoek);
         testBeoordeling.setWaardering(5);
         testBeoordeling.setInhoud("Geweldig boek!");
         testBeoordeling.setAnoniem(false);
         testBeoordeling.setSpoiler(false);
 
-        // Update deze constructor naar jouw exacte BeoordelingDTO velden 
-        // (bijv: id, gebruikerId, gebruikersnaam, boekId, waardering, inhoud, isAnoniem, gerapporteerd)
         testDto = new BeoordelingDTO(10L, "Test Gebruiker", BOEK_ID, 5, "Geweldig boek!", false, false, false);
+
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(SMARTSCHOOL_ID, null, List.of()));
     }
 
-    // =========================================================================
-    // TESTS VOOR: getBeoordelingenOpBoekId(Long bookId)
-    // =========================================================================
+    @AfterEach
+    void tearDown() {
+        SecurityContextHolder.clearContext();
+    }
 
     @Test
     void givenBoekBestaatNiet_whenGetBeoordelingenOpBoekId_thenThrowsBoekNotFoundException() {
@@ -102,6 +109,7 @@ public class BeoordelingServiceTest {
     void givenBoekBestaatZonderBeoordelingen_whenGetBeoordelingenOpBoekId_thenReturnsEmptyList() {
         when(boekRepository.existsById(BOEK_ID)).thenReturn(true);
         when(beoordelingRepository.findByBoekId(BOEK_ID)).thenReturn(Collections.emptyList());
+        when(userRepository.findBySmartschoolId(SMARTSCHOOL_ID)).thenReturn(Optional.of(testGebruiker));
 
         List<BeoordelingDTO> result = beoordelingService.getBeoordelingenOpBoekId(BOEK_ID);
 
@@ -113,20 +121,17 @@ public class BeoordelingServiceTest {
     void givenBoekBestaatMetBeoordelingen_whenGetBeoordelingenOpBoekId_thenReturnsBeoordelingDTOList() {
         when(boekRepository.existsById(BOEK_ID)).thenReturn(true);
         when(beoordelingRepository.findByBoekId(BOEK_ID)).thenReturn(List.of(testBeoordeling));
-        when(gerapporteerdeBeoordelingRepository.existsByBeoordelingIdAndGebruikerMelder_GebruikerID(10L, 1L))
+        when(userRepository.findBySmartschoolId(SMARTSCHOOL_ID)).thenReturn(Optional.of(testGebruiker));
+        when(gerapporteerdeBeoordelingRepository.existsByBeoordelingIdAndUserMelder_Id(10L, 1L))
                 .thenReturn(true);
 
         List<BeoordelingDTO> result = beoordelingService.getBeoordelingenOpBoekId(BOEK_ID);
 
         assertEquals(1, result.size());
-        assertEquals("Geweldig boek!", result.get(0).inhoud()); 
-        assertTrue(result.get(0).gerapporteerd()); 
+        assertEquals("Geweldig boek!", result.get(0).inhoud());
+        assertTrue(result.get(0).gerapporteerd());
         verify(beoordelingRepository, times(1)).findByBoekId(BOEK_ID);
     }
-
-    // =========================================================================
-    // TESTS VOOR: beoordelingOpslaan(BeoordelingDTO dto)
-    // =========================================================================
 
     @Test
     void givenBoekBestaatNiet_whenBeoordelingOpslaan_thenThrowsBoekNotFoundException() {
@@ -142,17 +147,16 @@ public class BeoordelingServiceTest {
     }
 
     @Test
-    void givenBoekBestaatMaarGebruikerNiet_whenBeoordelingOpslaan_thenThrowsRuntimeException() {
+    void givenBoekBestaatMaarGebruikerNiet_whenBeoordelingOpslaan_thenThrowsGebruikerNotFoundException() {
         when(filterService.bevatScheldwoorden(testDto.inhoud())).thenReturn(false);
         when(boekRepository.findById(testDto.boekId())).thenReturn(Optional.of(testBoek));
-        // We mocken de repository zodat hij de tijdelijke gebruiker (ID 1) niet kan vinden
-        when(gebruikerRepository.findById(1L)).thenReturn(Optional.empty());
+        when(userRepository.findBySmartschoolId(SMARTSCHOOL_ID)).thenReturn(Optional.empty());
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+        GebruikerNotFoundException exception = assertThrows(GebruikerNotFoundException.class, () -> {
             beoordelingService.beoordelingOpslaan(testDto);
         });
 
-        assertEquals("Gebruiker niet gevonden met id: 1", exception.getMessage());
+        assertEquals("Geen user gevonden voor smartschoolId: " + SMARTSCHOOL_ID, exception.getMessage());
         verify(beoordelingRepository, never()).save(any(Beoordeling.class));
     }
 
@@ -160,8 +164,8 @@ public class BeoordelingServiceTest {
     void givenGeldigeDataEnBestaandBoekEnGebruiker_whenBeoordelingOpslaan_thenSavesBeoordeling() {
         when(filterService.bevatScheldwoorden(testDto.inhoud())).thenReturn(false);
         when(boekRepository.findById(testDto.boekId())).thenReturn(Optional.of(testBoek));
-        // We mocken de repository zodat hij succesvol de Gebruiker teruggeeft
-        when(gebruikerRepository.findById(1L)).thenReturn(Optional.of(testGebruiker));
+        when(userRepository.findBySmartschoolId(SMARTSCHOOL_ID)).thenReturn(Optional.of(testGebruiker));
+        when(beoordelingRepository.findByBoekId(testBoek.getId())).thenReturn(List.of(testBeoordeling));
 
         beoordelingService.beoordelingOpslaan(testDto);
 

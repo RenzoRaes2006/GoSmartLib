@@ -13,15 +13,21 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.List;
+import java.util.Optional;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 
 import ap.be.backend.dto.BeoordelingDTO;
+import ap.be.backend.entity.User;
+import ap.be.backend.repository.UserRepository;
 import ap.be.backend.service.BeoordelingService;
 import ap.be.backend.service.GerapporteerdeBeoordelingService;
 
+@WithMockUser(username = "ss-test-controller", roles = {"LEERLING"})
 class BeoordelingControllerTest extends AbstractIntegrationTest {
 
     @MockBean
@@ -29,6 +35,17 @@ class BeoordelingControllerTest extends AbstractIntegrationTest {
 
     @MockBean
     private GerapporteerdeBeoordelingService gerapporteerdeBeoordelingService;
+
+    @MockBean
+    private UserRepository userRepository;
+
+    @BeforeEach
+    void stubCurrentUser() {
+        User melder = new User();
+        melder.setId(1L);
+        melder.setSmartschoolId("ss-test-controller");
+        when(userRepository.findBySmartschoolId("ss-test-controller")).thenReturn(Optional.of(melder));
+    }
 
     @Test
     void getBeoordelingenOpBoekIdGeeftLijstTerug() throws Exception {
