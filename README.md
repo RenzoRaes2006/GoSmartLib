@@ -1,93 +1,184 @@
 # GoSmartLib
 
+GoSmartLib is een digitaal bibliotheekbeheersysteem voor scholen, gebouwd voor AP Hogeschool Antwerpen. Leerlingen kunnen boeken opzoeken, reserveren en hun leengeschiedenis raadplegen. Leerkrachten beheren klasleeslijsten en volgen het leengedrag van hun klas op. Bibliotheekbeheerders verwerken uitleningen, retours en rapporteren ongepaste reviews. Authenticatie verloopt via Smartschool OAuth2.
 
+---
 
-## Getting started
+## Technische stack
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+| Laag | Technologie |
+|---|---|
+| Backend | Java 21, Spring Boot 3.5 |
+| Frontend | Angular 20 |
+| Database | MySQL 8.0 |
+| Auth | Smartschool OAuth2 + JWT |
+| Containerisatie | Docker + Docker Compose + Traefik |
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+---
 
-## Add your files
+## Vereisten
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
+- Java 21
+- Maven 3.9+
+- Node.js 20+ en npm
+- MySQL 8.0 (of Docker)
+- Een Smartschool-omgeving met OAuth2-client (voor inloggen)
+- Een OneRoster API-toegang (voor klas- en gebruikersdata)
+
+---
+
+## Setup — lokale ontwikkeling
+
+### 1. Repository klonen
+
+```bash
+git clone https://gitlab.apstudent.be/bachelor-it/software-project/25-26/team-09/gosmartlib.git
+cd gosmartlib
+```
+
+### 2. Database aanmaken
+
+Zorg dat MySQL draait en maak een database aan:
+
+```sql
+CREATE DATABASE schooldb;
+```
+
+Of start via Docker (enkel de database):
+
+```bash
+docker run --name gosmartlib-mysql -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=schooldb -p 3306:3306 -d mysql:8.0
+```
+
+### 3. Backend configureren
+
+Bewerk `backend/src/main/resources/application.properties` en vul de volgende variabelen in:
+
+```properties
+# Database
+spring.datasource.url=jdbc:mysql://localhost:3306/schooldb?createDatabaseIfNotExist=true&serverTimezone=UTC
+spring.datasource.username=root
+spring.datasource.password=root
+
+# JWT (gebruik een lange, willekeurige string in productie)
+app.jwt.secret=JOUW_GEHEIME_SLEUTEL_MIN_32_TEKENS
+
+# Frontend URL (voor redirects na login)
+app.frontend.url=http://localhost:4200/
+
+# CORS
+app.cors.allowed-origins=http://localhost:4200
+
+# Smartschool OAuth2 (zie sectie hieronder)
+spring.security.oauth2.client.registration.smartschool.client-id=JOUW_CLIENT_ID
+spring.security.oauth2.client.registration.smartschool.client-secret=JOUW_CLIENT_SECRET
+
+# OneRoster API (klas- en gebruikersdata, opvragen bij Smartschool-beheerder)
+oneroster.base-url=https://JOUWSCHOOL.smartschool.be/ims/oneroster/v1p1
+oneroster.token-url=https://JOUWSCHOOL.smartschool.be/ims/oneroster/token
+oneroster.username=ONEROSTER_USERNAME
+oneroster.password=ONEROSTER_PASSWORD
+```
+
+### 4. Backend starten
+
+```bash
+cd backend
+mvn spring-boot:run
+```
+
+De backend draait op `http://localhost:8081`.
+
+### 5. Frontend configureren
+
+In `frontend/src/environments/` kan je de API-URL instellen. Standaard wijst de frontend naar `http://localhost:8081`.
+
+### 6. Frontend starten
+
+```bash
+cd frontend
+npm install
+ng serve
+```
+
+De frontend is bereikbaar op `http://localhost:4200`.
+
+---
+
+## Setup — Docker (volledig)
+
+Start backend, frontend en database in één keer:
+
+```bash
+docker compose up --build
+```
+
+> Let op: de Docker-setup gebruikt Traefik als reverse proxy en is bedoeld voor productie op `frontend-sp09.cloud-ap.be`. Voor lokale ontwikkeling is de losse setup (stappen 3–6) eenvoudiger.
+
+---
+
+## Smartschool OAuth2 configureren
+
+1. Log in op het Smartschool-beheerderspaneel van jouw school.
+2. Ga naar **Instellingen → API / OAuth2** en maak een nieuwe OAuth2-client aan.
+3. Vul als redirect URI in:
+   - Lokaal: `http://localhost:8081/login/oauth2/code/smartschool`
+   - Productie: `https://api-sp09.cloud-ap.be/login/oauth2/code/smartschool`
+4. Kopieer de `client-id` en `client-secret` naar `application.properties`.
+5. Stel de scopes in op `userinfo`.
+
+De gebruikersinformatie (smartschoolId, rol, klas) wordt opgehaald via de OneRoster API. Vraag de `username` en `password` hiervoor op bij de Smartschool-beheerder van de school.
+
+---
+
+## Tests uitvoeren
+
+### Backend
+
+```bash
+cd backend
+mvn test
+```
+
+Gebruikt H2 in-memory database — geen MySQL vereist voor tests.
+
+### Frontend
+
+```bash
+cd frontend
+ng test --watch=false --browsers=ChromeHeadless
+```
+
+---
+
+## Rollen
+
+| Rol | Toegang |
+|---|---|
+| `LEERLING` | Catalogus, leeslijst, reviews, eigen leengeschiedenis |
+| `LEERKRACHT` | Klasleeslijsten beheren, leengedrag klas opvolgen |
+| `BEHEERDER` | Boekbeheer, uitleningen verwerken, reviews modereren, statistieken |
+
+---
+
+## Projectstructuur
 
 ```
-cd existing_repo
-git remote add origin https://gitlab.apstudent.be/bachelor-it/software-project/25-26/team-09/gosmartlib.git
-git branch -M main
-git push -uf origin main
+gosmartlib/
+├── backend/          # Spring Boot applicatie
+│   └── src/
+│       ├── main/java/ap/be/backend/
+│       │   ├── controller/   # REST endpoints
+│       │   ├── service/      # Business logica
+│       │   ├── entity/       # JPA entiteiten
+│       │   ├── repository/   # Spring Data repositories
+│       │   ├── security/     # JWT + OAuth2 configuratie
+│       │   └── seeds/        # Testdata bij opstarten
+│       └── test/             # Unit- en integratietests
+├── frontend/         # Angular applicatie
+│   └── src/app/
+│       ├── services/ # HTTP-services naar backend
+│       └── ...       # Components per feature
+├── docker-compose.yaml
+└── traefik/          # Reverse proxy configuratie
 ```
-
-## Integrate with your tools
-
-- [ ] [Set up project integrations](https://gitlab.apstudent.be/bachelor-it/software-project/25-26/team-09/gosmartlib/-/settings/integrations)
-
-## Collaborate with your team
-
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
-
-## Test and Deploy
-
-Use the built-in continuous integration in GitLab.
-
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
-
-***
-
-# Editing this README
-
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
-
-## Suggestions for a good README
-
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
-
-## Name
-Choose a self-explaining name for your project.
-
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
-
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
-
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
-
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
-
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
-
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
-
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
-
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
-
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
-
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
