@@ -1,17 +1,18 @@
 // package ap.be.backend.security;
 
+// import static org.junit.jupiter.api.Assertions.assertEquals;
 // import static org.mockito.ArgumentMatchers.any;
-// import static org.mockito.ArgumentMatchers.eq;
-// import static org.mockito.Mockito.mock;
 // import static org.mockito.Mockito.never;
 // import static org.mockito.Mockito.times;
 // import static org.mockito.Mockito.verify;
 // import static org.mockito.Mockito.when;
+// import static org.mockito.Mockito.mock;
 
 // import java.util.Optional;
 
 // import org.junit.jupiter.api.Test;
 // import org.junit.jupiter.api.extension.ExtendWith;
+// import org.mockito.ArgumentCaptor;
 // import org.mockito.InjectMocks;
 // import org.mockito.Mock;
 // import org.mockito.junit.jupiter.MockitoExtension;
@@ -21,87 +22,73 @@
 
 // import ap.be.backend.config.JwtService;
 // import ap.be.backend.config.OAuth2LoginSuccessHandler;
-// import ap.be.backend.dto.OneRosterUser;
-// import ap.be.backend.entity.Gebruiker;
 // import ap.be.backend.entity.User;
-// import ap.be.backend.repository.GebruikerRepository;
 // import ap.be.backend.repository.UserRepository;
-// import ap.be.backend.service.OneRosterService;
 // import jakarta.servlet.http.HttpServletRequest;
 // import jakarta.servlet.http.HttpServletResponse;
 
 // @ExtendWith(MockitoExtension.class)
-// class OAuth2LoginSuccessHandlerTest {
+// public class OAuth2LoginSuccessHandlerTest {
 
 //     @Mock
 //     private JwtService jwtService;
+
 //     @Mock
 //     private UserRepository userRepository;
-//     @Mock
-//     private GebruikerRepository gebruikerRepository;
-//     @Mock
-//     private OneRosterService oneRosterService;
 
 //     @InjectMocks
 //     private OAuth2LoginSuccessHandler successHandler;
 
+//     /*** Verifieert dat een nieuwe gebruiker wordt opgeslagen en doorgestuurd met token. */
 //     @Test
-//     void newUser_isPersistedAndRedirectedWithToken() throws Exception {
-//         ReflectionTestUtils.setField(successHandler, "frontendBaseUrl", "https://frontend.test");
+//     void givenNewUser_whenOnAuthenticationSuccess_thenUserSavedAndRedirected() throws Exception {
+//         ReflectionTestUtils.setField(successHandler, "frontendBaseUrl", "https://localhost:4200");
 
 //         OAuth2User oAuth2User = mock(OAuth2User.class);
-//         when(oAuth2User.getAttribute("userID")).thenReturn("ss-123");
-//         when(oAuth2User.getAttribute("name")).thenReturn("Haitam");
-//         when(oAuth2User.getAttribute("username")).thenReturn("sof2.haitam");
+//         when(oAuth2User.getAttribute("id")).thenReturn("ss-123");
+//         when(oAuth2User.getAttribute("role")).thenReturn("STUDENT");
+//         when(oAuth2User.getAttribute("name")).thenReturn("Test Gebruiker");
 
-//         OneRosterUser orUser = new OneRosterUser("src-1", "student");
-//         when(oneRosterService.getUserByUsername("sof2.haitam")).thenReturn(orUser);
-//         when(oneRosterService.getKlasBySourcedId("src-1")).thenReturn("2SOF");
-
-//         Authentication auth = mock(Authentication.class);
-//         when(auth.getPrincipal()).thenReturn(oAuth2User);
+//         Authentication authentication = mock(Authentication.class);
+//         when(authentication.getPrincipal()).thenReturn(oAuth2User);
 
 //         when(userRepository.findBySmartschoolId("ss-123")).thenReturn(Optional.empty());
-//         when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
-//         when(gebruikerRepository.findBySmartschoolId("ss-123")).thenReturn(Optional.empty());
-//         when(gebruikerRepository.save(any(Gebruiker.class))).thenAnswer(i -> i.getArgument(0));
-//         when(jwtService.generateToken(eq("ss-123"), eq("student"), eq("Haitam"), eq("2SOF")))
-//                 .thenReturn("jwt-token");
+//         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+//         when(jwtService.generateToken("ss-123", "STUDENT", "Test Gebruiker")).thenReturn("jwt-token");
 
+//         HttpServletRequest request = mock(HttpServletRequest.class);
 //         HttpServletResponse response = mock(HttpServletResponse.class);
 
-//         successHandler.onAuthenticationSuccess(mock(HttpServletRequest.class), response, auth);
+//         successHandler.onAuthenticationSuccess(request, response, authentication);
 
-//         verify(userRepository, times(1)).save(any(User.class));
-//         verify(gebruikerRepository, times(1)).save(any(Gebruiker.class));
-//         verify(response).sendRedirect("https://frontend.test/login-success?token=jwt-token");
+//         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+//         verify(userRepository, times(1)).save(userCaptor.capture());
+//         assertEquals("ss-123", userCaptor.getValue().getSmartschoolId());
+//         verify(response, times(1)).sendRedirect("https://localhost:4200/login-success?token=jwt-token");
 //     }
 
+//     /*** Verifieert dat een bestaande gebruiker niet opnieuw wordt opgeslagen. */
 //     @Test
-//     void existingUser_isNotPersistedAgain() throws Exception {
-//         ReflectionTestUtils.setField(successHandler, "frontendBaseUrl", "https://frontend.test");
+//     void givenExistingUser_whenOnAuthenticationSuccess_thenNoSaveAndRedirected() throws Exception {
+//         ReflectionTestUtils.setField(successHandler, "frontendBaseUrl", "https://localhost:4200");
 
 //         OAuth2User oAuth2User = mock(OAuth2User.class);
-//         when(oAuth2User.getAttribute("userID")).thenReturn("ss-456");
-//         when(oAuth2User.getAttribute("name")).thenReturn("Admin");
-//         when(oAuth2User.getAttribute("username")).thenReturn("admin.user");
+//         when(oAuth2User.getAttribute("id")).thenReturn("ss-456");
+//         when(oAuth2User.getAttribute("role")).thenReturn("ADMIN");
+//         when(oAuth2User.getAttribute("name")).thenReturn("Admin User");
 
-//         when(oneRosterService.getUserByUsername("admin.user")).thenReturn(null);
-
-//         Authentication auth = mock(Authentication.class);
-//         when(auth.getPrincipal()).thenReturn(oAuth2User);
+//         Authentication authentication = mock(Authentication.class);
+//         when(authentication.getPrincipal()).thenReturn(oAuth2User);
 
 //         when(userRepository.findBySmartschoolId("ss-456")).thenReturn(Optional.of(new User("ss-456")));
-//         when(gebruikerRepository.findBySmartschoolId("ss-456")).thenReturn(Optional.of(new Gebruiker()));
-//         when(jwtService.generateToken(eq("ss-456"), eq("onbekend"), eq("Admin"), eq("onbekend")))
-//                 .thenReturn("jwt-token-2");
+//         when(jwtService.generateToken("ss-456", "ADMIN", "Admin User")).thenReturn("jwt-token-2");
 
+//         HttpServletRequest request = mock(HttpServletRequest.class);
 //         HttpServletResponse response = mock(HttpServletResponse.class);
 
-//         successHandler.onAuthenticationSuccess(mock(HttpServletRequest.class), response, auth);
+//         successHandler.onAuthenticationSuccess(request, response, authentication);
 
 //         verify(userRepository, never()).save(any(User.class));
-//         verify(gebruikerRepository, never()).save(any(Gebruiker.class));
-//         verify(response).sendRedirect("https://frontend.test/login-success?token=jwt-token-2");
+//         verify(response, times(1)).sendRedirect("https://localhost:4200/login-success?token=jwt-token-2");
 //     }
 // }

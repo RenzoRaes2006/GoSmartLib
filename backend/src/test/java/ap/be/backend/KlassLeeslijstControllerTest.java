@@ -1,172 +1,141 @@
 package ap.be.backend;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 
-import ap.be.backend.controller.KlassLeeslijstController;
 import ap.be.backend.dto.KlassLeeslijstRequestDTO;
 import ap.be.backend.dto.KlassLeeslijstResponseDTO;
 import ap.be.backend.service.KlassLeeslijstService;
 
-@ExtendWith(MockitoExtension.class)
-class KlassLeeslijstControllerTest {
+class KlassLeeslijstControllerTest extends AbstractIntegrationTest {
 
-    @Mock
+    @MockBean
     private KlassLeeslijstService leeslijstService;
 
-    @InjectMocks
-    private KlassLeeslijstController leeslijstController;
-
-    /**
-     * Test of de controller een HTTP 200 OK retourneert met het aangemaakte DTO
-     * nadat de service succesvol een nieuwe leeslijst heeft gegenereerd.
-     */
     @Test
-    void createLeeslijst_ReturnsCreatedDTO() {
+    void createLeeslijst_ReturnsCreatedDTO() throws Exception {
+        // Arrange
         KlassLeeslijstRequestDTO request = new KlassLeeslijstRequestDTO("Mijn Lijst");
         KlassLeeslijstResponseDTO expected = new KlassLeeslijstResponseDTO(1L, "Mijn Lijst", List.of());
-
         when(leeslijstService.createLeeslijst("Mijn Lijst", 1L)).thenReturn(expected);
 
-        ResponseEntity<KlassLeeslijstResponseDTO> response = leeslijstController.createLeeslijst(1L, request);
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(expected, response.getBody());
+        // Act + Assert
+        mockMvc.perform(post("/api/leeslijsten/leerkracht/{id}", 1L)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.naam").value("Mijn Lijst"));
     }
 
-    /**
-     * Test of de controller de correcte lijst met leeslijsten voor een specifieke
-     * leerkracht retourneert samen met een HTTP 200 OK status.
-     */
     @Test
-    void getLeeslijstenByLeerkracht_ReturnsList() {
+    void getLeeslijstenByLeerkracht_ReturnsList() throws Exception {
+        // Arrange
         Long leerkrachtId = 1L;
-        List<KlassLeeslijstResponseDTO> expected = List.of(
-                new KlassLeeslijstResponseDTO(1L, "Lijst 1", List.of()));
-        when(leeslijstService.getLeeslijstenByLeerkracht(leerkrachtId)).thenReturn(expected);
+        when(leeslijstService.getLeeslijstenByLeerkracht(leerkrachtId)).thenReturn(List.of(
+                new KlassLeeslijstResponseDTO(1L, "Lijst 1", List.of())));
 
-        ResponseEntity<List<KlassLeeslijstResponseDTO>> response = leeslijstController
-                .getLeeslijstenByLeerkracht(leerkrachtId);
-
-        assertEquals(1, response.getBody().size());
-        assertEquals(HttpStatus.OK, response.getStatusCode());
+        // Act + Assert
+        mockMvc.perform(get("/api/leeslijsten/leerkracht/{id}", leerkrachtId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1));
     }
 
-    /**
-     * Test of de controller een HTTP 200 OK en de bijgewerkte leeslijst retourneert
-     * nadat een boek is toegevoegd.
-     */
     @Test
-    void addBoekToLeeslijst_ReturnsUpdatedDTO() {
+    void addBoekToLeeslijst_ReturnsUpdatedDTO() throws Exception {
+        // Arrange
         Long lijstId = 10L;
         Long boekId = 5L;
-        KlassLeeslijstResponseDTO expected = new KlassLeeslijstResponseDTO(lijstId, "Lijst", List.of());
+        when(leeslijstService.addBoekToLeeslijst(lijstId, boekId))
+                .thenReturn(new KlassLeeslijstResponseDTO(lijstId, "Lijst", List.of()));
 
-        when(leeslijstService.addBoekToLeeslijst(lijstId, boekId)).thenReturn(expected);
+        // Act + Assert
+        mockMvc.perform(post("/api/leeslijsten/{l}/boeken/{b}", lijstId, boekId))
+                .andExpect(status().isOk());
 
-        ResponseEntity<KlassLeeslijstResponseDTO> response = leeslijstController.addBoekToLeeslijst(lijstId, boekId);
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
         verify(leeslijstService, times(1)).addBoekToLeeslijst(lijstId, boekId);
     }
 
-    /**
-     * Test of de controller de correcte leeslijst ophaalt op basis van ID
-     * en retourneert met een HTTP 200 OK status.
-     */
     @Test
-    void getLeeslijstById_ReturnsDTO() {
+    void getLeeslijstById_ReturnsDTO() throws Exception {
+        // Arrange
         Long lijstId = 10L;
-        KlassLeeslijstResponseDTO expected = new KlassLeeslijstResponseDTO(lijstId, "Lijst", List.of());
+        when(leeslijstService.getLeeslijstById(lijstId))
+                .thenReturn(new KlassLeeslijstResponseDTO(lijstId, "Lijst", List.of()));
 
-        when(leeslijstService.getLeeslijstById(lijstId)).thenReturn(expected);
-
-        ResponseEntity<KlassLeeslijstResponseDTO> response = leeslijstController.getLeeslijstById(lijstId);
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(expected, response.getBody()); // Bevestigt dat de controller het juiste DTO teruggeeft[cite: 11]
+        // Act + Assert
+        mockMvc.perform(get("/api/leeslijsten/{id}", lijstId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(10));
     }
 
-    /**
-     * Test of de controller de bijgewerkte leeslijst retourneert na
-     * het succesvol verwijderen van een boek via de service.
-     */
     @Test
-    void removeBoekFromLeeslijst_ReturnsUpdatedDTO() {
+    void removeBoekFromLeeslijst_ReturnsUpdatedDTO() throws Exception {
+        // Arrange
         Long lijstId = 10L;
         Long boekId = 5L;
-        KlassLeeslijstResponseDTO expected = new KlassLeeslijstResponseDTO(lijstId, "Lijst", List.of());
+        when(leeslijstService.removeBoekFromLeeslijst(lijstId, boekId))
+                .thenReturn(new KlassLeeslijstResponseDTO(lijstId, "Lijst", List.of()));
 
-        when(leeslijstService.removeBoekFromLeeslijst(lijstId, boekId)).thenReturn(expected);
+        // Act + Assert
+        mockMvc.perform(delete("/api/leeslijsten/{l}/boeken/{b}", lijstId, boekId))
+                .andExpect(status().isOk());
 
-        ResponseEntity<KlassLeeslijstResponseDTO> response = leeslijstController.removeBoekFromLeeslijst(lijstId,
-                boekId);
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        verify(leeslijstService, times(1)).removeBoekFromLeeslijst(lijstId, boekId); // Bevestigt dat de HTTP DELETE het
-                                                                                     // boek verwijdert via de
-                                                                                     // service[cite: 11]
+        verify(leeslijstService, times(1)).removeBoekFromLeeslijst(lijstId, boekId);
     }
 
-    /**
-     * Test of de controller de bijgewerkte leeslijst retourneert
-     * na het succesvol aanpassen van de naam.
-     */
     @Test
-    void updateLeeslijstNaam_ReturnsUpdatedDTO() {
+    void updateLeeslijstNaam_ReturnsUpdatedDTO() throws Exception {
+        // Arrange
         Long lijstId = 10L;
         String nieuweNaam = "Nieuwe Naam";
-        KlassLeeslijstResponseDTO expected = new KlassLeeslijstResponseDTO(lijstId, nieuweNaam, List.of());
+        when(leeslijstService.updateLeeslijstNaam(eq(lijstId), eq(nieuweNaam)))
+                .thenReturn(new KlassLeeslijstResponseDTO(lijstId, nieuweNaam, List.of()));
 
-        when(leeslijstService.updateLeeslijstNaam(lijstId, nieuweNaam)).thenReturn(expected);
-
-        ResponseEntity<KlassLeeslijstResponseDTO> response = leeslijstController.updateLeeslijstNaam(lijstId,
-                nieuweNaam);
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(expected, response.getBody()); // Controleert de naam update via de HTTP PUT methode[cite: 11]
+        // Act + Assert
+        mockMvc.perform(put("/api/leeslijsten/{id}/naam", lijstId)
+                .contentType(MediaType.TEXT_PLAIN)
+                .content(nieuweNaam))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.naam").value(nieuweNaam));
     }
 
-    /**
-     * Test of de controller een HTTP 204 No Content retourneert
-     * wanneer een leeslijst succesvol is verwijderd.
-     */
     @Test
-    void deleteLeeslijst_ReturnsNoContent() {
+    void deleteLeeslijst_ReturnsNoContent() throws Exception {
+        // Arrange
         Long lijstId = 10L;
         doNothing().when(leeslijstService).deleteLeeslijst(lijstId);
 
-        ResponseEntity<Void> response = leeslijstController.deleteLeeslijst(lijstId);
+        // Act + Assert
+        mockMvc.perform(delete("/api/leeslijsten/{id}", lijstId))
+                .andExpect(status().isNoContent());
 
-        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode()); // Bevestigt dat de status 204 No Content is na
-                                                                       // een succesvolle HTTP DELETE[cite: 11]
         verify(leeslijstService, times(1)).deleteLeeslijst(lijstId);
     }
 
-    /**
-     * Test of de controller een HTTP 200 OK retourneert met de volledige lijst
-     * van alle klassenleeslijsten.
-     */
     @Test
-    void getAllKlassenLeeslijsten_ReturnsList() {
-        List<KlassLeeslijstResponseDTO> expected = List.of(
-                new KlassLeeslijstResponseDTO(1L, "Lijst 1", List.of()));
-        when(leeslijstService.getAllKlassenLeeslijsten()).thenReturn(expected);
+    void getAllKlassenLeeslijsten_ReturnsList() throws Exception {
+        // Arrange
+        when(leeslijstService.getAllKlassenLeeslijsten()).thenReturn(List.of(
+                new KlassLeeslijstResponseDTO(1L, "Lijst 1", List.of())));
 
-        ResponseEntity<List<KlassLeeslijstResponseDTO>> response = leeslijstController.getAllKlassenLeeslijsten();
-
-        assertEquals(1, response.getBody().size());
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        verify(leeslijstService, times(1)).getAllKlassenLeeslijsten();
+        // Act + Assert
+        mockMvc.perform(get("/api/leeslijsten/alle"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1));
     }
 }

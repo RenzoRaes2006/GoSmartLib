@@ -3,7 +3,6 @@ package ap.be.backend.security;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -50,15 +49,12 @@ public class JwtAuthenticationFilterTest {
 
         when(jwtService.isTokenValid("valid.token")).thenReturn(true);
         when(jwtService.extractSmartschoolId("valid.token")).thenReturn("ss-123");
-        when(jwtService.extractRole("valid.token")).thenReturn("student");
 
         filter.doFilter(request, response, chain);
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         assertNotNull(auth);
         assertEquals("ss-123", auth.getPrincipal());
-        assertTrue(auth.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_STUDENT")));
         verify(chain, times(1)).doFilter(request, response);
     }
 

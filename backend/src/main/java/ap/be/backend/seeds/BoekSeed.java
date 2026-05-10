@@ -5,26 +5,21 @@ import java.util.Map;
 import java.util.Random;
 
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import ap.be.backend.entity.Boek;
 import ap.be.backend.repository.BoekRepository;
 
-/**
- * Vult de database bij het opstarten met testboeken als de tabel leeg is.
- *
- * Haalt basisgegevens op via de Google Books API en vult ontbrekende velden
- * aan met willekeurig gekozen waarden uit de onderstaande lijsten.
- * Deze seeder draait enkel als er nog geen boeken in de database staan.
- */
 @Component
+@Profile("!test")
 public class BoekSeed implements CommandLineRunner {
 
     private final BoekRepository boekRepository;
     private final RestTemplate restTemplate;
 
-    String[] locaties = { "GO! Spectrumschool", "GO! muzische basisschool K'DO", "GO! basisschool VONK!",
+    String[] locaties = { "GO! Spectrumschool", "GO! muzische basisschool K’DO", "GO! basisschool VONK!",
             "GO! lyceum Antwerpen", "MaGO! Antwerpen" };
     String[] genres = { "Non-fictie algemeen", "Fictie algemeen", "Literaire roman", "Spanning / thriller",
             "Detective / misdaad", "Fantasy", "Dystopie", "Historische roman", "Romantiek", "Coming-of-age",
@@ -38,6 +33,7 @@ public class BoekSeed implements CommandLineRunner {
             "Toekomst & technologie" };
     Random random = new Random();
 
+    // Spring injecteert de repository automatisch via de constructor
     public BoekSeed(BoekRepository boekRepository, RestTemplate restTemplate) {
         this.boekRepository = boekRepository;
         this.restTemplate = restTemplate;
@@ -46,6 +42,8 @@ public class BoekSeed implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         if (boekRepository.count() == 0) {
+            // 1. Haal data op van Google Books (bijvoorbeeld boeken over 'Java
+            // programming')
             String url = "https://www.googleapis.com/books/v1/volumes?q=maxResults=10";
             Map<String, Object> response = restTemplate.getForObject(url, Map.class);
 
@@ -58,12 +56,15 @@ public class BoekSeed implements CommandLineRunner {
                     Boek nieuwBoek = new Boek();
                     nieuwBoek.setTitel((String) volumeInfo.get("title"));
 
+                    // Auteurs
                     List<String> auteurs = (List<String>) volumeInfo.get("authors");
                     nieuwBoek.setAuteur(auteurs != null ? auteurs.get(0) : "Onbekende Auteur");
 
+                    // Pagina's (Check op null om NullPointerException te voorkomen)
                     Integer pages = (Integer) volumeInfo.get("pageCount");
                     nieuwBoek.setPagina(pages != null ? pages : 0);
 
+                    // Genres: wijs 1-2 random genres toe uit de vaste lijst
                     String genre1 = genres[random.nextInt(genres.length)];
                     String genre2 = genres[random.nextInt(genres.length)];
                     if (genre1.equals(genre2)) {
@@ -72,6 +73,7 @@ public class BoekSeed implements CommandLineRunner {
                         nieuwBoek.setGenre(List.of(genre1, genre2));
                     }
 
+                    // Thematische tags: wijs 1-2 random tags toe
                     String tag1 = thematischeTags[random.nextInt(thematischeTags.length)];
                     String tag2 = thematischeTags[random.nextInt(thematischeTags.length)];
                     if (tag1.equals(tag2)) {
@@ -80,11 +82,13 @@ public class BoekSeed implements CommandLineRunner {
                         nieuwBoek.setThematischeTag(List.of(tag1, tag2));
                     }
 
+                    // Afbeelding
                     Map<String, String> imageLinks = (Map<String, String>) volumeInfo.get("imageLinks");
                     if (imageLinks != null) {
                         nieuwBoek.setAfbeelding(imageLinks.get("smallThumbnail"));
                     }
 
+                    // ISBN toewijzen
                     List<Map<String, String>> identifiers = (List<Map<String, String>>) volumeInfo
                             .get("industryIdentifiers");
                     if (identifiers != null) {
@@ -97,16 +101,20 @@ public class BoekSeed implements CommandLineRunner {
                         }
                     }
 
+                    // Random aantal exemplaren
                     nieuwBoek.setAantalExemplaren(random.nextInt(11));
 
-                    // Ongeveer 1 op 4 boeken wordt gemarkeerd als didactisch materiaal.
+                    // Ongeveer 1 op 4 boeken markeren als didactisch materiaal.
                     nieuwBoek.setDidactischMateriaal(random.nextDouble() < 0.25);
 
+                    // Random locatie
                     nieuwBoek.setLocatie(locaties[random.nextInt(locaties.length)]);
 
+                    // Beschrijving
                     String beschrijving = (String) volumeInfo.get("description");
                     nieuwBoek.setBeschrijving(beschrijving != null ? beschrijving : "Geen beschrijving beschikbaar.");
 
+                    // 2. Uitgave Jaar
                     String fullDate = (String) volumeInfo.get("publishedDate");
                     if (fullDate != null && fullDate.length() >= 4) {
                         nieuwBoek.setUitgaveJaar(fullDate.substring(0, 4));
@@ -114,12 +122,15 @@ public class BoekSeed implements CommandLineRunner {
                         nieuwBoek.setUitgaveJaar("Onbekend");
                     }
 
+                    // 3. Uitgever
                     String uitgever = (String) volumeInfo.get("publisher");
                     nieuwBoek.setUitgever(uitgever != null ? uitgever : "Onbekende uitgever");
 
+                    // Opslaan
                     boekRepository.save(nieuwBoek);
                 }
             }
         }
+
     }
 }

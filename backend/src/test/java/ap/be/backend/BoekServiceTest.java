@@ -238,15 +238,15 @@
 
 //     @Test
 //     void givenBestaandIsbn_whenGetBoekByIsbn_thenGeeftBoekTerug() {
-//         // Given
+//         // Arrange
 //         Boek boek = new Boek("Clean Code", "Robert Martin");
 //         boek.setIsbn("9780132350884");
 //         when(boekRepository.findByIsbn("9780132350884")).thenReturn(Optional.of(boek));
 
-//         // When
+//         // Act
 //         Boek result = boekService.getBoekByIsbn("9780132350884");
 
-//         // Then
+//         // Assert
 //         assertNotNull(result);
 //         assertEquals("9780132350884", result.getIsbn());
 //         assertEquals("Clean Code", result.getTitel());
@@ -255,28 +255,28 @@
 
 //     @Test
 //     void givenNietBestaandIsbn_whenGetBoekByIsbn_thenGeeftNullTerug() {
-//         // Given
+//         // Arrange
 //         when(boekRepository.findByIsbn("0000000000000")).thenReturn(Optional.empty());
 
-//         // When
+//         // Act
 //         Boek result = boekService.getBoekByIsbn("0000000000000");
 
-//         // Then
+//         // Assert
 //         assertNull(result);
 //         verify(boekRepository, times(1)).findByIsbn("0000000000000");
 //     }
 
 //     @Test
 //     void givenIsbnMetSpaties_whenGetBoekByIsbn_thenTrimsEnZoekt() {
-//         // Given - ISBN met leading/trailing spaties
+//         // Arrange - ISBN met leading/trailing spaties
 //         Boek boek = new Boek("Test Boek", "Auteur");
 //         boek.setIsbn("9781234567890");
 //         when(boekRepository.findByIsbn("9781234567890")).thenReturn(Optional.of(boek));
 
-//         // When
+//         // Act
 //         Boek result = boekService.getBoekByIsbn(" 9781234567890 ");
 
-//         // Then
+//         // Assert
 //         assertNotNull(result);
 //         assertEquals("9781234567890", result.getIsbn());
 //     }
@@ -285,17 +285,17 @@
 
 //     @Test
 //     void givenBoeken_whenGetBoekenPaged_thenGeeftPaginaTerug() {
-//         // Given
+//         // Arrange
 //         Boek boek1 = new Boek("Boek A", "Auteur A");
 //         Boek boek2 = new Boek("Boek B", "Auteur B");
 //         PageRequest pageRequest = PageRequest.of(0, 6, Sort.by("titel").ascending());
 //         Page<Boek> verwacht = new PageImpl<>(List.of(boek1, boek2), pageRequest, 2);
 //         when(boekRepository.findAll(pageRequest)).thenReturn(verwacht);
 
-//         // When
+//         // Act
 //         Page<Boek> result = boekService.getBoekenPaged(0, 6);
 
-//         // Then
+//         // Assert
 //         assertEquals(2, result.getTotalElements());
 //         assertEquals("Boek A", result.getContent().get(0).getTitel());
 //         assertEquals("Boek B", result.getContent().get(1).getTitel());
@@ -304,31 +304,31 @@
 
 //     @Test
 //     void givenGeenBoeken_whenGetBoekenPaged_thenGeeftLegePaginaTerug() {
-//         // Given
+//         // Arrange
 //         PageRequest pageRequest = PageRequest.of(0, 6, Sort.by("titel").ascending());
 //         Page<Boek> verwacht = new PageImpl<>(List.of(), pageRequest, 0);
 //         when(boekRepository.findAll(pageRequest)).thenReturn(verwacht);
 
-//         // When
+//         // Act
 //         Page<Boek> result = boekService.getBoekenPaged(0, 6);
 
-//         // Then
+//         // Assert
 //         assertEquals(0, result.getTotalElements());
 //         assertTrue(result.getContent().isEmpty());
 //     }
 
 //     @Test
 //     void givenTweedePagina_whenGetBoekenPaged_thenGeeftJuistePaginaTerug() {
-//         // Given - pagina 1 (tweede pagina, 0-indexed)
+//         // Arrange - pagina 1 (tweede pagina, 0-indexed)
 //         Boek boek = new Boek("Boek C", "Auteur C");
 //         PageRequest pageRequest = PageRequest.of(1, 6, Sort.by("titel").ascending());
 //         Page<Boek> verwacht = new PageImpl<>(List.of(boek), pageRequest, 7);
 //         when(boekRepository.findAll(pageRequest)).thenReturn(verwacht);
 
-//         // When
+//         // Act
 //         Page<Boek> result = boekService.getBoekenPaged(1, 6);
 
-//         // Then
+//         // Assert
 //         assertEquals(7, result.getTotalElements());
 //         assertEquals(1, result.getContent().size());
 //         assertEquals(1, result.getNumber());

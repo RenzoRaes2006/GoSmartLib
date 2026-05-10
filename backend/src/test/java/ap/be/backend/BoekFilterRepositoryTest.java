@@ -62,7 +62,7 @@ public class BoekFilterRepositoryTest {
 
     @Test
     void givenDidactischBoek_whenFilterDidactischTrue_thenBoekWordtGetoond() {
-        // Given
+        // Arrange
         Boek didactisch = new Boek();
         didactisch.setTitel("Didactisch Boek " + System.currentTimeMillis());
         didactisch.setDidactischMateriaal(true);
@@ -73,11 +73,11 @@ public class BoekFilterRepositoryTest {
         normaal.setDidactischMateriaal(false);
         boekRepository.save(normaal);
 
-        // When - filter op didactischMateriaal = true
+        // Act - filter op didactischMateriaal = true
         Page<Boek> resultaat = boekRepository.filterBoeken(null, null, null, null, null,
                 null, null, null, null, null, true, null, defaultPageable);
 
-        // Then
+        // Assert
         List<String> titels = resultaat.getContent().stream().map(Boek::getTitel).toList();
         assertThat(titels).contains(didactisch.getTitel());
         assertThat(titels).doesNotContain(normaal.getTitel());
@@ -85,7 +85,7 @@ public class BoekFilterRepositoryTest {
 
     @Test
     void givenBoekMetDidactischeSubcategorie_whenFilterOpSubcategorie_thenAlleenDatBoekGetoond() {
-        // Given
+        // Arrange
         Boek lesmethode = new Boek();
         lesmethode.setTitel("Wiskunde Methode " + System.currentTimeMillis());
         lesmethode.setDidactischMateriaal(true);
@@ -98,11 +98,11 @@ public class BoekFilterRepositoryTest {
         naslagwerk.setDidactischeSubcategorie(DidactischeSubcategorie.NASLAGWERKEN);
         boekRepository.save(naslagwerk);
 
-        // When - filter op LESMETHODES
+        // Act - filter op LESMETHODES
         Page<Boek> resultaat = boekRepository.filterBoeken(null, null, null, null, null,
                 null, null, null, null, null, null, DidactischeSubcategorie.LESMETHODES, defaultPageable);
 
-        // Then
+        // Assert
         List<String> titels = resultaat.getContent().stream().map(Boek::getTitel).toList();
         assertThat(titels).contains(lesmethode.getTitel());
         assertThat(titels).doesNotContain(naslagwerk.getTitel());
@@ -195,7 +195,7 @@ public class BoekFilterRepositoryTest {
 
     @Test
     void givenDidactischBoekMetZoekterm_whenFilterOpBeide_thenAlleenExacteMatch() {
-        // Given
+        // Arrange
         String term = "Wiskunde";
         Boek match = new Boek();
         match.setTitel("Wiskunde voor gevorderden");
@@ -207,11 +207,11 @@ public class BoekFilterRepositoryTest {
         geenMatch.setDidactischMateriaal(false);
         boekRepository.save(geenMatch);
 
-        // When - filter op zoekterm "Wiskunde" EN didactischMateriaal = true
+        // Act - filter op zoekterm "Wiskunde" EN didactischMateriaal = true
         Page<Boek> resultaat = boekRepository.filterBoeken(term, null, null, null, null,
                 null, null, null, null, null, true, null, defaultPageable);
 
-        // Then
+        // Assert
         List<String> titels = resultaat.getContent().stream().map(Boek::getTitel).toList();
         assertThat(titels).contains(match.getTitel());
         assertThat(titels).doesNotContain(geenMatch.getTitel());

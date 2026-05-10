@@ -203,7 +203,7 @@ export class ScanModus implements OnDestroy {
     }
 
     this.bezig.set(true);
-    this.scanService.verwerkBatch({ gebruikerId: leerling.id, actie, isbns }).subscribe({
+    this.scanService.verwerkBatch({ gebruikerId: leerling.gebruikerID!, actie, isbns }).subscribe({
       next: (resp) => {
         this.resultaten.set(resp.resultaten);
         this.stap.set('RESULTAAT');

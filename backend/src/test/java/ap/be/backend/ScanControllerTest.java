@@ -11,28 +11,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import ap.be.backend.controller.ScanController;
 import ap.be.backend.dto.ScanBatchItemResultDTO;
 import ap.be.backend.dto.ScanBatchRequestDTO;
 import ap.be.backend.dto.ScanBatchResponseDTO;
 import ap.be.backend.service.ScanService;
 
-@WebMvcTest(ScanController.class)
-public class ScanControllerTest {
-
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
+public class ScanControllerTest extends AbstractIntegrationTest {
 
     @MockBean
     private ScanService scanService;

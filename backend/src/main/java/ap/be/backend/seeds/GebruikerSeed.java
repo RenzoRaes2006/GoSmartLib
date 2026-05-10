@@ -1,52 +1,59 @@
 package ap.be.backend.seeds;
 
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
+import ap.be.backend.entity.Gebruiker;
 import ap.be.backend.entity.LeeslijstMap;
 import ap.be.backend.entity.Rol;
-import ap.be.backend.entity.User;
+import ap.be.backend.repository.GebruikerRepository;
 import ap.be.backend.repository.LeeslijstMapRepository;
-import ap.be.backend.repository.UserRepository;
 
 @Component
+@Profile("!test")
 public class GebruikerSeed implements CommandLineRunner {
-    private final UserRepository userRepository;
+    private final GebruikerRepository gebruikerRepository;
     private final LeeslijstMapRepository mapRepository;
 
-    public GebruikerSeed(UserRepository userRepository, LeeslijstMapRepository mapRepository) {
-        this.userRepository = userRepository;
+    public GebruikerSeed(GebruikerRepository gebruikerRepository, LeeslijstMapRepository mapRepository) {
+        this.gebruikerRepository = gebruikerRepository;
         this.mapRepository = mapRepository;
     }
 
     @Override
     public void run(String... args) throws Exception {
-        User test = ensureLeerling("12345");
-        ensureLeerling("12346");
-        ensureLeerling("12347");
-        ensureLeerling("12348");
-        ensureLeerling("12349");
-        ensureLeerling("12350");
-        ensureLeerling("12351");
-        ensureLeerling("12352");
-        ensureLeerling("12353");
-        ensureLeerling("12354");
-        ensureLeerling("12355");
-        ensureLeerling("12356");
-        ensureLeerling("12357");
-        ensureLeerling("12358");
-        ensureLeerling("12359");
-        ensureLeerling("12360");
+        Gebruiker test = ensureLeerling(12345L, "Test", "Gebruiker", "test@gosmartlib.be");
+        ensureLeerling(12346L, "Jan", "Jansen", "jan.jansen@gosmartlib.be");
+        ensureLeerling(12347L, "Piet", "Pieters", "piet.pieters@gosmartlib.be");
+        ensureLeerling(12348L, "Klaas", "Klaassen", "klaas.klaassen@gosmartlib.be");
+        ensureLeerling(12349L, "Sofie", "Vermeulen", "sofie.vermeulen@gosmartlib.be");
+        ensureLeerling(12350L, "Lucas", "De Smet", "lucas.desmet@gosmartlib.be");
+        ensureLeerling(12351L, "Emma", "Peeters", "emma.peeters@gosmartlib.be");
+        ensureLeerling(12352L, "Noah", "Maes", "noah.maes@gosmartlib.be");
+        ensureLeerling(12353L, "Lien", "Willems", "lien.willems@gosmartlib.be");
+        ensureLeerling(12354L, "Daan", "Claes", "daan.claes@gosmartlib.be");
+        ensureLeerling(12355L, "Fien", "Hermans", "fien.hermans@gosmartlib.be");
+        ensureLeerling(12356L, "Sam", "Wouters", "sam.wouters@gosmartlib.be");
+        ensureLeerling(12357L, "Lotte", "Janssens", "lotte.janssens@gosmartlib.be");
+        ensureLeerling(12358L, "Milan", "De Vos", "milan.devos@gosmartlib.be");
+        ensureLeerling(12359L, "Nora", "Smeets", "nora.smeets@gosmartlib.be");
+        ensureLeerling(12360L, "Tuur", "Van Damme", "tuur.vandamme@gosmartlib.be");
 
-        if (test != null && mapRepository.findByUser_Id(test.getId()).isEmpty()) {
+        if (test != null && mapRepository.findByGebruiker_GebruikerID(test.getGebruikerID()).isEmpty()) {
             mapRepository.save(new LeeslijstMap("Favorieten", test));
         }
     }
 
-    private User ensureLeerling(String smartschoolId) {
-        return userRepository.findBySmartschoolId(smartschoolId).orElseGet(() -> {
-            User u = new User(smartschoolId, null, Rol.LEERLING);
-            return userRepository.save(u);
+    private Gebruiker ensureLeerling(long schoolId, String voorNaam, String achternaam, String email) {
+        return gebruikerRepository.findBySchoolId(schoolId).orElseGet(() -> {
+            Gebruiker g = new Gebruiker();
+            g.setVoorNaam(voorNaam);
+            g.setAchternaam(achternaam);
+            g.setEmail(email);
+            g.setSchoolId(schoolId);
+            g.setRol(Rol.LEERLING);
+            return gebruikerRepository.save(g);
         });
     }
 }

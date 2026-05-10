@@ -14,36 +14,19 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.test.web.servlet.MockMvc;
 
-import ap.be.backend.controller.BoekController;
 import ap.be.backend.dto.BoekDTO;
 import ap.be.backend.dto.BoekenFilters;
 import ap.be.backend.dto.BoekenSort;
-import ap.be.backend.dto.PageRequestParams;
 import ap.be.backend.entity.DidactischeSubcategorie;
-import ap.be.backend.repository.BoekRepository;
-import ap.be.backend.service.BoekImportService;
 import ap.be.backend.service.BoekService;
 
-@WebMvcTest(BoekController.class)
-public class BoekFilterControllerTest {
-
-        @Autowired
-        private MockMvc mockMvc;
+public class BoekFilterControllerTest extends AbstractIntegrationTest {
 
         @MockBean
         private BoekService boekService;
-
-        @MockBean
-        private BoekImportService boekImportService;
-
-        @MockBean
-        private BoekRepository boekRepository;
 
         private BoekDTO dto(String titel, String auteur) {
                 return new BoekDTO(1L, titel, auteur, "1234567890", "Uitg", "2020", 100,

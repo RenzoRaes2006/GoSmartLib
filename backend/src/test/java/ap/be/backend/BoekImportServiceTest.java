@@ -57,7 +57,7 @@ public class BoekImportServiceTest {
 
     @Test
     void givenGeldigBestand_whenParseerVoorPreview_thenReturnsLijstMetBoeken() throws Exception {
-        // Given: Een Excel met 1 geldig boek
+        // Arrange: Een Excel met 1 geldig boek
         List<String[]> excelData = Arrays.asList(
                 new String[] { "Titel", "Auteur", "ISBN", "Aantal exemplaren" },
                 new String[] { "Clean Code", "Robert C. Martin", "9780132350884", "3" });
@@ -67,10 +67,10 @@ public class BoekImportServiceTest {
         when(boekRepository.findByIsbn("9780132350884")).thenReturn(Optional.empty());
         when(boekRepository.findByTitelAndAuteur("Clean Code", "Robert C. Martin")).thenReturn(Optional.empty());
 
-        // When
+        // Act
         List<Boek> previewLijst = boekImportService.parseerVoorPreview(file);
 
-        // Then
+        // Assert
         assertEquals(1, previewLijst.size(), "Er moet exact 1 boek geparseerd zijn");
         Boek geparseerdBoek = previewLijst.get(0);
         assertEquals("Clean Code", geparseerdBoek.getTitel());
@@ -80,13 +80,13 @@ public class BoekImportServiceTest {
 
     @Test
     void givenBestandZonderTitel_whenParseerVoorPreview_thenThrowsInvalidImportDataException() throws Exception {
-        // Given: Een Excel waar de titel leeg is op rij 2
+        // Arrange: Een Excel waar de titel leeg is op rij 2
         List<String[]> excelData = Arrays.asList(
                 new String[] { "Titel", "Auteur", "ISBN" },
                 new String[] { "", "J.K. Rowling", "1234567890" });
         MockMultipartFile file = createMockExcelFile(excelData);
 
-        // When & Then: Er moet een InvalidImportDataException gegooid worden
+        // Act & Then: Er moet een InvalidImportDataException gegooid worden
         InvalidImportDataException ex = assertThrows(InvalidImportDataException.class, () -> {
             boekImportService.parseerVoorPreview(file);
         });
@@ -99,7 +99,7 @@ public class BoekImportServiceTest {
 
     @Test
     void givenNieuwBoek_whenBevestigImport_thenSavesNewBookAndReturnsCount() {
-        // Given: Een goedgekeurd boek vanuit de frontend
+        // Arrange: Een goedgekeurd boek vanuit de frontend
         Boek nieuwBoek = new Boek();
         nieuwBoek.setTitel("Spring Boot in Action");
         nieuwBoek.setAuteur("Craig Walls");
@@ -109,17 +109,17 @@ public class BoekImportServiceTest {
         when(boekRepository.findByIsbn("9781617292545")).thenReturn(Optional.empty());
         when(boekRepository.findByTitelAndAuteur("Spring Boot in Action", "Craig Walls")).thenReturn(Optional.empty());
 
-        // When
+        // Act
         int result = boekImportService.bevestigImport(List.of(nieuwBoek));
 
-        // Then
+        // Assert
         assertEquals(2, result, "Het totaal aantal toegevoegde exemplaren moet 2 zijn");
         verify(boekRepository, times(1)).save(nieuwBoek); // Controleer of save() is aangeroepen
     }
 
     @Test
     void givenBestaandBoek_whenBevestigImport_thenUpdatesStockOnly() {
-        // Given: Een boek dat AL in de database zit met 3 exemplaren
+        // Arrange: Een boek dat AL in de database zit met 3 exemplaren
         Boek dbBoek = new Boek();
         dbBoek.setId(1L);
         dbBoek.setTitel("De Hobbit");
@@ -136,10 +136,10 @@ public class BoekImportServiceTest {
 
         when(boekRepository.findByIsbn("12345")).thenReturn(Optional.of(dbBoek));
 
-        // When
+        // Act
         int result = boekImportService.bevestigImport(List.of(importBoek));
 
-        // Then
+        // Assert
         assertEquals(2, result, "De methode moet 2 extra exemplaren rapporteren");
         assertEquals(5, dbBoek.getAantalExemplaren(), "De voorraad in het DB object moet verhoogd zijn naar 5 (3+2)");
         verify(boekRepository, times(1)).save(dbBoek); // We slaan het geüpdatete DB boek op, geen nieuwe!

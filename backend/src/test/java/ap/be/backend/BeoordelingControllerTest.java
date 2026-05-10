@@ -1,102 +1,94 @@
-// package ap.be.backend;
+package ap.be.backend;
 
-// import static org.junit.jupiter.api.Assertions.assertEquals;
-// import static org.mockito.Mockito.doNothing;
-// import static org.mockito.Mockito.times;
-// import static org.mockito.Mockito.verify;
-// import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-// import java.util.List;
-// import java.util.Optional;
+import java.util.List;
 
-// import org.junit.jupiter.api.AfterEach;
-// import org.junit.jupiter.api.Test;
-// import org.junit.jupiter.api.extension.ExtendWith;
-// import org.mockito.InjectMocks;
-// import org.mockito.Mock;
-// import org.mockito.junit.jupiter.MockitoExtension;
-// import org.springframework.http.HttpStatus;
-// import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-// import org.springframework.security.core.context.SecurityContextHolder;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 
-// import ap.be.backend.controller.BeoordelingController;
-// import ap.be.backend.dto.BeoordelingDTO;
-// import ap.be.backend.entity.Gebruiker;
-// import ap.be.backend.repository.GebruikerRepository;
-// import ap.be.backend.service.BeoordelingService;
-// import ap.be.backend.service.GerapporteerdeBeoordelingService;
+import ap.be.backend.dto.BeoordelingDTO;
+import ap.be.backend.service.BeoordelingService;
+import ap.be.backend.service.GerapporteerdeBeoordelingService;
 
-// @ExtendWith(MockitoExtension.class)
-// class BeoordelingControllerTest {
+class BeoordelingControllerTest extends AbstractIntegrationTest {
 
-//     @Mock
-//     private BeoordelingService beoordelingService;
+    @MockBean
+    private BeoordelingService beoordelingService;
 
-//     @Mock
-//     private GerapporteerdeBeoordelingService gerapporteerdeBeoordelingService;
+    @MockBean
+    private GerapporteerdeBeoordelingService gerapporteerdeBeoordelingService;
 
-//     @Mock
-//     private GebruikerRepository gebruikerRepository;
+    @Test
+    void getBeoordelingenOpBoekIdGeeftLijstTerug() throws Exception {
+        // Arrange
+        Long boekId = 1L;
+        when(beoordelingService.getBeoordelingenOpBoekId(boekId)).thenReturn(List.of(
+                new BeoordelingDTO(10L, "Test Gebruiker", boekId, 4, "Sterke review", false, false, false)));
 
-//     @InjectMocks
-//     private BeoordelingController beoordelingController;
+        // Act + Assert
+        mockMvc.perform(get("/api/books/{id}/reviews", boekId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].inhoud").value("Sterke review"));
 
-//     @AfterEach
-//     void clearSecurityContext() {
-//         SecurityContextHolder.clearContext();
-//     }
+        verify(beoordelingService, times(1)).getBeoordelingenOpBoekId(boekId);
+    }
 
-//     @Test
-//     void getBeoordelingenOpBoekIdGeeftLijstTerug() {
-//         Long boekId = 1L;
-//         List<BeoordelingDTO> expected = List.of(
-//             new BeoordelingDTO(10L, "Test Gebruiker", boekId, 4, "Sterke review", false, false, false));
-//         when(beoordelingService.getBeoordelingenOpBoekId(boekId)).thenReturn(expected);
+    @Test
+    void beoordelingOpslaanReturnedZelfdeDto() throws Exception {
+        // Arrange
+        BeoordelingDTO dto = new BeoordelingDTO(11L, "Leerling", 2L, 5, "Top boek", true, false, false);
+        doNothing().when(beoordelingService).beoordelingOpslaan(any(BeoordelingDTO.class));
 
-//         List<BeoordelingDTO> result = beoordelingController.getBeoordelingenOpBoekId(boekId);
+        // Act + Assert
+        mockMvc.perform(post("/api/reviews")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.inhoud").value("Top boek"));
 
-//         assertEquals(1, result.size());
-//         assertEquals("Sterke review", result.get(0).inhoud());
-//         verify(beoordelingService, times(1)).getBeoordelingenOpBoekId(boekId);
-//     }
+        verify(beoordelingService, times(1)).beoordelingOpslaan(any(BeoordelingDTO.class));
+    }
 
-//     @Test
-//     void beoordelingOpslaanReturnedZelfdeDto() {
-//         BeoordelingDTO dto = new BeoordelingDTO(11L, "Leerling", 2L, 5, "Top boek", true, false, false);
-//         doNothing().when(beoordelingService).beoordelingOpslaan(dto);
+    @Test
+    void rapporteerBeoordelingGebruiktTijdelijkeGebruikerId1() throws Exception {
+        // Arrange
+        Long beoordelingId = 7L;
+        String reden = "spoiler";
 
-//         BeoordelingDTO response = beoordelingController.beoordelingOpslaan(dto);
+        // Act
+        mockMvc.perform(post("/api/reviews/{id}/report", beoordelingId)
+                .contentType(MediaType.TEXT_PLAIN)
+                .content(reden))
+                .andExpect(status().isOk());
 
-//         assertEquals(dto, response);
-//         verify(beoordelingService, times(1)).beoordelingOpslaan(dto);
-//     }
+        // Assert
+        verify(gerapporteerdeBeoordelingService, times(1))
+                .rapporteerBeoordeling(eq(beoordelingId), eq(1L), eq(reden));
+    }
 
-//     @Test
-//     void rapporteerBeoordelingGebruiktAuthContextSmartschoolId() {
-//         Long beoordelingId = 7L;
-//         String reden = "spoiler";
+    @Test
+    void verwijderBeoordelingGeeftNoContent() throws Exception {
+        // Arrange
+        Long beoordelingId = 33L;
+        doNothing().when(beoordelingService).verwijderBeoordeling(beoordelingId);
 
-//         SecurityContextHolder.getContext().setAuthentication(
-//                 new UsernamePasswordAuthenticationToken("ss-42", null, List.of()));
+        // Act + Assert
+        mockMvc.perform(delete("/api/reviews/{id}", beoordelingId))
+                .andExpect(status().isNoContent());
 
-//         Gebruiker melder = new Gebruiker();
-//         melder.setId(99L);
-//         when(gebruikerRepository.findBySmartschoolId("ss-42")).thenReturn(Optional.of(melder));
-
-//         beoordelingController.rapporteerBeoordeling(beoordelingId, reden);
-
-//         verify(gerapporteerdeBeoordelingService, times(1))
-//                 .rapporteerBeoordeling(beoordelingId, 99L, reden);
-//     }
-
-//     @Test
-//     void verwijderBeoordelingGeeftNoContent() {
-//         Long beoordelingId = 33L;
-//         doNothing().when(beoordelingService).verwijderBeoordeling(beoordelingId);
-
-//         var response = beoordelingController.verwijderBeoordeling(beoordelingId);
-
-//         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-//         verify(beoordelingService, times(1)).verwijderBeoordeling(beoordelingId);
-//     }
-// }
+        verify(beoordelingService, times(1)).verwijderBeoordeling(beoordelingId);
+    }
+}
