@@ -9,6 +9,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { ScanService } from '../services/scan.service';
 import { Gebruiker } from '../models/Gebruiker.mode';
 import { MandjeItem, ScanBatchItemResult, ScanModus as ModusType } from '../models/scan.model';
@@ -22,7 +23,7 @@ type Stap = 'LEERLING' | 'MODUS' | 'SCAN' | 'RESULTAAT';
 @Component({
   selector: 'app-scan-modus',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './scan-modus.html',
   styleUrl: './scan-modus.css',
 })
@@ -219,6 +220,16 @@ export class ScanModus implements OnDestroy {
 
   nieuweSessie(): void {
     this.sessieReset();
+  }
+
+  andereActieZelfdeLeerling(): void {
+    this.modus.set(null);
+    this.isbnInput.set('');
+    this.mandje.set([]);
+    this.scanFout.set('');
+    this.resultaten.set([]);
+    this.stap.set('MODUS');
+    this.resetIdleTimer();
   }
 
   private sessieReset(): void {
