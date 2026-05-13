@@ -177,7 +177,7 @@ export class BoekBeheer implements OnInit {
   // Reset het formulier en statusberichten
   resetForm() {
     this.boekForm.reset();
-    this.boekForm.patchValue({ didactischMateriaal: false });
+    this.boekForm.patchValue({ didactischMateriaal: false, didactischeSubcategorie: '' });
     this.errorMessage.set('');
     this.successMessage.set('');
     this.boekGevonden.set(false);
@@ -368,7 +368,7 @@ export class BoekBeheer implements OnInit {
           console.log('Boek succesvol toegevoegd');
           this.successMessage.set('Boek succesvol toegevoegd!');
           this.boekForm.reset();
-          this.boekForm.patchValue({ didactischMateriaal: false });
+          this.boekForm.patchValue({ didactischMateriaal: false, didactischeSubcategorie: '' });
           this.resetDropdowns();
           setTimeout(() => this.successMessage.set(''), 5000);
         },
@@ -422,7 +422,7 @@ export class BoekBeheer implements OnInit {
       next: () => {
         this.successMessage.set('Boek succesvol bijgewerkt!');
         this.boekForm.reset();
-        this.boekForm.patchValue({ didactischMateriaal: false });
+        this.boekForm.patchValue({ didactischMateriaal: false, didactischeSubcategorie: '' });
         this.resetDropdowns();
         this.boekGevonden.set(false);
         this.naarTeWijzigenBoek.set(null);
@@ -469,7 +469,7 @@ export class BoekBeheer implements OnInit {
       next: () => {
         this.successMessage.set('Boek succesvol verwijderd!');
         this.boekForm.reset();
-        this.boekForm.patchValue({ didactischMateriaal: false });
+        this.boekForm.patchValue({ didactischMateriaal: false, didactischeSubcategorie: '' });
         this.resetDropdowns();
         this.boekGevonden.set(false);
         this.naarTeWijzigenBoek.set(null);
