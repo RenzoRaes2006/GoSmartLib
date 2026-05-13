@@ -135,6 +135,37 @@
         />
         <button class="btn-primary" (click)="opslaanLimiet(limietInput.value)">Opslaan</button>
       </div>
+      <hr style="border: 0; border-top: 1px dashed var(--admin-border); margin: 25px 0" />
+
+      <label
+        for="inlevertermijn"
+        style="display: block; margin-bottom: 10px; font-weight: 600; color: #4a5568"
+      >
+        Standaard inlevertermijn
+        <span style="font-weight: 400; color: #718096">(in dagen)</span>:
+      </label>
+
+      <div style="display: flex; gap: 15px; align-items: center">
+        <input
+          type="number"
+          id="inlevertermijn"
+          [value]="huidigeTermijn()"
+          #termijnInput
+          min="1"
+          max="365"
+          style="
+            padding: 12px;
+            width: 90px;
+            border: 1px solid var(--admin-border);
+            border-radius: 8px;
+            font-size: 1.1rem;
+            text-align: center;
+            font-weight: 600;
+            color: var(--admin-text);
+          "
+        />
+        <button class="btn-primary" (click)="opslaanTermijn(termijnInput.value)">Opslaan</button>
+      </div>
     </div>
   </div>
 </div>

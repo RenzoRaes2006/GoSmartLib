@@ -14,6 +14,7 @@ import { StatistiekService } from '../services/statistiek.service';
 export class AdminDashboard implements OnInit {
   boekService = inject(BoekService);
   huidigeLimiet = signal<number>(0);
+  huidigeTermijn = signal<number>(14);
   instellingService = inject(InstellingService);
   statistiekService = inject(StatistiekService);
   recenteLeningen: any[] = [];
@@ -39,6 +40,7 @@ export class AdminDashboard implements OnInit {
 
   ngOnInit(): void {
     this.laadLimiet();
+    this.laadTermijn();
     this.laadStatistieken();
     this.boekService.getAlleActieveLeningenSysteem().subscribe({
       next: (response) => {
@@ -89,6 +91,30 @@ export class AdminDashboard implements OnInit {
       });
     } else {
       this.toonToast('De limiet mag niet negatief zijn.', 'fout');
+    }
+  }
+
+  laadTermijn() {
+    this.instellingService.getInlevertermijn().subscribe({
+      next: (termijn) => this.huidigeTermijn.set(termijn),
+      error: (err) => console.error('Fout bij ophalen van inlevertermijn:', err),
+    });
+  }
+
+  opslaanTermijn(nieuweWaarde: string) {
+    const termijn = parseInt(nieuweWaarde, 10);
+    if (termijn >= 1 && termijn <= 365) {
+      this.instellingService.updateInlevertermijn(termijn).subscribe({
+        next: (msg) => {
+          this.toonToast('Inlevertermijn succesvol aangepast!', 'succes');
+          this.huidigeTermijn.set(termijn);
+        },
+        error: (err) => {
+          this.toonToast(err.error || 'Fout bij opslaan.', 'fout');
+        },
+      });
+    } else {
+      this.toonToast('De termijn moet tussen 1 en 365 dagen liggen.', 'fout');
     }
   }
 }
