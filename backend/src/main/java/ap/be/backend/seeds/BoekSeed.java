@@ -4,9 +4,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import ap.be.backend.entity.Boek;
@@ -15,6 +18,8 @@ import ap.be.backend.repository.BoekRepository;
 @Component
 @Profile("!test")
 public class BoekSeed implements CommandLineRunner {
+
+    private static final Logger log = LoggerFactory.getLogger(BoekSeed.class);
 
     private final BoekRepository boekRepository;
     private final RestTemplate restTemplate;
@@ -45,7 +50,18 @@ public class BoekSeed implements CommandLineRunner {
             // 1. Haal data op van Google Books (bijvoorbeeld boeken over 'Java
             // programming')
             String url = "https://www.googleapis.com/books/v1/volumes?q=maxResults=10";
-            Map<String, Object> response = restTemplate.getForObject(url, Map.class);
+            Map<String, Object> response;
+            try {
+                response = restTemplate.getForObject(url, Map.class);
+            } catch (RestClientException e) {
+                log.warn("BoekSeed overgeslagen: Google Books API onbereikbaar ({}). App start verder zonder seed-boeken.",
+                        e.getMessage());
+                return;
+            }
+            if (response == null) {
+                log.warn("BoekSeed overgeslagen: lege respons van Google Books API.");
+                return;
+            }
 
             List<Map<String, Object>> items = (List<Map<String, Object>>) response.get("items");
 
