@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "reported_reviews")
+@Table(name = "gerapporteerde_beoordelingen")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -20,12 +20,12 @@ public class GerapporteerdeBeoordeling {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "review_id", nullable = false)
+    @JoinColumn(name = "beoordeling_id", nullable = false)
     private Beoordeling beoordeling;
 
     @ManyToOne
-    @JoinColumn(name = "gebruiker_id", nullable = false)
-    private Gebruiker gebruikerMelder;
+    @JoinColumn(name = "user_id", nullable = false)
+    private User userMelder;
 
     @Column(nullable = false)
     private String reden;

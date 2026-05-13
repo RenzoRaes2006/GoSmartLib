@@ -7,7 +7,9 @@ import { Observable } from 'rxjs';
 })
 export class BeheerderService {
   private http = inject(HttpClient);
-  private apiUrl = true ? 'http://localhost:8081/api/leerlingen' : 'https://api-sp09.cloud-ap.be/api/leerlingen';
+  private apiUrl = window.location.hostname === 'localhost'
+    ? 'http://localhost:8081/api/leerlingen'
+    : 'https://api-sp09.cloud-ap.be/api/leerlingen';
 
   startSchoolOp(schoolData: any, file: File | null): Observable<any> {
     const formData = new FormData();

@@ -3,9 +3,17 @@ package ap.be.backend.mappers;
 import ap.be.backend.dto.BoekDTO;
 import ap.be.backend.entity.Boek;
 
+/**
+ * Zet Boek-entiteiten om naar BoekDTO's en omgekeerd.
+ */
 public class BoekMapper {
 
-    // Van Entity naar DTO
+    /**
+     * Zet een Boek-entiteit om naar een BoekDTO.
+     *
+     * @param boek de te converteren entiteit
+     * @return het boek als DTO
+     */
     public static BoekDTO toDTO(Boek boek) {
         return new BoekDTO(
                 boek.getId(),
@@ -27,7 +35,12 @@ public class BoekMapper {
                 boek.getDidactischeSubcategorie());
     }
 
-    // Van DTO naar Entity
+    /**
+     * Zet een BoekDTO om naar een Boek-entiteit.
+     *
+     * @param dto de DTO met de invoergegevens
+     * @return de aangemaakte Boek-entiteit
+     */
     public static Boek toEntity(BoekDTO dto) {
         Boek boek = new Boek();
         boek.setId(dto.id() != null ? dto.id() : 0);

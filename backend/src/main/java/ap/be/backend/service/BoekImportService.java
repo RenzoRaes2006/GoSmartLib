@@ -15,7 +15,6 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -23,15 +22,33 @@ import ap.be.backend.entity.Boek;
 import ap.be.backend.repository.BoekRepository;
 import ap.be.backend.exception.InvalidImportDataException;
 
+/**
+ * Verwerkt het importeren van boeken via een Excel-bestand (.xlsx of .xls).
+ *
+ * Het importproces verloopt in twee stappen:
+ *   1. Voorvertoning: het Excel-bestand wordt ingelezen en getoond aan de beheerder,
+ *      zonder iets op te slaan in de database.
+ *   2. Bevestiging: de goedgekeurde boeken worden definitief opgeslagen. Bestaat een
+ *      boek al in de database, dan worden enkel de exemplaren bijgeteld.
+ */
 @Service
 public class BoekImportService {
 
-    @Autowired
-    private BoekRepository boekRepository;
+    private final BoekRepository boekRepository;
+
+    public BoekImportService(BoekRepository boekRepository) {
+        this.boekRepository = boekRepository;
+    }
 
     /**
-     * Parses the Excel file and returns a list for the frontend preview.
-     * Does NOT save anything to the database yet.
+     * Leest een Excel-bestand in en geeft de inhoud terug als voorvertoning.
+     *
+     * Slaat niets op in de database. Werpt een uitzondering als het bestand
+     * geen geldig Excel-formaat heeft.
+     *
+     * @param file het geüploade Excel-bestand
+     * @return lijst van Boek-objecten op basis van de bestandsinhoud
+     * @throws IllegalArgumentException als het bestand geen .xlsx of .xls is
      */
     public List<Boek> parseerVoorPreview(MultipartFile file) {
         String filename = file.getOriginalFilename();
@@ -43,6 +60,17 @@ public class BoekImportService {
         }
     }
 
+    /**
+     * Slaat de goedgekeurde boeken definitief op in de database.
+     *
+     * Bestaat een boek al (gecontroleerd op ISBN en daarna op titel + auteur),
+     * dan worden enkel de exemplaren bijgeteld. Ontbreekt het ISBN bij het
+     * bestaande boek maar heeft het nieuwe wel een ISBN, dan wordt het ISBN
+     * aangevuld. Nieuwe boeken worden volledig opgeslagen.
+     *
+     * @param goedgekeurdeBoeken de lijst van boeken die de beheerder heeft goedgekeurd
+     * @return het totaal aantal toegevoegde exemplaren
+     */
     public int bevestigImport(List<Boek> goedgekeurdeBoeken) {
         int totaalExemplarenToegevoegd = 0;
 
@@ -80,6 +108,19 @@ public class BoekImportService {
         return totaalExemplarenToegevoegd;
     }
 
+    /**
+     * Leest het Excel-bestand rij voor rij uit en zet elke rij om naar een Boek-object.
+     *
+     * De eerste rij wordt behandeld als kolomnamen (header). Lege rijen worden
+     * overgeslagen. Als een rij geen titel of auteur heeft, wordt een uitzondering
+     * gegooid. Als een boek al in de database staat, wordt het gemarkeerd met
+     * bestaatAl=true zodat de frontend dit kan tonen in de voorvertoning.
+     *
+     * @param file het te verwerken Excel-bestand
+     * @return lijst van Boek-objecten op basis van de bestandsinhoud
+     * @throws InvalidImportDataException als verplichte velden ontbreken of het
+     *         bestand niet gelezen kan worden
+     */
     private List<Boek> extractBoekenUitExcel(MultipartFile file) {
         List<Boek> boekenOmOpTeSlaan = new ArrayList<>();
         DataFormatter dataFormatter = new DataFormatter();
@@ -126,6 +167,8 @@ public class BoekImportService {
                     if (isbn != null) {
                         isbn = isbn.trim();
 
+                        // Excel slaat lange nummers soms op in wetenschappelijke notatie (bv. 9.78E12).
+                        // BigDecimal zet dit terug naar de volledige numerieke string.
                         if (isbn.toUpperCase().contains("E")) {
                             try {
                                 String parseableIsbn = isbn.replace(",", ".");
@@ -223,6 +266,18 @@ public class BoekImportService {
         }
     }
 
+    /**
+     * Leest de celwaarde op een bepaalde kolompositie uit een rij.
+     *
+     * Numerieke cellen worden via BigDecimal omgezet naar een exacte string
+     * om afrondingsfouten bij grote getallen (zoals ISBNs) te vermijden.
+     * Eindigt de waarde op ".0", dan wordt dat achtervoegsel verwijderd.
+     *
+     * @param row       de te lezen Excel-rij
+     * @param colIndex  de kolomindex (null als de kolom niet in de header staat)
+     * @param formatter de DataFormatter voor niet-numerieke cellen
+     * @return de celwaarde als string, of null als de cel leeg of afwezig is
+     */
     private String getWaarde(Row row, Integer colIndex, DataFormatter formatter) {
         if (colIndex == null)
             return null;
@@ -231,7 +286,6 @@ public class BoekImportService {
             return null;
 
         if (cell.getCellType() == CellType.NUMERIC) {
-
             String exacteWaarde = java.math.BigDecimal.valueOf(cell.getNumericCellValue()).toPlainString();
 
             if (exacteWaarde.endsWith(".0")) {

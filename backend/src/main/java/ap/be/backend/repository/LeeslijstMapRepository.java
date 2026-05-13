@@ -11,8 +11,7 @@ import ap.be.backend.entity.LeeslijstMap;
 @Repository
 public interface LeeslijstMapRepository extends JpaRepository<LeeslijstMap, Long> {
 
-    // ophalen alle mapjes van 1 specifieke gebruiker
-    List<LeeslijstMap> findByGebruiker_GebruikerID(Long gebruikerId);
+    List<LeeslijstMap> findByUser_Id(Long userId);
 
-    Optional<LeeslijstMap> findByGebruiker_GebruikerIDAndNaam(Long gebruikerId, String naam);
+    Optional<LeeslijstMap> findByUser_IdAndNaam(Long userId, String naam);
 }

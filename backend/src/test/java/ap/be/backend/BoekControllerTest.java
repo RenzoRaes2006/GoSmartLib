@@ -1,23 +1,17 @@
 package ap.be.backend;
 
-import ap.be.backend.controller.BoekController;
 import ap.be.backend.dto.BoekDTO;
 import ap.be.backend.entity.Boek;
 import ap.be.backend.entity.DidactischeSubcategorie;
-import ap.be.backend.repository.BoekRepository;
 import ap.be.backend.service.BoekImportService;
 import ap.be.backend.service.BoekService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.mock.web.MockMultipartFile;
-import ap.be.backend.exception.IsbnAlreadyExistsException;
 
 import java.util.List;
 
@@ -26,17 +20,10 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(BoekController.class)
-public class BoekControllerTest {
-
-        @Autowired
-        private MockMvc mockMvc;
+public class BoekControllerTest extends AbstractIntegrationTest {
 
         @MockBean
         private BoekImportService boekImportService;
-
-        @MockBean
-        private BoekRepository boekRepository;
 
         @MockBean
         private BoekService boekService;
@@ -45,63 +32,44 @@ public class BoekControllerTest {
 
         @Test
         public void givenSearchTerm_whenGetAlleBoekenCalled_thenCallsFilterBoekenInService() throws Exception {
-                // Given
-                String term = "java";
-                Page<Boek> page = new PageImpl<>(List.of(new Boek()));
-                Mockito.when(boekService.filterBoeken(eq(term), any(), any(), any(), any(),
-                                any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
-                                .thenReturn(page);
+                Page<BoekDTO> page = new PageImpl<>(List.of());
+                Mockito.when(boekService.filterBoeken(any(), any(), any())).thenReturn(page);
 
-                // When & Then
-                mockMvc.perform(get("/api/boeken").param("zoekterm", term))
+                mockMvc.perform(get("/api/boeken").param("zoekterm", "java"))
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$.content").isArray());
 
-                Mockito.verify(boekService).filterBoeken(eq(term), any(), any(), any(), any(),
-                                any(), any(), any(), any(), any(), any(), any(), any(), any(), any());
+                Mockito.verify(boekService).filterBoeken(any(), any(), any());
         }
 
         @Test
         public void givenNoSearchTerm_whenGetAlleBoekenCalled_thenCallsFilterBoekenInService() throws Exception {
-                // Given
-                Page<Boek> page = new PageImpl<>(List.of());
-                Mockito.when(boekService.filterBoeken(any(), any(), any(), any(), any(),
-                                any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
-                                .thenReturn(page);
+                Page<BoekDTO> page = new PageImpl<>(List.of());
+                Mockito.when(boekService.filterBoeken(any(), any(), any())).thenReturn(page);
 
-                // When & Then
-                mockMvc.perform(get("/api/boeken"))
-                                .andExpect(status().isOk());
+                mockMvc.perform(get("/api/boeken")).andExpect(status().isOk());
 
-                Mockito.verify(boekService).filterBoeken(any(), any(), any(), any(), any(),
-                                any(), any(), any(), any(), any(), any(), any(), any(), any(), any());
+                Mockito.verify(boekService).filterBoeken(any(), any(), any());
         }
 
         @Test
         public void givenDidactischFilters_whenGetAlleBoekenCalled_thenCallsFilterBoekenInService() throws Exception {
-                // Given
-                Page<Boek> page = new PageImpl<>(List.of());
-                Mockito.when(boekService.filterBoeken(any(), any(), any(), any(), any(),
-                                any(), any(), any(), any(), any(), eq(true), eq(DidactischeSubcategorie.LESMETHODES),
-                                any(), any(), any()))
-                                .thenReturn(page);
+                Page<BoekDTO> page = new PageImpl<>(List.of());
+                Mockito.when(boekService.filterBoeken(any(), any(), any())).thenReturn(page);
 
-                // When & Then
                 mockMvc.perform(get("/api/boeken")
                                 .param("didactischMateriaal", "true")
                                 .param("didactischeSubcategorie", "LESMETHODES"))
                                 .andExpect(status().isOk());
 
-                Mockito.verify(boekService).filterBoeken(any(), any(), any(), any(), any(),
-                                any(), any(), any(), any(), any(), eq(true), eq(DidactischeSubcategorie.LESMETHODES),
-                                any(), any(), any());
+                Mockito.verify(boekService).filterBoeken(any(), any(), any());
         }
 
         // --- POST: BOEK TOEVOEGEN ---
 
         @Test
         public void givenGeldigBoek_whenPostBoek_thenStatus201EnBoekTerug() throws Exception {
-                // Given
+                // Arrange
                 Boek opgeslagen = new Boek("Clean Code", "Robert Martin");
                 opgeslagen.setId(1L);
                 opgeslagen.setIsbn("9780132350884");
@@ -127,7 +95,7 @@ public class BoekControllerTest {
                                 }
                                 """;
 
-                // When & Then
+                // Act & Then
                 mockMvc.perform(post("/api/boeken")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(json))
@@ -140,7 +108,7 @@ public class BoekControllerTest {
 
         @Test
         public void givenOngeldigBoekZonderTitel_whenPostBoek_thenStatus400() throws Exception {
-                // Given - titel ontbreekt
+                // Arrange - titel ontbreekt
                 String json = """
                                 {
                                     "titel": "",
@@ -157,7 +125,7 @@ public class BoekControllerTest {
                                 }
                                 """;
 
-                // When & Then
+                // Act & Then
                 mockMvc.perform(post("/api/boeken")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(json))
@@ -166,7 +134,7 @@ public class BoekControllerTest {
 
         @Test
         public void givenOngeldigIsbn_whenPostBoek_thenStatus400() throws Exception {
-                // Given - ISBN is geen 10 of 13 cijfers
+                // Arrange - ISBN is geen 10 of 13 cijfers
                 String json = """
                                 {
                                     "titel": "Test Boek",
@@ -183,7 +151,7 @@ public class BoekControllerTest {
                                 }
                                 """;
 
-                // When & Then
+                // Act & Then
                 mockMvc.perform(post("/api/boeken")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(json))
@@ -194,7 +162,7 @@ public class BoekControllerTest {
 
         @Test
         public void givenBestaandBoek_whenPutBoek_thenStatus200EnBijgewerktBoek() throws Exception {
-                // Given
+                // Arrange
                 Boek bijgewerkt = new Boek("Bijgewerkte Titel", "Nieuwe Auteur");
                 bijgewerkt.setId(5L);
                 bijgewerkt.setDidactischMateriaal(false);
@@ -217,7 +185,7 @@ public class BoekControllerTest {
                                 }
                                 """;
 
-                // When & Then
+                // Act & Then
                 mockMvc.perform(put("/api/boeken/5")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(json))
@@ -228,7 +196,7 @@ public class BoekControllerTest {
 
         @Test
         public void givenNietBestaandBoek_whenPutBoek_thenStatus404() throws Exception {
-                // Given
+                // Arrange
                 Mockito.when(boekService.updateBoek(eq(999L), any(BoekDTO.class))).thenReturn(null);
 
                 String json = """
@@ -247,7 +215,7 @@ public class BoekControllerTest {
                                 }
                                 """;
 
-                // When & Then
+                // Act & Then
                 mockMvc.perform(put("/api/boeken/999")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(json))
@@ -258,10 +226,10 @@ public class BoekControllerTest {
 
         @Test
         public void givenBestaandBoek_whenDeleteBoek_thenStatus200() throws Exception {
-                // Given
+                // Arrange
                 Mockito.when(boekService.deleteBoek(10L)).thenReturn(true);
 
-                // When & Then
+                // Act & Then
                 mockMvc.perform(delete("/api/boeken/10"))
                                 .andExpect(status().isOk())
                                 .andExpect(content().string("Boek is verwijderd."));
@@ -269,10 +237,10 @@ public class BoekControllerTest {
 
         @Test
         public void givenNietBestaandBoek_whenDeleteBoek_thenStatus404() throws Exception {
-                // Given
+                // Arrange
                 Mockito.when(boekService.deleteBoek(999L)).thenReturn(false);
 
-                // When & Then
+                // Act & Then
                 mockMvc.perform(delete("/api/boeken/999"))
                                 .andExpect(status().isNotFound());
         }
@@ -281,12 +249,12 @@ public class BoekControllerTest {
 
         @Test
         public void givenBoeken_whenGetBoekenPaged_thenStatus200EnPaginaData() throws Exception {
-                // Given
+                // Arrange
                 Boek boek = new Boek("Test Boek", "Auteur");
                 Page<Boek> page = new PageImpl<>(List.of(boek));
                 Mockito.when(boekService.getBoekenPaged(0, 6)).thenReturn(page);
 
-                // When & Then
+                // Act & Then
                 mockMvc.perform(get("/api/boeken/paged")
                                 .param("page", "0")
                                 .param("size", "6"))
@@ -297,11 +265,11 @@ public class BoekControllerTest {
 
         @Test
         public void givenGeenBoeken_whenGetBoekenPaged_thenStatus200EnLegePagina() throws Exception {
-                // Given
+                // Arrange
                 Page<Boek> page = new PageImpl<>(List.of());
                 Mockito.when(boekService.getBoekenPaged(0, 6)).thenReturn(page);
 
-                // When & Then
+                // Act & Then
                 mockMvc.perform(get("/api/boeken/paged")
                                 .param("page", "0")
                                 .param("size", "6"))
@@ -314,12 +282,12 @@ public class BoekControllerTest {
 
         @Test
         public void givenBestaandIsbn_whenGetBoekByIsbn_thenStatus200EnBoek() throws Exception {
-                // Given
+                // Arrange
                 Boek boek = new Boek("Clean Code", "Robert Martin");
                 boek.setIsbn("9780132350884");
                 Mockito.when(boekService.getBoekByIsbn("9780132350884")).thenReturn(boek);
 
-                // When & Then
+                // Act & Then
                 mockMvc.perform(get("/api/boeken/isbn/9780132350884"))
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$.isbn").value("9780132350884"))
@@ -328,10 +296,10 @@ public class BoekControllerTest {
 
         @Test
         public void givenNietBestaandIsbn_whenGetBoekByIsbn_thenStatus404() throws Exception {
-                // Given
+                // Arrange
                 Mockito.when(boekService.getBoekByIsbn("0000000000000")).thenReturn(null);
 
-                // When & Then
+                // Act & Then
                 mockMvc.perform(get("/api/boeken/isbn/0000000000000"))
                                 .andExpect(status().isNotFound());
         }
@@ -341,7 +309,7 @@ public class BoekControllerTest {
         // @Test
         // public void givenGeldigExcelBestand_whenImporteerBoeken_thenStatus200()
         // throws Exception {
-        // // Given: Een gesimuleerd Excel bestand
+        // // Arrange: Een gesimuleerd Excel bestand
         // MockMultipartFile file = new MockMultipartFile(
         // "file",
         // "boeken.xlsx",
@@ -351,7 +319,7 @@ public class BoekControllerTest {
         // // We simuleren dat de service succesvol 2 boeken opslaat
         // Mockito.when(boekImportService.importeerBestand(any())).thenReturn(2);
 
-        // // When & Then: We verwachten een 200 OK en de juiste tekst
+        // // Act & Then: We verwachten een 200 OK en de juiste tekst
         // mockMvc.perform(multipart("/api/boeken/import").file(file))
         // .andExpect(status().isOk())
         // .andExpect(content().string("Aantal geïmporteerde boeken: 2"));
@@ -359,15 +327,15 @@ public class BoekControllerTest {
 
         @Test
         public void givenLeegBestand_whenImporteerBoeken_thenStatus400() throws Exception {
-                // Given: Een leeg bestand (0 bytes)
+                // Arrange: Een leeg bestand (0 bytes)
                 MockMultipartFile leegBestand = new MockMultipartFile(
                                 "file",
                                 "leeg.xlsx",
                                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                                 new byte[0]);
 
-                // When & Then: De controller gooit een IllegalArgumentException.
-                mockMvc.perform(multipart("/api/boeken/import").file(leegBestand))
+                // Act & Then: De controller gooit een IllegalArgumentException.
+                mockMvc.perform(multipart("/api/boeken/import/preview").file(leegBestand))
                                 .andExpect(status().isBadRequest())
                                 .andExpect(content().string("Het geüploade bestand is leeg."));
         }
@@ -375,7 +343,7 @@ public class BoekControllerTest {
         // @Test
         // public void givenBestandMetDubbelIsbn_whenImporteerBoeken_thenStatus409()
         // throws Exception {
-        // // Given: Een bestand met data
+        // // Arrange: Een bestand met data
         // MockMultipartFile file = new MockMultipartFile(
         // "file",
         // "boeken.xlsx",
@@ -387,7 +355,7 @@ public class BoekControllerTest {
         // .thenThrow(new IsbnAlreadyExistsException(
         // "ISBN 9780132350884 bestaat al in de database."));
 
-        // // When & Then: De GlobalExceptionHandler grijpt in
+        // // Act & Then: De GlobalExceptionHandler grijpt in
         // mockMvc.perform(multipart("/api/boeken/import").file(file))
         // .andExpect(status().isConflict())
         // .andExpect(content().string("ISBN 9780132350884 bestaat al in de

@@ -2,22 +2,22 @@ package ap.be.backend.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
+@Table(name = "instellingen")
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 public class Instelling {
+
     @Id
     private String sleutel;
 
     private String waarde;
-
-    public Instelling(String sleutel, String waarde) {
-        this.sleutel = sleutel;
-        this.waarde = waarde;
-    }
 }

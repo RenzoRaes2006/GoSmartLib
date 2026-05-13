@@ -9,7 +9,13 @@ export class LeerlingService {
   private http = inject(HttpClient);
 
   // use the dynamic api url from the environment
-  private baseUrl = true ? 'http://localhost:8081/api/leerlingen' : 'https://api-sp09.cloud-ap.be/api/leerlingen';
+  //private baseUrl = true ? 'http://localhost:8081/api/leerlingen' : 'https://api-sp09.cloud-ap.be/api/leerlingen';
+
+  private baseUrl =
+    window.location.hostname === 'localhost'
+      ? 'http://localhost:8081/api/leerlingen'
+      : 'https://api-sp09.cloud-ap.be/api/leerlingen';
+  ;
 
   getLeerlingen(page: number, size: number, klas: string, zoekterm: string): Observable<any> {
     // HttpParams is de veiligste manier om query parameters toe te voegen
@@ -28,6 +34,6 @@ export class LeerlingService {
   }
 
   getLeerlingStats(id: number): Observable<any> {
-  return this.http.get<any>(`${this.baseUrl}/${id}/stats`);
-}
+    return this.http.get<any>(`${this.baseUrl}/${id}/stats`);
+  }
 }

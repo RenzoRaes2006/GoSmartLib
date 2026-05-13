@@ -11,7 +11,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import ap.be.backend.config.SecurityUtils;
 import ap.be.backend.dto.BeoordelingDTO;
+import ap.be.backend.entity.User;
+import ap.be.backend.repository.UserRepository;
 import ap.be.backend.service.BeoordelingService;
 import ap.be.backend.service.GerapporteerdeBeoordelingService;
 import jakarta.validation.Valid;
@@ -21,11 +24,14 @@ import jakarta.validation.Valid;
 public class BeoordelingController {
     private final BeoordelingService beoordelingService;
     private final GerapporteerdeBeoordelingService gerapporteerdeBeoordelingService;
+    private final UserRepository userRepository;
 
     public BeoordelingController(BeoordelingService beoordelingService,
-            GerapporteerdeBeoordelingService gerapporteerdeBeoordelingService) {
+            GerapporteerdeBeoordelingService gerapporteerdeBeoordelingService,
+            UserRepository userRepository) {
         this.beoordelingService = beoordelingService;
         this.gerapporteerdeBeoordelingService = gerapporteerdeBeoordelingService;
+        this.userRepository = userRepository;
     }
 
     @GetMapping("/books/{id}/reviews")
@@ -33,9 +39,7 @@ public class BeoordelingController {
         return beoordelingService.getBeoordelingenOpBoekId(id);
     }
 
-    @PostMapping("/reviews") // dat moet verbeter worden, want er moet ook een boekId meegegeven worden. dan
-                             // in de service moet dan ook een boek opgehaald worden en dan de beoordeling
-                             // aan dat boek koppelen
+    @PostMapping("/reviews")
     public BeoordelingDTO beoordelingOpslaan(@Valid @RequestBody BeoordelingDTO beoordeling) {
         beoordelingService.beoordelingOpslaan(beoordeling);
         return beoordeling;
@@ -43,12 +47,10 @@ public class BeoordelingController {
 
     @PostMapping("/reviews/{id}/report")
     public void rapporteerBeoordeling(@PathVariable("id") Long beoordelingId, @RequestBody String reden) {
-        Long tijdelijkeGebruikerId = 1L; // tijdelijke gebruiker ID, dit moet vervangen worden door de daadwerkelijke
-                                         // gebruiker ID uit de authenticatie context
-        gerapporteerdeBeoordelingService.rapporteerBeoordeling(beoordelingId, tijdelijkeGebruikerId, reden);
+        User melder = SecurityUtils.getCurrentUser(userRepository);
+        gerapporteerdeBeoordelingService.rapporteerBeoordeling(beoordelingId, melder.getId(), reden);
     }
 
-    
     @DeleteMapping("/reviews/{id}")
     public ResponseEntity<Void> verwijderBeoordeling(@PathVariable("id") Long beoordelingId) {
         beoordelingService.verwijderBeoordeling(beoordelingId);

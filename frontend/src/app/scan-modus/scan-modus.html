@@ -1,4 +1,5 @@
 <div class="scan-container">
+  <a routerLink="/admin" class="back-link">← Terug naar dashboard</a>
   <h1>Uitleenbalie</h1>
 
   @if (stap() === 'LEERLING') {
@@ -29,11 +30,7 @@
 
         @if (totaalPaginas() > 1) {
           <div class="paginatie">
-            <button
-              class="terug-knop"
-              (click)="vorigePagina()"
-              [disabled]="huidigePagina() === 0"
-            >
+            <button class="terug-knop" (click)="vorigePagina()" [disabled]="huidigePagina() === 0">
               ← Vorige
             </button>
             <span class="pagina-info">
@@ -65,7 +62,10 @@
 
   @if (stap() === 'SCAN') {
     <div class="stap">
-      <h2>{{ modus() === 'UITLENING' ? 'Boeken lenen' : 'Boeken terugbrengen' }} — {{ naamOpScherm() }}</h2>
+      <h2>
+        {{ modus() === 'UITLENING' ? 'Boeken lenen' : 'Boeken terugbrengen' }} —
+        {{ naamOpScherm() }}
+      </h2>
       <input
         type="text"
         placeholder="Scan ISBN (of typ het)"
@@ -83,22 +83,25 @@
         Geselecteerde boeken ({{ mandje().length }}
         {{ modus() === 'UITLENING' ? 'te lenen' : 'terug te brengen' }})
       </h3>
-      @for (item of mandje(); track item.isbn) {
-        <div class="lijst-item" [class]="'actie-' + modus()!.toLowerCase()">
-          <span class="titel">{{ item.titel }}</span>
-          <span class="isbn">{{ item.isbn }}</span>
-          <button class="verwijder-knop" (click)="verwijderUitMandje(item.isbn)">✕</button>
-        </div>
-      } @empty {
-        <p class="leeg">Scan een boek om toe te voegen.</p>
-      }
+      <div class="mandje-lijst">
+        @for (item of mandje(); track item.isbn) {
+          <div class="lijst-item" [class]="'actie-' + modus()!.toLowerCase()">
+            <span class="titel">{{ item.titel }}</span>
+            <span class="isbn">{{ item.isbn }}</span>
+            <button class="verwijder-knop" (click)="verwijderUitMandje(item.isbn)">✕</button>
+          </div>
+        } @empty {
+          <p class="leeg">Scan een boek om toe te voegen.</p>
+        }
+      </div>
 
-      <button class="terug-knop" (click)="terugNaarModus()">← Terug naar keuze</button>
+      <div class="scan-acties">
+        <button class="terug-knop" (click)="terugNaarModus()">← Terug naar keuze</button>
+        <button class="klaar-knop" (click)="vraagKlaarBevestiging()" [disabled]="bezig()">
+          {{ bezig() ? 'Bezig...' : 'Klaar' }}
+        </button>
+      </div>
     </div>
-
-    <button class="klaar-knop" (click)="vraagKlaarBevestiging()" [disabled]="bezig()">
-      {{ bezig() ? 'Bezig...' : 'Klaar' }}
-    </button>
 
     @if (toonKlaarBevestiging()) {
       <div class="modal-overlay" (click)="annuleerKlaar()">
@@ -138,7 +141,12 @@
           </span>
         </div>
       }
-      <button class="klaar-knop" (click)="nieuweSessie()">Nieuwe sessie</button>
+      <div class="scan-acties">
+        <button class="terug-knop" (click)="andereActieZelfdeLeerling()">
+          Andere actie voor {{ naamOpScherm() }}
+        </button>
+        <button class="klaar-knop" (click)="nieuweSessie()">Nieuwe leerling</button>
+      </div>
     </div>
   }
 </div>

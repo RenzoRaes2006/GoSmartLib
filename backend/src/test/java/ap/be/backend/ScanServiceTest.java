@@ -28,7 +28,7 @@ import ap.be.backend.dto.ScanBatchItemResultDTO;
 import ap.be.backend.dto.ScanBatchRequestDTO;
 import ap.be.backend.dto.ScanBatchResponseDTO;
 import ap.be.backend.entity.Boek;
-import ap.be.backend.entity.Gebruiker;
+import ap.be.backend.entity.User;
 import ap.be.backend.entity.Uitlening;
 import ap.be.backend.repository.BoekRepository;
 import ap.be.backend.repository.UitleningRepository;
@@ -54,16 +54,14 @@ public class ScanServiceTest {
     @InjectMocks
     private ScanService scanService;
 
-    private Gebruiker gebruiker;
+    private User gebruiker;
     private Boek boek;
 
     @BeforeEach
     void setUp() {
-        gebruiker = new Gebruiker();
-        gebruiker.setGebruikerID(1L);
-        gebruiker.setSchoolId(12345L);
-        gebruiker.setVoorNaam("Test");
-        gebruiker.setAchternaam("Leerling");
+        gebruiker = new User();
+        gebruiker.setId(1L);
+        gebruiker.setSmartschoolId("12345");
 
         boek = new Boek();
         boek.setId(10L);
@@ -85,7 +83,7 @@ public class ScanServiceTest {
     @Test
     void givenOnbekendeActie_whenVerwerkBatch_thenThrowIllegalArgumentException() {
         ScanBatchRequestDTO request = buildRequest("VERNIETIGEN", "9780132350884");
-        when(gebruikerService.getGebruikerById(1L)).thenReturn(gebruiker);
+        when(gebruikerService.getUserById(1L)).thenReturn(gebruiker);
 
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
                 () -> scanService.verwerkBatch(request));
@@ -100,9 +98,9 @@ public class ScanServiceTest {
     @Test
     void givenBeschikbaarBoek_whenUitlening_thenCreateUitleningAndDecreaseVoorraad() {
         ScanBatchRequestDTO request = buildRequest("UITLENING", "9780132350884");
-        when(gebruikerService.getGebruikerById(1L)).thenReturn(gebruiker);
+        when(gebruikerService.getUserById(1L)).thenReturn(gebruiker);
         when(boekService.getBoekByIsbn("9780132350884")).thenReturn(boek);
-        when(uitleningRepository.findFirstByGebruikerAndBoekAndIsIngeleverdFalseOrderByUitleenDatumAsc(gebruiker, boek))
+        when(uitleningRepository.findFirstByUserAndBoekAndIsIngeleverdFalseOrderByUitleenDatumAsc(gebruiker, boek))
                 .thenReturn(Optional.empty());
 
         ScanBatchResponseDTO response = scanService.verwerkBatch(request);
@@ -120,7 +118,7 @@ public class ScanServiceTest {
         ArgumentCaptor<Uitlening> uitleningCaptor = ArgumentCaptor.forClass(Uitlening.class);
         verify(uitleningRepository, times(1)).save(uitleningCaptor.capture());
         Uitlening saved = uitleningCaptor.getValue();
-        assertEquals(gebruiker, saved.getGebruiker());
+        assertEquals(gebruiker, saved.getUser());
         assertEquals(boek, saved.getBoek());
         assertEquals("ACTIEF", saved.getStatus());
         assertFalse(saved.isIngeleverd());
@@ -134,7 +132,7 @@ public class ScanServiceTest {
     @Test
     void givenIsbnZonderBoek_whenUitlening_thenFoutResult() {
         ScanBatchRequestDTO request = buildRequest("UITLENING", "0000000000000");
-        when(gebruikerService.getGebruikerById(1L)).thenReturn(gebruiker);
+        when(gebruikerService.getUserById(1L)).thenReturn(gebruiker);
         when(boekService.getBoekByIsbn("0000000000000")).thenReturn(null);
 
         ScanBatchResponseDTO response = scanService.verwerkBatch(request);
@@ -153,13 +151,13 @@ public class ScanServiceTest {
     void givenBoekAlGeleend_whenUitlening_thenFoutResult() {
         ScanBatchRequestDTO request = buildRequest("UITLENING", "9780132350884");
         Uitlening bestaande = new Uitlening();
-        bestaande.setGebruiker(gebruiker);
+        bestaande.setUser(gebruiker);
         bestaande.setBoek(boek);
         bestaande.setIngeleverd(false);
 
-        when(gebruikerService.getGebruikerById(1L)).thenReturn(gebruiker);
+        when(gebruikerService.getUserById(1L)).thenReturn(gebruiker);
         when(boekService.getBoekByIsbn("9780132350884")).thenReturn(boek);
-        when(uitleningRepository.findFirstByGebruikerAndBoekAndIsIngeleverdFalseOrderByUitleenDatumAsc(gebruiker, boek))
+        when(uitleningRepository.findFirstByUserAndBoekAndIsIngeleverdFalseOrderByUitleenDatumAsc(gebruiker, boek))
                 .thenReturn(Optional.of(bestaande));
 
         ScanBatchResponseDTO response = scanService.verwerkBatch(request);
@@ -180,9 +178,9 @@ public class ScanServiceTest {
         boek.setAantalExemplaren(0);
         ScanBatchRequestDTO request = buildRequest("UITLENING", "9780132350884");
 
-        when(gebruikerService.getGebruikerById(1L)).thenReturn(gebruiker);
+        when(gebruikerService.getUserById(1L)).thenReturn(gebruiker);
         when(boekService.getBoekByIsbn("9780132350884")).thenReturn(boek);
-        when(uitleningRepository.findFirstByGebruikerAndBoekAndIsIngeleverdFalseOrderByUitleenDatumAsc(gebruiker, boek))
+        when(uitleningRepository.findFirstByUserAndBoekAndIsIngeleverdFalseOrderByUitleenDatumAsc(gebruiker, boek))
                 .thenReturn(Optional.empty());
 
         ScanBatchResponseDTO response = scanService.verwerkBatch(request);
@@ -201,14 +199,14 @@ public class ScanServiceTest {
     void givenActieveUitlening_whenRetour_thenMarkIngeleverdAndIncreaseVoorraad() {
         ScanBatchRequestDTO request = buildRequest("RETOUR", "9780132350884");
         Uitlening bestaande = new Uitlening();
-        bestaande.setGebruiker(gebruiker);
+        bestaande.setUser(gebruiker);
         bestaande.setBoek(boek);
         bestaande.setIngeleverd(false);
         bestaande.setStatus("ACTIEF");
 
-        when(gebruikerService.getGebruikerById(1L)).thenReturn(gebruiker);
+        when(gebruikerService.getUserById(1L)).thenReturn(gebruiker);
         when(boekService.getBoekByIsbn("9780132350884")).thenReturn(boek);
-        when(uitleningRepository.findFirstByGebruikerAndBoekAndIsIngeleverdFalseOrderByUitleenDatumAsc(gebruiker, boek))
+        when(uitleningRepository.findFirstByUserAndBoekAndIsIngeleverdFalseOrderByUitleenDatumAsc(gebruiker, boek))
                 .thenReturn(Optional.of(bestaande));
 
         ScanBatchResponseDTO response = scanService.verwerkBatch(request);
@@ -231,9 +229,9 @@ public class ScanServiceTest {
     @Test
     void givenGeenActieveUitlening_whenRetour_thenFoutResult() {
         ScanBatchRequestDTO request = buildRequest("RETOUR", "9780132350884");
-        when(gebruikerService.getGebruikerById(1L)).thenReturn(gebruiker);
+        when(gebruikerService.getUserById(1L)).thenReturn(gebruiker);
         when(boekService.getBoekByIsbn("9780132350884")).thenReturn(boek);
-        when(uitleningRepository.findFirstByGebruikerAndBoekAndIsIngeleverdFalseOrderByUitleenDatumAsc(gebruiker, boek))
+        when(uitleningRepository.findFirstByUserAndBoekAndIsIngeleverdFalseOrderByUitleenDatumAsc(gebruiker, boek))
                 .thenReturn(Optional.empty());
 
         ScanBatchResponseDTO response = scanService.verwerkBatch(request);
@@ -252,7 +250,7 @@ public class ScanServiceTest {
     @Test
     void givenIsbnZonderBoek_whenRetour_thenFoutResult() {
         ScanBatchRequestDTO request = buildRequest("RETOUR", "0000000000000");
-        when(gebruikerService.getGebruikerById(1L)).thenReturn(gebruiker);
+        when(gebruikerService.getUserById(1L)).thenReturn(gebruiker);
         when(boekService.getBoekByIsbn("0000000000000")).thenReturn(null);
 
         ScanBatchResponseDTO response = scanService.verwerkBatch(request);
@@ -276,11 +274,11 @@ public class ScanServiceTest {
         ScanBatchRequestDTO request = buildRequest("UITLENING",
                 "9780132350884", "9780321125217", "0000000000000");
 
-        when(gebruikerService.getGebruikerById(1L)).thenReturn(gebruiker);
+        when(gebruikerService.getUserById(1L)).thenReturn(gebruiker);
         when(boekService.getBoekByIsbn("9780132350884")).thenReturn(boek);
         when(boekService.getBoekByIsbn("9780321125217")).thenReturn(boek2);
         when(boekService.getBoekByIsbn("0000000000000")).thenReturn(null);
-        when(uitleningRepository.findFirstByGebruikerAndBoekAndIsIngeleverdFalseOrderByUitleenDatumAsc(
+        when(uitleningRepository.findFirstByUserAndBoekAndIsIngeleverdFalseOrderByUitleenDatumAsc(
                 eq(gebruiker), any(Boek.class))).thenReturn(Optional.empty());
 
         ScanBatchResponseDTO response = scanService.verwerkBatch(request);
@@ -300,9 +298,9 @@ public class ScanServiceTest {
     @Test
     void givenRepositoryThrows_whenVerwerkBatch_thenFoutResultMetOnverwachteFout() {
         ScanBatchRequestDTO request = buildRequest("UITLENING", "9780132350884");
-        when(gebruikerService.getGebruikerById(1L)).thenReturn(gebruiker);
+        when(gebruikerService.getUserById(1L)).thenReturn(gebruiker);
         when(boekService.getBoekByIsbn("9780132350884")).thenReturn(boek);
-        when(uitleningRepository.findFirstByGebruikerAndBoekAndIsIngeleverdFalseOrderByUitleenDatumAsc(gebruiker, boek))
+        when(uitleningRepository.findFirstByUserAndBoekAndIsIngeleverdFalseOrderByUitleenDatumAsc(gebruiker, boek))
                 .thenThrow(new RuntimeException("DB down"));
 
         ScanBatchResponseDTO response = scanService.verwerkBatch(request);
@@ -321,7 +319,7 @@ public class ScanServiceTest {
         request.setGebruikerId(1L);
         request.setActie("UITLENING");
         request.setIsbns(List.of());
-        when(gebruikerService.getGebruikerById(1L)).thenReturn(gebruiker);
+        when(gebruikerService.getUserById(1L)).thenReturn(gebruiker);
 
         ScanBatchResponseDTO response = scanService.verwerkBatch(request);
 

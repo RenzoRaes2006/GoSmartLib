@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,8 +22,9 @@ import org.springframework.data.domain.Pageable;
 import ap.be.backend.dto.AdminStatistiekDTO;
 import ap.be.backend.dto.LeerkrachtStatistiekDTO;
 import ap.be.backend.dto.LeerlingStatistiekDTO;
+import ap.be.backend.entity.User;
 import ap.be.backend.repository.BoekRepository;
-import ap.be.backend.repository.GebruikerRepository;
+import ap.be.backend.repository.UserRepository;
 import ap.be.backend.repository.UitleningRepository;
 import ap.be.backend.service.StatistiekService;
 
@@ -36,7 +38,7 @@ class StatistiekServiceTest {
     private BoekRepository boekRepository;
 
     @Mock
-    private GebruikerRepository gebruikerRepository;
+    private UserRepository userRepository;
 
     @InjectMocks
     private StatistiekService statistiekService;
@@ -97,7 +99,7 @@ class StatistiekServiceTest {
     void getLeerkrachtStatistieken_MetKlasGebruiktKlasFilter() {
         String klas = "5A";
 
-        when(gebruikerRepository.countByKlasIgnoreCase(klas)).thenReturn(22L);
+        when(userRepository.countByKlasIgnoreCase(klas)).thenReturn(22L);
         when(uitleningRepository.countActieveLeningenVoorKlas(eq(klas), anyList())).thenReturn(8L);
         when(uitleningRepository.countTeLaatVoorKlas(eq(klas), anyList(), any(LocalDate.class))).thenReturn(2L);
         when(uitleningRepository.countLeningenSindsVoorKlas(eq(klas), anyList(), any(LocalDate.class))).thenReturn(5L);
@@ -115,7 +117,7 @@ class StatistiekServiceTest {
 
     @Test
     void getLeerkrachtStatistieken_ZonderKlasGebruiktTotaalAantalLeerlingen() {
-        when(gebruikerRepository.count()).thenReturn(150L);
+        when(userRepository.count()).thenReturn(150L);
         when(uitleningRepository.countActieveLeningenVoorKlas(eq(null), anyList())).thenReturn(40L);
         when(uitleningRepository.countTeLaatVoorKlas(eq(null), anyList(), any(LocalDate.class))).thenReturn(6L);
         when(uitleningRepository.countLeningenSindsVoorKlas(eq(null), anyList(), any(LocalDate.class))).thenReturn(20L);
@@ -131,7 +133,7 @@ class StatistiekServiceTest {
 
     @Test
     void getLeerkrachtStatistieken_LegeStringTeltAlsGeenFilter() {
-        when(gebruikerRepository.count()).thenReturn(99L);
+        when(userRepository.count()).thenReturn(99L);
         when(uitleningRepository.countActieveLeningenVoorKlas(eq(null), anyList())).thenReturn(0L);
         when(uitleningRepository.countTeLaatVoorKlas(eq(null), anyList(), any(LocalDate.class))).thenReturn(0L);
         when(uitleningRepository.countLeningenSindsVoorKlas(eq(null), anyList(), any(LocalDate.class))).thenReturn(0L);
@@ -145,10 +147,13 @@ class StatistiekServiceTest {
 
     @Test
     void getLeerlingStatistieken_GeldigSchoolIdRetourneertCounts() {
-        long sid = 12345L;
-        when(uitleningRepository.countLeengeschiedenisVoorSchoolId(sid, "GEWEIGERD")).thenReturn(11L);
-        when(uitleningRepository.countActieveLeningenVoorSchoolId(eq(sid), anyList())).thenReturn(2L);
-        when(uitleningRepository.countTeLaatVoorSchoolId(eq(sid), anyList(), any(LocalDate.class))).thenReturn(1L);
+        User testUser = new User();
+        testUser.setId(1L);
+        testUser.setSmartschoolId("12345");
+        when(userRepository.findBySmartschoolId("12345")).thenReturn(Optional.of(testUser));
+        when(uitleningRepository.countLeengeschiedenisVoorUser(1L, "GEWEIGERD")).thenReturn(11L);
+        when(uitleningRepository.countActieveLeningenVoorUser(eq(1L), anyList())).thenReturn(2L);
+        when(uitleningRepository.countTeLaatVoorUser(eq(1L), anyList(), any(LocalDate.class))).thenReturn(1L);
 
         LeerlingStatistiekDTO dto = statistiekService.getLeerlingStatistieken("12345");
 

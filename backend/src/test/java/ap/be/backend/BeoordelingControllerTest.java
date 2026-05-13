@@ -1,81 +1,111 @@
 package ap.be.backend;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.List;
+import java.util.Optional;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 
-import ap.be.backend.controller.BeoordelingController;
 import ap.be.backend.dto.BeoordelingDTO;
+import ap.be.backend.entity.User;
+import ap.be.backend.repository.UserRepository;
 import ap.be.backend.service.BeoordelingService;
 import ap.be.backend.service.GerapporteerdeBeoordelingService;
 
-@ExtendWith(MockitoExtension.class)
-class BeoordelingControllerTest {
+@WithMockUser(username = "ss-test-controller", roles = {"LEERLING"})
+class BeoordelingControllerTest extends AbstractIntegrationTest {
 
-    @Mock
+    @MockBean
     private BeoordelingService beoordelingService;
 
-    @Mock
+    @MockBean
     private GerapporteerdeBeoordelingService gerapporteerdeBeoordelingService;
 
-    @InjectMocks
-    private BeoordelingController beoordelingController;
+    @MockBean
+    private UserRepository userRepository;
+
+    @BeforeEach
+    void stubCurrentUser() {
+        User melder = new User();
+        melder.setId(1L);
+        melder.setSmartschoolId("ss-test-controller");
+        when(userRepository.findBySmartschoolId("ss-test-controller")).thenReturn(Optional.of(melder));
+    }
 
     @Test
-    void getBeoordelingenOpBoekIdGeeftLijstTerug() {
+    void getBeoordelingenOpBoekIdGeeftLijstTerug() throws Exception {
+        // Arrange
         Long boekId = 1L;
-        List<BeoordelingDTO> expected = List.of(
-            new BeoordelingDTO(10L, "Test Gebruiker", boekId, 4, "Sterke review", false, false, false));
-        when(beoordelingService.getBeoordelingenOpBoekId(boekId)).thenReturn(expected);
+        when(beoordelingService.getBeoordelingenOpBoekId(boekId)).thenReturn(List.of(
+                new BeoordelingDTO(10L, "Test Gebruiker", boekId, 4, "Sterke review", false, false, false)));
 
-        List<BeoordelingDTO> result = beoordelingController.getBeoordelingenOpBoekId(boekId);
+        // Act + Assert
+        mockMvc.perform(get("/api/books/{id}/reviews", boekId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].inhoud").value("Sterke review"));
 
-        assertEquals(1, result.size());
-        assertEquals("Sterke review", result.get(0).inhoud());
         verify(beoordelingService, times(1)).getBeoordelingenOpBoekId(boekId);
     }
 
     @Test
-    void beoordelingOpslaanReturnedZelfdeDto() {
+    void beoordelingOpslaanReturnedZelfdeDto() throws Exception {
+        // Arrange
         BeoordelingDTO dto = new BeoordelingDTO(11L, "Leerling", 2L, 5, "Top boek", true, false, false);
-        doNothing().when(beoordelingService).beoordelingOpslaan(dto);
+        doNothing().when(beoordelingService).beoordelingOpslaan(any(BeoordelingDTO.class));
 
-        BeoordelingDTO response = beoordelingController.beoordelingOpslaan(dto);
+        // Act + Assert
+        mockMvc.perform(post("/api/reviews")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.inhoud").value("Top boek"));
 
-        assertEquals(dto, response);
-        verify(beoordelingService, times(1)).beoordelingOpslaan(dto);
+        verify(beoordelingService, times(1)).beoordelingOpslaan(any(BeoordelingDTO.class));
     }
 
     @Test
-    void rapporteerBeoordelingGebruiktTijdelijkeGebruikerId1() {
+    void rapporteerBeoordelingGebruiktTijdelijkeGebruikerId1() throws Exception {
+        // Arrange
         Long beoordelingId = 7L;
         String reden = "spoiler";
 
-        beoordelingController.rapporteerBeoordeling(beoordelingId, reden);
+        // Act
+        mockMvc.perform(post("/api/reviews/{id}/report", beoordelingId)
+                .contentType(MediaType.TEXT_PLAIN)
+                .content(reden))
+                .andExpect(status().isOk());
 
+        // Assert
         verify(gerapporteerdeBeoordelingService, times(1))
-                .rapporteerBeoordeling(beoordelingId, 1L, reden);
+                .rapporteerBeoordeling(eq(beoordelingId), eq(1L), eq(reden));
     }
 
     @Test
-    void verwijderBeoordelingGeeftNoContent() {
+    void verwijderBeoordelingGeeftNoContent() throws Exception {
+        // Arrange
         Long beoordelingId = 33L;
         doNothing().when(beoordelingService).verwijderBeoordeling(beoordelingId);
 
-        var response = beoordelingController.verwijderBeoordeling(beoordelingId);
+        // Act + Assert
+        mockMvc.perform(delete("/api/reviews/{id}", beoordelingId))
+                .andExpect(status().isNoContent());
 
-        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
         verify(beoordelingService, times(1)).verwijderBeoordeling(beoordelingId);
     }
 }

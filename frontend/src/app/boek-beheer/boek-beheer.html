@@ -86,7 +86,7 @@
       </tr>
     </thead>
     <tbody>
-      @for (boek of boeknOverzicht(); track boek.isbn) {
+      @for (boek of boeknOverzicht(); track boek.id) {
       <tr>
         <td>{{ boek.titel }}</td>
         <td>{{ boek.auteur }}</td>

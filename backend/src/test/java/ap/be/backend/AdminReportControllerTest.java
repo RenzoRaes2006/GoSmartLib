@@ -1,55 +1,53 @@
 package ap.be.backend;
- 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
-import ap.be.backend.controller.AdminReportController;
 import ap.be.backend.dto.GerapporteerdeBeoordelingAdminDTO;
 import ap.be.backend.service.GerapporteerdeBeoordelingService;
 
-@ExtendWith(MockitoExtension.class)
-class AdminReportControllerTest {
+class AdminReportControllerTest extends AbstractIntegrationTest {
 
-    @Mock
+    @MockBean
     private GerapporteerdeBeoordelingService gerapporteerdeBeoordelingService;
 
-    @InjectMocks
-    private AdminReportController adminReportController;
-
     @Test
-    void getAlleRapportagesGeeftOkMetDataTerug() {
-        List<GerapporteerdeBeoordelingAdminDTO> expected = List.of(
+    void getAlleRapportagesGeeftOkMetDataTerug() throws Exception {
+        // Arrange
+        when(gerapporteerdeBeoordelingService.getAlleGerapporteerdeBeoordelingen()).thenReturn(List.of(
                 new GerapporteerdeBeoordelingAdminDTO(1L, 10L, "Boektitel", "Reviewtekst", 2L, 3L,
-                        "spoiler", null));
-        when(gerapporteerdeBeoordelingService.getAlleGerapporteerdeBeoordelingen()).thenReturn(expected);
+                        "spoiler", null)));
 
-        var response = adminReportController.getAlleRapportages();
+        // Act + Assert
+        mockMvc.perform(get("/api/reports"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].boekTitel").value("Boektitel"));
 
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(1, response.getBody().size());
         verify(gerapporteerdeBeoordelingService, times(1)).getAlleGerapporteerdeBeoordelingen();
     }
 
     @Test
-    void negeerRapportageGeeftNoContentTerug() {
+    void negeerRapportageGeeftNoContentTerug() throws Exception {
+        // Arrange
         Long rapportageId = 7L;
         doNothing().when(gerapporteerdeBeoordelingService).verwijderRapportage(rapportageId);
 
-        var response = adminReportController.negeerRapportage(rapportageId);
+        // Act + Assert
+        mockMvc.perform(delete("/api/reports/{id}", rapportageId))
+                .andExpect(status().isNoContent());
 
-        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
         verify(gerapporteerdeBeoordelingService, times(1)).verwijderRapportage(rapportageId);
     }
 }

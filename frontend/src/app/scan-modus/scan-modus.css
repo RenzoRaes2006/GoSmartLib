@@ -1,4 +1,4 @@
-/* =========================================
+/* ========================================
    LAYOUT
    ========================================= */
 .scan-container {
@@ -17,6 +17,20 @@
   color: #8c1b3f;
 }
 
+.back-link {
+  display: block;
+  max-width: 900px;
+  margin: 0 auto 12px auto;
+  color: #8c1b3f;
+  text-decoration: none;
+  font-weight: 600;
+  transition: transform 0.2s;
+}
+
+.back-link:hover {
+  transform: translateX(-5px);
+}
+
 /* =========================================
    CARD (per stap)
    ========================================= */
@@ -24,7 +38,7 @@
   max-width: 900px;
   margin: 0 auto;
   background: white;
-  padding: 30px;
+  padding: 20px 30px;
   border-radius: 12px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
   border: 1px solid #e2dfd5;
@@ -261,22 +275,42 @@
 }
 
 /* =========================================
-   KLAAR-KNOP (floating)
+   MANDJE-LIJST (scrollbaar bij veel boeken)
+   ========================================= */
+.mandje-lijst {
+  max-height: 360px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+/* =========================================
+   SCAN ACTIES (rij met terug + klaar)
+   ========================================= */
+.scan-acties {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: 25px;
+}
+
+.scan-acties .terug-knop {
+  margin-top: 0;
+}
+
+/* =========================================
+   KLAAR-KNOP
    ========================================= */
 .klaar-knop {
-  position: fixed;
-  right: 30px;
-  bottom: 30px;
-  padding: 16px 32px;
-  font-size: 1.15rem;
+  padding: 10px 18px;
+  font-size: 0.95rem;
   font-weight: 600;
   color: white;
   background: #8c1b3f;
-  border: none;
-  border-radius: 12px;
+  border: 1px solid #8c1b3f;
+  border-radius: 8px;
   cursor: pointer;
   font-family: inherit;
-  box-shadow: 0 6px 18px rgba(140, 27, 63, 0.3);
   transition: background 0.15s, transform 0.1s;
 }
 

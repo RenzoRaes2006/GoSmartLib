@@ -1,6 +1,6 @@
 <nav class="navbar">
   <div class="nav-left">
-    <a routerLink="/" class="logo-link">
+    <a [routerLink]="homeRoute" class="logo-link">
       <div class="go-badge">GO!</div>
       <span class="logo-text">SmartLib</span>
     </a>
@@ -36,7 +36,7 @@
       <span class="icon">👤</span>
     </a>
 
-    <button class="nav-icon-btn logout-btn" title="Uitloggen">
+    <button class="nav-icon-btn logout-btn" title="Uitloggen" (click)="logout()">
       <span class="icon">➜]</span>
     </button>
   </div>

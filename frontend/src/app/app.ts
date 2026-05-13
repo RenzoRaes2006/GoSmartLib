@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 import { Navbar } from './navbar/navbar';
+import { AuthService } from './services/AuthService';
 
 @Component({
   selector: 'app-root',
@@ -10,6 +11,7 @@ import { Navbar } from './navbar/navbar';
 })
 export class App {
   private router = inject(Router);
+  protected authService = inject(AuthService);
 
 
   // http = inject(HttpClient);

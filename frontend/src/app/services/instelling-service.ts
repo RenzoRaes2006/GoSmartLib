@@ -6,7 +6,9 @@ import { Observable } from 'rxjs';
 })
 export class InstellingService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:8081/api/instellingen';
+  private apiUrl = window.location.hostname === 'localhost'
+    ? 'http://localhost:8081/api/instellingen'
+    : 'https://api-sp09.cloud-ap.be/api/instellingen';
 
   getLeenLimiet(): Observable<number> {
     return this.http.get<number>(`${this.apiUrl}/leenlimiet`);

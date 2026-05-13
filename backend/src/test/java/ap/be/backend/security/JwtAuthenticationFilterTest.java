@@ -49,6 +49,7 @@ public class JwtAuthenticationFilterTest {
 
         when(jwtService.isTokenValid("valid.token")).thenReturn(true);
         when(jwtService.extractSmartschoolId("valid.token")).thenReturn("ss-123");
+        when(jwtService.extractRole("valid.token")).thenReturn("LEERLING");
 
         filter.doFilter(request, response, chain);
 

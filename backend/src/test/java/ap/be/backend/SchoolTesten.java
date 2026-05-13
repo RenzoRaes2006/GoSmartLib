@@ -1,13 +1,8 @@
 package ap.be.backend;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Arrays;
 import java.util.List;
@@ -19,28 +14,13 @@ import static org.mockito.BDDMockito.then;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-// Jouw eigen imports
-
-import ap.be.backend.config.JwtService; // <--- Import toegevoegd uit jouw error log
-import ap.be.backend.controller.SchoolController;
 import ap.be.backend.entity.School;
 import ap.be.backend.repository.SchoolRepository;
 
-@WebMvcTest(SchoolController.class)
-@AutoConfigureMockMvc(addFilters = false) // <--- Zet security uit voor deze specifieke test
-public class SchoolTesten {
-
-    @Autowired
-    private MockMvc mockMvc;
+public class SchoolTesten extends AbstractIntegrationTest {
 
     @MockBean
     private SchoolRepository schoolRepository;
-
-    @MockBean
-    private JwtService jwtService; // <--- Voorkomt de applicatie crash!
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     @Test
     void givenSchoolsInDatabase_whenGetAllSchools_thenReturnJsonArrayOfSchools() throws Exception {

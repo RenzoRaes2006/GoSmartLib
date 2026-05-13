@@ -6,6 +6,7 @@ import { Boek } from '../models/Boek';
 import { LeeslijstService } from '../services/leeslijstService';
 import { FormsModule } from '@angular/forms';
 import { StatistiekService } from '../services/statistiek.service';
+import { AuthService } from '../services/AuthService';
 
 @Component({
   selector: 'app-home-page-leerling',
@@ -17,9 +18,10 @@ export class HomePage implements OnInit {
   private boekService = inject(BoekService);
   private leeslijstService = inject(LeeslijstService);
   private statistiekService = inject(StatistiekService);
+  private authService = inject(AuthService);
 
   // Gebruikersinfo & Gamification
-  naam = signal<string>('Jeroen');
+  naam = computed(() => this.authService.currentUser()?.name ?? '');
   gebruikerId = 1; // Tijdelijk hardcoded, pas aan naar ingelogde gebruiker
   schoolId = '12345'; // Tijdelijk hardcoded — komt later uit AuthService/Smartschool
 

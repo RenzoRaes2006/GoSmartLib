@@ -11,14 +11,13 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import ap.be.backend.entity.Boek;
-import ap.be.backend.entity.Gebruiker;
 import ap.be.backend.entity.Uitlening;
+import ap.be.backend.entity.User;
 
 @Repository
 public interface UitleningRepository extends JpaRepository<Uitlening, Long> {
 
-    // Gebruikt exact de ID variabele zoals Spring Boot die verwacht
-    long countByGebruiker_GebruikerID(Long gebruikerId);
+    long countByUser_Id(Long userId);
 
     long countByIsIngeleverdFalseAndStatusIn(List<String> statussen);
 
@@ -31,71 +30,65 @@ public interface UitleningRepository extends JpaRepository<Uitlening, Long> {
     @Query("SELECT COUNT(u) FROM Uitlening u WHERE u.uitleenDatum >= :sinds AND u.status IN :statussen")
     long countLeningenSinds(@Param("statussen") List<String> statussen, @Param("sinds") LocalDate sinds);
 
-    @Query("SELECT COUNT(u) FROM Uitlening u WHERE u.gebruiker.SchoolId = :schoolId " +
+    @Query("SELECT COUNT(u) FROM Uitlening u WHERE u.user.id = :userId " +
             "AND u.isIngeleverd = false AND u.status IN :statussen")
-    long countActieveLeningenVoorSchoolId(@Param("schoolId") long schoolId,
-                                          @Param("statussen") List<String> statussen);
+    long countActieveLeningenVoorUser(@Param("userId") Long userId,
+                                       @Param("statussen") List<String> statussen);
 
-    @Query("SELECT COUNT(u) FROM Uitlening u WHERE u.gebruiker.SchoolId = :schoolId " +
+    @Query("SELECT COUNT(u) FROM Uitlening u WHERE u.user.id = :userId " +
             "AND u.isIngeleverd = false AND u.status IN :statussen AND u.inleverDatum < :datum")
-    long countTeLaatVoorSchoolId(@Param("schoolId") long schoolId,
-                                 @Param("statussen") List<String> statussen,
-                                 @Param("datum") LocalDate datum);
+    long countTeLaatVoorUser(@Param("userId") Long userId,
+                              @Param("statussen") List<String> statussen,
+                              @Param("datum") LocalDate datum);
 
-    @Query("SELECT COUNT(u) FROM Uitlening u WHERE u.gebruiker.SchoolId = :schoolId " +
+    @Query("SELECT COUNT(u) FROM Uitlening u WHERE u.user.id = :userId " +
             "AND u.status <> :status")
-    long countLeengeschiedenisVoorSchoolId(@Param("schoolId") long schoolId,
-                                           @Param("status") String status);
+    long countLeengeschiedenisVoorUser(@Param("userId") Long userId,
+                                        @Param("status") String status);
 
     @Query("SELECT COUNT(u) FROM Uitlening u WHERE u.uitleenDatum >= :sinds " +
             "AND u.status IN :statussen " +
-            "AND (:klas IS NULL OR :klas = '' OR LOWER(u.gebruiker.klas) = LOWER(:klas))")
+            "AND (:klas IS NULL OR :klas = '' OR LOWER(u.user.klas) = LOWER(:klas))")
     long countLeningenSindsVoorKlas(@Param("klas") String klas,
                                     @Param("statussen") List<String> statussen,
                                     @Param("sinds") LocalDate sinds);
 
     @Query("SELECT COUNT(u) FROM Uitlening u WHERE u.isIngeleverd = false " +
             "AND u.status IN :statussen " +
-            "AND (:klas IS NULL OR :klas = '' OR LOWER(u.gebruiker.klas) = LOWER(:klas))")
+            "AND (:klas IS NULL OR :klas = '' OR LOWER(u.user.klas) = LOWER(:klas))")
     long countActieveLeningenVoorKlas(@Param("klas") String klas,
                                       @Param("statussen") List<String> statussen);
 
     @Query("SELECT COUNT(u) FROM Uitlening u WHERE u.isIngeleverd = false " +
             "AND u.status IN :statussen AND u.inleverDatum < :datum " +
-            "AND (:klas IS NULL OR :klas = '' OR LOWER(u.gebruiker.klas) = LOWER(:klas))")
+            "AND (:klas IS NULL OR :klas = '' OR LOWER(u.user.klas) = LOWER(:klas))")
     long countTeLaatVoorKlas(@Param("klas") String klas,
                              @Param("statussen") List<String> statussen,
                              @Param("datum") LocalDate datum);
 
     @Query("SELECT u.boek.titel FROM Uitlening u WHERE u.status IN :statussen " +
-            "AND (:klas IS NULL OR :klas = '' OR LOWER(u.gebruiker.klas) = LOWER(:klas)) " +
+            "AND (:klas IS NULL OR :klas = '' OR LOWER(u.user.klas) = LOWER(:klas)) " +
             "GROUP BY u.boek.titel ORDER BY COUNT(u) DESC")
     List<String> findTopBoekTitelsVoorKlas(@Param("klas") String klas,
                                            @Param("statussen") List<String> statussen,
                                            Pageable pageable);
 
-    // Get active loans of a user
-    List<Uitlening> findByGebruiker_GebruikerIDAndIsIngeleverdFalse(Long gebruikerId);
+    List<Uitlening> findByUser_IdAndIsIngeleverdFalse(Long userId);
 
-    // Check if user has overdue loans
-    boolean existsByGebruiker_GebruikerIDAndIsIngeleverdFalseAndInleverDatumBefore(Long gebruikerId, LocalDate vandaag);
+    boolean existsByUser_IdAndIsIngeleverdFalseAndInleverDatumBefore(Long userId, LocalDate vandaag);
 
-    // Check if user already has this book
-    boolean existsByGebruiker_GebruikerIDAndBoek_IdAndIsIngeleverdFalse(Long gebruikerId, Long boekId);
+    boolean existsByUser_IdAndBoek_IdAndIsIngeleverdFalse(Long userId, Long boekId);
 
-    // Fetch all requests by status
     List<Uitlening> findByStatus(String status);
 
-    boolean existsByGebruiker_GebruikerIDAndStatus(Long gebruikerId, String status);
+    boolean existsByUser_IdAndStatus(Long userId, String status);
 
-    List<Uitlening> findByGebruiker_GebruikerIDOrderByUitleenDatumDesc(Long gebruikerId);
+    List<Uitlening> findByUser_IdOrderByUitleenDatumDesc(Long userId);
 
-    Optional<Uitlening> findFirstByGebruikerAndBoekAndIsIngeleverdFalseOrderByUitleenDatumAsc(Gebruiker gebruiker, Boek boek);
+    Optional<Uitlening> findFirstByUserAndBoekAndIsIngeleverdFalseOrderByUitleenDatumAsc(User user, Boek boek);
 
     List<Uitlening> findByIsIngeleverdFalseOrderByUitleenDatumDesc();
 
-    // Aangepaste query: Omdat we geen inleverdatum kunnen vergelijken in de entity,
-    // tellen we hier simpelweg hoeveel boeken deze leerling al heeft teruggebracht.
-    @Query("SELECT COUNT(u) FROM Uitlening u WHERE u.gebruiker.gebruikerID = :id AND u.isIngeleverd = true")
+    @Query("SELECT COUNT(u) FROM Uitlening u WHERE u.user.id = :id AND u.isIngeleverd = true")
     long countOnTime(@Param("id") Long id);
 }

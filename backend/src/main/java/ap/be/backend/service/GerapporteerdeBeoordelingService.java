@@ -13,30 +13,29 @@ import ap.be.backend.exception.GebruikerNotFoundException;
 import ap.be.backend.exception.RapportageNotFoundException;
 import ap.be.backend.mappers.GerapporteerdeBeoordelingMapper;
 import ap.be.backend.repository.BeoordelingRepository;
-import ap.be.backend.repository.GebruikerRepository;
 import ap.be.backend.repository.GerapporteerdeBeoordelingRepository;
+import ap.be.backend.repository.UserRepository;
 
 @Service
 public class GerapporteerdeBeoordelingService {
     private final GerapporteerdeBeoordelingRepository gerapporteerdeBeoordelingRepository;
     private final BeoordelingRepository beoordelingRepository;
-    private final GebruikerRepository gebruikerRepository;
+    private final UserRepository userRepository;
 
     public GerapporteerdeBeoordelingService(GerapporteerdeBeoordelingRepository gerapporteerdeBeoordelingRepository,
-            BeoordelingRepository beoordelingRepository, GebruikerRepository gebruikerRepository) {
+            BeoordelingRepository beoordelingRepository, UserRepository userRepository) {
         this.gerapporteerdeBeoordelingRepository = gerapporteerdeBeoordelingRepository;
         this.beoordelingRepository = beoordelingRepository;
-        this.gebruikerRepository = gebruikerRepository;
+        this.userRepository = userRepository;
     }
 
-    public void rapporteerBeoordeling(Long beoordelingId, Long gebruikerId, String reden) {
+    public void rapporteerBeoordeling(Long beoordelingId, Long userId, String reden) {
 
         if (reden == null || reden.trim().isEmpty()) {
             throw new IllegalArgumentException("Reden mag niet leeg zijn.");
         }
 
-        if (gerapporteerdeBeoordelingRepository.existsByBeoordelingIdAndGebruikerMelder_GebruikerID(beoordelingId,
-                gebruikerId)) {
+        if (gerapporteerdeBeoordelingRepository.existsByBeoordelingIdAndUserMelder_Id(beoordelingId, userId)) {
             throw new DuplicateReportException("Je hebt deze beoordeling al gerapporteerd.");
         }
 
@@ -44,13 +43,13 @@ public class GerapporteerdeBeoordelingService {
                 .orElseThrow(
                         () -> new BeoordelingNotFoundException("Beoordeling niet gevonden met id: " + beoordelingId));
 
-        var gebruiker = gebruikerRepository.findById(gebruikerId)
-                .orElseThrow(() -> new GebruikerNotFoundException("Gebruiker niet gevonden met id: " + gebruikerId));
+        var user = userRepository.findById(userId)
+                .orElseThrow(() -> new GebruikerNotFoundException("User niet gevonden met id: " + userId));
 
         GerapporteerdeBeoordeling gerapporteerdeBeoordeling = new GerapporteerdeBeoordeling();
         gerapporteerdeBeoordeling.setBeoordeling(beoordeling);
         gerapporteerdeBeoordeling.setReden(reden);
-        gerapporteerdeBeoordeling.setGebruikerMelder(gebruiker);
+        gerapporteerdeBeoordeling.setUserMelder(user);
         gerapporteerdeBeoordeling.setDatumGemeld(LocalDateTime.now());
 
         gerapporteerdeBeoordelingRepository.save(gerapporteerdeBeoordeling);

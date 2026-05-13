@@ -1,55 +1,83 @@
 package ap.be.backend.controller;
 
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import ap.be.backend.dto.SchoolDTO;
 import ap.be.backend.entity.School;
+import ap.be.backend.mappers.SchoolMapper;
 import ap.be.backend.repository.SchoolRepository;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * Behandelt API-endpoints voor het beheren van scholen in het systeem.
+ *
+ * Scholen worden opgeslagen in de eigen database. Leerlingen- en klassendata
+ * worden niet opgeslagen, maar live opgehaald uit Smartschool en alleen
+ * doorgegeven aan de frontend.
+ */
 @RestController
 @RequestMapping("/api/scholen")
-@CrossOrigin(origins = "*") // allow angular to communicate with this backend
 public class SchoolController {
 
-    @Autowired
-    private SchoolRepository schoolRepository;
+    private final SchoolRepository schoolRepository;
 
-    // 1. fetch all registered schools for the dashboard table
+    public SchoolController(SchoolRepository schoolRepository) {
+        this.schoolRepository = schoolRepository;
+    }
+
+    /**
+     * Geeft alle geregistreerde scholen terug.
+     *
+     * @return lijst van scholen als DTO's
+     */
     @GetMapping
-    public List<School> getAlleScholen() {
-        return schoolRepository.findAll();
+    public List<SchoolDTO> getAlleScholen() {
+        return schoolRepository.findAll().stream().map(SchoolMapper::toDTO).toList();
     }
 
-    // 2. save a new school (only the basic info, no students)
+    /**
+     * Slaat een nieuwe school op in de database.
+     *
+     * Enkel basisgegevens worden opgeslagen (naam, adres, apiCode). Leerlingen
+     * en klassen worden niet opgeslagen.
+     *
+     * @param nieuweSchool de gegevens van de nieuwe school
+     * @return de opgeslagen school als DTO
+     */
     @PostMapping
-    public ResponseEntity<School> maakSchoolAan(@RequestBody School nieuweSchool) {
+    public ResponseEntity<SchoolDTO> maakSchoolAan(@RequestBody School nieuweSchool) {
         School opgeslagenSchool = schoolRepository.save(nieuweSchool);
-        System.out.println("New school saved: " + opgeslagenSchool.getNaam());
-        return ResponseEntity.ok(opgeslagenSchool);
+        return ResponseEntity.ok(SchoolMapper.toDTO(opgeslagenSchool));
     }
 
-    // 3. fetch live data (single source of truth - this is never saved to our database)
+    /**
+     * Geeft live leerlingen- en klassendata terug van een school.
+     *
+     * Deze data wordt nooit opgeslagen in de database. Het is een momentopname
+     * van de Smartschool-data op het moment van de aanvraag.
+     *
+     * LET OP: de huidige implementatie geeft gesimuleerde testdata terug.
+     * De echte Smartschool-koppeling moet nog worden geïmplementeerd.
+     *
+     * @param id het database-ID van de school
+     * @return een object met schoolinfo en live Smartschool-data, of 404 als
+     *         de school niet bestaat
+     */
     @GetMapping("/{id}/live-data")
     public ResponseEntity<?> getLiveSmartschoolData(@PathVariable Long id) {
-        
+
         Optional<School> schoolOpt = schoolRepository.findById(id);
-        
+
         if (schoolOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
 
         School school = schoolOpt.get();
-        String smartschoolSleutel = school.getApiCode();
 
-        System.out.println("Connecting to smartschool api for " + school.getNaam() + " with key: " + smartschoolSleutel);
-        
-        // simulation of the smartschool data that gets generated on-the-fly
         List<Map<String, Object>> liveKlassen = List.of(
                 Map.of("id", 101, "naam", "1A"),
                 Map.of("id", 102, "naam", "1B"),
@@ -61,7 +89,6 @@ public class SchoolController {
                 Map.of("id", 5002, "voorNaam", "Bram", "achternaam", "Peeters", "klas", "1A")
         );
 
-        // build the response for the frontend
         Map<String, Object> response = Map.of(
                 "schoolInfo", Map.of("naam", school.getNaam(), "adres", school.getAdres()),
                 "liveSmartschoolData", Map.of(
@@ -73,17 +100,20 @@ public class SchoolController {
         return ResponseEntity.ok(response);
     }
 
-    // 4. delete a school from the database
+    /**
+     * Verwijdert een school uit de database.
+     *
+     * @param id het ID van de te verwijderen school
+     * @return 204 No Content bij succes, 404 als de school niet bestaat
+     */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> verwijderSchool(@PathVariable Long id) {
         if (!schoolRepository.existsById(id)) {
             return ResponseEntity.notFound().build();
         }
-        
-        System.out.println("Deleting school with ID: " + id);
+
         schoolRepository.deleteById(id);
-        
-        // return 204 no content (successful deletion)
+
         return ResponseEntity.noContent().build();
     }
 }

@@ -1,7 +1,8 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { LeenMandjeService } from '../services/leen-mandje.service';
 import { ToegankelijkheidService } from '../services/toegankelijkheid';
+import { AuthService } from '../services/AuthService';
 
 @Component({
   selector: 'app-navbar',
@@ -15,6 +16,8 @@ export class Navbar implements OnInit {
   aantalInMandje: number = 0;
   toegankelijkheidService = inject(ToegankelijkheidService);
   isDyslexieActief: boolean = false;
+  authService = inject(AuthService);
+  private router = inject(Router);
 
   ngOnInit() {
     this.mandjeService.mandje$.subscribe((boeken) => {
@@ -26,5 +29,14 @@ export class Navbar implements OnInit {
   }
   toggleDyslexie() {
     this.toegankelijkheidService.toggleDyslexieFont();
+  }
+
+  get homeRoute(): string {
+    return this.authService.currentUser()?.role === 'teacher' ? '/leerkracht-dashboard' : '/';
+  }
+
+  logout() {
+    this.authService.logout();
+    this.router.navigate(['/login']);
   }
 }

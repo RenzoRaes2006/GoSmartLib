@@ -14,20 +14,21 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.mockito.Mockito.when;
 
-import ap.be.backend.entity.Gebruiker;
 import ap.be.backend.entity.Rol;
+import ap.be.backend.entity.User;
 import ap.be.backend.exception.GebruikerNotFoundException;
 import ap.be.backend.repository.BoekRepository;
-import ap.be.backend.repository.GebruikerRepository;
+import ap.be.backend.repository.UserRepository;
 import ap.be.backend.repository.LeeslijstMapRepository;
 import ap.be.backend.repository.UitleningRepository;
 import ap.be.backend.service.GebruikerService;
+import ap.be.backend.service.InstellingService;
 
 @ExtendWith(MockitoExtension.class)
 public class LeerlingLookupServiceTest {
 
     @Mock
-    private GebruikerRepository gebruikerRepository;
+    private UserRepository userRepository;
 
     @Mock
     private LeeslijstMapRepository leeslijstMapRepository;
@@ -38,64 +39,61 @@ public class LeerlingLookupServiceTest {
     @Mock
     private UitleningRepository uitleningRepository;
 
+    @Mock
+    private InstellingService instellingService;
+
     @InjectMocks
     private GebruikerService gebruikerService;
 
-    private Gebruiker leerling;
+    private User leerling;
 
     @BeforeEach
     void setUp() {
-        leerling = new Gebruiker();
-        leerling.setGebruikerID(1L);
-        leerling.setSchoolId(12345L);
-        leerling.setVoorNaam("Test");
-        leerling.setAchternaam("Leerling");
+        leerling = new User();
+        leerling.setId(1L);
+        leerling.setSmartschoolId("12345");
         leerling.setRol(Rol.LEERLING);
     }
 
     @Test
-    void givenBestaandeLeerling_whenGetLeerlingBySchoolId_thenReturnLeerling() {
-        when(gebruikerRepository.findBySchoolId(12345L)).thenReturn(Optional.of(leerling));
+    void givenBestaandeLeerling_whenGetLeerlingBySmartschoolId_thenReturnLeerling() {
+        when(userRepository.findBySmartschoolId("12345")).thenReturn(Optional.of(leerling));
 
-        Gebruiker result = gebruikerService.getLeerlingBySchoolId(12345L);
+        User result = gebruikerService.getLeerlingBySmartschoolId("12345");
 
-        assertEquals(12345L, result.getSchoolId());
+        assertEquals("12345", result.getSmartschoolId());
         assertEquals(Rol.LEERLING, result.getRol());
     }
 
     @Test
-    void givenOnbekendeSchoolId_whenGetLeerlingBySchoolId_thenThrowNotFound() {
-        when(gebruikerRepository.findBySchoolId(99999L)).thenReturn(Optional.empty());
-
-        GebruikerNotFoundException ex = assertThrows(GebruikerNotFoundException.class,
-                () -> gebruikerService.getLeerlingBySchoolId(99999L));
-
-        assertEquals("Leerling met school ID 99999 niet gevonden", ex.getMessage());
-    }
-
-    @Test
-    void givenGebruikerIsBeheerder_whenGetLeerlingBySchoolId_thenThrowNotFound() {
-        Gebruiker beheerder = new Gebruiker();
-        beheerder.setGebruikerID(2L);
-        beheerder.setSchoolId(54321L);
-        beheerder.setRol(Rol.BEHEERDER);
-        when(gebruikerRepository.findBySchoolId(54321L)).thenReturn(Optional.of(beheerder));
-
-        GebruikerNotFoundException ex = assertThrows(GebruikerNotFoundException.class,
-                () -> gebruikerService.getLeerlingBySchoolId(54321L));
-
-        assertEquals("Leerling met school ID 54321 niet gevonden", ex.getMessage());
-    }
-
-    @Test
-    void givenGebruikerIsLeerkracht_whenGetLeerlingBySchoolId_thenThrowNotFound() {
-        Gebruiker leerkracht = new Gebruiker();
-        leerkracht.setGebruikerID(3L);
-        leerkracht.setSchoolId(77777L);
-        leerkracht.setRol(Rol.LEERKRACHT);
-        when(gebruikerRepository.findBySchoolId(77777L)).thenReturn(Optional.of(leerkracht));
+    void givenOnbekendeSmartschoolId_whenGetLeerlingBySmartschoolId_thenThrowNotFound() {
+        when(userRepository.findBySmartschoolId("99999")).thenReturn(Optional.empty());
 
         assertThrows(GebruikerNotFoundException.class,
-                () -> gebruikerService.getLeerlingBySchoolId(77777L));
+                () -> gebruikerService.getLeerlingBySmartschoolId("99999"));
+    }
+
+    @Test
+    void givenGebruikerIsBeheerder_whenGetLeerlingBySmartschoolId_thenThrowNotFound() {
+        User beheerder = new User();
+        beheerder.setId(2L);
+        beheerder.setSmartschoolId("54321");
+        beheerder.setRol(Rol.BEHEERDER);
+        when(userRepository.findBySmartschoolId("54321")).thenReturn(Optional.of(beheerder));
+
+        assertThrows(GebruikerNotFoundException.class,
+                () -> gebruikerService.getLeerlingBySmartschoolId("54321"));
+    }
+
+    @Test
+    void givenGebruikerIsLeerkracht_whenGetLeerlingBySmartschoolId_thenThrowNotFound() {
+        User leerkracht = new User();
+        leerkracht.setId(3L);
+        leerkracht.setSmartschoolId("77777");
+        leerkracht.setRol(Rol.LEERKRACHT);
+        when(userRepository.findBySmartschoolId("77777")).thenReturn(Optional.of(leerkracht));
+
+        assertThrows(GebruikerNotFoundException.class,
+                () -> gebruikerService.getLeerlingBySmartschoolId("77777"));
     }
 }

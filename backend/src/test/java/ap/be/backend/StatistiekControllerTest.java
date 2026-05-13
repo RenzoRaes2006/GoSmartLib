@@ -1,82 +1,80 @@
 package ap.be.backend;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
-import ap.be.backend.controller.StatistiekController;
 import ap.be.backend.dto.AdminStatistiekDTO;
 import ap.be.backend.dto.LeerkrachtStatistiekDTO;
 import ap.be.backend.dto.LeerlingStatistiekDTO;
 import ap.be.backend.service.StatistiekService;
 
-@ExtendWith(MockitoExtension.class)
-class StatistiekControllerTest {
+class StatistiekControllerTest extends AbstractIntegrationTest {
 
-    @Mock
+    @MockBean
     private StatistiekService statistiekService;
 
-    @InjectMocks
-    private StatistiekController statistiekController;
-
     @Test
-    void getAdminStatistieken_GeeftDtoVanService() {
+    void getAdminStatistieken_GeeftDtoVanService() throws Exception {
+        // Arrange
         AdminStatistiekDTO expected = new AdminStatistiekDTO(25.0, 4, "Fantasy", 12);
         when(statistiekService.getAdminStatistieken()).thenReturn(expected);
 
-        ResponseEntity<AdminStatistiekDTO> response = statistiekController.getAdminStatistieken();
+        // Act + Assert
+        mockMvc.perform(get("/api/statistieken/admin"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.populairsteGenre").value("Fantasy"));
 
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(expected, response.getBody());
         verify(statistiekService, times(1)).getAdminStatistieken();
     }
 
     @Test
-    void getLeerkrachtStatistieken_MetKlasIdGeeftDtoVanService() {
+    void getLeerkrachtStatistieken_MetKlasIdGeeftDtoVanService() throws Exception {
+        // Arrange
         String klasId = "5A";
         LeerkrachtStatistiekDTO expected = new LeerkrachtStatistiekDTO(22, 8, 2, 5, List.of("Boek A"));
         when(statistiekService.getLeerkrachtStatistieken(klasId)).thenReturn(expected);
 
-        ResponseEntity<LeerkrachtStatistiekDTO> response = statistiekController.getLeerkrachtStatistieken(klasId);
+        // Act + Assert
+        mockMvc.perform(get("/api/statistieken/leerkracht").param("klasId", klasId))
+                .andExpect(status().isOk());
 
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(expected, response.getBody());
         verify(statistiekService, times(1)).getLeerkrachtStatistieken(klasId);
     }
 
     @Test
-    void getLeerkrachtStatistieken_ZonderKlasIdGeeftDtoVanService() {
+    void getLeerkrachtStatistieken_ZonderKlasIdGeeftDtoVanService() throws Exception {
+        // Arrange
         LeerkrachtStatistiekDTO expected = new LeerkrachtStatistiekDTO(150, 40, 6, 20, List.of());
         when(statistiekService.getLeerkrachtStatistieken(null)).thenReturn(expected);
 
-        ResponseEntity<LeerkrachtStatistiekDTO> response = statistiekController.getLeerkrachtStatistieken(null);
+        // Act + Assert
+        mockMvc.perform(get("/api/statistieken/leerkracht"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.aantalLeerlingen").value(150));
 
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(150, response.getBody().getAantalLeerlingen());
         verify(statistiekService, times(1)).getLeerkrachtStatistieken(null);
     }
 
     @Test
-    void getLeerlingStatistieken_GeeftDtoVanService() {
+    void getLeerlingStatistieken_GeeftDtoVanService() throws Exception {
+        // Arrange
         String schoolId = "12345";
         LeerlingStatistiekDTO expected = new LeerlingStatistiekDTO(11, 10, 2, 1);
         when(statistiekService.getLeerlingStatistieken(schoolId)).thenReturn(expected);
 
-        ResponseEntity<LeerlingStatistiekDTO> response = statistiekController.getLeerlingStatistieken(schoolId);
+        // Act + Assert
+        mockMvc.perform(get("/api/statistieken/leerling/{id}", schoolId))
+                .andExpect(status().isOk());
 
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(expected, response.getBody());
         verify(statistiekService, times(1)).getLeerlingStatistieken(schoolId);
     }
 }

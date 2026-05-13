@@ -1,7 +1,7 @@
 package ap.be.backend.controller;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -12,7 +12,6 @@ import ap.be.backend.service.InstellingService;
 
 @RestController
 @RequestMapping("/api/instellingen")
-@CrossOrigin(origins = "*", allowedHeaders = "*")
 public class InstellingController {
     private final InstellingService instellingService;
 
@@ -25,6 +24,7 @@ public class InstellingController {
         return ResponseEntity.ok(instellingService.getLeenLimiet());
     }
 
+    @PreAuthorize("hasRole('BEHEERDER')")
     @PutMapping("/leenlimiet")
     public ResponseEntity<String> updateLeenLimiet(@RequestBody int nieuweLimiet) {
         if (nieuweLimiet < 0) {

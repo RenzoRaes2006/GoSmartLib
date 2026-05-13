@@ -2,6 +2,7 @@ package ap.be.backend.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -9,28 +10,44 @@ import org.springframework.stereotype.Service;
 import ap.be.backend.dto.AdminStatistiekDTO;
 import ap.be.backend.dto.LeerkrachtStatistiekDTO;
 import ap.be.backend.dto.LeerlingStatistiekDTO;
+import ap.be.backend.entity.User;
 import ap.be.backend.repository.BoekRepository;
-import ap.be.backend.repository.GebruikerRepository;
 import ap.be.backend.repository.UitleningRepository;
+import ap.be.backend.repository.UserRepository;
 
+/**
+ * Berekent statistieken voor het beheerder-dashboard, het leerkracht-dashboard
+ * en de leerling-profielpagina.
+ *
+ * Alleen leningen met de status GOEDGEKEURD of ACTIEF tellen mee als echte
+ * leningen. Aanvragen en geweigerde leningen worden buiten beschouwing gelaten.
+ */
 @Service
 public class StatistiekService {
-    // Echte leningen: aanvragen die door admin zijn goedgekeurd of via scan zijn aangemaakt.
-    // Inlevering flipt enkel isIngeleverd=true, dus deze lijst dekt zowel lopende als teruggebrachte leningen.
+
+    // Leningen met deze statussen zijn goedgekeurd door de beheerder of aangemaakt via de scan-modus.
     private static final List<String> ACTIEVE_STATUSSEN = List.of("GOEDGEKEURD", "ACTIEF");
 
     private final UitleningRepository uitleningRepository;
     private final BoekRepository boekRepository;
-    private final GebruikerRepository gebruikerRepository;
+    private final UserRepository userRepository;
 
     public StatistiekService(UitleningRepository uitleningRepository,
                              BoekRepository boekRepository,
-                             GebruikerRepository gebruikerRepository) {
+                             UserRepository userRepository) {
         this.uitleningRepository = uitleningRepository;
         this.boekRepository = boekRepository;
-        this.gebruikerRepository = gebruikerRepository;
+        this.userRepository = userRepository;
     }
 
+    /**
+     * Berekent de statistieken voor het beheerder-dashboard.
+     *
+     * Bevat het percentage uitgeleende boeken, het aantal te laat ingeleverde
+     * boeken, het populairste genre en het aantal leningen deze maand.
+     *
+     * @return een AdminStatistiekDTO met de berekende waarden
+     */
     public AdminStatistiekDTO getAdminStatistieken() {
         long actieveLeningen = uitleningRepository.countByIsIngeleverdFalseAndStatusIn(ACTIEVE_STATUSSEN);
         long totaalExemplaren = boekRepository.sumTotaalAantalExemplaren();
@@ -52,12 +69,21 @@ public class StatistiekService {
         return new AdminStatistiekDTO(percentageUitgeleend, teLaatIngeleverd, populairsteGenre, uitleningenDezeMaand);
     }
 
+    /**
+     * Berekent de statistieken voor het leerkracht-dashboard.
+     *
+     * Als een klasnaam wordt meegegeven, worden de cijfers beperkt tot die klas.
+     * Zonder klasnaam worden alle leerlingen meegeteld.
+     *
+     * @param klasId de klasnaam om op te filteren, of null voor alle klassen
+     * @return een LeerkrachtStatistiekDTO met de berekende waarden
+     */
     public LeerkrachtStatistiekDTO getLeerkrachtStatistieken(String klasId) {
         String klas = (klasId == null || klasId.isBlank()) ? null : klasId;
 
         int aantalLeerlingen = klas == null
-                ? (int) gebruikerRepository.count()
-                : (int) gebruikerRepository.countByKlasIgnoreCase(klas);
+                ? (int) userRepository.count()
+                : (int) userRepository.countByKlasIgnoreCase(klas);
 
         int actief = (int) uitleningRepository.countActieveLeningenVoorKlas(klas, ACTIEVE_STATUSSEN);
         int teLaat = (int) uitleningRepository.countTeLaatVoorKlas(klas, ACTIEVE_STATUSSEN, LocalDate.now());
@@ -70,19 +96,27 @@ public class StatistiekService {
         return new LeerkrachtStatistiekDTO(aantalLeerlingen, actief, teLaat, afgelopenWeek, topBoeken);
     }
 
-    public LeerlingStatistiekDTO getLeerlingStatistieken(String schoolId) {
-        long sid;
-        try {
-            sid = Long.parseLong(schoolId);
-        } catch (NumberFormatException e) {
+    /**
+     * Berekent de statistieken voor de profielpagina van een leerling.
+     *
+     * Geeft standaardwaarden terug als de leerling niet gevonden wordt.
+     * Het leesdoel is nog niet persistent opgeslagen en staat voorlopig
+     * vast op 10 totdat er een instelling per leerling beschikbaar is.
+     *
+     * @param smartschoolId de unieke Smartschool-ID van de leerling
+     * @return een LeerlingStatistiekDTO met de berekende waarden
+     */
+    public LeerlingStatistiekDTO getLeerlingStatistieken(String smartschoolId) {
+        Optional<User> userOpt = userRepository.findBySmartschoolId(smartschoolId);
+        if (userOpt.isEmpty()) {
             return new LeerlingStatistiekDTO(0, 10, 0, 0);
         }
+        Long userId = userOpt.get().getId();
 
-        int gelezen = (int) uitleningRepository.countLeengeschiedenisVoorSchoolId(sid, "GEWEIGERD");
-        int actief = (int) uitleningRepository.countActieveLeningenVoorSchoolId(sid, ACTIEVE_STATUSSEN);
-        int teLaat = (int) uitleningRepository.countTeLaatVoorSchoolId(sid, ACTIEVE_STATUSSEN, LocalDate.now());
+        int gelezen = (int) uitleningRepository.countLeengeschiedenisVoorUser(userId, "GEWEIGERD");
+        int actief = (int) uitleningRepository.countActieveLeningenVoorUser(userId, ACTIEVE_STATUSSEN);
+        int teLaat = (int) uitleningRepository.countTeLaatVoorUser(userId, ACTIEVE_STATUSSEN, LocalDate.now());
 
-        // leesDoel wordt nog niet persistent opgeslagen; default 10 tot dat er een instelling per leerling is
         return new LeerlingStatistiekDTO(gelezen, 10, actief, teLaat);
     }
 }

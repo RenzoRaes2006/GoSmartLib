@@ -5,7 +5,6 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,17 +15,19 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import ap.be.backend.dto.BoekDTO;
+import ap.be.backend.dto.BoekenFilters;
+import ap.be.backend.dto.BoekenSort;
+import ap.be.backend.dto.PageRequestParams;
 import ap.be.backend.entity.Boek;
+import ap.be.backend.mappers.BoekMapper;
 import ap.be.backend.service.BoekImportService;
 import ap.be.backend.service.BoekService;
 import jakarta.validation.Valid;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.data.domain.Sort;
 
 @RestController
-// @CrossOrigin(origins = { "https://frontend.localhost",
-// "http://localhost:4200"
-// })
 public class BoekController {
     private final BoekService boekService;
     private final BoekImportService boekImportService;
@@ -37,66 +38,49 @@ public class BoekController {
     }
 
     @GetMapping("/api/boeken")
-    @CrossOrigin(origins = "*", allowedHeaders = "*")
-    public Page<Boek> getAlleBoeken(
-            @RequestParam(required = false) String zoekterm,
-            @RequestParam(required = false) List<String> genre,
-            @RequestParam(required = false) List<String> thematischeTag,
-            @RequestParam(required = false) String uitgever,
-            @RequestParam(required = false) Integer minPagina,
-            @RequestParam(required = false) Integer maxPagina,
-            @RequestParam(required = false) String sorteerOp,
-            @RequestParam(required = false) String sorteerRichting,
-            @RequestParam(required = false) String beschikbaar,
-            @RequestParam(required = false) Integer uitgaveJaarVan,
-            @RequestParam(required = false) Integer uitgaveJaarTot,
-            @RequestParam(required = false) String leesniveau,
-            @RequestParam(required = false) Boolean didactischMateriaal,
-            @RequestParam(required = false) ap.be.backend.entity.DidactischeSubcategorie didactischeSubcategorie,
-            @RequestParam(required = false) Integer page,
-            @RequestParam(required = false) Integer size) {
-
-        Sort sort;
-        if (sorteerOp != null && sorteerRichting != null) {
-            sort = Sort.by(Sort.Direction.fromString(sorteerRichting), sorteerOp);
-        } else {
-            sort = Sort.by(Sort.Direction.ASC, "id");
-        }
-
-        return boekService.filterBoeken(zoekterm, genre, thematischeTag, uitgever, minPagina, maxPagina,
-                beschikbaar != null ? Boolean.parseBoolean(beschikbaar) : null, uitgaveJaarVan, uitgaveJaarTot,
-                leesniveau, didactischMateriaal, didactischeSubcategorie, page, size, sort);
+    public Page<BoekDTO> getAlleBoeken(
+            @ModelAttribute BoekenFilters filters,
+            @ModelAttribute BoekenSort sort,
+            @ModelAttribute PageRequestParams paging) {
+        return boekService.filterBoeken(filters, sort, paging);
     }
 
+    @PreAuthorize("hasRole('BEHEERDER')")
     @PostMapping("/api/boeken")
-    public ResponseEntity<Boek> postBoek(@Valid @RequestBody BoekDTO boekDTO) {
+    public ResponseEntity<BoekDTO> postBoek(@Valid @RequestBody BoekDTO boekDTO) {
         Boek nieuwBoek = boekService.addBoek(boekDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(nieuwBoek);
+        return ResponseEntity.status(HttpStatus.CREATED).body(BoekMapper.toDTO(nieuwBoek));
     }
 
     @GetMapping("/api/boeken/{id}")
-    public Boek getBoekById(@PathVariable("id") Long id) {
-        return boekService.getBoekById(id);
+    public ResponseEntity<BoekDTO> getBoekById(@PathVariable("id") Long id) {
+        Boek boek = boekService.getBoekById(id);
+        if (boek == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(BoekMapper.toDTO(boek));
     }
 
     @GetMapping("/api/boeken/isbn/{isbn}")
-    public ResponseEntity<Boek> getBoekByIsbn(@PathVariable("isbn") String isbn) {
+    public ResponseEntity<BoekDTO> getBoekByIsbn(@PathVariable("isbn") String isbn) {
         Boek boek = boekService.getBoekByIsbn(isbn);
         if (boek == null) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(boek);
+        return ResponseEntity.ok(BoekMapper.toDTO(boek));
     }
 
+    @PreAuthorize("hasRole('BEHEERDER')")
     @PutMapping("/api/boeken/{id}")
-    public ResponseEntity<Boek> updateBoek(@PathVariable Long id, @Valid @RequestBody BoekDTO boekDTO) {
+    public ResponseEntity<BoekDTO> updateBoek(@PathVariable Long id, @Valid @RequestBody BoekDTO boekDTO) {
         Boek geupdate = boekService.updateBoek(id, boekDTO);
         if (geupdate == null) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(geupdate);
+        return ResponseEntity.ok(BoekMapper.toDTO(geupdate));
     }
 
+    @PreAuthorize("hasRole('BEHEERDER')")
     @DeleteMapping("/api/boeken/{id}")
     public ResponseEntity<String> deleteBoek(@PathVariable Long id) {
         boolean deleted = boekService.deleteBoek(id);
@@ -107,19 +91,21 @@ public class BoekController {
     }
 
     @GetMapping("/api/boeken/paged")
-    public Page<Boek> getBoekenPaged(@RequestParam(defaultValue = "0") int page,
+    public Page<BoekDTO> getBoekenPaged(@RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size) {
-        return boekService.getBoekenPaged(page, size);
+        return boekService.getBoekenPaged(page, size).map(BoekMapper::toDTO);
     }
 
     @GetMapping("/api/boeken/top/populair")
-    public ResponseEntity<List<Boek>> getPopulaireBoeken() {
-        List<Boek> populaireBoeken = boekService.getPopulaireBoeken();
+    public ResponseEntity<List<BoekDTO>> getPopulaireBoeken() {
+        List<BoekDTO> populaireBoeken = boekService.getPopulaireBoeken().stream()
+                .map(BoekMapper::toDTO)
+                .toList();
         return ResponseEntity.ok(populaireBoeken);
     }
 
+    @PreAuthorize("hasRole('BEHEERDER')")
     @PostMapping("/api/boeken/import/preview")
-    @CrossOrigin(origins = "*", allowedHeaders = "*")
     public ResponseEntity<?> previewImporteerBoeken(@RequestParam("file") MultipartFile file) {
         if (file.isEmpty()) {
             return ResponseEntity.badRequest().body("Het geüploade bestand is leeg.");
@@ -136,8 +122,8 @@ public class BoekController {
         }
     }
 
+    @PreAuthorize("hasRole('BEHEERDER')")
     @PostMapping("/api/boeken/import/bevestig")
-    @CrossOrigin(origins = "*", allowedHeaders = "*")
     public ResponseEntity<String> bevestigImport(@RequestBody List<Boek> boekenLijst) {
         if (boekenLijst == null || boekenLijst.isEmpty()) {
             return ResponseEntity.badRequest().body("Lijst om te importeren is leeg.");

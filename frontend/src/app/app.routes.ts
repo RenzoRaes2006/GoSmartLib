@@ -17,6 +17,7 @@ import { ScanModus } from './scan-modus/scan-modus';
 import { LoginSuccessComponent } from './login-success/login-success';
 import { adminGuard } from './guards/admin-guard';
 import { authGuard } from './guards/auth.guard';
+import { teacherGuard } from './guards/teacher-guard';
 import { LeningenBeheerder } from './leningen-beheerder/leningen-beheerder';
 import { BeheerderDashboard } from './beheerder-dashboard/beheerder-dashboard';
 import { KlassLeeslijstenOverzichtComponent } from './klass-leeslijsten-overzicht/klass-leeslijsten-overzicht';
@@ -24,31 +25,41 @@ import { KlassLeeslijstBeheerComponent } from './klass-leeslijst-beheer/klass-le
 import { BulkOntlenenComponent } from './bulk-ontlenen-component/bulk-ontlenen-component';
 import { KlassenleeslijstenLeerlingComponent } from './klassenleeslijsten-leerling/klassenleeslijsten-leerling';
 import { KlassenleeslijstDetailLeerlingComponent } from './klassenleeslijst-detail-leerling/klassenleeslijst-detail-leerling';
+import { BeheerderLogin } from './beheerder-login/beheerder-login';
 
 export const routes: Routes = [
-  { path: '', component: HomePage },
-  { path: 'catalogus', component: Catalogus },
-  { path: 'login-success', component: LoginSuccessComponent },
-  { path: 'details/:id', component: Detail },
-  { path: 'leeslijst', component: Leeslijst },
-  { path: 'leeslijst/:id', component: Leeslijst },
-  { path: 'boek-beheer', component: BoekBeheer },
-  { path: 'reserveren', component: ReserverenComponent },
-  { path: 'not-found', component: PageNotFound },
+  // Geen guard
   { path: 'login', component: Login },
-  { path: 'bulk-ontlenen', component: BulkOntlenenComponent },
-  { path: 'beheer/aanvragen', component: AanvragenBeheer },
-  { path: 'beheer/scan', component: ScanModus },
-  { path: 'gerapporteerde-beoordelingen', component: GerapporteerdeReviews },
-  { path: 'leengeschiedenis', component: Leengeschiedenis },
-  { path: 'beheer/actieve-leningen', component: LeningenBeheerder },
-  { path: 'leerkracht-dashboard', component: Leerkrachtdashboard },
-  { path: 'admin', component: AdminDashboard },
-  { path: 'boek-import', component: BoekImport },
-  { path: 'beheerder', component: BeheerderDashboard },
-  { path: 'leeslijsten', component: KlassLeeslijstenOverzichtComponent },
-  { path: 'leeslijsten/:id', component: KlassLeeslijstBeheerComponent },
-  { path: 'klassenleeslijsten', component: KlassenleeslijstenLeerlingComponent },
-  { path: 'klassenleeslijsten/:id', component: KlassenleeslijstDetailLeerlingComponent },
+  { path: 'beheerder-login', component: BeheerderLogin },
+  { path: 'login-success', component: LoginSuccessComponent },
+  { path: 'not-found', component: PageNotFound },
+
+  // authGuard — ingelogde gebruikers
+  { path: '', component: HomePage, canActivate: [authGuard] },
+  { path: 'catalogus', component: Catalogus, canActivate: [authGuard] },
+  { path: 'details/:id', component: Detail, canActivate: [authGuard] },
+  { path: 'leeslijst', component: Leeslijst, canActivate: [authGuard] },
+  { path: 'leeslijst/:id', component: Leeslijst, canActivate: [authGuard] },
+  { path: 'reserveren', component: ReserverenComponent, canActivate: [authGuard] },
+  { path: 'leengeschiedenis', component: Leengeschiedenis, canActivate: [authGuard] },
+  { path: 'klassenleeslijsten', component: KlassenleeslijstenLeerlingComponent, canActivate: [authGuard] },
+  { path: 'klassenleeslijsten/:id', component: KlassenleeslijstDetailLeerlingComponent, canActivate: [authGuard] },
+
+  // teacherGuard — enkel leerkrachten
+  { path: 'leerkracht-dashboard', component: Leerkrachtdashboard, canActivate: [teacherGuard] },
+  { path: 'leeslijsten', component: KlassLeeslijstenOverzichtComponent, canActivate: [teacherGuard] },
+  { path: 'leeslijsten/:id', component: KlassLeeslijstBeheerComponent, canActivate: [teacherGuard] },
+  { path: 'bulk-ontlenen', component: BulkOntlenenComponent, canActivate: [teacherGuard] },
+
+  // adminGuard — enkel beheerders
+  { path: 'admin', component: AdminDashboard, canActivate: [adminGuard] },
+  { path: 'beheerder', component: BeheerderDashboard, canActivate: [adminGuard] },
+  { path: 'beheer/aanvragen', component: AanvragenBeheer, canActivate: [adminGuard] },
+  { path: 'beheer/scan', component: ScanModus, canActivate: [adminGuard] },
+  { path: 'beheer/actieve-leningen', component: LeningenBeheerder, canActivate: [adminGuard] },
+  { path: 'boek-beheer', component: BoekBeheer, canActivate: [adminGuard] },
+  { path: 'boek-import', component: BoekImport, canActivate: [adminGuard] },
+  { path: 'gerapporteerde-beoordelingen', component: GerapporteerdeReviews, canActivate: [adminGuard] },
+
   { path: '**', redirectTo: 'not-found' },
 ];

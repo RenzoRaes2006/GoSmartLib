@@ -10,9 +10,13 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import ap.be.backend.dto.BoekDTO;
+import ap.be.backend.dto.BoekenFilters;
+import ap.be.backend.dto.BoekenSort;
+import ap.be.backend.dto.PageRequestParams;
 import ap.be.backend.entity.Boek;
 import ap.be.backend.exception.InvalidYearRangeException;
 import ap.be.backend.exception.IsbnAlreadyExistsException;
+import ap.be.backend.mappers.BoekMapper;
 import ap.be.backend.repository.BoekRepository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -92,21 +96,26 @@ public class BoekService {
         return boekRepository.findByIsbn(isbn.trim()).orElse(null);
     }
 
-    public Page<Boek> filterBoeken(String zoekterm, List<String> genres, List<String> thematischeTags, String uitgever,
-            Integer minPagina,
-            Integer maxPagina,
-            Boolean beschikbaarheid, Integer uitgaveJaarVan, Integer uitgaveJaarTot, String leesniveau,
-            Boolean didactischMateriaal, ap.be.backend.entity.DidactischeSubcategorie didactischeSubcategorie,
-            Integer page,
-            Integer size,
-            Sort sort) {
-        validateYearRange(uitgaveJaarVan, uitgaveJaarTot);
-        PageRequest pageable = PageRequest.of(page != null ? page : 0, size != null ? size : 10, sort);
-        List<String> genresParam = (genres == null || genres.isEmpty()) ? null : genres;
-        List<String> tagsParam = (thematischeTags == null || thematischeTags.isEmpty()) ? null : thematischeTags;
-        return boekRepository.filterBoeken(zoekterm, genresParam, tagsParam, uitgever, minPagina, maxPagina,
-                beschikbaarheid,
-                uitgaveJaarVan, uitgaveJaarTot, leesniveau, didactischMateriaal, didactischeSubcategorie, pageable);
+    public Page<BoekDTO> filterBoeken(BoekenFilters filters, BoekenSort sort, PageRequestParams paging) {
+        validateYearRange(filters.uitgaveJaarVan(), filters.uitgaveJaarTot());
+        List<String> genresParam = (filters.genre() == null || filters.genre().isEmpty()) ? null : filters.genre();
+        List<String> tagsParam = (filters.thematischeTag() == null || filters.thematischeTag().isEmpty()) ? null
+                : filters.thematischeTag();
+        Page<Boek> page = boekRepository.filterBoeken(
+                filters.zoekterm(),
+                genresParam,
+                tagsParam,
+                filters.uitgever(),
+                filters.minPagina(),
+                filters.maxPagina(),
+                filters.beschikbaarAsBoolean(),
+                filters.uitgaveJaarVan(),
+                filters.uitgaveJaarTot(),
+                filters.leesniveau(),
+                filters.didactischMateriaal(),
+                filters.didactischeSubcategorie(),
+                paging.toPageable(sort.toSort()));
+        return page.map(BoekMapper::toDTO);
     }
 
     private void validateYearRange(Integer uitgaveJaarVan, Integer uitgaveJaarTot) {

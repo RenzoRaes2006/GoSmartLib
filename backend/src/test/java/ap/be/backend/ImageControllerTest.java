@@ -1,28 +1,14 @@
 package ap.be.backend;
 
-import ap.be.backend.controller.ImageController;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.web.servlet.MockMvc;
-
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.hamcrest.Matchers.*;
 
-@WebMvcTest(ImageController.class)
-@TestPropertySource(properties = "upload.path=${java.io.tmpdir}/gosmartlib-test-uploads")
-public class ImageControllerTest {
-
-    @Autowired
-    private MockMvc mockMvc;
+public class ImageControllerTest extends AbstractIntegrationTest {
 
     @Test
     public void givenJpegFile_whenUpload_thenReturnsRelativePath() throws Exception {

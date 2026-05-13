@@ -4,18 +4,27 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import java.time.LocalDate;
 
-// Voeg deze methode toe aan je Service
+/**
+ * Haalt de dringende leningen op: boeken die binnen 7 dagen ingeleverd moeten
+ * worden, inclusief boeken die al te laat zijn.
+ *
+ * Sorteert oplopend op inleverdatum zodat de meest urgente leningen bovenaan staan.
+ * Als startdatum wordt 365 dagen geleden gebruikt om ook al lang te late
+ * boeken mee te nemen.
+ *
+ * @param page paginanummer (0-gebaseerd)
+ * @param size aantal resultaten per pagina
+ * @return een pagina met dringende leningen
+ */
 public Page<Uitlening> getDringendeLeningenSysteem(int page, int size) {
     LocalDate vandaag = LocalDate.now();
     LocalDate overEenWeek = vandaag.plusDays(7);
-    
-    // We sorteren oplopend, zodat de leningen die het eerst binnen moeten (of te laat zijn) bovenaan staan
+
     Pageable pageable = PageRequest.of(page, size, Sort.by("inleverDatum").ascending());
-    
-    // OPMERKING: We gebruiken minusDays(365) als startdatum om óók de boeken te vangen die al héél erg te laat zijn!
+
     return uitleningRepository.findAllByIsIngeleverdFalseAndInleverDatumBetween(
-        vandaag.minusDays(365), 
-        overEenWeek, 
+        vandaag.minusDays(365),
+        overEenWeek,
         pageable
     );
 }

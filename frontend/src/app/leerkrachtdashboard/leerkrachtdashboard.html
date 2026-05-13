@@ -92,7 +92,7 @@
       </article>
     </div>
     <section class="class-loans-section" style="margin-top: 10px; margin-bottom: 32px">
-      <h2 class="section-title">Actieve bulk ontleningen</h2>
+      <h2 class="section-title">Actieve ontleningen</h2>
 
       <div class="loans-grid">
         @for (lening of actieveKlassenLeningen(); track lening.boek.id) {
@@ -155,7 +155,9 @@
             <li class="stat-note">Nog geen uitleningen.</li>
           }
         </ol>
-        <p class="stat-note">Meest gekozen titels {{ selectedClass() ? 'in de klas' : 'op school' }}.</p>
+        <p class="stat-note">
+          Meest gekozen titels {{ selectedClass() ? 'in de klas' : 'op school' }}.
+        </p>
       </article>
     </div>
   </section>

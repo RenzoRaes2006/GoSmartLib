@@ -10,8 +10,8 @@ import ap.be.backend.dto.ScanBatchItemResultDTO;
 import ap.be.backend.dto.ScanBatchRequestDTO;
 import ap.be.backend.dto.ScanBatchResponseDTO;
 import ap.be.backend.entity.Boek;
-import ap.be.backend.entity.Gebruiker;
 import ap.be.backend.entity.Uitlening;
+import ap.be.backend.entity.User;
 import ap.be.backend.repository.BoekRepository;
 import ap.be.backend.repository.UitleningRepository;
 import jakarta.transaction.Transactional;
@@ -34,7 +34,7 @@ public class ScanService {
 
     @Transactional
     public ScanBatchResponseDTO verwerkBatch(ScanBatchRequestDTO request) {
-        Gebruiker gebruiker = gebruikerService.getGebruikerById(request.getGebruikerId());
+        User user = gebruikerService.getUserById(request.getGebruikerId());
         String actie = request.getActie();
         List<ScanBatchItemResultDTO> resultaten = new ArrayList<>();
 
@@ -51,7 +51,7 @@ public class ScanService {
                 }
 
                 Uitlening bestaande = uitleningRepository
-                        .findFirstByGebruikerAndBoekAndIsIngeleverdFalseOrderByUitleenDatumAsc(gebruiker, boek)
+                        .findFirstByUserAndBoekAndIsIngeleverdFalseOrderByUitleenDatumAsc(user, boek)
                         .orElse(null);
 
                 if ("UITLENING".equals(actie)) {
@@ -69,7 +69,7 @@ public class ScanService {
                     boekRepository.save(boek);
 
                     Uitlening nieuw = new Uitlening();
-                    nieuw.setGebruiker(gebruiker);
+                    nieuw.setUser(user);
                     nieuw.setBoek(boek);
                     nieuw.setUitleenDatum(LocalDate.now());
                     nieuw.setInleverDatum(LocalDate.now().plusMonths(1));

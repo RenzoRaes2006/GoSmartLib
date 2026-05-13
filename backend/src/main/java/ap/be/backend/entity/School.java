@@ -2,14 +2,16 @@ package ap.be.backend.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "scholen")
-@Data 
-@NoArgsConstructor 
-@AllArgsConstructor 
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class School {
 
     @Id
@@ -21,7 +23,6 @@ public class School {
 
     private String adres;
 
-    // the secret key to communicate with the smartschool api of this specific school
     @Column(name = "api_code")
     private String apiCode;
 }

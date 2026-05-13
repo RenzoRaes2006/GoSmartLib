@@ -6,14 +6,17 @@ import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
+@Table(name = "boeken")
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 public class Boek {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -81,20 +84,12 @@ public class Boek {
     @JoinTable(name = "leeslijst_map_boeken", inverseJoinColumns = @JoinColumn(name = "map_id"))
     private Set<LeeslijstMap> leeslijstMaps;
 
+    @Transient
+    private boolean bestaatAl;
+
     public Boek(String titel, String auteur) {
         this.titel = titel;
         this.auteur = auteur;
     }
-
-    @Transient
-    private boolean bestaatAl;
-
-    public boolean isBestaatAl() {
-        return bestaatAl;
-    }
-
-    public void setBestaatAl(boolean bestaatAl) {
-        this.bestaatAl = bestaatAl;
-    }
-
 }
+
