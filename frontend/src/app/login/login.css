@@ -46,7 +46,7 @@
   background-color: #e67300;
 }
 
-.beheerder-link {
+.admin-link {
   display: block;
   margin-top: 16px;
   font-size: 13px;
@@ -54,7 +54,7 @@
   text-decoration: none;
 }
 
-.beheerder-link:hover {
+.admin-link:hover {
   color: #555;
   text-decoration: underline;
 }

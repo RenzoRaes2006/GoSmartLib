@@ -48,7 +48,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
      *
      * Stap 4: Lees bij een geldige token de smartschoolId en de rol uit de
      *         token. Vertaal de rol naar een Spring-authority (ROLE_STUDENT,
-     *         ROLE_TEACHER of ROLE_BEHEERDER) en sla het authenticatie-object
+     *         ROLE_TEACHER, ROLE_BEHEERDER of ROLE_ADMIN) en sla het authenticatie-object
      *         op in de SecurityContextHolder.
      *
      * Stap 5: Geef de request altijd door aan het volgende filter in de keten,

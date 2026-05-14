@@ -41,7 +41,7 @@ public class AdminAuthController {
 
         String token = jwtService.generateToken(
                 "admin_" + admin.getGebruikersnaam(),
-                "beheerder",
+                "admin",
                 admin.getNaam(),
                 "nvt"
         );

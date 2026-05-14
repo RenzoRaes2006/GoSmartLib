@@ -5,12 +5,12 @@ import { Router } from '@angular/router';
 import { AuthService } from '../services/AuthService';
 
 @Component({
-  selector: 'app-beheerder-login',
+  selector: 'app-admin-login',
   imports: [FormsModule],
-  templateUrl: './beheerder-login.html',
-  styleUrl: './beheerder-login.css',
+  templateUrl: './admin-login.html',
+  styleUrl: './admin-login.css',
 })
-export class BeheerderLogin {
+export class AdminLogin {
   gebruikersnaam = '';
   wachtwoord = '';
   foutmelding = '';

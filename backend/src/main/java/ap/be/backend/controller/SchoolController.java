@@ -1,6 +1,7 @@
 package ap.be.backend.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import ap.be.backend.dto.SchoolDTO;
@@ -21,6 +22,7 @@ import java.util.Optional;
  */
 @RestController
 @RequestMapping("/api/scholen")
+@PreAuthorize("hasRole('ADMIN')")
 public class SchoolController {
 
     private final SchoolRepository schoolRepository;
