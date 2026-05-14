@@ -27,8 +27,10 @@ export class LoginSuccessComponent implements OnInit {
         const role = this.authService.currentUser()?.role;
         if (role === 'teacher') {
           this.router.navigate(['/leerkracht-dashboard']);
-        } else if (role === 'beheerder') {
+        } else if (role === 'admin') {
           this.router.navigate(['/admin']);
+        } else if (role === 'beheerder') {
+          this.router.navigate(['/beheerder']);
         } else {
           this.router.navigate(['/']);
         }

@@ -1,20 +1,26 @@
 import { HttpInterceptorFn } from '@angular/common/http';
+import { isDevMode } from '@angular/core';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
-    // 1. Haal de token uit de localStorage
-    const token = localStorage.getItem('jwtToken');
+    // Dev-modus: stuur X-Dev-Role mee zodat de backend DevAuthFilter
+    // weet welke rol hij moet simuleren. De rol kan tijdens het testen
+    // overruled worden via localStorage.setItem('devRole', 'STUDENT').
+    if (isDevMode()) {
+        const devRole = (localStorage.getItem('devRole') || 'BEHEERDER').toUpperCase();
+        const devReq = req.clone({ setHeaders: { 'X-Dev-Role': devRole } });
+        return next(devReq);
+    }
 
-    // 2. Als er een token is, kloon het verzoek en voeg de header toe
+    // Productie: standaard JWT-flow via localStorage.
+    const token = localStorage.getItem('jwtToken');
     if (token) {
         const clonedRequest = req.clone({
             setHeaders: {
                 Authorization: `Bearer ${token}`
             }
         });
-        // Stuur het aangepaste verzoek door naar de backend
         return next(clonedRequest);
     }
 
-    // 3. Als er geen token is, stuur het originele verzoek gewoon door
     return next(req);
 };

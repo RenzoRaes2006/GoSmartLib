@@ -1,149 +1,208 @@
-<div class="dashboard-container">
-  <div class="banner">
-    <h1>Beheerdersdashboard</h1>
-    <p>GO! SmartLib Antwerpen</p>
-  </div>
-
-  <h3 class="section-title">Snelle acties</h3>
-  <div class="action-grid">
-    <a routerLink="/beheer/aanvragen" class="action-tile clickable">
-      <h3>Aanvragen bekijken</h3>
-      <p>Goedkeuren of weigeren</p>
-    </a>
-
-    <a routerLink="/beheer/scan" class="action-tile clickable">
-      <h3>Uitleenbalie openen</h3>
-      <p>Retouren en scannen</p>
-    </a>
-
-    <a routerLink="/boek-beheer" [queryParams]="{ mode: 'wijzigen' }" class="action-tile clickable">
-      <h3>Catalogus beheren</h3>
-      <p>Wijzigen en tags beheren</p>
-    </a>
-
-    <a
-      routerLink="/boek-beheer"
-      [queryParams]="{ mode: 'toevoegen' }"
-      class="action-tile clickable"
-    >
-      <h3>Boek toevoegen</h3>
-      <p>Nieuw boek inschrijven</p>
-    </a>
-
-    <a routerLink="/gerapporteerde-beoordelingen" class="action-tile clickable">
-      <h3>Reviews modereren</h3>
-      <span class="badge">12 nieuwe</span>
-    </a>
-  </div>
-
-  <h3 class="section-title">Algemene statistieken</h3>
-  <div class="kpi-grid">
-    <div class="kpi-card">
-      <span class="kpi-label">Collectie uitgeleend</span>
-      <strong class="kpi-value text-blue">{{ percentageUitgeleend() }}%</strong>
-      <div class="progress-bar">
-        <div class="progress-fill bg-blue" [style.width.%]="percentageUitgeleend()"></div>
+<div class="admin-layout">
+  <!-- header with minimal styling -->
+  <header class="admin-header">
+    <div class="header-content">
+      <img src="https://go-antwerpen.be/wp-content/uploads/2021/11/logo_go_antwerpen.svg" alt="GO! Antwerpen" class="go-logo">
+      <div class="header-titles">
+        <h1>Systeembeheer</h1>
+        <p class="subtitle">Centraal beheer van scholen, gebruikers en instellingen</p>
       </div>
     </div>
-    <div class="kpi-card">
-      <span class="kpi-label">Te laat ingeleverd</span>
-      <strong class="kpi-value text-bordeaux">{{ teLaatIngeleverd() }}</strong>
-      <span class="kpi-trend">boeken over inleverdatum</span>
-    </div>
-    <div class="kpi-card">
-      <span class="kpi-label">Populairste genre</span>
-      <strong class="kpi-value kpi-value-text text-green">{{ populairsteGenre() }}</strong>
-      <span class="kpi-trend">meest geleend deze maand</span>
-    </div>
-    <div class="kpi-card">
-      <span class="kpi-label">Uitleningen deze maand</span>
-      <strong class="kpi-value">{{ uitleningenDezeMaand() }}</strong>
-      <span class="kpi-trend">sinds begin van de maand</span>
-    </div>
-  </div>
+  </header>
 
-  <div class="card recent-loans-card">
-    <div class="recent-loans-header">
-      <h3 class="section-title">Recente actieve leningen</h3>
-      <a routerLink="/beheer/actieve-leningen" class="btn-primary btn-small">
-        Bekijk alle actieve leningen
-      </a>
+  <!-- navigation tabs -->
+  <nav class="admin-nav">
+    <div class="nav-container">
+      <button [class.active]="activeTab() === 'scholen'" (click)="wisselTab('scholen')">
+        Scholen overzicht
+      </button>
+      <button [class.active]="activeTab() === 'wizard'" (click)="wisselTab('wizard')">
+        Nieuwe school toevoegen
+      </button>
     </div>
+  </nav>
 
-    <div *ngIf="recenteLeningen.length === 0" class="empty-state">
-      Er zijn momenteel geen actieve leningen.
-    </div>
+  <main class="admin-content">
 
-    <div class="loan-item" *ngFor="let lening of recenteLeningen">
-      <div>
-        <strong class="loan-item-title">{{ lening.boek.titel }}</strong>
-        <span class="loan-item-subtitle"
-          >Geleend door: {{ lening.gebruiker.voorNaam }} {{ lening.gebruiker.achternaam }}</span
-        >
+    <!-- tab 1: scholen overzicht -->
+    @if (activeTab() === 'scholen') {
+
+      <!-- list of all schools (only database info) -->
+      @if (!geselecteerdeSchool()) {
+        <div class="admin-card">
+          <div class="card-header">
+            <h2>Geregistreerde scholen</h2>
+          </div>
+
+          <div class="table-responsive">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Naam school</th>
+                  <th>Smartschool koppeling</th>
+                  <th>Acties</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (school of geregistreerdeScholen(); track school.id) {
+                  <tr>
+                    <td><strong>{{ school.naam }}</strong></td>
+                    <td><span class="badge" style="background: #e2fbd7; color: #348a45; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem; font-weight: 600;">Actief ({{ school.apiCode }})</span></td>
+                    <td>
+                      <button class="btn-outline btn-sm" (click)="bekijkSchoolDetails(school)">Bewerken</button>
+                      <button class="btn-outline btn-sm btn-delete" (click)="verwijderSchool(school)">Verwijderen</button>
+                    </td>
+
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="3" class="text-muted text-center">Geen scholen gevonden in de database.</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      }
+
+      <!-- detail view with live smartschool data -->
+      @else {
+        <div class="admin-card detail-view">
+          <button class="btn-text back-btn" (click)="sluitSchoolDetails()">← Terug naar overzicht</button>
+
+          <div class="school-header-simple">
+            <h2>{{ geselecteerdeSchool().naam }}</h2>
+            <p class="text-muted">Live data weergave via Smartschool API</p>
+          </div>
+
+          @if (isDataAanHetLaden()) {
+            <div class="text-center" style="padding: 40px; color: var(--go-bordeaux);">
+              <strong>Data live ophalen uit Smartschool...</strong>
+            </div>
+          } @else {
+            <div class="split-layout">
+              <div class="split-column">
+                <h3>Klassen</h3>
+                <table class="admin-table">
+                  <thead><tr><th>Klasnaam</th></tr></thead>
+                  <tbody>
+                    @for (klas of liveKlassen(); track klas.id) {
+                      <tr><td><strong>{{ klas.naam }}</strong></td></tr>
+                    } @empty {
+                      <tr><td class="text-muted">Geen klassen gevonden in Smartschool.</td></tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="split-column">
+                <h3>Leerlingen</h3>
+                <table class="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Naam</th>
+                      <th>Klas</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (leerling of liveLeerlingen(); track leerling.id) {
+                      <tr>
+                        <td><strong>{{ leerling.voorNaam }} {{ leerling.achternaam }}</strong></td>
+                        <td>{{ leerling.klas | uppercase }}</td>
+                      </tr>
+                    } @empty {
+                      <tr><td colspan="2" class="text-muted">Geen leerlingen gevonden in Smartschool.</td></tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    }
+
+    <!-- tab 2: wizard -->
+    @if (activeTab() === 'wizard') {
+      <div class="admin-card wizard-card">
+        <div class="card-header">
+          <h2>School toevoegen</h2>
+        </div>
+
+        <div class="wizard-progress">
+          <div class="progress-track">
+            <div class="progress-fill" [style.width.%]="(huidigeStap() / 2) * 100"></div>
+          </div>
+          <div class="step-labels">
+            <span [class.active]="huidigeStap() >= 1">Instelling selecteren</span>
+            <span [class.active]="huidigeStap() >= 2">Smartschool synchronisatie</span>
+          </div>
+        </div>
+
+        <div class="wizard-body">
+
+          <!-- step 1: instelling selecteren (ROBUUSTE NATIVE DROPDOWN) -->
+          @if (huidigeStap() === 1) {
+            <div class="wizard-step-content">
+              <h3>Kies de in te richten school</h3>
+              <hr class="divider">
+
+              <div class="form-group">
+                <label>Naam school</label>
+                <!-- safely bind with ngModel instead of value -->
+                <select
+                  class="form-input"
+                  [ngModel]="nieuweSchool().naam"
+                  (ngModelChange)="onSchoolGeselecteerd($event)">
+                  <option value="" disabled>Kies een GO! school uit de lijst...</option>
+
+                  @for (school of beschikbareScholen(); track school.naam) {
+                    <option [value]="school.naam">{{ school.naam }}</option>
+                  }
+                </select>
+
+                @if (beschikbareScholen().length === 0) {
+                  <p class="text-muted" style="margin-top: 10px; font-size: 0.85rem;">Alle scholen zijn al geregistreerd.</p>
+                }
+              </div>
+            </div>
+            <div class="action-row right">
+              <!-- strictly check for empty string -->
+              <button (click)="volgendeStap()" class="btn-go" [disabled]="nieuweSchool().naam === ''">Volgende stap</button>
+            </div>
+          }
+
+          <!-- step 2: synchronisatie & afronden -->
+          @if (huidigeStap() === 2) {
+            <div class="wizard-step-content">
+              <h3>Overzicht en synchronisatie</h3>
+              <hr class="divider">
+
+              <table class="summary-table">
+                <tbody>
+                  <tr>
+                    <td><strong>Geselecteerde instelling</strong></td>
+                    <td>{{ nieuweSchool().naam }}</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <div class="upload-box-clean" style="margin-top: 30px;">
+                <h4 style="margin-top: 0; color: var(--text-dark);">Koppeling met Smartschool</h4>
+                <p class="instruction-text">
+                  Bij het bevestigen zal het systeem automatisch verbinding maken met de Smartschool API. Alle actieve klassen en leerlingen worden veilig en live opgehaald wanneer nodig. Er worden geen privacygevoelige gegevens in de database opgeslagen.
+                </p>
+              </div>
+            </div>
+
+            <div class="action-row split">
+              <button (click)="vorigeStap()" class="btn-outline">Vorige</button>
+              <button (click)="startSchoolOp()" class="btn-go success">Instelling aanmaken & synchroniseren</button>
+            </div>
+          }
+        </div>
       </div>
-      <div class="loan-item-right">
-        <span class="loan-item-label">Inleveren voor:</span>
-        <span class="badge bg-blue-alt">{{ lening.inleverDatum | date: 'dd/MM/yyyy' }}</span>
-      </div>
-    </div>
-  </div>
+    }
 
-  <div class="bottom-grid">
-    <div class="card">
-      <h3 class="section-title">Data importeren</h3>
-      <p class="text-muted">Importeer nieuwe collecties via Excel.</p>
-      <a
-        routerLink="/boek-import"
-        class="btn-primary"
-        style="text-decoration: none; display: inline-block; margin-top: 0.5rem"
-      >
-        Start import
-      </a>
-    </div>
-
-    <div class="card">
-      <h3 class="section-title">Systeemconfiguratie</h3>
-      <p class="text-muted" style="margin-bottom: 15px">
-        Beheer het uitleenbeleid voor de leerlingen op school.
-      </p>
-
-      <label
-        for="leenlimiet"
-        style="display: block; margin-bottom: 10px; font-weight: 600; color: #4a5568"
-      >
-        Maximum te lenen boeken
-        <span style="font-weight: 400; color: #718096">(0 = Geen limiet)</span>:
-      </label>
-
-      <div style="display: flex; gap: 15px; align-items: center">
-        <input
-          type="number"
-          id="leenlimiet"
-          [value]="huidigeLimiet()"
-          #limietInput
-          min="0"
-          style="
-            padding: 12px;
-            width: 90px;
-            border: 1px solid var(--admin-border);
-            border-radius: 8px;
-            font-size: 1.1rem;
-            text-align: center;
-            font-weight: 600;
-            color: var(--admin-text);
-          "
-        />
-        <button class="btn-primary" (click)="opslaanLimiet(limietInput.value)">Opslaan</button>
-      </div>
-    </div>
-  </div>
+  </main>
 </div>
-@if (toastActief()) {
-  <div
-    class="toast-notification"
-    [ngClass]="toastType() === 'succes' ? 'toast-succes' : 'toast-fout'"
-  >
-    <span class="toast-icon">{{ toastType() === 'succes' ? '✅' : '⚠️' }}</span>
-    <span class="toast-tekst">{{ toastBericht() }}</span>
-  </div>
-}
