@@ -18,9 +18,16 @@ describe('BeheerderDashboard', () => {
     boekSpy = jasmine.createSpyObj('BoekService', ['getAlleActieveLeningenSysteem']);
     boekSpy.getAlleActieveLeningenSysteem.and.returnValue(of([]));
 
-    instellingSpy = jasmine.createSpyObj('InstellingService', ['getLeenLimiet', 'updateLeenLimiet']);
+    instellingSpy = jasmine.createSpyObj('InstellingService', [
+      'getLeenLimiet',
+      'updateLeenLimiet',
+      'getInlevertermijn',
+      'updateInlevertermijn',
+    ]);
     instellingSpy.getLeenLimiet.and.returnValue(of(3));
     instellingSpy.updateLeenLimiet.and.returnValue(of('ok'));
+    instellingSpy.getInlevertermijn.and.returnValue(of(14));
+    instellingSpy.updateInlevertermijn.and.returnValue(of('ok'));
 
     statSpy = jasmine.createSpyObj('StatistiekService', ['getAdminStatistieken']);
     statSpy.getAdminStatistieken.and.returnValue(
