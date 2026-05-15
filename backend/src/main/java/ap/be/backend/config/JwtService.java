@@ -70,6 +70,32 @@ public class JwtService {
                 .compact();
     }
 
+    private final long passwordResetExpiration = 15 * 60 * 1000L;
+
+    /**
+     * Maakt een kortlevende token die uitsluitend bedoeld is om bij eerste
+     * login het wachtwoord te wijzigen. De scope-claim zorgt dat dit token
+     * niet als gewoon admin-token misbruikt kan worden.
+     */
+    public String generatePasswordResetToken(String gebruikersnaam) {
+        return Jwts.builder()
+                .setSubject(gebruikersnaam)
+                .claim("scope", "wachtwoord-wijzigen")
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + passwordResetExpiration))
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    public String extractScope(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .get("scope", String.class);
+    }
+
     /**
      * Leest de smartschoolId (subject-claim) uit een bestaande token.
      *

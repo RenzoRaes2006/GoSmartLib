@@ -51,7 +51,7 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/login", "/error", "/api/boeken/**", "/api/auth/admin/login").permitAll()
+                        .requestMatchers("/", "/login", "/error", "/api/boeken/**", "/api/auth/admin/login", "/api/auth/admin/wachtwoord-wijzigen").permitAll()
                         .anyRequest().authenticated());
 
         if (isDev && devAuthFilter != null) {

@@ -1,42 +1,84 @@
 <div class="login-container">
   <div class="login-card">
     <h1>Welkom bij GO! SmartLib</h1>
-    <p>Aanmelden als admin</p>
 
-    <form (ngSubmit)="login()" #loginForm="ngForm">
-      <div class="form-group">
-        <label for="gebruikersnaam">Gebruikersnaam</label>
-        <input
-          id="gebruikersnaam"
-          type="text"
-          [(ngModel)]="gebruikersnaam"
-          name="gebruikersnaam"
-          required
-          autocomplete="username"
-          placeholder="Gebruikersnaam"
-        />
-      </div>
+    @if (stap === 'login') {
+      <p>Aanmelden als admin</p>
 
-      <div class="form-group">
-        <label for="wachtwoord">Wachtwoord</label>
-        <input
-          id="wachtwoord"
-          type="password"
-          [(ngModel)]="wachtwoord"
-          name="wachtwoord"
-          required
-          autocomplete="current-password"
-          placeholder="Wachtwoord"
-        />
-      </div>
+      <form (ngSubmit)="login()" #loginForm="ngForm">
+        <div class="form-group">
+          <label for="gebruikersnaam">Gebruikersnaam</label>
+          <input
+            id="gebruikersnaam"
+            type="text"
+            [(ngModel)]="gebruikersnaam"
+            name="gebruikersnaam"
+            required
+            autocomplete="username"
+            placeholder="Gebruikersnaam"
+          />
+        </div>
 
-      @if (foutmelding) {
-        <p class="foutmelding">{{ foutmelding }}</p>
-      }
+        <div class="form-group">
+          <label for="wachtwoord">Wachtwoord</label>
+          <input
+            id="wachtwoord"
+            type="password"
+            [(ngModel)]="wachtwoord"
+            name="wachtwoord"
+            required
+            autocomplete="current-password"
+            placeholder="Wachtwoord"
+          />
+        </div>
 
-      <button type="submit" class="login-btn" [disabled]="bezig || !gebruikersnaam || !wachtwoord">
-        {{ bezig ? 'Bezig met inloggen...' : 'Aanmelden' }}
-      </button>
-    </form>
+        @if (foutmelding) {
+          <p class="foutmelding">{{ foutmelding }}</p>
+        }
+
+        <button type="submit" class="login-btn" [disabled]="bezig || !gebruikersnaam || !wachtwoord">
+          {{ bezig ? 'Bezig met inloggen...' : 'Aanmelden' }}
+        </button>
+      </form>
+    } @else {
+      <p>Kies een nieuw wachtwoord voor je eerste aanmelding</p>
+
+      <form (ngSubmit)="wachtwoordWijzigen()" #wijzigForm="ngForm">
+        <div class="form-group">
+          <label for="nieuwWachtwoord">Nieuw wachtwoord</label>
+          <input
+            id="nieuwWachtwoord"
+            type="password"
+            [(ngModel)]="nieuwWachtwoord"
+            name="nieuwWachtwoord"
+            required
+            minlength="8"
+            autocomplete="new-password"
+            placeholder="Minstens 8 tekens"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="nieuwWachtwoordBevestig">Bevestig nieuw wachtwoord</label>
+          <input
+            id="nieuwWachtwoordBevestig"
+            type="password"
+            [(ngModel)]="nieuwWachtwoordBevestig"
+            name="nieuwWachtwoordBevestig"
+            required
+            autocomplete="new-password"
+            placeholder="Herhaal je nieuwe wachtwoord"
+          />
+        </div>
+
+        @if (foutmelding) {
+          <p class="foutmelding">{{ foutmelding }}</p>
+        }
+
+        <button type="submit" class="login-btn" [disabled]="bezig || !nieuwWachtwoord || !nieuwWachtwoordBevestig">
+          {{ bezig ? 'Bezig...' : 'Wachtwoord opslaan' }}
+        </button>
+      </form>
+    }
   </div>
 </div>

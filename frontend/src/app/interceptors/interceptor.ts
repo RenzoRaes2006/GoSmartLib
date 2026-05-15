@@ -13,6 +13,13 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         return next(req);
     }
 
+    // Als de aanroeper zelf al een Authorization-header heeft gezet
+    // (bv. het tijdelijke reset-token bij wachtwoord-wijzigen),
+    // niet overschrijven met het reguliere jwtToken uit localStorage.
+    if (req.headers.has('Authorization')) {
+        return next(req);
+    }
+
     // Dev-modus: stuur X-Dev-Role mee zodat de backend DevAuthFilter
     // weet welke rol hij moet simuleren. De rol kan tijdens het testen
     // overruled worden via localStorage.setItem('devRole', 'STUDENT').
