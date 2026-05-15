@@ -2,6 +2,17 @@ import { HttpInterceptorFn } from '@angular/common/http';
 import { isDevMode } from '@angular/core';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
+    // Externe API's (zoals Google Books) niet aanraken: een custom header
+    // triggert een CORS preflight die de externe server afwijst.
+    // Eigen backend op localhost (andere poort) telt NIET als extern.
+    const isOwnBackend =
+        req.url.startsWith('/') ||
+        req.url.startsWith(window.location.origin) ||
+        /^https?:\/\/localhost(:\d+)?\//i.test(req.url);
+    if (!isOwnBackend) {
+        return next(req);
+    }
+
     // Dev-modus: stuur X-Dev-Role mee zodat de backend DevAuthFilter
     // weet welke rol hij moet simuleren. De rol kan tijdens het testen
     // overruled worden via localStorage.setItem('devRole', 'STUDENT').

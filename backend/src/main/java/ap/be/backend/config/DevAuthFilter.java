@@ -31,11 +31,16 @@ public class DevAuthFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         String role = req.getHeader("X-Dev-Role");
+        System.out.println("DevAuthFilter: authenticating as dev-user-001 with role " + role);
+
         if (role == null || role.isBlank())
             role = "BEHEERDER";
 
+        System.out.println();
+        System.out.println("DevAuthFilter: authenticating as dev-user-001 with role " + role);
+
         var authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()));
-        var auth = new UsernamePasswordAuthenticationToken("dev-user-001", null, authorities);
+        var auth = new UsernamePasswordAuthenticationToken("12357", null, authorities);
 
         SecurityContextHolder.getContext().setAuthentication(auth);
         chain.doFilter(req, res);
