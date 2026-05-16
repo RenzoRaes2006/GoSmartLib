@@ -124,4 +124,52 @@ describe('KlassLeeslijstBeheerComponent', () => {
     expect(leeslijstSpy.deleteLeeslijst).toHaveBeenCalledWith(5);
     expect(navSpy).toHaveBeenCalledWith(['/leeslijsten']);
   });
+
+  it('updateFilters zet paginaError bij negatieve minPagina', () => {
+    component.minPagina.set(-1);
+
+    component.updateFilters();
+
+    expect(component.paginaError()).toContain('Minimum');
+  });
+
+  it('updateFilters zet paginaError bij negatieve maxPagina', () => {
+    component.minPagina.set(0);
+    component.maxPagina.set(-5);
+
+    component.updateFilters();
+
+    expect(component.paginaError()).toContain('Maximum');
+  });
+
+  it('updateFilters zet paginaError als min > max', () => {
+    component.minPagina.set(200);
+    component.maxPagina.set(100);
+
+    component.updateFilters();
+
+    expect(component.paginaError()).toContain('Min');
+  });
+
+  it('onMinPaginaSlider clampt waarde naar maxPagina', () => {
+    component.maxPagina.set(100);
+    const input = document.createElement('input');
+    input.value = '300';
+
+    component.onMinPaginaSlider({ target: input } as unknown as Event);
+
+    expect(component.minPagina()).toBe(100);
+    expect(input.value).toBe('100');
+  });
+
+  it('onMaxPaginaSlider clampt waarde naar minPagina', () => {
+    component.minPagina.set(200);
+    const input = document.createElement('input');
+    input.value = '50';
+
+    component.onMaxPaginaSlider({ target: input } as unknown as Event);
+
+    expect(component.maxPagina()).toBe(200);
+    expect(input.value).toBe('200');
+  });
 });
