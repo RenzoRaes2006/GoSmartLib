@@ -36,4 +36,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
             @Param("klas") String klas,
             @Param("zoekterm") String zoekterm,
             Pageable pageable);
+
+    @Query("SELECT DISTINCT u.klas FROM User u WHERE u.klas IS NOT NULL AND u.klas <> '' ORDER BY u.klas")
+    List<String> findDistinctKlassen();
 }

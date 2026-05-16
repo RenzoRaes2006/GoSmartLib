@@ -8,5 +8,9 @@ import java.util.List;
 
 @Repository
 public interface KlassLeeslijstRepository extends JpaRepository<KlassLeeslijst, Long> {
-    List<KlassLeeslijst> findByLeerkrachtId(Long leerkrachtId);
+    List<KlassLeeslijst> findByLeerkrachtIdOrderByAangemaaktOpDesc(Long leerkrachtId);
+
+    List<KlassLeeslijst> findByKlasAndZichtbaarTrueOrderByAangemaaktOpDesc(String klas);
+
+    List<KlassLeeslijst> findByLeerlingIdAndZichtbaarTrueOrderByAangemaaktOpDesc(Long leerlingId);
 }
