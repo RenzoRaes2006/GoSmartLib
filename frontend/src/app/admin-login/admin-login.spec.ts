@@ -2,12 +2,12 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { Router, provideRouter } from '@angular/router';
 
-import { BeheerderLogin } from './beheerder-login';
+import { AdminLogin } from './admin-login';
 import { AuthService } from '../services/AuthService';
 
-describe('BeheerderLogin', () => {
-  let component: BeheerderLogin;
-  let fixture: ComponentFixture<BeheerderLogin>;
+describe('AdminLogin', () => {
+  let component: AdminLogin;
+  let fixture: ComponentFixture<AdminLogin>;
   let httpMock: HttpTestingController;
   let authSpy: jasmine.SpyObj<AuthService>;
   let router: Router;
@@ -16,11 +16,11 @@ describe('BeheerderLogin', () => {
     authSpy = jasmine.createSpyObj('AuthService', ['setUserFromToken', 'currentUser', 'logout']);
 
     await TestBed.configureTestingModule({
-      imports: [BeheerderLogin, HttpClientTestingModule],
+      imports: [AdminLogin, HttpClientTestingModule],
       providers: [provideRouter([]), { provide: AuthService, useValue: authSpy }],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(BeheerderLogin);
+    fixture = TestBed.createComponent(AdminLogin);
     component = fixture.componentInstance;
     httpMock = TestBed.inject(HttpTestingController);
     router = TestBed.inject(Router);

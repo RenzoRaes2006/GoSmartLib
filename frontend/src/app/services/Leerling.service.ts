@@ -36,4 +36,9 @@ export class LeerlingService {
   getLeerlingStats(id: number): Observable<any> {
     return this.http.get<any>(`${this.baseUrl}/${id}/stats`);
   }
+
+  /** Geeft alle unieke klassen terug waar leerlingen in zitten. */
+  getKlassen(): Observable<string[]> {
+    return this.http.get<string[]>(`${this.baseUrl}/klassen`);
+  }
 }

@@ -20,6 +20,7 @@
           </div>
         }
 
+       @if (isLeerling) {
        <a class="album-card teacher-list-card" [routerLink]="['/klassenleeslijsten']" aria-label="Leerkracht leeslijsten">
           <div class="album-cover teacher-list-cover">
             <div class="cover-emoji">👩‍🏫</div>
@@ -27,6 +28,7 @@
             <span class="teacher-list-pill">Van leerkrachten</span>
           </div>
         </a>
+       }
       </div>
     }
   } @else {

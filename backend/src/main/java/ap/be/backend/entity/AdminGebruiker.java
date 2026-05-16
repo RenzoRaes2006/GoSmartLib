@@ -26,9 +26,13 @@ public class AdminGebruiker {
 
     private String naam;
 
+    @Column(nullable = false)
+    private boolean moetWachtwoordWijzigen = true;
+
     public AdminGebruiker(String gebruikersnaam, String wachtwoordHash, String naam) {
         this.gebruikersnaam = gebruikersnaam;
         this.wachtwoordHash = wachtwoordHash;
         this.naam = naam;
+        this.moetWachtwoordWijzigen = true;
     }
 }

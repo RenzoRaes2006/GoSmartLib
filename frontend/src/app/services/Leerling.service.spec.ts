@@ -40,4 +40,15 @@ describe('LeerlingService', () => {
     expect(req.request.method).toBe('GET');
     req.flush({ totaalGeleend: 5, opTijdTerug: 4, teLaat: 1 });
   });
+
+  it('getKlassen stuurt GET /klassen en returns string-array', () => {
+    let resultaat: string[] | undefined;
+    service.getKlassen().subscribe((data) => (resultaat = data));
+
+    const req = httpMock.expectOne((r) => r.url.endsWith('/api/leerlingen/klassen'));
+    expect(req.request.method).toBe('GET');
+    req.flush(['1a', '2a', '5INF1']);
+
+    expect(resultaat).toEqual(['1a', '2a', '5INF1']);
+  });
 });

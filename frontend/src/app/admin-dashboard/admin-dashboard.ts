@@ -1,94 +1,183 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnInit, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
-import { BoekService } from '../services/boek.service';
-import { InstellingService } from '../services/instelling-service';
-import { StatistiekService } from '../services/statistiek.service';
+import { Component, computed, OnInit, signal, inject } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { SchoolService } from '../services/School.Service';
+
+// static list of all official secondary schools under go! scholengroep antwerpen
+const GO_ANTWERPEN_SCHOLEN = [
+  { naam: 'GO! Atheneum Antwerpen', adres: 'Franklin Rooseveltplaats 11, 2060 Antwerpen', apiCode: 'ss-ant-001' },
+  { naam: 'GO! Koninklijk Lyceum Antwerpen', adres: 'Kasteelpleinstraat 31, 2000 Antwerpen', apiCode: 'ss-lyc-002' },
+  { naam: 'GO! Kunsthumaniora Antwerpen', adres: 'Karel Oomsstraat 24, 2018 Antwerpen', apiCode: 'ss-kun-003' },
+  { naam: 'GO! Topsportschool Antwerpen', adres: 'Edegemsesteenweg 100, 2610 Wilrijk', apiCode: 'ss-top-004' },
+  { naam: 'GO! Spectrumschool (Campus Ruggeveld)', adres: 'Ruggeveldlaan 496, 2100 Deurne', apiCode: 'ss-spe-005' },
+  { naam: 'GO! Spectrumschool (Campus Plantin)', adres: 'Plantin en Moretuslei 165, 2140 Borgerhout', apiCode: 'ss-spp-006' },
+  { naam: 'GO! Atheneum Deurne', adres: 'Hooftvunderlei 160, 2100 Deurne', apiCode: 'ss-deu-007' },
+  { naam: 'GO! Atheneum Hoboken', adres: 'Lage Weg 100, 2660 Hoboken', apiCode: 'ss-hob-008' },
+  { naam: 'GO! De Scheepvaartschool - Cenflumarin', adres: 'Gloriantlaan 75, 2050 Antwerpen', apiCode: 'ss-sch-009' },
+  { naam: 'GO! Atheneum Schoten', adres: 'Villerslei 124, 2900 Schoten', apiCode: 'ss-sct-010' },
+  { naam: 'GO! Atheneum Brasschaat', adres: 'Augustijnslei 46, 2930 Brasschaat', apiCode: 'ss-bra-011' },
+  { naam: 'GO! KTA Kapellen', adres: 'Pastoor Vandenhoudtstraat 8, 2950 Kapellen', apiCode: 'ss-kap-012' },
+  { naam: 'GO! Middenschool Centrum Antwerpen', adres: 'Lange Nieuwstraat 105, 2000 Antwerpen', apiCode: 'ss-mid-013' },
+  { naam: 'GO! KMS (Koninklijke Middenschool)', adres: 'Kasteelpleinstraat 31, 2000 Antwerpen', apiCode: 'ss-kms-014' },
+  { naam: 'GO! De Es (Buitengewoon secundair)', adres: 'Karel Oomsstraat 24, 2018 Antwerpen', apiCode: 'ss-es-015' },
+  { naam: 'GO! SBSO Zonnebos (Campus Brasschaat)', adres: 'Sint-Antoniuslei 95, 2930 Brasschaat', apiCode: 'ss-zob-016' },
+  { naam: 'GO! SBSO Zonnebos (Campus Antwerpen)', adres: 'Karel Oomsstraat 24, 2018 Antwerpen', apiCode: 'ss-zoa-017' }
+];
 
 @Component({
   selector: 'app-admin-dashboard',
-  imports: [CommonModule, RouterLink],
+  standalone: true,
+  imports: [CommonModule, FormsModule],
   templateUrl: './admin-dashboard.html',
-  styleUrl: './admin-dashboard.css',
+  styleUrl: './admin-dashboard.css'
 })
 export class AdminDashboard implements OnInit {
-  boekService = inject(BoekService);
-  huidigeLimiet = signal<number>(0);
-  instellingService = inject(InstellingService);
-  statistiekService = inject(StatistiekService);
-  recenteLeningen: any[] = [];
 
-  toastActief = signal<boolean>(false);
-  toastBericht = signal<string>('');
-  toastType = signal<'succes' | 'fout'>('succes');
+  // inject the service to communicate with spring boot
+  private schoolService = inject(SchoolService);
 
-  toonToast(bericht: string, type: 'succes' | 'fout') {
-    this.toastBericht.set(bericht);
-    this.toastType.set(type);
-    this.toastActief.set(true);
+  // tab navigation state
+  activeTab = signal<'scholen' | 'wizard'>('scholen');
 
-    setTimeout(() => {
-      this.toastActief.set(false);
-    }, 3000);
+  // state for the selected school detail view
+  geselecteerdeSchool = signal<any>(null);
+
+  // temporary memory for live smartschool data
+  liveKlassen = signal<any[]>([]);
+  liveLeerlingen = signal<any[]>([]);
+  isDataAanHetLaden = signal<boolean>(false);
+
+  // wizard state
+  huidigeStap = signal<number>(1);
+  nieuweSchool = signal({ naam: '', adres: '', apiCode: '' });
+
+  // actual database records from spring boot
+  geregistreerdeScholen = signal<any[]>([]);
+
+  // computed signal: returns only schools that are not yet registered
+  beschikbareScholen = computed(() => {
+    const scholen = this.geregistreerdeScholen() || [];
+    const geregistreerdeNamen = scholen.map(s => s?.naam).filter(Boolean);
+    return GO_ANTWERPEN_SCHOLEN.filter(school => !geregistreerdeNamen.includes(school.naam));
+  });
+
+  ngOnInit() {
+    // fetch saved schools from the spring boot backend on startup
+    this.laadScholenUitDatabase();
   }
 
-  percentageUitgeleend = signal<number>(0);
-  teLaatIngeleverd = signal<number>(0);
-  populairsteGenre = signal<string>('—');
-  uitleningenDezeMaand = signal<number>(0);
+  laadScholenUitDatabase() {
+    this.schoolService.getAlleScholen().subscribe({
+      next: (scholen) => {
+        if (Array.isArray(scholen)) {
+          this.geregistreerdeScholen.set(scholen);
+        } else {
+          this.geregistreerdeScholen.set([]);
+        }
+      },
+      error: (err) => {
+        console.error('error fetching schools from backend:', err);
+        this.geregistreerdeScholen.set([]);
+      }
+    });
+  }
 
-  ngOnInit(): void {
-    this.laadLimiet();
-    this.laadStatistieken();
-    this.boekService.getAlleActieveLeningenSysteem().subscribe({
+  wisselTab(tab: 'scholen' | 'wizard') {
+    this.activeTab.set(tab);
+    this.sluitSchoolDetails();
+  }
+
+  // fetch live data from smartschool when editing a school
+  bekijkSchoolDetails(school: any) {
+    this.geselecteerdeSchool.set(school);
+    this.isDataAanHetLaden.set(true);
+
+    this.schoolService.getLiveSmartschoolData(school.id).subscribe({
       next: (response) => {
-        const gesorteerdeLeningen = response.sort((a, b) => {
-          const datumA = new Date(a.inleverDatum).getTime();
-          const datumB = new Date(b.inleverDatum).getTime();
-
-          return datumA - datumB;
-        });
-
-        this.recenteLeningen = gesorteerdeLeningen.slice(0, 5);
+        this.liveKlassen.set(response.liveSmartschoolData.klassen);
+        this.liveLeerlingen.set(response.liveSmartschoolData.leerlingen);
+        this.isDataAanHetLaden.set(false);
       },
-      error: (error: Error) => {
-        console.error('Fout bij het ophalen van actieve leningen:', error);
-      },
-    });
-  }
-  laadStatistieken() {
-    this.statistiekService.getAdminStatistieken().subscribe({
-      next: (stats) => {
-        this.percentageUitgeleend.set(stats.percentageUitgeleend ?? 0);
-        this.teLaatIngeleverd.set(stats.teLaatIngeleverd ?? 0);
-        this.populairsteGenre.set(stats.populairsteGenre ?? '—');
-        this.uitleningenDezeMaand.set(stats.uitleningenDezeMaand ?? 0);
-      },
-      error: (err) => console.error('Fout bij ophalen statistieken:', err),
+      error: (err) => {
+        console.error('error fetching live smartschool data:', err);
+        this.isDataAanHetLaden.set(false);
+      }
     });
   }
 
-  laadLimiet() {
-    this.instellingService.getLeenLimiet().subscribe({
-      next: (limiet) => this.huidigeLimiet.set(limiet),
-      error: (err) => console.error('Fout bij ophalen van limiet:', err),
+  sluitSchoolDetails() {
+    this.geselecteerdeSchool.set(null);
+    // clear memory immediately
+    this.liveKlassen.set([]);
+    this.liveLeerlingen.set([]);
+  }
+
+  volgendeStap() { this.huidigeStap.update(s => s + 1); }
+  vorigeStap() { this.huidigeStap.update(s => s - 1); }
+
+  startSchoolOp() {
+    const schoolData = this.nieuweSchool();
+
+    // only save the basic info
+    const nieuweSchoolRecord = {
+      naam: schoolData.naam,
+      adres: schoolData.adres,
+      apiCode: schoolData.apiCode
+    };
+
+    console.log('sending school to spring boot...', nieuweSchoolRecord);
+
+    // use the service to talk to spring boot
+    this.schoolService.maakSchoolAan(nieuweSchoolRecord).subscribe({
+      next: (opgeslagenSchool) => {
+        console.log('successfully saved in db:', opgeslagenSchool);
+
+        // update the ui
+        this.geregistreerdeScholen.update(scholen => [...scholen, opgeslagenSchool]);
+
+        // reset wizard and return to overview
+        this.huidigeStap.set(1);
+        this.nieuweSchool.set({ naam: '', adres: '', apiCode: '' });
+        this.wisselTab('scholen');
+      },
+      error: (err) => {
+        console.error('error saving school to backend:', err);
+        alert('Kan de school niet opslaan. Draait je backend wel?');
+      }
     });
   }
-  opslaanLimiet(nieuweWaarde: string) {
-    const limiet = parseInt(nieuweWaarde, 10);
-    if (limiet >= 0) {
-      this.instellingService.updateLeenLimiet(limiet).subscribe({
-        next: (msg) => {
-          this.toonToast('Limiet succesvol aangepast!', 'succes');
-          this.huidigeLimiet.set(limiet);
-        },
-        error: (err) => {
-          console.error('CRITIEKE FOUT BIJ OPSLAAN:', err);
-          this.toonToast('Fout bij opslaan! Controleer de verbinding.', 'fout');
-        },
+
+  // handle the select change safely via ngmodel
+  onSchoolGeselecteerd(geselecteerdeNaam: string) {
+    const school = this.beschikbareScholen().find(s => s.naam === geselecteerdeNaam);
+
+    if (school) {
+      this.nieuweSchool.set({
+        naam: school.naam,
+        adres: school.adres,
+        apiCode: school.apiCode
       });
     } else {
-      this.toonToast('De limiet mag niet negatief zijn.', 'fout');
+      this.nieuweSchool.set({ naam: '', adres: '', apiCode: '' });
+    }
+  }
+
+  // delete a school after user confirmation
+  verwijderSchool(school: any) {
+    const isConfirmed = confirm(`Weet je zeker dat je ${school.naam} wilt verwijderen?`);
+
+    if (isConfirmed) {
+      this.schoolService.verwijderSchool(school.id).subscribe({
+        next: () => {
+          console.log(`successfully deleted ${school.naam}`);
+          // remove the deleted school from the local ui list
+          this.geregistreerdeScholen.update(scholen => scholen.filter(s => s.id !== school.id));
+        },
+        error: (err) => {
+          console.error('error deleting school:', err);
+          alert('Kan de school niet verwijderen. Draait je backend?');
+        }
+      });
     }
   }
 }

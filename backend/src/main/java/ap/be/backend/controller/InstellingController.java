@@ -33,4 +33,19 @@ public class InstellingController {
         instellingService.updateLeenLimiet(nieuweLimiet);
         return ResponseEntity.ok("Leenlimiet succesvol geüpdatet naar " + nieuweLimiet);
     }
+
+    @GetMapping("/inlevertermijn")
+    public ResponseEntity<Integer> getInlevertermijn() {
+        return ResponseEntity.ok(instellingService.getInlevertermijnDagen());
+    }
+
+    @PreAuthorize("hasRole('BEHEERDER')")
+    @PutMapping("/inlevertermijn")
+    public ResponseEntity<String> updateInlevertermijn(@RequestBody int dagen) {
+        if (dagen < 1 || dagen > 365) {
+            return ResponseEntity.badRequest().body("Inlevertermijn moet tussen 1 en 365 dagen liggen.");
+        }
+        instellingService.updateInlevertermijnDagen(dagen);
+        return ResponseEntity.ok("Standaard inlevertermijn succesvol geüpdatet naar " + dagen + " dagen.");
+    }
 }

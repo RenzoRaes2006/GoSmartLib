@@ -1,17 +1,42 @@
 <div class="page-wrapper">
+    <button class="btn-terug" (click)="terugNaarOverzicht()">← Terug naar overzicht</button>
+
     <!-- Info over de actuele leeslijst -->
     @if (lijst()) {
     <div class="leeslijst-header-card">
         <div class="header-info">
+            <div class="koppel-badges">
+                @if (lijst()!.klas) {
+                    <span class="badge badge-klas">Klas: {{ lijst()!.klas }}</span>
+                } @else if (lijst()!.leerlingId) {
+                    <span class="badge badge-leerling">Leerling: {{ lijst()!.leerlingNaam }}</span>
+                }
+                @if (lijst()!.zichtbaar) {
+                    <span class="badge badge-zichtbaar">Zichtbaar voor leerlingen</span>
+                } @else {
+                    <span class="badge badge-concept">Concept</span>
+                }
+                <button class="btn-edit-icon" (click)="openKoppelingModal()" title="Koppeling wijzigen">✎</button>
+            </div>
             <h1 class="header-titel">
                 Beheer: {{ lijst()!.naam }}
                 <button class="btn-edit-icon" (click)="openEditModal()" title="Naam wijzigen">✎</button>
             </h1>
+            <p class="beschrijving-tekst">
+                @if (lijst()!.beschrijving) {
+                    {{ lijst()!.beschrijving }}
+                } @else {
+                    <em>Geen beschrijving</em>
+                }
+                <button class="btn-edit-icon" (click)="openBeschrijvingModal()" title="Beschrijving wijzigen">✎</button>
+            </p>
             <p class="leeslijst-stats">Er zitten momenteel {{ lijst()!.boeken.length }} boeken in deze lijst.</p>
         </div>
 
         <div class="header-acties">
-            <button class="btn-assign" (click)="wijsToeAanKlas()"> Toewijzen aan klas</button>
+            <button class="btn-assign" (click)="toggleZichtbaar()">
+                {{ lijst()!.zichtbaar ? 'Verbergen voor leerlingen' : 'Zichtbaar maken voor leerlingen' }}
+            </button>
             <button class="btn-delete-list" (click)="openDeleteModal()"> Lijst verwijderen</button>
         </div>
     </div>
@@ -114,6 +139,10 @@
             </div>
         </div>
     </div>
+
+    <div class="page-footer">
+        <button class="btn-primary btn-klaar" (click)="terugNaarOverzicht()">Klaar — terug naar overzicht</button>
+    </div>
 </div>
 
 <!-- MODAL: Naam wijzigen (Exacte detail.html styling) -->
@@ -126,6 +155,78 @@
         <div class="modal-actions">
             <button class="cancel-btn" (click)="closeModals()">Annuleren</button>
             <button class="save-btn" [disabled]="!bewerkNaam().trim()" (click)="slaNaamOp()">Opslaan</button>
+        </div>
+    </div>
+</div>
+}
+
+<!-- MODAL: Beschrijving wijzigen -->
+@if (showBeschrijvingModal()) {
+<div class="modal-overlay">
+    <div class="modal-box">
+        <h3>Beschrijving wijzigen</h3>
+        <p class="modal-label" style="text-align: left; margin-left: 5%;">Reden, opdracht of context:</p>
+        <textarea [(ngModel)]="bewerkBeschrijving" class="form-input" rows="4" placeholder="Korte beschrijving..."></textarea>
+        <div class="modal-actions">
+            <button class="cancel-btn" (click)="closeModals()">Annuleren</button>
+            <button class="save-btn" (click)="slaBeschrijvingOp()">Opslaan</button>
+        </div>
+    </div>
+</div>
+}
+
+<!-- MODAL: Koppeling wijzigen -->
+@if (showKoppelingModal()) {
+<div class="modal-overlay">
+    <div class="modal-box modal-box-wide">
+        <h3>Koppeling wijzigen</h3>
+        <p class="modal-label" style="text-align: left; margin-left: 5%;">Koppelen aan:</p>
+        <div class="radio-row" style="margin: 0 5% 10px 5%;">
+            <label><input type="radio" name="koppelType" [value]="'KLAS'" [checked]="koppelType() === 'KLAS'" (change)="koppelType.set('KLAS')"> Klas</label>
+            <label><input type="radio" name="koppelType" [value]="'LEERLING'" [checked]="koppelType() === 'LEERLING'" (change)="koppelType.set('LEERLING')"> Specifieke leerling</label>
+        </div>
+
+        @if (koppelType() === 'KLAS') {
+            <label class="modal-label" style="text-align: left; margin-left: 5%;">Kies een klas</label>
+            <select [ngModel]="koppelKlas()" (ngModelChange)="koppelKlas.set($event)" class="form-input">
+                <option value="" disabled>-- Selecteer een klas --</option>
+                @for (k of klassen(); track k) {
+                    <option [value]="k">{{ k }}</option>
+                }
+            </select>
+        }
+
+        @if (koppelType() === 'LEERLING') {
+            <label class="modal-label" style="text-align: left; margin-left: 5%;">Kies eerst een klas</label>
+            <select [ngModel]="koppelLeerlingKlas()" (ngModelChange)="koppelLeerlingKlas.set($event); onKoppelLeerlingKlasChange()" class="form-input">
+                <option value="" disabled>-- Selecteer een klas --</option>
+                @for (k of klassen(); track k) {
+                    <option [value]="k">{{ k }}</option>
+                }
+            </select>
+
+            @if (koppelLeerlingKlas() && koppelLeerlingen().length > 0) {
+                <label class="modal-label" style="text-align: left; margin-left: 5%;">Kies een leerling</label>
+                <ul class="leerling-resultaten">
+                    @for (l of koppelLeerlingen(); track l.id) {
+                        <li (click)="kiesKoppelLeerling(l)" [class.geselecteerd]="koppelLeerlingId() === l.id">
+                            {{ l.smartschoolId || ('Leerling ' + l.id) }}
+                        </li>
+                    }
+                </ul>
+            }
+            @if (koppelLeerlingId()) {
+                <p class="geselecteerd-melding">Geselecteerd: <strong>{{ koppelLeerlingNaam() }}</strong></p>
+            }
+        }
+
+        @if (koppelFout()) {
+            <p class="fout-melding" style="margin: 8px 5% 0 5%;">{{ koppelFout() }}</p>
+        }
+
+        <div class="modal-actions">
+            <button class="cancel-btn" (click)="closeModals()">Annuleren</button>
+            <button class="save-btn" [disabled]="!kanKoppelingOpslaan" (click)="slaKoppelingOp()">Opslaan</button>
         </div>
     </div>
 </div>

@@ -1,8 +1,10 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, isDevMode, OnInit } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { LeenMandjeService } from '../services/leen-mandje.service';
 import { ToegankelijkheidService } from '../services/toegankelijkheid';
 import { AuthService } from '../services/AuthService';
+
+type DevRole = 'STUDENT' | 'TEACHER' | 'BEHEERDER' | 'ADMIN';
 
 @Component({
   selector: 'app-navbar',
@@ -19,6 +21,9 @@ export class Navbar implements OnInit {
   authService = inject(AuthService);
   private router = inject(Router);
 
+  isDevMode = isDevMode();
+  huidigeDevRole: DevRole = (localStorage.getItem('devRole') as DevRole) || 'BEHEERDER';
+
   ngOnInit() {
     this.mandjeService.mandje$.subscribe((boeken) => {
       this.aantalInMandje = boeken.length;
@@ -33,6 +38,11 @@ export class Navbar implements OnInit {
 
   get homeRoute(): string {
     return this.authService.currentUser()?.role === 'teacher' ? '/leerkracht-dashboard' : '/';
+  }
+
+  wisselDevRole(event: Event) {
+    const nieuw = (event.target as HTMLSelectElement).value as DevRole;
+    this.authService.setDevRole(nieuw);
   }
 
   logout() {
