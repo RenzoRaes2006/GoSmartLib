@@ -27,6 +27,58 @@
                 <label>Zoekopdracht</label>
                 <input type="text" placeholder="Titel, auteur of ISBN..." [(ngModel)]="zoekTerm"
                     (input)="updateFilters()" class="sidebar-input" />
+
+                <label for="leesniveau-filter">Leesniveau</label>
+                <select
+                    id="leesniveau-filter"
+                    [(ngModel)]="leesniveau"
+                    (change)="updateFilters()"
+                    class="sidebar-input"
+                >
+                    <option [ngValue]="undefined">Alle leesniveaus</option>
+                    <option value="A (eenvoudig taalgebruik)">A (eenvoudig taalgebruik)</option>
+                    <option value="B (gemiddeld taalgebruik)">B (gemiddeld taalgebruik)</option>
+                    <option value="C (complex taalgebruik)">C (complex taalgebruik)</option>
+                    <option value="D (literair niveau)">D (literair niveau)</option>
+                </select>
+
+                <label>Pagina's</label>
+                <div class="pagina-slider">
+                    <div class="slider-track">
+                        <div
+                            class="slider-range"
+                            [style.left.%]="((minPagina() ?? 0) / maxPaginaLimit) * 100"
+                            [style.right.%]="100 - ((maxPagina() ?? maxPaginaLimit) / maxPaginaLimit) * 100"
+                        ></div>
+                    </div>
+                    <input
+                        type="range"
+                        class="slider slider-min"
+                        min="0"
+                        [max]="maxPaginaLimit"
+                        [value]="minPagina() ?? 0"
+                        (input)="onMinPaginaSlider($event)"
+                    />
+                    <input
+                        type="range"
+                        class="slider slider-max"
+                        min="0"
+                        [max]="maxPaginaLimit"
+                        [value]="maxPagina() ?? maxPaginaLimit"
+                        (input)="onMaxPaginaSlider($event)"
+                    />
+                    <div class="pagina-slider-label">
+                        <span [style.left.%]="((minPagina() ?? 0) / maxPaginaLimit) * 100">{{
+                            minPagina() ?? 0
+                        }}</span>
+                        <span [style.left.%]="((maxPagina() ?? maxPaginaLimit) / maxPaginaLimit) * 100">{{
+                            maxPagina() ?? maxPaginaLimit
+                        }}</span>
+                    </div>
+                </div>
+                @if (paginaError()) {
+                    <span class="error-text">{{ paginaError() }}</span>
+                }
             </div>
         </aside>
 

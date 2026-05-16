@@ -26,6 +26,13 @@ export class KlassLeeslijstBeheerComponent {
   showEditModal = signal<boolean>(false);
   showDeleteModal = signal<boolean>(false);
 
+  // Filters: pagina's en leesniveau
+  minPagina = signal<number | undefined>(undefined);
+  maxPagina = signal<number | undefined>(undefined);
+  leesniveau = signal<string | undefined>(undefined);
+  paginaError = signal<string>('');
+  maxPaginaLimit = 1500;
+
   // selectedHoofdGenre = signal<string>('');
 
   private router = inject(Router);
@@ -52,8 +59,31 @@ export class KlassLeeslijstBeheerComponent {
 
   // 3. De krachtige zoekfunctie uit je catalogus[cite: 13]
   updateFilters(): void {
+    const min = this.minPagina();
+    const max = this.maxPagina();
+    this.paginaError.set('');
+
+    if (min !== undefined && min < 0) {
+      this.paginaError.set("Minimum pagina's mag niet negatief zijn");
+      return;
+    }
+    if (max !== undefined && max < 0) {
+      this.paginaError.set("Maximum pagina's mag niet negatief zijn");
+      return;
+    }
+    if (min !== undefined && max !== undefined && min > max) {
+      this.paginaError.set('"Min" mag niet groter zijn dan "Max"');
+      return;
+    }
+
     const filterOptions: FilterOptions = {
       zoekterm: this.zoekTerm()?.trim() || undefined,
+      minPagina: (this.minPagina() ?? 0) > 0 ? this.minPagina() : undefined,
+      maxPagina:
+        (this.maxPagina() ?? this.maxPaginaLimit) < this.maxPaginaLimit
+          ? this.maxPagina()
+          : undefined,
+      leesniveau: this.leesniveau(),
       page: 0,
       size: 10
     };
@@ -62,6 +92,30 @@ export class KlassLeeslijstBeheerComponent {
       next: (data) => this.zoekResultaten.set(data.content),
       error: (err) => console.log('Fout bij zoeken:', err)
     });
+  }
+
+  onMinPaginaSlider(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const value = +input.value;
+    const max = this.maxPagina() ?? this.maxPaginaLimit;
+    const clamped = Math.min(value, max);
+    if (value !== clamped) {
+      input.value = String(clamped);
+    }
+    this.minPagina.set(clamped);
+    this.updateFilters();
+  }
+
+  onMaxPaginaSlider(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const value = +input.value;
+    const min = this.minPagina() ?? 0;
+    const clamped = Math.max(value, min);
+    if (value !== clamped) {
+      input.value = String(clamped);
+    }
+    this.maxPagina.set(clamped);
+    this.updateFilters();
   }
 
   // 4. Specifieke Leeslijst Acties
