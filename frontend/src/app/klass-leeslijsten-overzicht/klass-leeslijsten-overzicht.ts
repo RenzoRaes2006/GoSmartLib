@@ -1,8 +1,12 @@
-import { Component } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { RouterLink, Router } from '@angular/router';
 import { KlassLeeslijst } from '../models/klass-leeslijst.model';
+import { LeeslijstRequest } from '../models/leeslijst-request.model';
 import { KlassLeeslijstService } from '../services/klassLeeslijstService';
+import { LeerlingService } from '../services/Leerling.service';
 import { FormsModule } from '@angular/forms';
+
+type KoppelType = 'KLAS' | 'LEERLING';
 
 @Component({
   selector: 'app-klass-leeslijsten-overzicht',
@@ -11,53 +15,116 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './klass-leeslijsten-overzicht.html',
   styleUrl: './klass-leeslijsten-overzicht.css',
 })
-export class KlassLeeslijstenOverzichtComponent {
+export class KlassLeeslijstenOverzichtComponent implements OnInit {
+  private leeslijstService = inject(KlassLeeslijstService);
+  private leerlingService = inject(LeerlingService);
+  private router = inject(Router);
+
   leeslijsten: KlassLeeslijst[] = [];
-  leerkrachtId = 1; // Tijdelijk hardcoded, later uit je auth-service halen
+  klassen: string[] = [];
 
-  showCreateModal: boolean = false;
-  nieuweLijstNaam: string = '';
+  showCreateModal = false;
+  nieuweLijstNaam = '';
+  nieuweLijstBeschrijving = '';
+  nieuweLijstZichtbaar = false;
+  koppelType: KoppelType = 'KLAS';
+  geselecteerdeKlas = '';
 
-  constructor(private leeslijstService: KlassLeeslijstService, private router: Router) { }
+  leerlingKlas = '';
+  leerlingResultaten: any[] = [];
+  geselecteerdeLeerlingId: number | null = null;
+  geselecteerdeLeerlingNaam = '';
+
+  laadFout = signal<string>('');
 
   ngOnInit(): void {
     this.laadLeeslijsten();
+    this.laadKlassen();
   }
 
   laadLeeslijsten(): void {
-    this.leeslijstService.getLeeslijstenByLeerkracht(this.leerkrachtId)
-      .subscribe({
-        next: (data) => {
-          this.leeslijsten = data;
-        },
-        error: (err) => {
-          console.error('Fout bij het laden van leeslijsten:', err);
-        }
-      });
+    this.leeslijstService.getMijnLeerkrachtLijsten().subscribe({
+      next: (data) => (this.leeslijsten = data),
+      error: (err) => {
+        console.error('Fout bij het laden van leeslijsten:', err);
+        this.laadFout.set('Kon je leeslijsten niet laden.');
+      },
+    });
+  }
+
+  laadKlassen(): void {
+    this.leerlingService.getKlassen().subscribe({
+      next: (data) => (this.klassen = data),
+      error: (err) => console.error('Fout bij ophalen klassen:', err),
+    });
   }
 
   openNieuweLijstModal(): void {
     this.showCreateModal = true;
-    this.nieuweLijstNaam = '';
+    this.resetModalState();
   }
 
   sluitModal(): void {
     this.showCreateModal = false;
+    this.resetModalState();
+  }
+
+  private resetModalState(): void {
     this.nieuweLijstNaam = '';
+    this.nieuweLijstBeschrijving = '';
+    this.nieuweLijstZichtbaar = false;
+    this.koppelType = 'KLAS';
+    this.geselecteerdeKlas = '';
+    this.leerlingKlas = '';
+    this.leerlingResultaten = [];
+    this.geselecteerdeLeerlingId = null;
+    this.geselecteerdeLeerlingNaam = '';
+  }
+
+  onLeerlingKlasChange(): void {
+    this.geselecteerdeLeerlingId = null;
+    this.geselecteerdeLeerlingNaam = '';
+    if (!this.leerlingKlas) {
+      this.leerlingResultaten = [];
+      return;
+    }
+    this.leerlingService.getLeerlingen(0, 50, this.leerlingKlas, '').subscribe({
+      next: (page) => (this.leerlingResultaten = page.content || []),
+      error: (err) => console.error('Fout bij ophalen leerlingen:', err),
+    });
+  }
+
+  kiesLeerling(leerling: any): void {
+    this.geselecteerdeLeerlingId = leerling.id;
+    this.geselecteerdeLeerlingNaam = leerling.smartschoolId || leerling.naam || `Leerling ${leerling.id}`;
+  }
+
+  get kanBevestigen(): boolean {
+    if (!this.nieuweLijstNaam.trim()) return false;
+    if (this.koppelType === 'KLAS') return !!this.geselecteerdeKlas;
+    return this.geselecteerdeLeerlingId !== null;
   }
 
   bevestigNieuweLijst(): void {
-    if (!this.nieuweLijstNaam.trim()) return;
+    if (!this.kanBevestigen) return;
 
-    this.leeslijstService.createLeeslijst(this.leerkrachtId, { naam: this.nieuweLijstNaam.trim() })
-      .subscribe({
-        next: (nieuweLijst) => {
-          this.sluitModal();
-          this.router.navigate(['/leeslijsten', nieuweLijst.id]);
-        },
-        error: (err) => {
-          console.error('Fout bij het aanmaken:', err);
-        }
-      });
+    const request: LeeslijstRequest = {
+      naam: this.nieuweLijstNaam.trim(),
+      klas: this.koppelType === 'KLAS' ? this.geselecteerdeKlas : null,
+      leerlingId: this.koppelType === 'LEERLING' ? this.geselecteerdeLeerlingId : null,
+      beschrijving: this.nieuweLijstBeschrijving.trim() || null,
+      zichtbaar: this.nieuweLijstZichtbaar,
+    };
+
+    this.leeslijstService.createLeeslijstVoorMij(request).subscribe({
+      next: (nieuweLijst) => {
+        this.sluitModal();
+        this.router.navigate(['/leeslijsten', nieuweLijst.id]);
+      },
+      error: (err) => {
+        console.error('Fout bij het aanmaken:', err);
+        this.laadFout.set('Aanmaken mislukt. Controleer de gegevens en probeer opnieuw.');
+      },
+    });
   }
 }

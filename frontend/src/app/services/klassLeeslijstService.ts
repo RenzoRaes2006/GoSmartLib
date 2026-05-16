@@ -9,7 +9,6 @@ import { LeeslijstRequest } from '../models/leeslijst-request.model';
 })
 export class KlassLeeslijstService {
 
-  // Vervang dit door de daadwerkelijke URL/poort van je Spring Boot backend
   private apiUrl =
     window.location.hostname === 'localhost'
       ? 'http://localhost:8081/api/leeslijsten'
@@ -17,53 +16,67 @@ export class KlassLeeslijstService {
 
   constructor(private http: HttpClient) { }
 
-  /**
-   * 1. Maakt een nieuwe leeslijst aan voor een specifieke leerkracht
-   */
   createLeeslijst(leerkrachtId: number, request: LeeslijstRequest): Observable<KlassLeeslijst> {
     return this.http.post<KlassLeeslijst>(`${this.apiUrl}/leerkracht/${leerkrachtId}`, request);
   }
 
   /**
-   * 2. Haalt alle leeslijsten op van een specifieke leerkracht
+   * Maakt een nieuwe leeslijst aan voor de huidige ingelogde leerkracht.
+   * Geen leerkracht-ID nodig — wordt afgeleid uit de JWT-token op de backend.
    */
+  createLeeslijstVoorMij(request: LeeslijstRequest): Observable<KlassLeeslijst> {
+    return this.http.post<KlassLeeslijst>(`${this.apiUrl}`, request);
+  }
+
   getLeeslijstenByLeerkracht(leerkrachtId: number): Observable<KlassLeeslijst[]> {
     return this.http.get<KlassLeeslijst[]>(`${this.apiUrl}/leerkracht/${leerkrachtId}`);
   }
 
   /**
-   * 3. Voegt één specifiek boek toe aan een bestaande leeslijst
+   * Haalt alle leeslijsten van de huidige ingelogde leerkracht op.
    */
-  addBoekToLeeslijst(leeslijstId: number, boekId: number): Observable<KlassLeeslijst> {
-    // We sturen een lege body {} mee, omdat het een POST request is, 
-    // maar de ID's al in de URL (als PathVariables) zitten.
-    return this.http.post<KlassLeeslijst>(`${this.apiUrl}/${leeslijstId}/boeken/${boekId}`, {});
+  getMijnLeerkrachtLijsten(): Observable<KlassLeeslijst[]> {
+    return this.http.get<KlassLeeslijst[]>(`${this.apiUrl}/mijn-leerkracht-lijsten`);
   }
 
   /**
- * 4. Haalt de details van één specifieke leeslijst op (naam + boekenlijst)
- */
+   * Haalt alle voor de huidige leerling zichtbare leeslijsten op
+   * (klas-leeslijsten + persoonlijk toegewezen).
+   */
+  getLeeslijstenVoorMij(): Observable<KlassLeeslijst[]> {
+    return this.http.get<KlassLeeslijst[]>(`${this.apiUrl}/mijn-leerling-lijsten`);
+  }
+
+  addBoekToLeeslijst(leeslijstId: number, boekId: number): Observable<KlassLeeslijst> {
+    return this.http.post<KlassLeeslijst>(`${this.apiUrl}/${leeslijstId}/boeken/${boekId}`, {});
+  }
+
   getLeeslijstDetails(id: number): Observable<KlassLeeslijst> {
     return this.http.get<KlassLeeslijst>(`${this.apiUrl}/${id}`);
   }
 
-  /**
-   * Verwijdert een specifiek boek uit een bestaande leeslijst
-   */
   verwijderBoekUitLeeslijst(leeslijstId: number, boekId: number): Observable<KlassLeeslijst> {
     return this.http.delete<KlassLeeslijst>(`${this.apiUrl}/${leeslijstId}/boeken/${boekId}`);
   }
 
-  /**
- * Werkt de naam van de leeslijst bij
- */
   updateLeeslijstNaam(id: number, nieuweNaam: string): Observable<KlassLeeslijst> {
     return this.http.put<KlassLeeslijst>(`${this.apiUrl}/${id}/naam`, nieuweNaam);
   }
 
-  /**
-   * Verwijdert een volledige leeslijst
-   */
+  updateBeschrijving(id: number, nieuweBeschrijving: string): Observable<KlassLeeslijst> {
+    return this.http.put<KlassLeeslijst>(`${this.apiUrl}/${id}/beschrijving`, nieuweBeschrijving, {
+      headers: { 'Content-Type': 'text/plain' }
+    });
+  }
+
+  updateZichtbaar(id: number, zichtbaar: boolean): Observable<KlassLeeslijst> {
+    return this.http.put<KlassLeeslijst>(`${this.apiUrl}/${id}/zichtbaar`, zichtbaar);
+  }
+
+  updateKoppeling(id: number, koppeling: { klas?: string | null; leerlingId?: number | null }): Observable<KlassLeeslijst> {
+    return this.http.put<KlassLeeslijst>(`${this.apiUrl}/${id}/koppeling`, koppeling);
+  }
+
   deleteLeeslijst(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
