@@ -2,6 +2,7 @@ package ap.be.backend.controller;
 
 import ap.be.backend.dto.KlassLeeslijstRequestDTO;
 import ap.be.backend.dto.KlassLeeslijstResponseDTO;
+import ap.be.backend.dto.KoppelingRequestDTO;
 import ap.be.backend.service.KlassLeeslijstService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -14,8 +15,9 @@ import java.util.List;
  * Behandelt API-endpoints voor het beheren van klassen-leeslijsten.
  *
  * Leeskrijsten kunnen aangemaakt, gevuld en verwijderd worden door leerkrachten.
- * Leerlingen en beheerders kunnen leeslijsten raadplegen. Write-operaties zijn
- * beveiligd met @PreAuthorize("hasRole('TEACHER')").
+ * Een leeslijst kan optioneel gekoppeld zijn aan een klas of aan een
+ * individuele leerling, en is pas zichtbaar voor leerlingen als 'zichtbaar' op
+ * true staat. Write-operaties zijn beveiligd met @PreAuthorize.
  */
 @RestController
 @RequestMapping("/api/leeslijsten")
@@ -26,8 +28,6 @@ public class KlassLeeslijstController {
 
     /**
      * Geeft alle klassen-leeslijsten terug, van alle leerkrachten.
-     *
-     * @return lijst van alle leeslijsten als DTO's
      */
     @GetMapping("/alle")
     public ResponseEntity<List<KlassLeeslijstResponseDTO>> getAllKlassenLeeslijsten() {
@@ -35,11 +35,8 @@ public class KlassLeeslijstController {
     }
 
     /**
-     * Maakt een nieuwe leeslijst aan voor een leerkracht.
-     *
-     * @param leerkrachtId het ID van de leerkracht die de lijst aanmaakt
-     * @param request      de request-body met de naam van de nieuwe leeslijst
-     * @return de aangemaakte leeslijst als DTO
+     * Maakt een nieuwe leeslijst aan voor een leerkracht, eventueel gekoppeld
+     * aan een klas of een individuele leerling.
      */
     @PreAuthorize("hasRole('TEACHER')")
     @PostMapping("/leerkracht/{leerkrachtId}")
@@ -47,15 +44,32 @@ public class KlassLeeslijstController {
             @PathVariable Long leerkrachtId,
             @RequestBody KlassLeeslijstRequestDTO request) {
 
-        KlassLeeslijstResponseDTO nieuweLijst = leeslijstService.createLeeslijst(request.naam(), leerkrachtId);
+        KlassLeeslijstResponseDTO nieuweLijst = leeslijstService.createLeeslijst(request, leerkrachtId);
         return ResponseEntity.ok(nieuweLijst);
     }
 
     /**
+     * Maakt een nieuwe leeslijst aan voor de huidige ingelogde leerkracht
+     * (geen path-parameter nodig).
+     */
+    @PreAuthorize("hasRole('TEACHER')")
+    @PostMapping
+    public ResponseEntity<KlassLeeslijstResponseDTO> createLeeslijstVoorHuidigeLeerkracht(
+            @RequestBody KlassLeeslijstRequestDTO request) {
+        return ResponseEntity.ok(leeslijstService.createLeeslijstVoorHuidigeLeerkracht(request));
+    }
+
+    /**
+     * Geeft alle leeslijsten van de huidige ingelogde leerkracht terug.
+     */
+    @PreAuthorize("hasRole('TEACHER')")
+    @GetMapping("/mijn-leerkracht-lijsten")
+    public ResponseEntity<List<KlassLeeslijstResponseDTO>> getLeeslijstenVoorHuidigeLeerkracht() {
+        return ResponseEntity.ok(leeslijstService.getLeeslijstenVoorHuidigeLeerkracht());
+    }
+
+    /**
      * Geeft alle leeslijsten terug van een bepaalde leerkracht.
-     *
-     * @param leerkrachtId het ID van de leerkracht
-     * @return lijst van leeslijsten als DTO's
      */
     @GetMapping("/leerkracht/{leerkrachtId}")
     public ResponseEntity<List<KlassLeeslijstResponseDTO>> getLeeslijstenByLeerkracht(
@@ -66,11 +80,17 @@ public class KlassLeeslijstController {
     }
 
     /**
+     * Geeft alle voor de huidige leerling zichtbare leeslijsten terug:
+     * klas-leeslijsten van zijn klas + persoonlijk toegewezen leeslijsten.
+     */
+    @PreAuthorize("hasRole('STUDENT')")
+    @GetMapping("/mijn-leerling-lijsten")
+    public ResponseEntity<List<KlassLeeslijstResponseDTO>> getLeeslijstenVoorHuidigeLeerling() {
+        return ResponseEntity.ok(leeslijstService.getLeeslijstenVoorHuidigeLeerling());
+    }
+
+    /**
      * Voegt een boek toe aan een bestaande leeslijst.
-     *
-     * @param leeslijstId het ID van de leeslijst
-     * @param boekId      het ID van het toe te voegen boek
-     * @return de bijgewerkte leeslijst als DTO
      */
     @PreAuthorize("hasRole('TEACHER')")
     @PostMapping("/{leeslijstId}/boeken/{boekId}")
@@ -84,9 +104,6 @@ public class KlassLeeslijstController {
 
     /**
      * Geeft een leeslijst terug op basis van het ID.
-     *
-     * @param id het ID van de leeslijst
-     * @return de leeslijst als DTO
      */
     @GetMapping("/{id}")
     public ResponseEntity<KlassLeeslijstResponseDTO> getLeeslijstById(@PathVariable Long id) {
@@ -95,10 +112,6 @@ public class KlassLeeslijstController {
 
     /**
      * Verwijdert een boek uit een leeslijst.
-     *
-     * @param leeslijstId het ID van de leeslijst
-     * @param boekId      het ID van het te verwijderen boek
-     * @return de bijgewerkte leeslijst als DTO
      */
     @PreAuthorize("hasRole('TEACHER')")
     @DeleteMapping("/{leeslijstId}/boeken/{boekId}")
@@ -110,10 +123,6 @@ public class KlassLeeslijstController {
 
     /**
      * Wijzigt de naam van een bestaande leeslijst.
-     *
-     * @param id         het ID van de leeslijst
-     * @param nieuweNaam de nieuwe naam
-     * @return de bijgewerkte leeslijst als DTO
      */
     @PreAuthorize("hasRole('TEACHER')")
     @PutMapping("/{id}/naam")
@@ -124,10 +133,40 @@ public class KlassLeeslijstController {
     }
 
     /**
+     * Wijzigt de beschrijving van een bestaande leeslijst.
+     */
+    @PreAuthorize("hasRole('TEACHER')")
+    @PutMapping("/{id}/beschrijving")
+    public ResponseEntity<KlassLeeslijstResponseDTO> updateBeschrijving(
+            @PathVariable Long id,
+            @RequestBody(required = false) String nieuweBeschrijving) {
+        return ResponseEntity.ok(leeslijstService.updateBeschrijving(id, nieuweBeschrijving));
+    }
+
+    /**
+     * Wijzigt de koppeling van een bestaande leeslijst (klas <-> leerling).
+     */
+    @PreAuthorize("hasRole('TEACHER')")
+    @PutMapping("/{id}/koppeling")
+    public ResponseEntity<KlassLeeslijstResponseDTO> updateKoppeling(
+            @PathVariable Long id,
+            @RequestBody KoppelingRequestDTO request) {
+        return ResponseEntity.ok(leeslijstService.updateKoppeling(id, request.klas(), request.leerlingId()));
+    }
+
+    /**
+     * Wisselt de zichtbaarheid van een leeslijst voor leerlingen.
+     */
+    @PreAuthorize("hasRole('TEACHER')")
+    @PutMapping("/{id}/zichtbaar")
+    public ResponseEntity<KlassLeeslijstResponseDTO> updateZichtbaar(
+            @PathVariable Long id,
+            @RequestBody boolean zichtbaar) {
+        return ResponseEntity.ok(leeslijstService.updateZichtbaar(id, zichtbaar));
+    }
+
+    /**
      * Verwijdert een leeslijst volledig.
-     *
-     * @param id het ID van de te verwijderen leeslijst
-     * @return 204 No Content bij succes
      */
     @PreAuthorize("hasRole('TEACHER')")
     @DeleteMapping("/{id}")

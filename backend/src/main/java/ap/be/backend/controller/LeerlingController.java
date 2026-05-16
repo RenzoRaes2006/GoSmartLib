@@ -33,6 +33,15 @@ public class LeerlingController {
                 .map(GebruikerMapper::toDTO);
     }
 
+    /**
+     * Geeft alle unieke klassen terug waar er gebruikers in zitten. Handig om
+     * een dropdown te vullen bij het aanmaken/zoeken van klas-gebonden data.
+     */
+    @GetMapping("/klassen")
+    public java.util.List<String> getKlassen() {
+        return repo.findDistinctKlassen();
+    }
+
     @GetMapping("/{id}/stats")
     public Map<String, Object> getLeerlingStats(@PathVariable Long id) {
         long totaal = uitleningRepo.countByUser_Id(id);
