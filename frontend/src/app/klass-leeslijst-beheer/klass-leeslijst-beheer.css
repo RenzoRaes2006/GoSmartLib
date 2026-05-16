@@ -518,6 +518,8 @@
     font-size: 11px;
     color: #e53e3e;
     margin-top: 2px;
+}
+
 .koppel-badges {
     display: flex;
     gap: 6px;
