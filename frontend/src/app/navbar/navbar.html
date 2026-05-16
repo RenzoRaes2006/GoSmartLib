@@ -7,6 +7,19 @@
   </div>
 
   <div class="nav-right">
+    @if (isDevMode) {
+      <label class="dev-role-switcher" title="Dev-mode: wissel van rol">
+        <span class="dev-role-label">DEV</span>
+        <select [value]="huidigeDevRole" (change)="wisselDevRole($event)">
+          <option value="STUDENT">STUDENT</option>
+          <option value="TEACHER">TEACHER</option>
+          <option value="BEHEERDER">BEHEERDER</option>
+          <option value="ADMIN">ADMIN</option>
+        </select>
+      </label>
+      <div class="divider"></div>
+    }
+
     <button
       class="dyslexia-toggle"
       [class.active]="isDyslexieActief"

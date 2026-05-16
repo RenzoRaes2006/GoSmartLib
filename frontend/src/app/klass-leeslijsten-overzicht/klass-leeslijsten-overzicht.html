@@ -1,22 +1,36 @@
 <div class="container">
   <h2>Mijn Leeslijsten</h2>
-  
- <button (click)="openNieuweLijstModal()" class="btn-primary">
-  + Nieuwe leeslijst maken
-</button>
+
+  <button (click)="openNieuweLijstModal()" class="btn-primary">
+    + Nieuwe leeslijst maken
+  </button>
+
+  @if (laadFout()) {
+    <p class="fout-melding">{{ laadFout() }}</p>
+  }
 
   <hr>
 
   @if (leeslijsten.length === 0) {
-    <!-- Toon dit als er geen lijsten zijn[cite: 2] -->
     <div class="empty-state">
       <p>Je hebt nog geen leeslijsten gemaakt. Klik op de knop hierboven om te starten.</p>
     </div>
   } @else {
-    <!-- Toon de bestaande lijsten[cite: 2] -->
     <div class="list-container">
       @for (lijst of leeslijsten; track lijst.id) {
         <div class="card" [routerLink]="['/leeslijsten', lijst.id]">
+          <div class="card-badges">
+            @if (lijst.klas) {
+              <span class="badge badge-klas">Klas: {{ lijst.klas }}</span>
+            } @else if (lijst.leerlingId) {
+              <span class="badge badge-leerling">Leerling: {{ lijst.leerlingNaam }}</span>
+            }
+            @if (lijst.zichtbaar) {
+              <span class="badge badge-zichtbaar">Zichtbaar</span>
+            } @else {
+              <span class="badge badge-concept">Concept</span>
+            }
+          </div>
           <h3>{{ lijst.naam }}</h3>
           <p>{{ lijst.boeken.length }} boeken op deze lijst</p>
           <small>Klik om boeken toe te voegen of te wijzigen</small>
@@ -27,22 +41,82 @@
 </div>
 
 @if (showCreateModal) {
-<div class="modal-overlay">
-  <div class="modal-box">
-    <h3>Nieuwe leeslijst maken</h3>
-    <p class="modal-label" style="text-align: left; margin-left: 5%;">Geef je lijst een naam:</p>
-    <input 
-      type="text" 
-      [(ngModel)]="nieuweLijstNaam" 
-      class="form-input" 
-      placeholder="Bv. Literatuurlijst 5A..." 
-      (keyup.enter)="bevestigNieuweLijst()" 
-      autofocus
-    />
-    <div class="modal-actions">
-      <button class="cancel-btn" (click)="sluitModal()">Annuleren</button>
-      <button class="save-btn" [disabled]="!nieuweLijstNaam.trim()" (click)="bevestigNieuweLijst()">Aanmaken</button>
+  <div class="modal-overlay">
+    <div class="modal-box modal-box-wide">
+      <h3>Nieuwe leeslijst maken</h3>
+
+      <label class="modal-label">Naam van de lijst</label>
+      <input
+        type="text"
+        [(ngModel)]="nieuweLijstNaam"
+        class="form-input"
+        placeholder="Bv. Literatuurlijst 5A..."
+        autofocus
+      />
+
+      <label class="modal-label">Korte beschrijving (optioneel)</label>
+      <textarea
+        [(ngModel)]="nieuweLijstBeschrijving"
+        class="form-input"
+        rows="3"
+        placeholder="Reden, opdracht of context voor deze lijst..."
+      ></textarea>
+
+      <label class="modal-label">Koppelen aan</label>
+      <div class="radio-row">
+        <label><input type="radio" name="koppel" [(ngModel)]="koppelType" value="KLAS"> Klas</label>
+        <label><input type="radio" name="koppel" [(ngModel)]="koppelType" value="LEERLING"> Specifieke leerling</label>
+      </div>
+
+      @if (koppelType === 'KLAS') {
+        <label class="modal-label">Kies een klas</label>
+        <select [(ngModel)]="geselecteerdeKlas" class="form-input">
+          <option value="" disabled>-- Selecteer een klas --</option>
+          @for (k of klassen; track k) {
+            <option [value]="k">{{ k }}</option>
+          }
+        </select>
+      }
+
+      @if (koppelType === 'LEERLING') {
+        <label class="modal-label">Kies eerst een klas</label>
+        <select [(ngModel)]="leerlingKlas" (ngModelChange)="onLeerlingKlasChange()" class="form-input">
+          <option value="" disabled>-- Selecteer een klas --</option>
+          @for (k of klassen; track k) {
+            <option [value]="k">{{ k }}</option>
+          }
+        </select>
+
+        @if (leerlingKlas && leerlingResultaten.length > 0) {
+          <label class="modal-label">Kies een leerling</label>
+          <ul class="leerling-resultaten">
+            @for (l of leerlingResultaten; track l.id) {
+              <li
+                (click)="kiesLeerling(l)"
+                [class.geselecteerd]="geselecteerdeLeerlingId === l.id"
+              >
+                {{ l.smartschoolId || ('Leerling ' + l.id) }}
+              </li>
+            }
+          </ul>
+        }
+        @if (leerlingKlas && leerlingResultaten.length === 0) {
+          <p class="info-melding">Geen leerlingen gevonden in deze klas.</p>
+        }
+        @if (geselecteerdeLeerlingId) {
+          <p class="geselecteerd-melding">Geselecteerd: <strong>{{ geselecteerdeLeerlingNaam }}</strong></p>
+        }
+      }
+
+      <label class="checkbox-row">
+        <input type="checkbox" [(ngModel)]="nieuweLijstZichtbaar">
+        <span class="checkbox-text">Direct zichtbaar voor leerlingen <small>(anders blijft de lijst een concept)</small></span>
+      </label>
+
+      <div class="modal-actions">
+        <button class="cancel-btn" (click)="sluitModal()">Annuleren</button>
+        <button class="save-btn" [disabled]="!kanBevestigen" (click)="bevestigNieuweLijst()">Aanmaken</button>
+      </div>
     </div>
   </div>
-</div>
 }

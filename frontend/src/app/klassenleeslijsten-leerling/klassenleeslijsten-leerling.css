@@ -72,3 +72,62 @@ p {
     }
 }
 
+.leeslijst-sectie {
+    margin-bottom: 40px;
+}
+
+.sectie-titel {
+    color: #475569;
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0 0 16px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.card-badges {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+}
+
+.badge {
+    display: inline-block;
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+
+.badge-klas {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.badge-leerling {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.beschrijving {
+    font-style: italic;
+    color: #6b7280 !important;
+    font-size: 0.9rem !important;
+    font-weight: 400 !important;
+    margin-bottom: 8px !important;
+    padding: 0 !important;
+    text-align: left !important;
+}
+
+.fout-melding {
+    color: #8c1b3f;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    padding: 10px 14px;
+    text-align: left;
+    padding: 10px 14px !important;
+}
+

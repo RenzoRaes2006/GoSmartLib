@@ -9,13 +9,18 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Collections;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import ap.be.backend.config.SecurityUtils;
+import ap.be.backend.dto.KlassLeeslijstRequestDTO;
 import ap.be.backend.dto.KlassLeeslijstResponseDTO;
 import ap.be.backend.entity.Boek;
 import ap.be.backend.entity.KlassLeeslijst;
@@ -41,6 +46,7 @@ public class KlassLeeslijstServiceTest {
     private KlassLeeslijstService leeslijstService;
 
     private User testLeerkracht;
+    private User testLeerling;
     private KlassLeeslijst testLijst;
     private Boek testBoek;
 
@@ -48,6 +54,11 @@ public class KlassLeeslijstServiceTest {
     void setUp() {
         testLeerkracht = new User();
         testLeerkracht.setId(1L);
+
+        testLeerling = new User();
+        testLeerling.setId(42L);
+        testLeerling.setSmartschoolId("leerling42");
+        testLeerling.setKlas("5INF1");
 
         testLijst = new KlassLeeslijst();
         testLijst.setId(10L);
@@ -61,19 +72,66 @@ public class KlassLeeslijstServiceTest {
     }
 
     /**
-     * Test of een nieuwe leeslijst correct wordt aangemaakt en opgeslagen
-     * wanneer een bestaande leerkracht en geldige naam worden meegegeven.
+     * Test of er een exceptie wordt gegooid wanneer noch klas noch leerling
+     * worden meegegeven — een leeslijst moet altijd gekoppeld zijn.
      */
     @Test
-    void givenGeldigeData_whenCreateLeeslijst_thenSavesAndReturnsDTO() {
+    void givenGeenKoppeling_whenCreateLeeslijst_thenThrowsIllegalArgumentException() {
+        KlassLeeslijstRequestDTO request = new KlassLeeslijstRequestDTO("Testlijst", null, null, null, null);
+
+        assertThrows(IllegalArgumentException.class,
+                () -> leeslijstService.createLeeslijst(request, 1L));
+    }
+
+    /**
+     * Test of een leeslijst aan een klas gekoppeld wordt en zichtbaarheid wordt
+     * gerespecteerd.
+     */
+    @Test
+    void givenKlasKoppeling_whenCreateLeeslijst_thenZetKlasEnZichtbaar() {
+        KlassLeeslijstRequestDTO request = new KlassLeeslijstRequestDTO(
+                "Wiskunde lijst", "5INF1", null, "Voor het rekenen-hoofdstuk", true);
+        when(userRepository.findDistinctKlassen()).thenReturn(List.of("5INF1"));
         when(userRepository.findById(1L)).thenReturn(Optional.of(testLeerkracht));
-        when(leeslijstRepository.save(any(KlassLeeslijst.class))).thenReturn(testLijst);
+        when(leeslijstRepository.save(any(KlassLeeslijst.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        KlassLeeslijstResponseDTO result = leeslijstService.createLeeslijst("Testlijst", 1L);
+        KlassLeeslijstResponseDTO result = leeslijstService.createLeeslijst(request, 1L);
 
-        assertNotNull(result);
-        assertEquals("Testlijst", result.naam());
-        verify(leeslijstRepository, times(1)).save(any(KlassLeeslijst.class));
+        assertEquals("5INF1", result.klas());
+        assertNull(result.leerlingId());
+        assertEquals("Voor het rekenen-hoofdstuk", result.beschrijving());
+        assertTrue(result.zichtbaar());
+    }
+
+    /**
+     * Test of een leeslijst aan een leerling gekoppeld wordt.
+     */
+    @Test
+    void givenLeerlingKoppeling_whenCreateLeeslijst_thenZetLeerling() {
+        KlassLeeslijstRequestDTO request = new KlassLeeslijstRequestDTO(
+                "Persoonlijk lijstje", null, 42L, null, false);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testLeerkracht));
+        when(userRepository.findById(42L)).thenReturn(Optional.of(testLeerling));
+        when(leeslijstRepository.save(any(KlassLeeslijst.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        KlassLeeslijstResponseDTO result = leeslijstService.createLeeslijst(request, 1L);
+
+        assertNull(result.klas());
+        assertEquals(42L, result.leerlingId());
+        assertEquals("leerling42", result.leerlingNaam());
+    }
+
+    /**
+     * Test of er een exceptie wordt gegooid wanneer zowel klas als leerling
+     * worden meegegeven (dubbele koppeling is niet toegestaan).
+     */
+    @Test
+    void givenBeideKoppelingen_whenCreateLeeslijst_thenThrowsIllegalArgumentException() {
+        KlassLeeslijstRequestDTO request = new KlassLeeslijstRequestDTO(
+                "Foute lijst", "5INF1", 42L, null, false);
+
+        assertThrows(IllegalArgumentException.class,
+                () -> leeslijstService.createLeeslijst(request, 1L));
     }
 
     /**
@@ -82,11 +140,55 @@ public class KlassLeeslijstServiceTest {
      */
     @Test
     void givenLeerkrachtNietGevonden_whenCreateLeeslijst_thenThrowsGebruikerNotFoundException() {
+        KlassLeeslijstRequestDTO request = new KlassLeeslijstRequestDTO("Naam", "5INF1", null, null, null);
+        when(userRepository.findDistinctKlassen()).thenReturn(List.of("5INF1"));
         when(userRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(GebruikerNotFoundException.class, () -> {
-            leeslijstService.createLeeslijst("Naam", 1L);
-        });
+        assertThrows(GebruikerNotFoundException.class,
+                () -> leeslijstService.createLeeslijst(request, 1L));
+    }
+
+    /**
+     * Test of er een exceptie wordt gegooid wanneer de opgegeven klas niet
+     * bestaat in de database (server-side validatie).
+     */
+    @Test
+    void givenOnbekendeKlas_whenCreateLeeslijst_thenThrowsIllegalArgumentException() {
+        KlassLeeslijstRequestDTO request = new KlassLeeslijstRequestDTO("Naam", "ONBEKEND", null, null, null);
+        when(userRepository.findDistinctKlassen()).thenReturn(List.of("5INF1", "5INF2"));
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> leeslijstService.createLeeslijst(request, 1L));
+        assertTrue(ex.getMessage().contains("ONBEKEND"));
+    }
+
+    /**
+     * Test of de koppeling van een bestaande lijst gewisseld kan worden van
+     * klas naar leerling.
+     */
+    @Test
+    void givenBestaandeLijst_whenUpdateKoppelingNaarLeerling_thenZetLeerlingEnWistKlas() {
+        testLijst.setKlas("5INF1");
+        when(leeslijstRepository.findById(10L)).thenReturn(Optional.of(testLijst));
+        when(userRepository.findById(42L)).thenReturn(Optional.of(testLeerling));
+        when(leeslijstRepository.save(any(KlassLeeslijst.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        KlassLeeslijstResponseDTO result = leeslijstService.updateKoppeling(10L, null, 42L);
+
+        assertNull(result.klas());
+        assertEquals(42L, result.leerlingId());
+    }
+
+    /**
+     * Test of de koppeling van een bestaande lijst gewisseld kan worden van
+     * leerling naar klas, en dat de klas-validatie ook hier geldt.
+     */
+    @Test
+    void givenOnbekendeKlas_whenUpdateKoppeling_thenThrowsIllegalArgumentException() {
+        when(userRepository.findDistinctKlassen()).thenReturn(List.of("5INF1"));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> leeslijstService.updateKoppeling(10L, "ONBEKEND", null));
     }
 
     /**
@@ -99,7 +201,7 @@ public class KlassLeeslijstServiceTest {
         when(boekRepository.findById(5L)).thenReturn(Optional.of(testBoek));
         when(leeslijstRepository.save(any(KlassLeeslijst.class))).thenReturn(testLijst);
 
-        KlassLeeslijstResponseDTO result = leeslijstService.addBoekToLeeslijst(10L, 5L);
+        leeslijstService.addBoekToLeeslijst(10L, 5L);
 
         verify(leeslijstRepository, times(1)).save(testLijst);
     }
@@ -112,14 +214,12 @@ public class KlassLeeslijstServiceTest {
     void givenLijstNietGevonden_whenAddBoekToLeeslijst_thenThrowsKlassLeeslijstNotFoundException() {
         when(leeslijstRepository.findById(10L)).thenReturn(Optional.empty());
 
-        assertThrows(KlassLeeslijstNotFoundException.class, () -> {
-            leeslijstService.addBoekToLeeslijst(10L, 5L);
-        });
+        assertThrows(KlassLeeslijstNotFoundException.class,
+                () -> leeslijstService.addBoekToLeeslijst(10L, 5L));
     }
 
     /**
-     * Test of een boek succesvol wordt verwijderd uit een bestaande
-     * leeslijst en de lijst correct wordt opgeslagen in de database.
+     * Test of een boek succesvol wordt verwijderd uit een bestaande leeslijst.
      */
     @Test
     void givenGeldigeIds_whenRemoveBoekFromLeeslijst_thenRemovesBoek() {
@@ -128,31 +228,58 @@ public class KlassLeeslijstServiceTest {
         when(boekRepository.findById(5L)).thenReturn(Optional.of(testBoek));
         when(leeslijstRepository.save(any(KlassLeeslijst.class))).thenReturn(testLijst);
 
-        KlassLeeslijstResponseDTO result = leeslijstService.removeBoekFromLeeslijst(10L, 5L);
+        leeslijstService.removeBoekFromLeeslijst(10L, 5L);
 
         verify(leeslijstRepository, times(1)).save(testLijst);
-        assertTrue(testLijst.getBoeken().isEmpty()); // Verwijdert de koppeling tussen de leeslijst en het boek[cite:
-                                                     // 10]
+        assertTrue(testLijst.getBoeken().isEmpty());
     }
 
     /**
-     * Test of de naam van een bestaande leeslijst correct kan
-     * worden gewijzigd en de wijziging wordt opgeslagen.
+     * Test of de naam van een bestaande leeslijst correct kan worden gewijzigd.
      */
     @Test
     void givenGeldigId_whenUpdateLeeslijstNaam_thenUpdatesNaam() {
         when(leeslijstRepository.findById(10L)).thenReturn(Optional.of(testLijst));
         when(leeslijstRepository.save(any(KlassLeeslijst.class))).thenReturn(testLijst);
 
-        KlassLeeslijstResponseDTO result = leeslijstService.updateLeeslijstNaam(10L, "Nieuwe Naam");
+        leeslijstService.updateLeeslijstNaam(10L, "Nieuwe Naam");
 
         verify(leeslijstRepository, times(1)).save(testLijst);
         assertEquals("Nieuwe Naam", testLijst.getNaam());
     }
 
     /**
-     * Test of een bestaande leeslijst correct wordt verwijderd
-     * uit de database.
+     * Test of de beschrijving van een bestaande leeslijst correct kan worden
+     * gewijzigd.
+     */
+    @Test
+    void givenGeldigId_whenUpdateBeschrijving_thenUpdatesBeschrijving() {
+        when(leeslijstRepository.findById(10L)).thenReturn(Optional.of(testLijst));
+        when(leeslijstRepository.save(any(KlassLeeslijst.class))).thenReturn(testLijst);
+
+        leeslijstService.updateBeschrijving(10L, "Nieuwe uitleg");
+
+        assertEquals("Nieuwe uitleg", testLijst.getBeschrijving());
+        verify(leeslijstRepository, times(1)).save(testLijst);
+    }
+
+    /**
+     * Test of de zichtbaarheid van een bestaande leeslijst correct kan worden
+     * omgewisseld.
+     */
+    @Test
+    void givenGeldigId_whenUpdateZichtbaar_thenUpdatesZichtbaar() {
+        when(leeslijstRepository.findById(10L)).thenReturn(Optional.of(testLijst));
+        when(leeslijstRepository.save(any(KlassLeeslijst.class))).thenReturn(testLijst);
+
+        leeslijstService.updateZichtbaar(10L, true);
+
+        assertTrue(testLijst.isZichtbaar());
+        verify(leeslijstRepository, times(1)).save(testLijst);
+    }
+
+    /**
+     * Test of een bestaande leeslijst correct wordt verwijderd uit de database.
      */
     @Test
     void givenGeldigId_whenDeleteLeeslijst_thenDeletesLijst() {
@@ -160,13 +287,11 @@ public class KlassLeeslijstServiceTest {
 
         leeslijstService.deleteLeeslijst(10L);
 
-        verify(leeslijstRepository, times(1)).delete(testLijst); // Controleert of leeslijstRepository.delete wordt
-                                                                 // aangeroepen[cite: 10]
+        verify(leeslijstRepository, times(1)).delete(testLijst);
     }
 
     /**
-     * Test of alle beschikbare klassenleeslijsten worden opgehaald
-     * en succesvol worden omgezet naar een lijst van DTO's.
+     * Test of alle beschikbare klassen-leeslijsten worden opgehaald.
      */
     @Test
     void givenLeeslijsten_whenGetAllKlassenLeeslijsten_thenReturnsList() {
@@ -177,6 +302,44 @@ public class KlassLeeslijstServiceTest {
         assertNotNull(result);
         assertEquals(1, result.size());
         assertEquals("Testlijst", result.get(0).naam());
-        verify(leeslijstRepository, times(1)).findAll();
+    }
+
+    /**
+     * CR-acceptatie: een leerling van klas 5INF1 ziet zowel zichtbare
+     * klas-leeslijsten van 5INF1 als persoonlijk toegewezen lijsten.
+     */
+    @Test
+    void givenLeerlingInKlas_whenGetLeeslijstenVoorHuidigeLeerling_thenCombineertKlasEnPersoonlijk() {
+        KlassLeeslijst klasLijst = new KlassLeeslijst();
+        klasLijst.setId(20L);
+        klasLijst.setNaam("Klas-lijst");
+        klasLijst.setLeerkracht(testLeerkracht);
+        klasLijst.setKlas("5INF1");
+        klasLijst.setZichtbaar(true);
+        klasLijst.setBoeken(new HashSet<>());
+
+        KlassLeeslijst persoonlijkeLijst = new KlassLeeslijst();
+        persoonlijkeLijst.setId(21L);
+        persoonlijkeLijst.setNaam("Persoonlijke lijst");
+        persoonlijkeLijst.setLeerkracht(testLeerkracht);
+        persoonlijkeLijst.setLeerling(testLeerling);
+        persoonlijkeLijst.setZichtbaar(true);
+        persoonlijkeLijst.setBoeken(new HashSet<>());
+
+        when(leeslijstRepository.findByKlasAndZichtbaarTrueOrderByAangemaaktOpDesc("5INF1"))
+                .thenReturn(List.of(klasLijst));
+        when(leeslijstRepository.findByLeerlingIdAndZichtbaarTrueOrderByAangemaaktOpDesc(42L))
+                .thenReturn(List.of(persoonlijkeLijst));
+
+        try (MockedStatic<SecurityUtils> securityMock = Mockito.mockStatic(SecurityUtils.class)) {
+            securityMock.when(() -> SecurityUtils.getCurrentUser(userRepository))
+                    .thenReturn(testLeerling);
+
+            List<KlassLeeslijstResponseDTO> result = leeslijstService.getLeeslijstenVoorHuidigeLeerling();
+
+            assertEquals(2, result.size());
+            assertTrue(result.stream().anyMatch(l -> "5INF1".equals(l.klas())));
+            assertTrue(result.stream().anyMatch(l -> l.leerlingId() != null && l.leerlingId() == 42L));
+        }
     }
 }
