@@ -2,16 +2,45 @@
     <h2>Leeslijsten van leerkrachten</h2>
     <hr>
 
-    @if (leeslijsten.length === 0) {
-    <p>Er zijn nog geen leeslijsten beschikbaar.</p>
-    } @else {
-    <div class="list-container">
-        @for (lijst of leeslijsten; track lijst.id) {
-        <div class="card" [routerLink]="['/klassenleeslijsten', lijst.id]" style="cursor: pointer;">
-            <h3>{{ lijst.naam }}</h3>
-            <p>{{ lijst.boeken.length }} boeken in deze lijst</p>
-        </div>
-        }
-    </div>
+    @if (fout()) {
+        <p class="fout-melding">{{ fout() }}</p>
+    }
+
+    @if (leeslijsten().length === 0 && !fout()) {
+        <p>Er zijn nog geen leeslijsten voor jou beschikbaar.</p>
+    }
+
+    @if (klasLijsten().length > 0) {
+        <section class="leeslijst-sectie">
+            <h3 class="sectie-titel">Klas-leeslijsten</h3>
+            <div class="list-container">
+                @for (lijst of klasLijsten(); track lijst.id) {
+                    <div class="card" [routerLink]="['/klassenleeslijsten', lijst.id]">
+                        <div class="card-badges">
+                            <span class="badge badge-klas">Klas: {{ lijst.klas }}</span>
+                        </div>
+                        <h3>{{ lijst.naam }}</h3>
+                        <p>{{ lijst.boeken.length }} boeken in deze lijst</p>
+                    </div>
+                }
+            </div>
+        </section>
+    }
+
+    @if (persoonlijkeLijsten().length > 0) {
+        <section class="leeslijst-sectie">
+            <h3 class="sectie-titel">Persoonlijk toegewezen</h3>
+            <div class="list-container">
+                @for (lijst of persoonlijkeLijsten(); track lijst.id) {
+                    <div class="card" [routerLink]="['/klassenleeslijsten', lijst.id]">
+                        <div class="card-badges">
+                            <span class="badge badge-leerling">Persoonlijk toegewezen</span>
+                        </div>
+                        <h3>{{ lijst.naam }}</h3>
+                        <p>{{ lijst.boeken.length }} boeken in deze lijst</p>
+                    </div>
+                }
+            </div>
+        </section>
     }
 </div>
