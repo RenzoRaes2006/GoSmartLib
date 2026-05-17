@@ -1,10 +1,14 @@
 <div class="login-container">
   <div class="login-card">
+    <!-- top logo loaded directly from the public folder -->
+    <img src="GOlogo.png" alt="Smartschool logo" class="brand-logo" />
+
     <h1>Welkom bij GO! SmartLib</h1>
     <p>Log in om de bibliotheekcatalogus te bekijken en boeken te reserveren.</p>
-    
-    <button class="smartschool-btn" (click)="loginMetSmartschool()">
-      Aanmelden met Smartschool
+
+    <button class="smartschool-img-btn" (click)="loginMetSmartschool()">
+      <!-- login image loaded directly from the public folder -->
+      <img src="aanmelden.png" alt="Aanmelden met smartschool" />
     </button>
 
     <a class="beheerder-link" routerLink="/beheerder-login">Aanmelden als beheerder</a>
