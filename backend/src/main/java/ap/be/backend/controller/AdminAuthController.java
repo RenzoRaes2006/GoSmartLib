@@ -35,7 +35,7 @@ public class AdminAuthController {
         if (adminOpt.isEmpty() || !passwordEncoder.matches(request.getWachtwoord(), adminOpt.get().getWachtwoordHash())) {
             return ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("fout", "Ongeldig gebruikersnaam of wachtwoord"));
+                    .body(Map.of("fout", "Ongeldige gebruikersnaam of wachtwoord."));
         }
 
         AdminGebruiker admin = adminOpt.get();
@@ -65,27 +65,27 @@ public class AdminAuthController {
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("fout", "Geen geldig token"));
+                    .body(Map.of("fout", "Geen geldig token."));
         }
         String resetToken = authHeader.substring(7);
 
         if (!jwtService.isTokenValid(resetToken)
                 || !"wachtwoord-wijzigen".equals(jwtService.extractScope(resetToken))) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("fout", "Token niet geldig voor wachtwoord wijzigen"));
+                    .body(Map.of("fout", "Token is niet geldig om het wachtwoord te wijzigen."));
         }
 
         String nieuw = request.getNieuwWachtwoord();
         if (nieuw == null || nieuw.length() < 8) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Map.of("fout", "Wachtwoord moet minstens 8 tekens lang zijn"));
+                    .body(Map.of("fout", "Wachtwoord moet minstens 8 tekens lang zijn."));
         }
 
         String gebruikersnaam = jwtService.extractSmartschoolId(resetToken);
         Optional<AdminGebruiker> adminOpt = adminGebruikerRepository.findByGebruikersnaam(gebruikersnaam);
         if (adminOpt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("fout", "Admin niet gevonden"));
+                    .body(Map.of("fout", "Admin niet gevonden."));
         }
 
         AdminGebruiker admin = adminOpt.get();
