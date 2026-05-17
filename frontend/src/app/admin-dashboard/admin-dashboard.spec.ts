@@ -1,40 +1,21 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
 import { of } from 'rxjs';
 
 import { AdminDashboard } from './admin-dashboard';
-import { BoekService } from '../services/boek.service';
-import { InstellingService } from '../services/instelling-service';
-import { StatistiekService } from '../services/statistiek.service';
+import { SchoolService } from '../services/School.Service';
 
 describe('AdminDashboard', () => {
   let component: AdminDashboard;
   let fixture: ComponentFixture<AdminDashboard>;
-  let boekSpy: jasmine.SpyObj<BoekService>;
-  let instellingSpy: jasmine.SpyObj<InstellingService>;
-  let statSpy: jasmine.SpyObj<StatistiekService>;
+  let schoolSpy: jasmine.SpyObj<SchoolService>;
 
   beforeEach(async () => {
-    boekSpy = jasmine.createSpyObj('BoekService', ['getAlleActieveLeningenSysteem']);
-    boekSpy.getAlleActieveLeningenSysteem.and.returnValue(of([]));
-
-    instellingSpy = jasmine.createSpyObj('InstellingService', ['getLeenLimiet', 'updateLeenLimiet']);
-    instellingSpy.getLeenLimiet.and.returnValue(of(3));
-    instellingSpy.updateLeenLimiet.and.returnValue(of('ok'));
-
-    statSpy = jasmine.createSpyObj('StatistiekService', ['getAdminStatistieken']);
-    statSpy.getAdminStatistieken.and.returnValue(
-      of({ percentageUitgeleend: 25, teLaatIngeleverd: 4, populairsteGenre: 'Fantasy', uitleningenDezeMaand: 12 } as any),
-    );
+    schoolSpy = jasmine.createSpyObj('SchoolService', ['getAlleScholen', 'maakSchoolAan', 'verwijderSchool', 'getLiveSmartschoolData']);
+    schoolSpy.getAlleScholen.and.returnValue(of([{ id: 1, naam: 'GO! Atheneum Antwerpen' }]));
 
     await TestBed.configureTestingModule({
       imports: [AdminDashboard],
-      providers: [
-        provideRouter([]),
-        { provide: BoekService, useValue: boekSpy },
-        { provide: InstellingService, useValue: instellingSpy },
-        { provide: StatistiekService, useValue: statSpy },
-      ],
+      providers: [{ provide: SchoolService, useValue: schoolSpy }],
     }).compileComponents();
 
     fixture = TestBed.createComponent(AdminDashboard);
@@ -46,28 +27,22 @@ describe('AdminDashboard', () => {
     expect(component).toBeTruthy();
   });
 
-  it('laadt limiet en statistieken bij init', () => {
-    expect(instellingSpy.getLeenLimiet).toHaveBeenCalled();
-    expect(statSpy.getAdminStatistieken).toHaveBeenCalled();
-    expect(component.huidigeLimiet()).toBe(3);
-    expect(component.populairsteGenre()).toBe('Fantasy');
+  it('laadt geregistreerde scholen via de service bij init', () => {
+    expect(schoolSpy.getAlleScholen).toHaveBeenCalled();
+    expect(component.geregistreerdeScholen().length).toBe(1);
   });
 
-  it('opslaanLimiet stuurt nieuwe waarde door en toont succes-toast', () => {
-    component.opslaanLimiet('5');
-
-    expect(instellingSpy.updateLeenLimiet).toHaveBeenCalledWith(5);
-    expect(component.toastActief()).toBeTrue();
-    expect(component.toastType()).toBe('succes');
-    expect(component.huidigeLimiet()).toBe(5);
+  it('beschikbareScholen filtert reeds-geregistreerde namen weg', () => {
+    const namen = component.beschikbareScholen().map((s) => s.naam);
+    expect(namen).not.toContain('GO! Atheneum Antwerpen');
   });
 
-  it('opslaanLimiet weigert negatieve waarden', () => {
-    instellingSpy.updateLeenLimiet.calls.reset();
+  it('wisselTab wisselt actieve tab en sluit school-details', () => {
+    component.geselecteerdeSchool.set({ id: 1 });
 
-    component.opslaanLimiet('-1');
+    component.wisselTab('wizard');
 
-    expect(instellingSpy.updateLeenLimiet).not.toHaveBeenCalled();
-    expect(component.toastType()).toBe('fout');
+    expect(component.activeTab()).toBe('wizard');
+    expect(component.geselecteerdeSchool()).toBeNull();
   });
 });

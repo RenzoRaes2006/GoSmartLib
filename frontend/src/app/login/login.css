@@ -1,4 +1,4 @@
-/* Container voor de hele pagina */
+/* Container for the entire page */
 .login-container {
   display: flex;
   justify-content: center;
@@ -8,7 +8,7 @@
   font-family: Arial, sans-serif;
 }
 
-/* De kaart in het midden */
+/* The card in the center */
 .login-card {
   background: white;
   padding: 40px;
@@ -19,7 +19,7 @@
   width: 100%;
 }
 
-/* Het logo bovenaan */
+/* The logo at the top */
 .brand-logo {
   display: block;
   margin: 0 auto 24px auto;
@@ -27,7 +27,7 @@
   height: auto;
 }
 
-/* Kop en tekst */
+/* Heading and text */
 .login-card h1 {
   font-size: 24px;
   margin-bottom: 10px;
@@ -40,7 +40,7 @@
   margin-bottom: 30px;
 }
 
-/* De knop die je afbeelding bevat. Vereenvoudigd voor de afbeelding. */
+/* The button containing the image. Simplified for the image. */
 .smartschool-img-btn {
   background: transparent;
   border: none;
@@ -51,27 +51,27 @@
   margin-bottom: 16px;
 }
 
-/* Een klein effect als je erop klikt */
+/* A small effect when clicked */
 .smartschool-img-btn:active {
   transform: scale(0.98);
 }
 
-/* Zorgt ervoor dat de afbeelding in de knop goed wordt weergegeven */
+/* Ensures the image in the button is displayed correctly */
 .smartschool-img-btn img {
   display: block;
   max-width: 100%;
   height: auto;
 }
 
-/* De link onderaan */
-.beheerder-link {
+/* The link at the bottom */
+.admin-link {
   display: block;
   font-size: 13px;
   color: #999;
   text-decoration: none;
 }
 
-.beheerder-link:hover {
+.admin-link:hover {
   color: #555;
   text-decoration: underline;
 }

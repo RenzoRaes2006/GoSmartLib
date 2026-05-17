@@ -1,5 +1,7 @@
 package ap.be.backend.service;
 
+import ap.be.backend.config.SecurityUtils;
+import ap.be.backend.dto.KlassLeeslijstRequestDTO;
 import ap.be.backend.dto.KlassLeeslijstResponseDTO;
 import ap.be.backend.entity.Boek;
 import ap.be.backend.entity.KlassLeeslijst;
@@ -15,14 +17,16 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Beheert de klassen-leeslijsten die leerkrachten aanmaken voor hun leerlingen.
+ * Beheert de klassen-leeslijsten die leerkrachten aanmaken.
  *
- * Een klassen-leeslijst is een verzameling boeken die een leerkracht samenstelt.
- * Leerlingen kunnen deze lijsten raadplegen om te zien welke boeken aanbevolen
- * worden voor hun klas.
+ * Een leeslijst kan optioneel gekoppeld worden aan een klas (string), aan een
+ * individuele leerling, of aan geen van beide (privé concept van de leerkracht).
+ * Een leeslijst is pas zichtbaar voor leerlingen als 'zichtbaar' op true staat.
  */
 @Service
 @RequiredArgsConstructor
@@ -33,46 +37,80 @@ public class KlassLeeslijstService {
     private final BoekRepository boekRepository;
 
     /**
-     * Maakt een nieuwe klassen-leeslijst aan voor een leerkracht.
+     * Maakt een nieuwe leeslijst aan voor een leerkracht.
      *
-     * @param naam        de naam van de nieuwe leeslijst
-     * @param leerkrachtId het database-ID van de leerkracht die de lijst aanmaakt
+     * @param request      de aanmaakgegevens (naam verplicht; klas, leerlingId,
+     *                     beschrijving en zichtbaar optioneel)
+     * @param leerkrachtId het database-ID van de leerkracht
      * @return de aangemaakte leeslijst als DTO
-     * @throws GebruikerNotFoundException als de leerkracht niet bestaat
+     * @throws GebruikerNotFoundException als de leerkracht of leerling niet bestaat
+     * @throws IllegalArgumentException   als geen of beide koppelingen zijn opgegeven
      */
     @Transactional
-    public KlassLeeslijstResponseDTO createLeeslijst(String naam, Long leerkrachtId) {
+    public KlassLeeslijstResponseDTO createLeeslijst(KlassLeeslijstRequestDTO request, Long leerkrachtId) {
+        boolean heeftKlas = request.klas() != null && !request.klas().isBlank();
+        boolean heeftLeerling = request.leerlingId() != null;
+
+        if (heeftKlas && heeftLeerling) {
+            throw new IllegalArgumentException("Een leeslijst kan niet tegelijk aan een klas en een leerling gekoppeld worden.");
+        }
+        if (!heeftKlas && !heeftLeerling) {
+            throw new IllegalArgumentException("Een leeslijst moet aan een klas of een leerling gekoppeld worden.");
+        }
+        if (heeftKlas && !userRepository.findDistinctKlassen().contains(request.klas())) {
+            throw new IllegalArgumentException("Klas '" + request.klas() + "' bestaat niet.");
+        }
+
         User leerkracht = userRepository.findById(leerkrachtId)
                 .orElseThrow(() -> new GebruikerNotFoundException("Leerkracht niet gevonden"));
 
         KlassLeeslijst leeslijst = new KlassLeeslijst();
-        leeslijst.setNaam(naam);
+        leeslijst.setNaam(request.naam());
         leeslijst.setLeerkracht(leerkracht);
+        leeslijst.setBeschrijving(request.beschrijving());
+        leeslijst.setZichtbaar(Boolean.TRUE.equals(request.zichtbaar()));
+
+        if (request.klas() != null && !request.klas().isBlank()) {
+            leeslijst.setKlas(request.klas());
+        } else if (request.leerlingId() != null) {
+            User leerling = userRepository.findById(request.leerlingId())
+                    .orElseThrow(() -> new GebruikerNotFoundException("Leerling niet gevonden"));
+            leeslijst.setLeerling(leerling);
+        }
 
         return KlassLeeslijstMapper.toDTO(leeslijstRepository.save(leeslijst));
     }
 
     /**
+     * Maakt een nieuwe leeslijst aan voor de huidige ingelogde leerkracht.
+     */
+    @Transactional
+    public KlassLeeslijstResponseDTO createLeeslijstVoorHuidigeLeerkracht(KlassLeeslijstRequestDTO request) {
+        User leerkracht = SecurityUtils.getCurrentUser(userRepository);
+        return createLeeslijst(request, leerkracht.getId());
+    }
+
+    /**
+     * Geeft alle leeslijsten van de huidige ingelogde leerkracht terug.
+     */
+    @Transactional(readOnly = true)
+    public List<KlassLeeslijstResponseDTO> getLeeslijstenVoorHuidigeLeerkracht() {
+        User leerkracht = SecurityUtils.getCurrentUser(userRepository);
+        return getLeeslijstenByLeerkracht(leerkracht.getId());
+    }
+
+    /**
      * Geeft alle leeslijsten terug van een bepaalde leerkracht.
-     *
-     * @param leerkrachtId het database-ID van de leerkracht
-     * @return lijst van leeslijsten als DTO's
      */
     @Transactional(readOnly = true)
     public List<KlassLeeslijstResponseDTO> getLeeslijstenByLeerkracht(Long leerkrachtId) {
-        return leeslijstRepository.findByLeerkrachtId(leerkrachtId).stream()
+        return leeslijstRepository.findByLeerkrachtIdOrderByAangemaaktOpDesc(leerkrachtId).stream()
                 .map(KlassLeeslijstMapper::toDTO)
                 .toList();
     }
 
     /**
      * Voegt een boek toe aan een bestaande leeslijst.
-     *
-     * @param leeslijstId het ID van de leeslijst
-     * @param boekId      het ID van het toe te voegen boek
-     * @return de bijgewerkte leeslijst als DTO
-     * @throws KlassLeeslijstNotFoundException als de leeslijst niet bestaat
-     * @throws BoekNotFoundException           als het boek niet bestaat
      */
     @Transactional
     public KlassLeeslijstResponseDTO addBoekToLeeslijst(Long leeslijstId, Long boekId) {
@@ -88,10 +126,6 @@ public class KlassLeeslijstService {
 
     /**
      * Geeft een leeslijst terug op basis van het ID.
-     *
-     * @param id het ID van de leeslijst
-     * @return de leeslijst als DTO
-     * @throws KlassLeeslijstNotFoundException als de leeslijst niet bestaat
      */
     @Transactional(readOnly = true)
     public KlassLeeslijstResponseDTO getLeeslijstById(Long id) {
@@ -102,12 +136,6 @@ public class KlassLeeslijstService {
 
     /**
      * Verwijdert een boek uit een leeslijst.
-     *
-     * @param leeslijstId het ID van de leeslijst
-     * @param boekId      het ID van het te verwijderen boek
-     * @return de bijgewerkte leeslijst als DTO
-     * @throws KlassLeeslijstNotFoundException als de leeslijst niet bestaat
-     * @throws BoekNotFoundException           als het boek niet bestaat
      */
     @Transactional
     public KlassLeeslijstResponseDTO removeBoekFromLeeslijst(Long leeslijstId, Long boekId) {
@@ -124,11 +152,6 @@ public class KlassLeeslijstService {
 
     /**
      * Wijzigt de naam van een bestaande leeslijst.
-     *
-     * @param id         het ID van de leeslijst
-     * @param nieuweNaam de nieuwe naam
-     * @return de bijgewerkte leeslijst als DTO
-     * @throws KlassLeeslijstNotFoundException als de leeslijst niet bestaat
      */
     @Transactional
     public KlassLeeslijstResponseDTO updateLeeslijstNaam(Long id, String nieuweNaam) {
@@ -139,10 +162,66 @@ public class KlassLeeslijstService {
     }
 
     /**
+     * Wijzigt de beschrijving van een bestaande leeslijst. Een lege of null waarde
+     * wist de beschrijving.
+     */
+    @Transactional
+    public KlassLeeslijstResponseDTO updateBeschrijving(Long id, String nieuweBeschrijving) {
+        KlassLeeslijst leeslijst = leeslijstRepository.findById(id)
+                .orElseThrow(() -> new KlassLeeslijstNotFoundException("Leeslijst niet gevonden"));
+        leeslijst.setBeschrijving(nieuweBeschrijving);
+        return KlassLeeslijstMapper.toDTO(leeslijstRepository.save(leeslijst));
+    }
+
+    /**
+     * Wijzigt de koppeling van een bestaande leeslijst. Net als bij aanmaken
+     * moet exact één van klas of leerlingId opgegeven worden, en moet de klas
+     * (als opgegeven) bestaan in de database.
+     */
+    @Transactional
+    public KlassLeeslijstResponseDTO updateKoppeling(Long id, String nieuweKlas, Long nieuweLeerlingId) {
+        boolean heeftKlas = nieuweKlas != null && !nieuweKlas.isBlank();
+        boolean heeftLeerling = nieuweLeerlingId != null;
+
+        if (heeftKlas && heeftLeerling) {
+            throw new IllegalArgumentException("Een leeslijst kan niet tegelijk aan een klas en een leerling gekoppeld worden.");
+        }
+        if (!heeftKlas && !heeftLeerling) {
+            throw new IllegalArgumentException("Een leeslijst moet aan een klas of een leerling gekoppeld worden.");
+        }
+        if (heeftKlas && !userRepository.findDistinctKlassen().contains(nieuweKlas)) {
+            throw new IllegalArgumentException("Klas '" + nieuweKlas + "' bestaat niet.");
+        }
+
+        KlassLeeslijst leeslijst = leeslijstRepository.findById(id)
+                .orElseThrow(() -> new KlassLeeslijstNotFoundException("Leeslijst niet gevonden"));
+
+        if (heeftKlas) {
+            leeslijst.setKlas(nieuweKlas);
+            leeslijst.setLeerling(null);
+        } else {
+            User leerling = userRepository.findById(nieuweLeerlingId)
+                    .orElseThrow(() -> new GebruikerNotFoundException("Leerling niet gevonden"));
+            leeslijst.setLeerling(leerling);
+            leeslijst.setKlas(null);
+        }
+
+        return KlassLeeslijstMapper.toDTO(leeslijstRepository.save(leeslijst));
+    }
+
+    /**
+     * Wisselt de zichtbaarheid van een leeslijst voor leerlingen.
+     */
+    @Transactional
+    public KlassLeeslijstResponseDTO updateZichtbaar(Long id, boolean zichtbaar) {
+        KlassLeeslijst leeslijst = leeslijstRepository.findById(id)
+                .orElseThrow(() -> new KlassLeeslijstNotFoundException("Leeslijst niet gevonden"));
+        leeslijst.setZichtbaar(zichtbaar);
+        return KlassLeeslijstMapper.toDTO(leeslijstRepository.save(leeslijst));
+    }
+
+    /**
      * Verwijdert een leeslijst volledig uit de database.
-     *
-     * @param id het ID van de te verwijderen leeslijst
-     * @throws KlassLeeslijstNotFoundException als de leeslijst niet bestaat
      */
     @Transactional
     public void deleteLeeslijst(Long id) {
@@ -153,12 +232,42 @@ public class KlassLeeslijstService {
 
     /**
      * Geeft alle klassen-leeslijsten terug, van alle leerkrachten.
-     *
-     * @return lijst van alle leeslijsten als DTO's
      */
     @Transactional(readOnly = true)
     public List<KlassLeeslijstResponseDTO> getAllKlassenLeeslijsten() {
         return leeslijstRepository.findAll().stream()
+                .map(KlassLeeslijstMapper::toDTO)
+                .toList();
+    }
+
+    /**
+     * Geeft alle leeslijsten terug die zichtbaar zijn voor de huidige ingelogde
+     * leerling: zowel klas-leeslijsten van de eigen klas als persoonlijk
+     * toegewezen lijsten. Onzichtbare lijsten worden gefilterd.
+     *
+     * @return gecombineerde lijst van zichtbare leeslijsten als DTO's
+     */
+    @Transactional(readOnly = true)
+    public List<KlassLeeslijstResponseDTO> getLeeslijstenVoorHuidigeLeerling() {
+        User huidigeLeerling = SecurityUtils.getCurrentUser(userRepository);
+
+        List<KlassLeeslijst> resultaat = new ArrayList<>();
+
+        if (huidigeLeerling.getKlas() != null && !huidigeLeerling.getKlas().isBlank()) {
+            resultaat.addAll(leeslijstRepository.findByKlasAndZichtbaarTrueOrderByAangemaaktOpDesc(huidigeLeerling.getKlas()));
+        }
+        resultaat.addAll(leeslijstRepository.findByLeerlingIdAndZichtbaarTrueOrderByAangemaaktOpDesc(huidigeLeerling.getId()));
+
+        resultaat.sort((a, b) -> {
+            LocalDateTime aDate = a.getAangemaaktOp();
+            LocalDateTime bDate = b.getAangemaaktOp();
+            if (aDate == null && bDate == null) return 0;
+            if (aDate == null) return 1;
+            if (bDate == null) return -1;
+            return bDate.compareTo(aDate);
+        });
+
+        return resultaat.stream()
                 .map(KlassLeeslijstMapper::toDTO)
                 .toList();
     }

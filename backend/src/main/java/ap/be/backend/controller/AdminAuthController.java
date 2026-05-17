@@ -2,6 +2,7 @@ package ap.be.backend.controller;
 
 import ap.be.backend.config.JwtService;
 import ap.be.backend.dto.AdminLoginRequest;
+import ap.be.backend.dto.WachtwoordWijzigenRequest;
 import ap.be.backend.entity.AdminGebruiker;
 import ap.be.backend.repository.AdminGebruikerRepository;
 import org.springframework.http.HttpStatus;
@@ -34,18 +35,70 @@ public class AdminAuthController {
         if (adminOpt.isEmpty() || !passwordEncoder.matches(request.getWachtwoord(), adminOpt.get().getWachtwoordHash())) {
             return ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("fout", "Ongeldig gebruikersnaam of wachtwoord"));
+                    .body(Map.of("fout", "Ongeldige gebruikersnaam of wachtwoord."));
         }
 
         AdminGebruiker admin = adminOpt.get();
 
+        if (admin.isMoetWachtwoordWijzigen()) {
+            String resetToken = jwtService.generatePasswordResetToken(admin.getGebruikersnaam());
+            return ResponseEntity.ok(Map.of(
+                    "moetWachtwoordWijzigen", true,
+                    "tijdelijkToken", resetToken
+            ));
+        }
+
         String token = jwtService.generateToken(
                 "admin_" + admin.getGebruikersnaam(),
-                "beheerder",
+                "admin",
                 admin.getNaam(),
                 "nvt"
         );
 
+        return ResponseEntity.ok(Map.of("token", token));
+    }
+
+    @PostMapping("/admin/wachtwoord-wijzigen")
+    public ResponseEntity<?> wachtwoordWijzigen(
+            @RequestHeader(value = "Authorization", required = false) String authHeader,
+            @RequestBody WachtwoordWijzigenRequest request) {
+
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("fout", "Geen geldig token."));
+        }
+        String resetToken = authHeader.substring(7);
+
+        if (!jwtService.isTokenValid(resetToken)
+                || !"wachtwoord-wijzigen".equals(jwtService.extractScope(resetToken))) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("fout", "Token is niet geldig om het wachtwoord te wijzigen."));
+        }
+
+        String nieuw = request.getNieuwWachtwoord();
+        if (nieuw == null || nieuw.length() < 8) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("fout", "Wachtwoord moet minstens 8 tekens lang zijn."));
+        }
+
+        String gebruikersnaam = jwtService.extractSmartschoolId(resetToken);
+        Optional<AdminGebruiker> adminOpt = adminGebruikerRepository.findByGebruikersnaam(gebruikersnaam);
+        if (adminOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("fout", "Admin niet gevonden."));
+        }
+
+        AdminGebruiker admin = adminOpt.get();
+        admin.setWachtwoordHash(passwordEncoder.encode(nieuw));
+        admin.setMoetWachtwoordWijzigen(false);
+        adminGebruikerRepository.save(admin);
+
+        String token = jwtService.generateToken(
+                "admin_" + admin.getGebruikersnaam(),
+                "admin",
+                admin.getNaam(),
+                "nvt"
+        );
         return ResponseEntity.ok(Map.of("token", token));
     }
 }

@@ -30,6 +30,22 @@ describe('KlassLeeslijstService', () => {
     req.flush([]);
   });
 
+  it('getMijnLeerkrachtLijsten stuurt GET op /mijn-leerkracht-lijsten', () => {
+    service.getMijnLeerkrachtLijsten().subscribe();
+
+    const req = httpMock.expectOne((r) => r.url.endsWith('/leeslijsten/mijn-leerkracht-lijsten'));
+    expect(req.request.method).toBe('GET');
+    req.flush([]);
+  });
+
+  it('getLeeslijstenVoorMij stuurt GET op /mijn-leerling-lijsten', () => {
+    service.getLeeslijstenVoorMij().subscribe();
+
+    const req = httpMock.expectOne((r) => r.url.endsWith('/leeslijsten/mijn-leerling-lijsten'));
+    expect(req.request.method).toBe('GET');
+    req.flush([]);
+  });
+
   it('createLeeslijst stuurt POST met body', () => {
     service.createLeeslijst(1, { naam: 'Mijn lijst' } as any).subscribe();
 
@@ -37,6 +53,42 @@ describe('KlassLeeslijstService', () => {
     expect(req.request.method).toBe('POST');
     expect((req.request.body as any).naam).toBe('Mijn lijst');
     req.flush({ id: 1, naam: 'Mijn lijst', boeken: [] });
+  });
+
+  it('createLeeslijstVoorMij stuurt POST op /api/leeslijsten met body', () => {
+    service.createLeeslijstVoorMij({ naam: 'Klas-lijst', klas: '5INF1', zichtbaar: true } as any).subscribe();
+
+    const req = httpMock.expectOne((r) => r.url.endsWith('/api/leeslijsten') || r.url.endsWith('/leeslijsten'));
+    expect(req.request.method).toBe('POST');
+    expect((req.request.body as any).klas).toBe('5INF1');
+    req.flush({ id: 1, naam: 'Klas-lijst', klas: '5INF1', zichtbaar: true, boeken: [] });
+  });
+
+  it('updateBeschrijving stuurt PUT op /{id}/beschrijving', () => {
+    service.updateBeschrijving(7, 'Nieuwe tekst').subscribe();
+
+    const req = httpMock.expectOne((r) => r.url.endsWith('/leeslijsten/7/beschrijving'));
+    expect(req.request.method).toBe('PUT');
+    expect(req.request.body).toBe('Nieuwe tekst');
+    req.flush({ id: 7, naam: 'X', beschrijving: 'Nieuwe tekst', boeken: [] });
+  });
+
+  it('updateZichtbaar stuurt PUT op /{id}/zichtbaar', () => {
+    service.updateZichtbaar(7, true).subscribe();
+
+    const req = httpMock.expectOne((r) => r.url.endsWith('/leeslijsten/7/zichtbaar'));
+    expect(req.request.method).toBe('PUT');
+    expect(req.request.body).toBe(true);
+    req.flush({ id: 7, naam: 'X', zichtbaar: true, boeken: [] });
+  });
+
+  it('updateKoppeling stuurt PUT op /{id}/koppeling met klas/leerlingId body', () => {
+    service.updateKoppeling(7, { klas: null, leerlingId: 42 }).subscribe();
+
+    const req = httpMock.expectOne((r) => r.url.endsWith('/leeslijsten/7/koppeling'));
+    expect(req.request.method).toBe('PUT');
+    expect((req.request.body as any).leerlingId).toBe(42);
+    req.flush({ id: 7, naam: 'X', leerlingId: 42, boeken: [] });
   });
 
   it('deleteLeeslijst stuurt DELETE op /api/leeslijsten/{id}', () => {

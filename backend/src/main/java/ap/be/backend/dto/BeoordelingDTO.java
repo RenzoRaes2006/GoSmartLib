@@ -20,7 +20,7 @@ public record BeoordelingDTO(
 
         @JsonProperty("boekId") @NotNull(message = "Boek ID is verplicht") @Min(value = 1, message = "Boek ID moet minimaal 1 zijn") long boekId,
 
-        @JsonProperty("waardering") @NotNull(message = "Waardering is verplicht") @Min(value = 1, message = "De waardering kan minimaal 1 zijn") @Max(value = 5, message = "De waardering mag maximaal 5 zijn") int waardering,
+        @JsonProperty("waardering") @NotNull(message = "Waardering is verplicht") @Min(value = 1, message = "De waardering moet minimaal 1 zijn") @Max(value = 5, message = "De waardering mag maximaal 5 zijn") int waardering,
 
         @JsonProperty("inhoud") @jakarta.validation.constraints.NotBlank(message = "De inhoud van de beoordeling mag niet leeg zijn") @jakarta.validation.constraints.Size(max = 1000, message = "De beoordeling mag maximaal 1000 tekens lang zijn") String inhoud,
 

@@ -2,6 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute } from '@angular/router';
 import { LeeslijstService } from '../services/leeslijstService';
+import { AuthService } from '../services/AuthService';
 
 @Component({
   selector: 'app-leeslijst',
@@ -13,9 +14,15 @@ import { LeeslijstService } from '../services/leeslijstService';
 export class Leeslijst implements OnInit {
   leeslijstService = inject(LeeslijstService);
   private route = inject(ActivatedRoute);
+  private authService = inject(AuthService);
   mappen: any[] = [];
   geselecteerdeMap: any = null;
   isLoading: boolean = true;
+
+  get isLeerling(): boolean {
+    const role = (this.authService.currentUser()?.role ?? '').toLowerCase();
+    return role === 'student' || role === 'leerling';
+  }
 
   ngOnInit(): void {
     this.route.paramMap.subscribe((params) => {

@@ -163,7 +163,8 @@ public class GebruikerService {
         boekRepository.save(boek);
 
         LocalDate vandaag = LocalDate.now();
-        LocalDate inleverDatum = vandaag.plusMonths(1);
+        int extraDagen = instellingService.getInlevertermijnDagen();
+        LocalDate inleverDatum = vandaag.plusDays(extraDagen);
 
         Uitlening nieuweUitlening = new Uitlening(user, boek, vandaag, inleverDatum);
         uitleningRepository.save(nieuweUitlening);
@@ -180,8 +181,9 @@ public class GebruikerService {
         uitlening.setStatus("GOEDGEKEURD");
 
         LocalDate vandaag = LocalDate.now();
+        int extraDagen = instellingService.getInlevertermijnDagen();
         uitlening.setUitleenDatum(vandaag);
-        uitlening.setInleverDatum(vandaag.plusMonths(1));
+        uitlening.setInleverDatum(vandaag.plusDays(extraDagen));
 
         uitleningRepository.save(uitlening);
     }
@@ -303,10 +305,13 @@ public class GebruikerService {
             boek.setAantalExemplaren(boek.getAantalExemplaren() - 1);
             boekRepository.save(boek);
 
-            Uitlening uitlening = new Uitlening(leraar, boek, LocalDate.now(), LocalDate.now().plusDays(30));
+            int extraDagen = instellingService.getInlevertermijnDagen();
+            LocalDate inleverDatum = LocalDate.now().plusDays(extraDagen);
+
+            Uitlening uitlening = new Uitlening(leraar, boek, LocalDate.now(), inleverDatum);
             uitlening.setStatus("ACTIEF");
             uitlening.setUitleenDatum(LocalDate.now());
-            uitlening.setInleverDatum(LocalDate.now().plusMonths(1));
+            uitlening.setInleverDatum(inleverDatum);
 
             uitleningRepository.save(uitlening);
         }

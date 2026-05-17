@@ -23,7 +23,7 @@ public class GlobalExceptionHandler {
         if (ex.getMessage() != null && ex.getMessage().toLowerCase().contains("isbn")) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Dit ISBN-nummer bestaat al.");
         }
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Database constraint violation");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Schending van een databaseregel.");
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -46,7 +46,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleGenericException(Exception ex) {
         ex.printStackTrace();
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Er is een fout opgetreden");
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Er is een fout opgetreden.");
     }
 
     @ExceptionHandler(InvalidYearRangeException.class)

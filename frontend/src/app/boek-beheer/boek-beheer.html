@@ -1,447 +1,530 @@
 <div class="beheer-topbar">
   @if (toonModeSelector()) {
-  <div class="mode-selector">
-    <button type="button" (click)="setMode('wijzigen')" [class.active]="mode() === 'wijzigen'">
-      Boek beheren
-    </button>
-    <button type="button" (click)="setMode('toevoegen')" [class.active]="mode() === 'toevoegen'">
-      Boek toevoegen
-    </button>
-  </div>
+    <div class="mode-selector">
+      <button type="button" (click)="setMode('wijzigen')" [class.active]="mode() === 'wijzigen'">
+        Boek beheren
+      </button>
+      <button type="button" (click)="setMode('toevoegen')" [class.active]="mode() === 'toevoegen'">
+        Boek toevoegen
+      </button>
+    </div>
   } @else {
-  <h2 class="beheer-titel">
-    {{ mode() === 'toevoegen' ? 'Boek toevoegen' : 'Catalogus beheren' }}
-  </h2>
+    <h2 class="beheer-titel">
+      {{ mode() === 'toevoegen' ? 'Boek toevoegen' : 'Catalogus beheren' }}
+    </h2>
   }
   <div class="topbar-messages">
     @if (errorMessage()) {
-    <div class="message-container error-message">{{ errorMessage() }}</div>
+      <div class="message-container error-message">{{ errorMessage() }}</div>
     }
     @if (successMessage()) {
-    <div class="message-container success-message">{{ successMessage() }}</div>
+      <div class="message-container success-message">{{ successMessage() }}</div>
     }
   </div>
-  <button type="button" class="verlaat-button" routerLink="/admin">Verlaten</button>
+  <button type="button" class="verlaat-button" routerLink="/beheerder">Verlaten</button>
 </div>
 
 <div class="isbn-zoek-boek">
   <button type="button" (click)="toggleIsbnZoek()">
     {{
-    toonIsbnZoek()
-    ? 'Verberg zoekveld'
-    : mode() === 'toevoegen'
-    ? 'Scan of zoek op ISBN'
-    : 'Zoek boek'
+      toonIsbnZoek()
+        ? 'Verberg zoekveld'
+        : mode() === 'toevoegen'
+          ? 'Scan of zoek op ISBN'
+          : 'Zoek boek'
     }}
   </button>
 
   @if (toonIsbnZoek()) {
-  <div>
-    @if (mode() === 'toevoegen') {
-    <label for="zoekIsbn">Scan ISBN of typ handmatig:</label>
-    <input #zoekIsbnVeld id="zoekIsbn" type="text" [value]="zoekTerm()"
-      (input)="onZoekIsbnInput($any($event.target).value)" (keydown.enter)="zoekBoekOp(); $event.preventDefault()"
-      placeholder="Scan barcode of typ ISBN (10 of 13 cijfers)" maxlength="13" inputmode="numeric" autocomplete="off" />
-    <button type="button" (click)="zoekBoekOp()" [disabled]="zoekTerm().length !== 10 && zoekTerm().length !== 13">
-      Zoek
-    </button>
-    }
+    <div>
+      @if (mode() === 'toevoegen') {
+        <label for="zoekIsbn">Scan ISBN of typ handmatig:</label>
+        <input
+          #zoekIsbnVeld
+          id="zoekIsbn"
+          type="text"
+          [value]="zoekTerm()"
+          (input)="onZoekIsbnInput($any($event.target).value)"
+          (keydown.enter)="zoekBoekOp(); $event.preventDefault()"
+          placeholder="Scan barcode of typ ISBN (10 of 13 cijfers)"
+          maxlength="13"
+          inputmode="numeric"
+          autocomplete="off"
+        />
+        <button
+          type="button"
+          (click)="zoekBoekOp()"
+          [disabled]="zoekTerm().length !== 10 && zoekTerm().length !== 13"
+        >
+          Zoek
+        </button>
+      }
 
-    @if (mode() === 'wijzigen') {
-    <label for="zoekIsbn">Zoek op titel, auteur of ISBN:</label>
-    <input #zoekIsbnVeld id="zoekIsbn" type="text" [value]="zoekTerm()"
-      (input)="onZoekTermInput($any($event.target).value)" placeholder="Typ een titel, auteur of ISBN" />
-    }
+      @if (mode() === 'wijzigen') {
+        <label for="zoekIsbn">Zoek op titel, auteur of ISBN:</label>
+        <input
+          #zoekIsbnVeld
+          id="zoekIsbn"
+          type="text"
+          [value]="zoekTerm()"
+          (input)="onZoekTermInput($any($event.target).value)"
+          placeholder="Typ een titel, auteur of ISBN"
+        />
+      }
 
-    @if (zoekMessage()) {
-    <small class="zoek-melding">{{ zoekMessage() }}</small>
-    }
-  </div>
+      @if (zoekMessage()) {
+        <small class="zoek-melding">{{ zoekMessage() }}</small>
+      }
+    </div>
   }
 </div>
 
-@if (mode() === 'wijzigen' && !boekGevonden() && (boeknOverzicht().length > 0 || isLoadingBoeken())) {
-<div class="boeken-overzicht">
-  <h3>Beschikbare boeken</h3>
+@if (
+  mode() === 'wijzigen' && !boekGevonden() && (boeknOverzicht().length > 0 || isLoadingBoeken())
+) {
+  <div class="boeken-overzicht">
+    <h3>Beschikbare boeken</h3>
 
-  @if (isLoadingBoeken()) {
-  <div class="loading-spinner">Boeken laden...</div>
-  }
-
-  @if (!isLoadingBoeken() && boeknOverzicht().length === 0) {
-  <div class="boeken-overzicht-empty">
-    <strong>Geen boeken gevonden.</strong> Controleer of de backend API draait.
-  </div>
-  }
-
-  @if (!isLoadingBoeken() && boeknOverzicht().length > 0) {
-  <table>
-    <thead>
-      <tr>
-        <th>Titel</th>
-        <th>Auteur</th>
-        <th>ISBN</th>
-        <th>Genre</th>
-        <th>Actie</th>
-      </tr>
-    </thead>
-    <tbody>
-      @for (boek of boeknOverzicht(); track boek.id) {
-      <tr>
-        <td>{{ boek.titel }}</td>
-        <td>{{ boek.auteur }}</td>
-        <td>{{ boek.isbn }}</td>
-        <td>{{ boek.genre.join(', ') }}</td>
-        <td>
-          <button type="button" class="action-button action-button-wijzig"
-            (click)="selecteerBoekUitLijst(boek, 'wijzig')">
-            Wijzig
-          </button>
-          <button type="button" class="action-button action-button-verwijder"
-            (click)="selecteerBoekUitLijst(boek, 'verwijder')">
-            Verwijder
-          </button>
-        </td>
-      </tr>
-      }
-    </tbody>
-  </table>
-  }
-
-  <div class="pagination-controls">
-    <button type="button" class="pagination-button" (click)="gaNaarVorigePagina()" [disabled]="currentPage() === 0">
-      ← Vorige
-    </button>
-
-    <span class="page-info"> Pagina {{ currentPage() + 1 }} van {{ totaalPages() }} </span>
-
-    <button type="button" class="pagination-button" (click)="gaNaarVolgendePagina()"
-      [disabled]="currentPage() + 1 >= totaalPages()">
-      Volgende →
-    </button>
-  </div>
-</div>
-}
-
-@if (mode() === 'toevoegen' || boekGevonden()) {
-<form [formGroup]="boekForm" (ngSubmit)="onSubmit()">
-  <div>
-    <label for="titel">Titel:</label>
-    <input id="titel" formControlName="titel" />
-    @if (boekForm.get('titel')?.invalid && boekForm.get('titel')?.touched) {
-    <div>
-      @if (boekForm.get('titel')?.errors?.['required']) {
-      <small>Titel is verplicht.</small>
-      }
-      @if (boekForm.get('titel')?.errors?.['minlength']) {
-      <small>Titel moet minimaal 2 tekens bevatten.</small>
-      }
-    </div>
+    @if (isLoadingBoeken()) {
+      <div class="loading-spinner">Boeken laden...</div>
     }
-  </div>
 
-  <div>
-    <label for="auteur">Auteur:</label>
-    <input id="auteur" formControlName="auteur" />
-    @if (boekForm.get('auteur')?.invalid && boekForm.get('auteur')?.touched) {
-    <div>
-      @if (boekForm.get('auteur')?.errors?.['required']) {
-      <small>Auteur is verplicht.</small>
-      }
-      @if (boekForm.get('auteur')?.errors?.['minlength']) {
-      <small>Auteur moet minimaal 2 tekens bevatten.</small>
-      }
-    </div>
+    @if (!isLoadingBoeken() && boeknOverzicht().length === 0) {
+      <div class="boeken-overzicht-empty">
+        <strong>Geen boeken gevonden.</strong> Controleer of de backend API draait.
+      </div>
     }
-  </div>
 
-  <div>
-    <label for="isbn">ISBN:</label>
-    <div style="display: flex; gap: 10px">
-      <input id="isbn" type="text" formControlName="isbn" (input)="onIsbnInput($event)" placeholder="9789012345678"
-        maxlength="13" />
-      <button type="button" (click)="genereerIsbn()">Genereer ISBN</button>
-    </div>
-    @if (boekForm.get('isbn')?.invalid && boekForm.get('isbn')?.touched) {
-    <div>
-      @if (boekForm.get('isbn')?.errors?.['required']) {
-      <small>ISBN is verplicht.</small>
-      }
-      @if (boekForm.get('isbn')?.errors?.['isbn']) {
-      <small>{{ boekForm.get('isbn')?.errors?.['isbn'] }}</small>
-      }
-    </div>
-    }
-  </div>
-
-  <div>
-    <label for="uitgever">Uitgever:</label>
-    <input id="uitgever" formControlName="uitgever" />
-    @if (boekForm.get('uitgever')?.invalid && boekForm.get('uitgever')?.touched) {
-    <div>
-      @if (boekForm.get('uitgever')?.errors?.['required']) {
-      <small>Uitgever is verplicht.</small>
-      }
-      @if (boekForm.get('uitgever')?.errors?.['minlength']) {
-      <small>Uitgever moet minimaal 2 tekens bevatten.</small>
-      }
-    </div>
-    }
-  </div>
-
-  <div>
-    <label for="uitgaveJaar">Uitgavejaar:</label>
-    <input id="uitgaveJaar" formControlName="uitgaveJaar" />
-    @if (boekForm.get('uitgaveJaar')?.invalid && boekForm.get('uitgaveJaar')?.touched) {
-    <div>
-      @if (boekForm.get('uitgaveJaar')?.errors?.['required']) {
-      <small>Uitgavejaar is verplicht.</small>
-      }
-      @if (boekForm.get('uitgaveJaar')?.errors?.['pattern']) {
-      <small>Uitgavejaar moet een geldig jaar zijn (bijv. 2023).</small>
-      }
-    </div>
-    }
-  </div>
-
-  <div>
-    <label for="pagina">Aantal pagina's:</label>
-    <input id="pagina" formControlName="pagina" />
-    @if (boekForm.get('pagina')?.invalid && boekForm.get('pagina')?.touched) {
-    <div>
-      @if (boekForm.get('pagina')?.errors?.['required']) {
-      <small>Aantal pagina's is verplicht.</small>
-      }
-      @if (boekForm.get('pagina')?.errors?.['min']) {
-      <small>Aantal pagina's moet minimaal 1 zijn.</small>
-      }
-    </div>
-    }
-  </div>
-
-  <div class="genre-leesniveau-row">
-    <div>
-      <label>Genre:</label>
-      <input type="hidden" formControlName="genre" />
-      <div class="genre-dropdown-row">
-        <select [ngModel]="selectedHoofdGenre()"
-          (ngModelChange)="selectedHoofdGenre.set($event); selectedSubGenre.set('')"
-          [ngModelOptions]="{ standalone: true }">
-          <option value="">Kies een genre</option>
-          @for (genre of hoofdGenres; track genre) {
-          <option [value]="genre">{{ genre }}</option>
+    @if (!isLoadingBoeken() && boeknOverzicht().length > 0) {
+      <table>
+        <thead>
+          <tr>
+            <th>Titel</th>
+            <th>Auteur</th>
+            <th>ISBN</th>
+            <th>Genre</th>
+            <th>Actie</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (boek of boeknOverzicht(); track boek.id) {
+            <tr>
+              <td>{{ boek.titel }}</td>
+              <td>{{ boek.auteur }}</td>
+              <td>{{ boek.isbn }}</td>
+              <td>{{ boek.genre.join(', ') }}</td>
+              <td>
+                <button
+                  type="button"
+                  class="action-button action-button-wijzig"
+                  (click)="selecteerBoekUitLijst(boek, 'wijzig')"
+                >
+                  Wijzig
+                </button>
+                <button
+                  type="button"
+                  class="action-button action-button-verwijder"
+                  (click)="selecteerBoekUitLijst(boek, 'verwijder')"
+                >
+                  Verwijder
+                </button>
+              </td>
+            </tr>
           }
-        </select>
-        @if (selectedHoofdGenre() && getSubGenres(selectedHoofdGenre()).length > 0) {
-        <select [ngModel]="selectedSubGenre()" (ngModelChange)="selectedSubGenre.set($event)"
-          [ngModelOptions]="{ standalone: true }">
-          <option value="">Kies subgenre</option>
-          @for (sub of getSubGenres(selectedHoofdGenre()); track sub) {
-          <option [value]="sub">{{ sub }}</option>
-          }
-        </select>
-        }
-        <button type="button" class="genre-toevoegen-btn" (click)="voegGenreToe()" [disabled]="!selectedHoofdGenre()">
-          +
-        </button>
-      </div>
-      @if (geselecteerdeGenres().length > 0) {
-      <div class="genre-tags">
-        @for (genre of geselecteerdeGenres(); track genre) {
-        <span class="genre-tag">
-          {{ genre }}
-          <button type="button" (click)="verwijderGenre(genre)">&times;</button>
-        </span>
-        }
-      </div>
-      }
-      @if (boekForm.get('genre')?.invalid && boekForm.get('genre')?.touched) {
-      <div>
-        @if (boekForm.get('genre')?.errors?.['required']) {
-        <small>Genre is verplicht.</small>
-        }
-      </div>
-      }
-    </div>
-
-    <div>
-      <label for="leesniveau">Leesniveau:</label>
-      <select id="leesniveau" formControlName="leesniveau">
-        <option value="">Geen leesniveau</option>
-        <option value="A (eenvoudig taalgebruik)">A (eenvoudig taalgebruik)</option>
-        <option value="B (gemiddeld taalgebruik)">B (gemiddeld taalgebruik)</option>
-        <option value="C (complex taalgebruik)">C (complex taalgebruik)</option>
-        <option value="D (literair niveau)">D (literair niveau)</option>
-      </select>
-    </div>
-
-    <div>
-      <label>Thematische tags:</label>
-      <input type="hidden" formControlName="thematischeTag" />
-      <div class="genre-dropdown-row">
-        <select [ngModel]="selectedTag()" (ngModelChange)="selectedTag.set($event)"
-          [ngModelOptions]="{ standalone: true }">
-          <option value="">Kies een thematische tag</option>
-          @for (tag of beschikbareTags; track tag) {
-          <option [value]="tag">{{ tag }}</option>
-          }
-        </select>
-        <button type="button" class="genre-toevoegen-btn" (click)="voegTagToe()" [disabled]="!selectedTag()">
-          +
-        </button>
-      </div>
-      @if (geselecteerdeTags().length > 0) {
-      <div class="genre-tags">
-        @for (tag of geselecteerdeTags(); track tag) {
-        <span class="genre-tag">
-          {{ tag }}
-          <button type="button" (click)="verwijderTag(tag)">&times;</button>
-        </span>
-        }
-      </div>
-      }
-    </div>
-  </div>
-
-  <!-- Toegevoegd door Jouw baas Mohamed -->
-  <div class="didactisch-optie">
-    <label>
-      <input type="checkbox" formControlName="didactischMateriaal" />
-      Dit boek is didactisch materiaal (alleen voor de aparte leerkrachtcatalogus)
-    </label>
-  </div>
-
-  @if (boekForm.get('didactischMateriaal')?.value) {
-  <div class="didactisch-subcategorie">
-    <label for="didactischeSubcategorie">Subcategorie:</label>
-    <select id="didactischeSubcategorie" formControlName="didactischeSubcategorie" class="sidebar-input">
-      <option value="">Kies subcategorie</option>
-      <option value="LESMETHODES">Lesmethodes</option>
-      <option value="DIDACTISCHE_HANDBOEKEN">Didactische handboeken</option>
-      <option value="EVALUATIEMATERIAAL">Evaluatiemateriaal</option>
-      <option value="NASLAGWERKEN">Naslagwerken</option>
-    </select>
-  </div>
-  }
-  <!-- End toegevoegd door Jouw baas Mohamed -->
-
-
-  <div>
-    <label for="beschrijving">Beschrijving:</label>
-    <textarea id="beschrijving" formControlName="beschrijving"></textarea>
-    @if (boekForm.get('beschrijving')?.invalid && boekForm.get('beschrijving')?.touched) {
-    <div>
-      @if (boekForm.get('beschrijving')?.errors?.['required']) {
-      <small>Beschrijving is verplicht.</small>
-      }
-    </div>
+        </tbody>
+      </table>
     }
-  </div>
 
-  <div class="afbeelding-sectie">
-    <label>Afbeelding:</label>
-    <div class="afbeelding-row">
-      <div class="afbeelding-controls">
-        <div class="image-upload-toggle">
-          <button type="button" (click)="uploadModus.set('url')" [class.active]="uploadModus() === 'url'">
-            URL invoeren
-          </button>
-          <button type="button" (click)="uploadModus.set('bestand')" [class.active]="uploadModus() === 'bestand'">
-            Bestand uploaden
-          </button>
-        </div>
+    <div class="pagination-controls">
+      <button
+        type="button"
+        class="pagination-button"
+        (click)="gaNaarVorigePagina()"
+        [disabled]="currentPage() === 0"
+      >
+        ← Vorige
+      </button>
 
-        <div class="afbeelding-input">
-          @if (uploadModus() === 'url') {
-          <input id="afbeelding" formControlName="afbeelding" placeholder="https://..." />
-          }
+      <span class="page-info"> Pagina {{ currentPage() + 1 }} van {{ totaalPages() }} </span>
 
-          @if (uploadModus() === 'bestand') {
-          <label class="file-upload-label">
-            <input type="file" accept="image/jpeg,image/png" (change)="opBestandGeselecteerd($event)" />
-            <span class="file-upload-btn">Kies bestand</span>
-          </label>
-          }
-
-          @if (uploadBezig()) {
-          <small class="upload-status">Uploaden...</small>
-          }
-        </div>
-      </div>
-
-      @if (boekForm.get('afbeelding')?.value) {
-      <div class="afbeelding-preview">
-        <button type="button" class="afbeelding-verwijder" (click)="verwijderAfbeelding()">&times;</button>
-        <img [src]="boekForm.get('afbeelding')?.value" alt="Cover preview" />
-      </div>
-      }
-    </div>
-  </div>
-
-  <div>
-    <label for="aantalExemplaren">Aantal exemplaren:</label>
-    <input id="aantalExemplaren" formControlName="aantalExemplaren" />
-    @if (boekForm.get('aantalExemplaren')?.invalid && boekForm.get('aantalExemplaren')?.touched) {
-    <div>
-      @if (boekForm.get('aantalExemplaren')?.errors?.['required']) {
-      <small>Aantal exemplaren is verplicht.</small>
-      }
-      @if (boekForm.get('aantalExemplaren')?.errors?.['min']) {
-      <small>Aantal exemplaren moet minimaal 1 zijn.</small>
-      }
-    </div>
-    }
-  </div>
-
-  <div>
-    <label for="locatie">Locatie:</label>
-    <input id="locatie" formControlName="locatie" />
-    @if (boekForm.get('locatie')?.invalid && boekForm.get('locatie')?.touched) {
-    <div>
-      @if (boekForm.get('locatie')?.errors?.['required']) {
-      <small>Locatie is verplicht.</small>
-      }
-    </div>
-    }
-  </div>
-
-  <div class="form-actions">
-    <button type="submit" [disabled]="boekForm.invalid || (mode() !== 'toevoegen' && !boekGevonden())">
-      {{ mode() === 'toevoegen' ? 'Boek toevoegen' : 'Wijzigingen opslaan' }}
-    </button>
-    @if (mode() === 'wijzigen' && boekGevonden()) {
-    <button type="button" class="delete-button" (click)="openVerwijderModal()">
-      Verwijder
-    </button>
-    }
-    <button type="button" (click)="resetForm()" class="reset-button">
-      {{ mode() === 'toevoegen' ? 'Wissen' : 'Annuleren' }}
-    </button>
-  </div>
-</form>
-}
-
-@if (toonVerwijderModal()) {
-<div class="modal-overlay" (click)="sluitVerwijderModal()">
-  <div class="modal-content" (click)="$event.stopPropagation()">
-    <div class="modal-header">
-      <h3>Boek verwijderen</h3>
-    </div>
-    <div class="modal-body">
-      <p>Weet je zeker dat je dit boek wilt verwijderen?</p>
-      @if (naarTeWijzigenBoek()) {
-      <p class="boek-info">
-        <strong>{{ naarTeWijzigenBoek()!.titel }}</strong> door {{ naarTeWijzigenBoek()!.auteur }}
-      </p>
-      }
-      <p class="warning-text">Deze actie kan niet ongedaan worden gemaakt.</p>
-    </div>
-    <div class="modal-footer">
-      <button type="button" class="btn-annuleren" (click)="sluitVerwijderModal()">Annuleren</button>
-      <button type="button" class="btn-verwijderen" (click)="bevestigVerwijderen()">
-        Verwijderen
+      <button
+        type="button"
+        class="pagination-button"
+        (click)="gaNaarVolgendePagina()"
+        [disabled]="currentPage() + 1 >= totaalPages()"
+      >
+        Volgende →
       </button>
     </div>
   </div>
-</div>
+}
+
+@if (mode() === 'toevoegen' || boekGevonden()) {
+  <form [formGroup]="boekForm" (ngSubmit)="onSubmit()">
+    <div>
+      <label for="titel">Titel:</label>
+      <input id="titel" formControlName="titel" />
+      @if (boekForm.get('titel')?.invalid && boekForm.get('titel')?.touched) {
+        <div>
+          @if (boekForm.get('titel')?.errors?.['required']) {
+            <small>Titel is verplicht.</small>
+          }
+          @if (boekForm.get('titel')?.errors?.['minlength']) {
+            <small>Titel moet minimaal 2 tekens bevatten.</small>
+          }
+        </div>
+      }
+    </div>
+
+    <div>
+      <label for="auteur">Auteur:</label>
+      <input id="auteur" formControlName="auteur" />
+      @if (boekForm.get('auteur')?.invalid && boekForm.get('auteur')?.touched) {
+        <div>
+          @if (boekForm.get('auteur')?.errors?.['required']) {
+            <small>Auteur is verplicht.</small>
+          }
+          @if (boekForm.get('auteur')?.errors?.['minlength']) {
+            <small>Auteur moet minimaal 2 tekens bevatten.</small>
+          }
+        </div>
+      }
+    </div>
+
+    <div>
+      <label for="isbn">ISBN:</label>
+      <div style="display: flex; gap: 10px">
+        <input
+          id="isbn"
+          type="text"
+          formControlName="isbn"
+          (input)="onIsbnInput($event)"
+          placeholder="9789012345678"
+          maxlength="13"
+        />
+        <button type="button" (click)="genereerIsbn()">Genereer ISBN</button>
+      </div>
+      @if (boekForm.get('isbn')?.invalid && boekForm.get('isbn')?.touched) {
+        <div>
+          @if (boekForm.get('isbn')?.errors?.['required']) {
+            <small>ISBN is verplicht.</small>
+          }
+          @if (boekForm.get('isbn')?.errors?.['isbn']) {
+            <small>{{ boekForm.get('isbn')?.errors?.['isbn'] }}</small>
+          }
+        </div>
+      }
+    </div>
+
+    <div>
+      <label for="uitgever">Uitgever:</label>
+      <input id="uitgever" formControlName="uitgever" />
+      @if (boekForm.get('uitgever')?.invalid && boekForm.get('uitgever')?.touched) {
+        <div>
+          @if (boekForm.get('uitgever')?.errors?.['required']) {
+            <small>Uitgever is verplicht.</small>
+          }
+          @if (boekForm.get('uitgever')?.errors?.['minlength']) {
+            <small>Uitgever moet minimaal 2 tekens bevatten.</small>
+          }
+        </div>
+      }
+    </div>
+
+    <div>
+      <label for="uitgaveJaar">Uitgavejaar:</label>
+      <input id="uitgaveJaar" formControlName="uitgaveJaar" />
+      @if (boekForm.get('uitgaveJaar')?.invalid && boekForm.get('uitgaveJaar')?.touched) {
+        <div>
+          @if (boekForm.get('uitgaveJaar')?.errors?.['required']) {
+            <small>Uitgavejaar is verplicht.</small>
+          }
+          @if (boekForm.get('uitgaveJaar')?.errors?.['pattern']) {
+            <small>Uitgavejaar moet een geldig jaar zijn (bijv. 2023).</small>
+          }
+        </div>
+      }
+    </div>
+
+    <div>
+      <label for="pagina">Aantal pagina's:</label>
+      <input id="pagina" formControlName="pagina" />
+      @if (boekForm.get('pagina')?.invalid && boekForm.get('pagina')?.touched) {
+        <div>
+          @if (boekForm.get('pagina')?.errors?.['required']) {
+            <small>Aantal pagina's is verplicht.</small>
+          }
+          @if (boekForm.get('pagina')?.errors?.['min']) {
+            <small>Aantal pagina's moet minimaal 1 zijn.</small>
+          }
+        </div>
+      }
+    </div>
+
+    <div class="genre-leesniveau-row">
+      <div>
+        <label>Genre:</label>
+        <input type="hidden" formControlName="genre" />
+        <div class="genre-dropdown-row">
+          <select
+            [ngModel]="selectedHoofdGenre()"
+            (ngModelChange)="selectedHoofdGenre.set($event); selectedSubGenre.set('')"
+            [ngModelOptions]="{ standalone: true }"
+          >
+            <option value="">Kies een genre</option>
+            @for (genre of hoofdGenres; track genre) {
+              <option [value]="genre">{{ genre }}</option>
+            }
+          </select>
+          @if (selectedHoofdGenre() && getSubGenres(selectedHoofdGenre()).length > 0) {
+            <select
+              [ngModel]="selectedSubGenre()"
+              (ngModelChange)="selectedSubGenre.set($event)"
+              [ngModelOptions]="{ standalone: true }"
+            >
+              <option value="">Kies subgenre</option>
+              @for (sub of getSubGenres(selectedHoofdGenre()); track sub) {
+                <option [value]="sub">{{ sub }}</option>
+              }
+            </select>
+          }
+          <button
+            type="button"
+            class="genre-toevoegen-btn"
+            (click)="voegGenreToe()"
+            [disabled]="!selectedHoofdGenre()"
+          >
+            +
+          </button>
+        </div>
+        @if (geselecteerdeGenres().length > 0) {
+          <div class="genre-tags">
+            @for (genre of geselecteerdeGenres(); track genre) {
+              <span class="genre-tag">
+                {{ genre }}
+                <button type="button" (click)="verwijderGenre(genre)">&times;</button>
+              </span>
+            }
+          </div>
+        }
+        @if (boekForm.get('genre')?.invalid && boekForm.get('genre')?.touched) {
+          <div>
+            @if (boekForm.get('genre')?.errors?.['required']) {
+              <small>Genre is verplicht.</small>
+            }
+          </div>
+        }
+      </div>
+
+      <div>
+        <label for="leesniveau">Leesniveau:</label>
+        <select id="leesniveau" formControlName="leesniveau">
+          <option value="">Geen leesniveau</option>
+          <option value="A (eenvoudig taalgebruik)">A (eenvoudig taalgebruik)</option>
+          <option value="B (gemiddeld taalgebruik)">B (gemiddeld taalgebruik)</option>
+          <option value="C (complex taalgebruik)">C (complex taalgebruik)</option>
+          <option value="D (literair niveau)">D (literair niveau)</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Thematische tags:</label>
+        <input type="hidden" formControlName="thematischeTag" />
+        <div class="genre-dropdown-row">
+          <select
+            [ngModel]="selectedTag()"
+            (ngModelChange)="selectedTag.set($event)"
+            [ngModelOptions]="{ standalone: true }"
+          >
+            <option value="">Kies een thematische tag</option>
+            @for (tag of beschikbareTags; track tag) {
+              <option [value]="tag">{{ tag }}</option>
+            }
+          </select>
+          <button
+            type="button"
+            class="genre-toevoegen-btn"
+            (click)="voegTagToe()"
+            [disabled]="!selectedTag()"
+          >
+            +
+          </button>
+        </div>
+        @if (geselecteerdeTags().length > 0) {
+          <div class="genre-tags">
+            @for (tag of geselecteerdeTags(); track tag) {
+              <span class="genre-tag">
+                {{ tag }}
+                <button type="button" (click)="verwijderTag(tag)">&times;</button>
+              </span>
+            }
+          </div>
+        }
+      </div>
+    </div>
+
+    <div>
+      <label for="beschrijving">Beschrijving:</label>
+      <textarea id="beschrijving" formControlName="beschrijving"></textarea>
+      @if (boekForm.get('beschrijving')?.invalid && boekForm.get('beschrijving')?.touched) {
+        <div>
+          @if (boekForm.get('beschrijving')?.errors?.['required']) {
+            <small>Beschrijving is verplicht.</small>
+          }
+        </div>
+      }
+    </div>
+
+    <div class="afbeelding-sectie">
+      <label>Afbeelding:</label>
+      <div class="afbeelding-row">
+        <div class="afbeelding-controls">
+          <div class="image-upload-toggle">
+            <button
+              type="button"
+              (click)="uploadModus.set('url')"
+              [class.active]="uploadModus() === 'url'"
+            >
+              URL invoeren
+            </button>
+            <button
+              type="button"
+              (click)="uploadModus.set('bestand')"
+              [class.active]="uploadModus() === 'bestand'"
+            >
+              Bestand uploaden
+            </button>
+          </div>
+
+          <div class="afbeelding-input">
+            @if (uploadModus() === 'url') {
+              <input id="afbeelding" formControlName="afbeelding" placeholder="https://..." />
+            }
+
+            @if (uploadModus() === 'bestand') {
+              <label class="file-upload-label">
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png"
+                  (change)="opBestandGeselecteerd($event)"
+                />
+                <span class="file-upload-btn">Kies bestand</span>
+              </label>
+            }
+
+            @if (uploadBezig()) {
+              <small class="upload-status">Uploaden...</small>
+            }
+          </div>
+        </div>
+
+        @if (boekForm.get('afbeelding')?.value) {
+          <div class="afbeelding-preview">
+            <button type="button" class="afbeelding-verwijder" (click)="verwijderAfbeelding()">
+              &times;
+            </button>
+            <img [src]="boekForm.get('afbeelding')?.value" alt="Cover preview" />
+          </div>
+        }
+      </div>
+    </div>
+
+    <div>
+      <label for="aantalExemplaren">Aantal exemplaren:</label>
+      <input id="aantalExemplaren" formControlName="aantalExemplaren" />
+      @if (boekForm.get('aantalExemplaren')?.invalid && boekForm.get('aantalExemplaren')?.touched) {
+        <div>
+          @if (boekForm.get('aantalExemplaren')?.errors?.['required']) {
+            <small>Aantal exemplaren is verplicht.</small>
+          }
+          @if (boekForm.get('aantalExemplaren')?.errors?.['min']) {
+            <small>Aantal exemplaren moet minimaal 1 zijn.</small>
+          }
+        </div>
+      }
+    </div>
+
+    <div>
+      <label for="locatie">Locatie:</label>
+      <input id="locatie" formControlName="locatie" />
+      @if (boekForm.get('locatie')?.invalid && boekForm.get('locatie')?.touched) {
+        <div>
+          @if (boekForm.get('locatie')?.errors?.['required']) {
+            <small>Locatie is verplicht.</small>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Toegevoegd door Jouw baas Mohamed -->
+    <div class="didactisch-sectie">
+      <label class="didactisch-titel">Didactisch materiaal</label>
+      <div class="didactisch-row">
+        <label class="didactisch-checkbox">
+          <input type="checkbox" formControlName="didactischMateriaal" />
+          <span>Didactisch materiaal</span>
+        </label>
+
+        @if (boekForm.get('didactischMateriaal')?.value) {
+          <select
+            id="didactischeSubcategorie"
+            formControlName="didactischeSubcategorie"
+            class="didactisch-subcategorie-select"
+          >
+            <option value="">Kies subcategorie</option>
+            <option value="LESMETHODES">Lesmethodes</option>
+            <option value="DIDACTISCHE_HANDBOEKEN">Didactische handboeken</option>
+            <option value="EVALUATIEMATERIAAL">Evaluatiemateriaal</option>
+            <option value="NASLAGWERKEN">Naslagwerken</option>
+          </select>
+        }
+      </div>
+    </div>
+    <!-- End toegevoegd door Jouw baas Mohamed -->
+
+    <div class="form-actions">
+      <button
+        type="submit"
+        [disabled]="boekForm.invalid || (mode() !== 'toevoegen' && !boekGevonden())"
+      >
+        {{ mode() === 'toevoegen' ? 'Boek toevoegen' : 'Wijzigingen opslaan' }}
+      </button>
+      @if (mode() === 'wijzigen' && boekGevonden()) {
+        <button type="button" class="delete-button" (click)="openVerwijderModal()">
+          Verwijder
+        </button>
+      }
+      <button type="button" (click)="resetForm()" class="reset-button">
+        {{ mode() === 'toevoegen' ? 'Wissen' : 'Annuleren' }}
+      </button>
+    </div>
+  </form>
+}
+
+@if (toonVerwijderModal()) {
+  <div class="modal-overlay" (click)="sluitVerwijderModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Boek verwijderen</h3>
+      </div>
+      <div class="modal-body">
+        <p>Weet je zeker dat je dit boek wilt verwijderen?</p>
+        @if (naarTeWijzigenBoek()) {
+          <p class="boek-info">
+            <strong>{{ naarTeWijzigenBoek()!.titel }}</strong> door
+            {{ naarTeWijzigenBoek()!.auteur }}
+          </p>
+        }
+        <p class="warning-text">Deze actie kan niet ongedaan worden gemaakt.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-annuleren" (click)="sluitVerwijderModal()">
+          Annuleren
+        </button>
+        <button type="button" class="btn-verwijderen" (click)="bevestigVerwijderen()">
+          Verwijderen
+        </button>
+      </div>
+    </div>
+  </div>
 }

@@ -216,4 +216,38 @@
     .nav-link .text-label { display: none; } /* Verberg tekst, houd iconen op kleine schermen */
     .nav-link { padding: 10px; border-radius: 50%; width: 42px; justify-content: center; }
     .toggle-text { display: none; }
+    .dev-role-label { display: none; }
+}
+
+/* =========================================
+   DEV ROLE SWITCHER (alleen in dev-mode)
+   ========================================= */
+.dev-role-switcher {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border: 1px dashed #f59e0b;
+    border-radius: 20px;
+    background: #fffbeb;
+    cursor: pointer;
+    font-size: 0.85rem;
+}
+
+.dev-role-label {
+    font-weight: 800;
+    color: #b45309;
+    letter-spacing: 1px;
+    font-size: 0.7rem;
+}
+
+.dev-role-switcher select {
+    border: none;
+    background: transparent;
+    font-weight: 700;
+    color: #92400e;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.85rem;
+    outline: none;
 }
