@@ -1,9 +1,17 @@
 <div class="dashboard-container">
   <div class="banner">
-    <h1>Beheerdersdashboard</h1>
-    <p>GO! SmartLib Antwerpen</p>
+    <div class="banner-titles">
+      <h1>Beheerdersdashboard</h1>
+      <p>GO! SmartLib Antwerpen</p>
+    </div>
     @if (isOokLeerkracht()) {
-      <a routerLink="/leerkracht-dashboard" class="btn-go">← Terug naar leerkracht-dashboard</a>
+      <a routerLink="/leerkracht-dashboard" class="dashboard-switch">
+        <span class="dashboard-switch-icon" aria-hidden="true">⇄</span>
+        <span class="dashboard-switch-text">
+          <span class="dashboard-switch-kicker">Wissel van dashboard</span>
+          <span class="dashboard-switch-label">Leerkracht</span>
+        </span>
+      </a>
     }
   </div>
 
