@@ -1,5 +1,4 @@
 <div class="admin-layout">
-  <!-- header with minimal styling -->
   <header class="admin-header">
     <div class="header-content">
       <img src="https://go-antwerpen.be/wp-content/uploads/2021/11/logo_go_antwerpen.svg" alt="GO! Antwerpen" class="go-logo">
@@ -10,7 +9,6 @@
     </div>
   </header>
 
-  <!-- navigation tabs -->
   <nav class="admin-nav">
     <div class="nav-container">
       <button [class.active]="activeTab() === 'scholen'" (click)="wisselTab('scholen')">
@@ -24,183 +22,294 @@
 
   <main class="admin-content">
 
-    <!-- tab 1: scholen overzicht -->
     @if (activeTab() === 'scholen') {
+      <div class="admin-card">
+        <div class="card-header">
+          <h2>Geregistreerde scholen</h2>
+        </div>
 
-      <!-- list of all schools (only database info) -->
-      @if (!geselecteerdeSchool()) {
-        <div class="admin-card">
-          <div class="card-header">
-            <h2>Geregistreerde scholen</h2>
-          </div>
-
-          <div class="table-responsive">
-            <table class="admin-table">
-              <thead>
+        <div class="table-responsive">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Naam school</th>
+                <th>Systeemcode</th>
+                <th>Acties</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (school of geregistreerdeScholen(); track school.id) {
                 <tr>
-                  <th>Naam school</th>
-                  <th>Smartschool koppeling</th>
-                  <th>Acties</th>
+                  <td><strong>{{ school.naam }}</strong><br><small class="text-muted">{{ school.adres }}</small></td>
+                  <td>
+                    <span class="badge" style="background: #e2fbd7; color: #348a45; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem; font-weight: 600;">
+                      Actief ({{ school.apiCode }})
+                    </span>
+                  </td>
+                  <td>
+                    <button class="btn-outline btn-sm" (click)="bewerkCampussenVoor(school)">
+                      {{ bewerkSchoolId() === school.id ? 'Sluiten' : 'Bewerken' }}
+                    </button>
+                    <button class="btn-outline btn-sm btn-delete" style="margin-left: 8px;" (click)="verwijderSchool(school)">Verwijderen</button>
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                @for (school of geregistreerdeScholen(); track school.id) {
+                @if (bewerkSchoolId() === school.id) {
                   <tr>
-                    <td><strong>{{ school.naam }}</strong></td>
-                    <td><span class="badge" style="background: #e2fbd7; color: #348a45; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem; font-weight: 600;">Actief ({{ school.apiCode }})</span></td>
-                    <td>
-                      <button class="btn-outline btn-sm" (click)="bekijkSchoolDetails(school)">Bewerken</button>
-                      <button class="btn-outline btn-sm btn-delete" (click)="verwijderSchool(school)">Verwijderen</button>
-                    </td>
+                    <td colspan="3" style="background:#f7f9fc; padding: 20px;">
+                      <h4 style="margin-top:0;">Campussen van {{ school.naam }}</h4>
 
-                  </tr>
-                } @empty {
-                  <tr>
-                    <td colspan="3" class="text-muted text-center">Geen scholen gevonden in de database.</td>
+                      @if (bewerkCampussen().length === 0) {
+                        <p class="text-muted">Nog geen campussen.</p>
+                      } @else {
+                        <ul style="list-style:none; padding:0; margin: 0 0 15px 0;">
+                          @for (c of bewerkCampussen(); track c.id) {
+                            <li style="display:flex; align-items:center; gap:10px; padding:6px 0; border-bottom:1px solid #e5e7eb;">
+                              <span style="flex:1;">{{ c.naam }}</span>
+                              <button type="button" class="btn-outline btn-sm btn-delete" (click)="verwijderBestaandeCampus(c)">Verwijderen</button>
+                            </li>
+                          }
+                        </ul>
+                      }
+
+                      <div style="display:flex; gap:10px; align-items:center;">
+                        <input class="form-input" style="flex:1;" placeholder="Naam nieuwe campus"
+                               [value]="nieuweCampusNaam()"
+                               (input)="nieuweCampusNaam.set($any($event.target).value)"
+                               (keyup.enter)="voegCampusToeAanBestaande()">
+                        <button type="button" class="btn-go btn-sm" (click)="voegCampusToeAanBestaande()"
+                                [disabled]="!nieuweCampusNaam().trim()">
+                          + Campus toevoegen
+                        </button>
+                      </div>
+
+                      @if (bewerkFout()) {
+                        <p style="color:#c0392b; margin-top:10px;">{{ bewerkFout() }}</p>
+                      }
+                    </td>
                   </tr>
                 }
-              </tbody>
-            </table>
-          </div>
+              } @empty {
+                <tr>
+                  <td colspan="3" class="text-muted text-center" style="padding: 30px;">
+                    Geen scholen gevonden in de database. Gebruik de wizard om een school toe te voegen.
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
         </div>
-      }
-
-      <!-- detail view with live smartschool data -->
-      @else {
-        <div class="admin-card detail-view">
-          <button class="btn-text back-btn" (click)="sluitSchoolDetails()">← Terug naar overzicht</button>
-
-          <div class="school-header-simple">
-            <h2>{{ geselecteerdeSchool().naam }}</h2>
-            <p class="text-muted">Live data weergave via Smartschool API</p>
-          </div>
-
-          @if (isDataAanHetLaden()) {
-            <div class="text-center" style="padding: 40px; color: var(--go-bordeaux);">
-              <strong>Data live ophalen uit Smartschool...</strong>
-            </div>
-          } @else {
-            <div class="split-layout">
-              <div class="split-column">
-                <h3>Klassen</h3>
-                <table class="admin-table">
-                  <thead><tr><th>Klasnaam</th></tr></thead>
-                  <tbody>
-                    @for (klas of liveKlassen(); track klas.id) {
-                      <tr><td><strong>{{ klas.naam }}</strong></td></tr>
-                    } @empty {
-                      <tr><td class="text-muted">Geen klassen gevonden in Smartschool.</td></tr>
-                    }
-                  </tbody>
-                </table>
-              </div>
-
-              <div class="split-column">
-                <h3>Leerlingen</h3>
-                <table class="admin-table">
-                  <thead>
-                    <tr>
-                      <th>Naam</th>
-                      <th>Klas</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    @for (leerling of liveLeerlingen(); track leerling.id) {
-                      <tr>
-                        <td><strong>{{ leerling.voorNaam }} {{ leerling.achternaam }}</strong></td>
-                        <td>{{ leerling.klas | uppercase }}</td>
-                      </tr>
-                    } @empty {
-                      <tr><td colspan="2" class="text-muted">Geen leerlingen gevonden in Smartschool.</td></tr>
-                    }
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          }
-        </div>
-      }
+      </div>
     }
 
-    <!-- tab 2: wizard -->
     @if (activeTab() === 'wizard') {
       <div class="admin-card wizard-card">
         <div class="card-header">
-          <h2>School toevoegen</h2>
+          <h2>Nieuwe school toevoegen</h2>
         </div>
 
         <div class="wizard-progress">
           <div class="progress-track">
-            <div class="progress-fill" [style.width.%]="(huidigeStap() / 2) * 100"></div>
+            <div class="progress-fill" [style.width.%]="(huidigeStapWizard() / totaleStappen) * 100"></div>
           </div>
           <div class="step-labels">
-            <span [class.active]="huidigeStap() >= 1">Instelling selecteren</span>
-            <span [class.active]="huidigeStap() >= 2">Smartschool synchronisatie</span>
+            <span [class.active]="huidigeStapWizard() >= 1">1. Gegevens</span>
+            <span [class.active]="huidigeStapWizard() >= 2">2. Verbinding</span>
+            <span [class.active]="huidigeStapWizard() >= 3">3. Campussen</span>
+            <span [class.active]="huidigeStapWizard() >= 4">4. Preview</span>
+            <span [class.active]="huidigeStapWizard() >= 5">5. Bevestigen</span>
           </div>
         </div>
 
-        <div class="wizard-body">
+        <form [formGroup]="wizardForm" class="wizard-body">
 
-          <!-- step 1: instelling selecteren (ROBUUSTE NATIVE DROPDOWN) -->
-          @if (huidigeStap() === 1) {
-            <div class="wizard-step-content">
-              <h3>Kies de in te richten school</h3>
+          @if (huidigeStapWizard() === 1) {
+            <div formGroupName="stap1" class="wizard-step-content">
+              <h3>1. Schoolgegevens</h3>
               <hr class="divider">
 
               <div class="form-group">
-                <label>Naam school</label>
-                <!-- safely bind with ngModel instead of value -->
-                <select
-                  class="form-input"
-                  [ngModel]="nieuweSchool().naam"
-                  (ngModelChange)="onSchoolGeselecteerd($event)">
-                  <option value="" disabled>Kies een GO! school uit de lijst...</option>
-
+                <label>Kies een GO! school</label>
+                <select class="form-input" (change)="onSchoolGeselecteerd($event)">
+                  <option value="" selected disabled>Selecteer uit de lijst...</option>
                   @for (school of beschikbareScholen(); track school.naam) {
                     <option [value]="school.naam">{{ school.naam }}</option>
                   }
                 </select>
-
-                @if (beschikbareScholen().length === 0) {
-                  <p class="text-muted" style="margin-top: 10px; font-size: 0.85rem;">Alle scholen zijn al geregistreerd.</p>
-                }
               </div>
-            </div>
-            <div class="action-row right">
-              <!-- strictly check for empty string -->
-              <button (click)="volgendeStap()" class="btn-go" [disabled]="nieuweSchool().naam === ''">Volgende stap</button>
+
+              <div class="form-group">
+                <label>Schoolnaam</label>
+                <input formControlName="schoolNaam" class="form-input" type="text">
+              </div>
+
+              <div class="form-group">
+                <label>Adres</label>
+                <input formControlName="adres" class="form-input" type="text">
+              </div>
+
+              <div class="form-group">
+                <label>Smartschool-domein</label>
+                <input formControlName="smartschoolDomein" class="form-input" type="text" placeholder="bv. mijnschool.smartschool.be">
+              </div>
+
+              <div class="form-group">
+                <label>OAuth Client ID</label>
+                <input formControlName="oauthClientId" class="form-input" type="text">
+              </div>
+
+              <div class="form-group">
+                <label>OAuth Client Secret</label>
+                <input formControlName="oauthClientSecret" class="form-input" type="password">
+              </div>
             </div>
           }
 
-          <!-- step 2: synchronisatie & afronden -->
-          @if (huidigeStap() === 2) {
+          @if (huidigeStapWizard() === 2) {
             <div class="wizard-step-content">
-              <h3>Overzicht en synchronisatie</h3>
+              <h3>2. Verbinding testen</h3>
+              <p>Test de verbinding met OneRoster aan de hand van de ingegeven credentials.</p>
               <hr class="divider">
 
-              <table class="summary-table">
-                <tbody>
-                  <tr>
-                    <td><strong>Geselecteerde instelling</strong></td>
-                    <td>{{ nieuweSchool().naam }}</td>
-                  </tr>
-                </tbody>
-              </table>
+              <button type="button" class="btn-go" (click)="testVerbinding()" [disabled]="verbindingStatus() === 'bezig'">
+                {{ verbindingStatus() === 'bezig' ? 'Bezig met testen...' : 'Test verbinding' }}
+              </button>
 
-              <div class="upload-box-clean" style="margin-top: 30px;">
-                <h4 style="margin-top: 0; color: var(--text-dark);">Koppeling met Smartschool</h4>
-                <p class="instruction-text">
-                  Bij het bevestigen zal het systeem automatisch verbinding maken met de Smartschool API. Alle actieve klassen en leerlingen worden veilig en live opgehaald wanneer nodig. Er worden geen privacygevoelige gegevens in de database opgeslagen.
-                </p>
-              </div>
-            </div>
-
-            <div class="action-row split">
-              <button (click)="vorigeStap()" class="btn-outline">Vorige</button>
-              <button (click)="startSchoolOp()" class="btn-go success">Instelling aanmaken & synchroniseren</button>
+              @if (verbindingStatus() === 'ok') {
+                <p style="color: #348a45; margin-top: 15px; font-weight: 600;">✓ Verbinding gelukt</p>
+              }
+              @if (verbindingStatus() === 'fout') {
+                <p style="color: #c0392b; margin-top: 15px; font-weight: 600;">✗ Verbinding mislukt — controleer het domein en de credentials.</p>
+                @if (verbindingDetail()) {
+                  <pre style="background:#fdecea; color:#922; padding:10px; border-radius:4px; white-space:pre-wrap; font-size:0.85rem;">{{ verbindingDetail() }}</pre>
+                }
+              }
             </div>
           }
-        </div>
+
+          @if (huidigeStapWizard() === 3) {
+            <div formGroupName="stap3" class="wizard-step-content">
+              <h3>3. Campussen toevoegen</h3>
+              <p>Voeg de fysieke vestigingsplaatsen of gebouwen van deze school toe.</p>
+              <hr class="divider">
+
+              <div formArrayName="campussen" style="margin-top: 20px;">
+                @for (campus of campussen.controls; track $index) {
+                  <div [formGroupName]="$index" style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <input formControlName="naam" class="form-input" placeholder="Naam campus (bv. Hoofdgebouw)">
+                    <button type="button" class="btn-outline btn-delete" (click)="verwijderCampus($index)" title="Campus verwijderen">X</button>
+                  </div>
+                }
+              </div>
+              <button type="button" class="btn-outline btn-sm" style="margin-top: 10px;" (click)="voegCampusToe()">+ Extra campus</button>
+            </div>
+          }
+
+          @if (huidigeStapWizard() === 4) {
+            <div class="wizard-step-content">
+              <h3>4. Import-preview</h3>
+              <p>Bekijk welke klassen en gebruikers vanuit OneRoster zullen worden geïmporteerd.</p>
+              <hr class="divider">
+
+              <button type="button" class="btn-outline" (click)="haalPreviewOp()" [disabled]="bezig()">
+                {{ bezig() ? 'Bezig met ophalen...' : (previewData() ? 'Opnieuw ophalen' : 'Preview ophalen') }}
+              </button>
+
+              @if (previewData(); as p) {
+                <div style="margin-top: 20px;">
+                  <p>
+                    <strong>{{ p.aantalKlassen }}</strong> klassen,
+                    <strong>{{ p.aantalLeerlingen }}</strong> leerlingen en
+                    <strong>{{ p.aantalLeerkrachten }}</strong> leerkrachten zullen worden geïmporteerd.
+                  </p>
+
+                  <div style="display: flex; gap: 30px; margin-top: 15px;">
+                    <div style="flex: 1;">
+                      <h4>Klassen</h4>
+                      <ul style="padding-left: 18px;">
+                        @for (k of p.klassen; track k.id) {
+                          <li>{{ k.naam }}</li>
+                        }
+                      </ul>
+                    </div>
+                    <div style="flex: 1;">
+                      <h4>Leerlingen</h4>
+                      <ul style="padding-left: 18px;">
+                        @for (l of p.leerlingen; track l.id) {
+                          <li>
+                            {{ l.voorNaam }} {{ l.achternaam }}
+                            @if (l.klas) {
+                              <small class="text-muted">({{ l.klas }})</small>
+                            }
+                          </li>
+                        }
+                      </ul>
+                    </div>
+                    <div style="flex: 1;">
+                      <h4>Leerkrachten</h4>
+                      <ul style="padding-left: 18px;">
+                        @for (lk of p.leerkrachten; track lk.id) {
+                          <li>{{ lk.voorNaam }} {{ lk.achternaam }}</li>
+                        }
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+
+          @if (huidigeStapWizard() === 5) {
+            <div class="wizard-step-content text-center">
+              <h3>5. Bevestigen en importeren</h3>
+              <hr class="divider">
+
+              <div class="upload-box-clean" style="margin-top: 20px; text-align: left;">
+                <p><strong>School:</strong> {{ wizardForm.value.stap1.schoolNaam }}</p>
+                <p><strong>Adres:</strong> {{ wizardForm.value.stap1.adres }}</p>
+                <p><strong>Smartschool-domein:</strong> {{ wizardForm.value.stap1.smartschoolDomein }}</p>
+                <p><strong>Campussen:</strong> {{ campussen.length }}</p>
+                @if (previewData(); as p) {
+                  <p><strong>Te importeren:</strong> {{ p.aantalKlassen }} klassen, {{ p.aantalLeerlingen }} leerlingen, {{ p.aantalLeerkrachten }} leerkrachten</p>
+                }
+              </div>
+
+              <p style="margin-top: 15px;">Bij bevestiging wordt alles in één transactie opgeslagen — bij een fout wordt alles teruggedraaid.</p>
+
+              @if (onboardSucces()) {
+                <p style="color: #348a45; margin-top: 15px; font-weight: 600;">✓ School succesvol toegevoegd — wizard wordt afgesloten...</p>
+              }
+            </div>
+          }
+
+          @if (foutmelding()) {
+            <div style="color: red; text-align: center; margin-top: 20px; font-weight: bold;">
+              {{ foutmelding() }}
+            </div>
+          }
+
+          <div class="action-row split">
+            <button type="button" class="btn-outline" (click)="vorigeStapWizard()"
+                    [disabled]="huidigeStapWizard() === 1 || bezig() || onboardSucces()">
+              Vorige
+            </button>
+
+            @if (huidigeStapWizard() < 5) {
+              <button type="button" class="btn-go" (click)="volgendeStapWizard()"
+                [disabled]="(huidigeStapWizard() === 1 && wizardForm.get('stap1')?.invalid) ||
+                            (huidigeStapWizard() === 2 && verbindingStatus() !== 'ok') ||
+                            (huidigeStapWizard() === 3 && wizardForm.get('stap3')?.invalid) ||
+                            (huidigeStapWizard() === 4 && !previewData())">
+                Volgende stap
+              </button>
+            } @else {
+              <button type="button" class="btn-go success" (click)="bevestigEnImporteer()"
+                      [disabled]="bezig() || onboardSucces()">
+                {{ bezig() ? 'Bezig met opslaan...' : 'Bevestig en importeer' }}
+              </button>
+            }
+          </div>
+
+        </form>
       </div>
     }
 

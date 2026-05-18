@@ -6,6 +6,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Entity
 @Table(name = "scholen")
 @Getter
@@ -25,4 +28,13 @@ public class School {
 
     @Column(name = "api_code")
     private String apiCode;
+
+    // new fields for smartschool onboarding
+    private String smartschoolDomein;
+    private String oauthClientId;
+    private String oauthClientSecret;
+
+    // cascade ensures that campuses are saved automatically when a school is saved
+    @OneToMany(mappedBy = "school", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Campus> campussen = new HashSet<>();
 }
