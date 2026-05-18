@@ -40,6 +40,9 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Rol rol;
 
+    @Column(nullable = false)
+    private boolean isBeheerder = false;
+
     @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<LeeslijstMap> mappen = new HashSet<>();

@@ -4,6 +4,15 @@
       <h1>Leerkrachtendashboard</h1>
       <p class="hero-kicker">GO! SmartLib Antwerpen</p>
     </div>
+    @if (isOokBeheerder()) {
+      <a routerLink="/beheerder" class="dashboard-switch">
+        <span class="dashboard-switch-icon" aria-hidden="true">⇄</span>
+        <span class="dashboard-switch-text">
+          <span class="dashboard-switch-kicker">Wissel van dashboard</span>
+          <span class="dashboard-switch-label">Beheerder</span>
+        </span>
+      </a>
+    }
   </header>
 
   <section class="tile-grid">

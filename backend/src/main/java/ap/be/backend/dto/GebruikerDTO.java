@@ -6,5 +6,6 @@ public record GebruikerDTO(
         @JsonProperty("id") Long id,
         @JsonProperty("smartschoolId") String smartschoolId,
         @JsonProperty("klas") String klas,
-        @JsonProperty("rol") String rol) {
+        @JsonProperty("rol") String rol,
+        @JsonProperty("isBeheerder") boolean isBeheerder) {
 }

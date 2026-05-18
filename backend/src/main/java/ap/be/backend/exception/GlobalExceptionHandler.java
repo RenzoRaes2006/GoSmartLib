@@ -115,4 +115,14 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
 
+    @ExceptionHandler(GebruikerNotFoundException.class)
+    public ResponseEntity<String> handleGebruikerNotFound(GebruikerNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(OngeldigeRolException.class)
+    public ResponseEntity<String> handleOngeldigeRol(OngeldigeRolException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+    }
+
 }

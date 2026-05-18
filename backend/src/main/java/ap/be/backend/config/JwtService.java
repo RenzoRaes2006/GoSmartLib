@@ -59,11 +59,16 @@ public class JwtService {
      * @return de ondertekende JWT-token als compacte string
      */
     public String generateToken(String smartschoolId, String rol, String naam, String klas) {
+        return generateToken(smartschoolId, rol, naam, klas, false);
+    }
+
+    public String generateToken(String smartschoolId, String rol, String naam, String klas, boolean isBeheerder) {
         return Jwts.builder()
                 .setSubject(smartschoolId)
                 .claim("role", rol)
                 .claim("name", naam)
                 .claim("klas", klas)
+                .claim("isBeheerder", isBeheerder)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
@@ -127,6 +132,16 @@ public class JwtService {
                 .parseClaimsJws(token)
                 .getBody()
                 .get("role", String.class);
+    }
+
+    public boolean extractIsBeheerder(String token) {
+        Boolean value = Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .get("isBeheerder", Boolean.class);
+        return value != null && value;
     }
 
     /**
