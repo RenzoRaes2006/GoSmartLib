@@ -1,5 +1,4 @@
 import { HttpInterceptorFn } from '@angular/common/http';
-import { isDevMode } from '@angular/core';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
     // Externe API's (zoals Google Books) niet aanraken: een custom header
@@ -20,10 +19,11 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         return next(req);
     }
 
-    // Dev-modus: stuur X-Dev-Role mee zodat de backend DevAuthFilter
-    // weet welke rol hij moet simuleren. De rol kan tijdens het testen
-    // overruled worden via localStorage.setItem('devRole', 'STUDENT').
-    if (isDevMode()) {
+    // Dev-modus: enkel op localhost. In de VM/productie zou een dev-build
+    // anders X-Dev-Role meesturen i.p.v. het JWT-token, wat een OAuth-redirect
+    // veroorzaakt omdat DevAuthFilter daar niet draait.
+    const isLocalhost = window.location.hostname === 'localhost';
+    if (isLocalhost) {
         const devRole = (localStorage.getItem('devRole') || 'BEHEERDER').toUpperCase();
         const devBeheerder = localStorage.getItem('devBeheerder') === 'true';
         const devReq = req.clone({
