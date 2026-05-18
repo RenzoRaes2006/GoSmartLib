@@ -3,5 +3,10 @@ import { Boek } from "./Boek";
 export interface KlassLeeslijst {
   id: number;
   naam: string;
-  boeken: Boek[]; 
+  klas?: string | null;
+  leerlingId?: number | null;
+  leerlingNaam?: string | null;
+  beschrijving?: string | null;
+  zichtbaar: boolean;
+  boeken: Boek[];
 }

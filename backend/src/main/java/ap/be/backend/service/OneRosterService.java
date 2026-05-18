@@ -10,6 +10,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Haalt via de OneRoster API de rol en klas op van een ingelogde gebruiker.
@@ -43,6 +44,8 @@ public class OneRosterService {
 
     private String cachedAccessToken = null;
     private long tokenExpiresAt = 0;
+
+    private final ConcurrentHashMap<String, String> naamCache = new ConcurrentHashMap<>();
 
     /**
      * Geeft een geldig access token terug.
@@ -229,5 +232,58 @@ public class OneRosterService {
             System.err.println("[OneRoster] Fout bij ophalen klas voor '" + sourcedId + "': " + e.getMessage());
             return "onbekend";
         }
+    }
+
+    /**
+     * Haalt de volledige naam (givenName + familyName) op van een gebruiker via
+     * zijn OneRoster sourcedId. Resultaat wordt in-memory gecached zodat een
+     * lijst met dezelfde leerling-koppelingen niet telkens een API-call doet.
+     *
+     * @param sourcedId de OneRoster sourcedId (in dit project: smartschoolId)
+     * @return de volledige naam, of null als ophalen mislukt
+     */
+    public String getNaamBySourcedId(String sourcedId) {
+        if (sourcedId == null || sourcedId.isBlank()) {
+            return null;
+        }
+        String cached = naamCache.get(sourcedId);
+        if (cached != null) {
+            return cached;
+        }
+
+        try {
+            String accessToken = getAccessToken();
+            if (accessToken == null) return null;
+
+            String url = baseUrl + "/users/" + sourcedId;
+            ResponseEntity<Map> response = restTemplate.exchange(
+                    url, HttpMethod.GET, new HttpEntity<>(buildBearerHeaders(accessToken)), Map.class);
+
+            @SuppressWarnings("unchecked")
+            Map<String, Object> user = (Map<String, Object>) response.getBody().get("user");
+            if (user == null) return null;
+
+            String givenName = (String) user.get("givenName");
+            String familyName = (String) user.get("familyName");
+
+            String volledigeNaam = bouwVolledigeNaam(givenName, familyName);
+            if (volledigeNaam != null) {
+                naamCache.put(sourcedId, volledigeNaam);
+            }
+            return volledigeNaam;
+
+        } catch (Exception e) {
+            System.err.println("[OneRoster] Fout bij ophalen naam voor '" + sourcedId + "': " + e.getMessage());
+            return null;
+        }
+    }
+
+    private String bouwVolledigeNaam(String givenName, String familyName) {
+        boolean heeftGiven = givenName != null && !givenName.isBlank();
+        boolean heeftFamily = familyName != null && !familyName.isBlank();
+        if (heeftGiven && heeftFamily) return givenName + " " + familyName;
+        if (heeftGiven) return givenName;
+        if (heeftFamily) return familyName;
+        return null;
     }
 }

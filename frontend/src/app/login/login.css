@@ -1,12 +1,14 @@
+/* Container for the entire page */
 .login-container {
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background-color: #f4f7f6; /* Pas dit aan naar jullie eigen achtergrondkleur */
+  background-color: #f4f7f6;
   font-family: Arial, sans-serif;
 }
 
+/* The card in the center */
 .login-card {
   background: white;
   padding: 40px;
@@ -17,6 +19,15 @@
   width: 100%;
 }
 
+/* The logo at the top */
+.brand-logo {
+  display: block;
+  margin: 0 auto 24px auto;
+  max-width: 100px;
+  height: auto;
+}
+
+/* Heading and text */
 .login-card h1 {
   font-size: 24px;
   margin-bottom: 10px;
@@ -29,26 +40,32 @@
   margin-bottom: 30px;
 }
 
-.smartschool-btn {
-  background-color: #ff7f00; /* De officiële Smartschool oranje kleur */
-  color: white;
+/* The button containing the image. Simplified for the image. */
+.smartschool-img-btn {
+  background: transparent;
   border: none;
-  padding: 12px 24px;
-  font-size: 16px;
-  font-weight: bold;
-  border-radius: 4px;
+  padding: 0;
   cursor: pointer;
-  width: 100%;
-  transition: background-color 0.3s ease;
+  transition: transform 0.1s ease;
+  display: inline-block;
+  margin-bottom: 16px;
 }
 
-.smartschool-btn:hover {
-  background-color: #e67300;
+/* A small effect when clicked */
+.smartschool-img-btn:active {
+  transform: scale(0.98);
 }
 
+/* Ensures the image in the button is displayed correctly */
+.smartschool-img-btn img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* The link at the bottom */
 .admin-link {
   display: block;
-  margin-top: 16px;
   font-size: 13px;
   color: #999;
   text-decoration: none;

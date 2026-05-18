@@ -18,21 +18,21 @@
           type="text"
           [(ngModel)]="zoekterm"
           (ngModelChange)="onSearch()"
-          placeholder="zoek op naam..."
+          placeholder="Zoek op naam..."
           style="flex: 1; padding: 10px; border-radius: 6px; border: 1px solid #ddd"
         />
 
         <select
           [(ngModel)]="selectedClass"
           (ngModelChange)="onFilterChange()"
-          aria-label="filter op klas"
+          aria-label="Filter op klas"
         >
-          <option value="">alle klassen</option>
-          <option value="1a">klas 1A</option>
-          <option value="1b">klas 1B</option>
-          <option value="2a">klas 2A</option>
-          <option value="2b">klas 2B</option>
-          <option value="3a">klas 3A</option>
+          <option value="">Alle klassen</option>
+          <option value="1a">Klas 1A</option>
+          <option value="1b">Klas 1B</option>
+          <option value="2a">Klas 2A</option>
+          <option value="2b">Klas 2B</option>
+          <option value="3a">Klas 3A</option>
         </select>
       </div>
 
@@ -49,23 +49,23 @@
             </div>
           </div>
         } @empty {
-          <p class="tile-intro">geen leerlingen gevonden.</p>
+          <p class="tile-intro">Geen leerlingen gevonden.</p>
         }
 
         @if (totaalAantalPaginas() > 1) {
           <div class="pagination-bar">
             <button class="pag-btn" (click)="vorigePagina()" [disabled]="huidigePagina() === 0">
-              &larr; vorige
+              &larr; Vorige
             </button>
             <span class="pag-info">
-              pagina {{ huidigePagina() + 1 }} van {{ totaalAantalPaginas() }}
+              Pagina {{ huidigePagina() + 1 }} van {{ totaalAantalPaginas() }}
             </span>
             <button
               class="pag-btn"
               (click)="volgendePagina()"
               [disabled]="huidigePagina() === totaalAantalPaginas() - 1"
             >
-              volgende &rarr;
+              Volgende &rarr;
             </button>
           </div>
         }
@@ -79,19 +79,19 @@
       <article class="tile function-tile">
         <h3>Bulk-ontleningen</h3>
         <p>Start een groepsuitleen voor een volledige klas.</p>
-        <a class="function-btn" href="/bulk-ontlenen"> bulk ontlenen </a>
+        <a class="function-btn" href="/bulk-ontlenen"> Bulk ontlenen </a>
       </article>
 
       <article class="tile function-tile">
         <h3>Leeslijsten beheren</h3>
         <p>Beheer klassikale leeslijsten en opdrachten.</p>
-        <a routerLink="/leeslijsten" class="function-btn">beheer leeslijsten</a>
+        <a routerLink="/leeslijsten" class="function-btn">Beheer leeslijsten</a>
       </article>
 
       <article class="tile function-tile catalogus-tile">
         <h3>Catalogus voor leerkracht</h3>
         <p>Bekijk boeken in de catalogus en start meteen met zoeken.</p>
-        <a class="function-btn catalogus-btn" href="/catalogus">open catalogus</a>
+        <a class="function-btn catalogus-btn" href="/catalogus">Open catalogus</a>
       </article>
     </div>
     <section class="class-loans-section" style="margin-top: 10px; margin-bottom: 32px">
@@ -186,7 +186,7 @@
             <span style="display: block; font-size: 24px; font-weight: bold; color: #007bff">
               {{ leerlingStats().totaalGeleend }}
             </span>
-            <small>boeken geleend</small>
+            <small>Boeken geleend</small>
           </div>
 
           <div
@@ -196,19 +196,19 @@
             <span style="display: block; font-size: 24px; font-weight: bold; color: #38a169">
               {{ leerlingStats().opTijdTerug }}
             </span>
-            <small>op tijd terug</small>
+            <small>Op tijd terug</small>
           </div>
         </div>
 
         <div class="history-section" style="margin-top: 25px">
-          <h4>recente activiteit</h4>
+          <h4>Recente activiteit</h4>
           <p style="color: #666; font-style: italic">
             Van de {{ leerlingStats().totaalGeleend }} boeken zijn er
             {{ leerlingStats().teLaat }} te laat ingeleverd.
           </p>
         </div>
       } @else {
-        <p>statistieken laden...</p>
+        <p>Statistieken laden...</p>
       }
     </div>
   </div>

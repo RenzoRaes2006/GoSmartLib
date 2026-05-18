@@ -1,7 +1,17 @@
 <div class="container">
   @if (lijst()) {
+    <div class="header-badges">
+      @if (lijst()!.klas) {
+        <span class="badge badge-klas">Klas: {{ lijst()!.klas }}</span>
+      } @else if (lijst()!.leerlingId) {
+        <span class="badge badge-leerling">Persoonlijk toegewezen</span>
+      }
+    </div>
     <h2>{{ lijst()!.naam }}</h2>
-    <p>Deze lijst bevat {{ lijst()!.boeken.length }} boeken.</p>
+    @if (lijst()!.beschrijving) {
+      <p class="beschrijving-tekst">{{ lijst()!.beschrijving }}</p>
+    }
+    <p class="aantal">Deze lijst bevat {{ lijst()!.boeken.length }} boeken.</p>
     <hr>
 
     <div class="boeken-lijst">

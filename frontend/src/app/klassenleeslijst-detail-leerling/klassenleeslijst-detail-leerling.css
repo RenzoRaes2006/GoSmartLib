@@ -4,11 +4,46 @@
     margin: 0 auto;
 }
 
+.header-badges {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 12px;
+}
+
+.badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.badge-klas { background: #dbeafe; color: #1e40af; }
+.badge-leerling { background: #fef3c7; color: #92400e; }
+
 h2 {
     color: #8c1b3f;
     font-size: 2rem;
     margin: 0 0 10px 0;
     font-weight: 700;
+}
+
+.beschrijving-tekst {
+    font-style: italic;
+    color: #4a5568;
+    background: #f7efe6;
+    border-left: 3px solid #8c1b3f;
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin: 12px 0 18px;
+    max-width: 800px;
+    line-height: 1.5;
+}
+
+.aantal {
+    color: #6b7280;
+    font-size: 0.95rem;
+    margin: 0;
 }
 
 h4 {
