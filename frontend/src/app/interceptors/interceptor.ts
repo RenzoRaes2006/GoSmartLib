@@ -25,7 +25,13 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     // overruled worden via localStorage.setItem('devRole', 'STUDENT').
     if (isDevMode()) {
         const devRole = (localStorage.getItem('devRole') || 'BEHEERDER').toUpperCase();
-        const devReq = req.clone({ setHeaders: { 'X-Dev-Role': devRole } });
+        const devBeheerder = localStorage.getItem('devBeheerder') === 'true';
+        const devReq = req.clone({
+            setHeaders: {
+                'X-Dev-Role': devRole,
+                'X-Dev-Beheerder': String(devBeheerder),
+            },
+        });
         return next(devReq);
     }
 

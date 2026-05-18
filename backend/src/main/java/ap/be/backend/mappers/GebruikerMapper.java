@@ -13,6 +13,7 @@ public class GebruikerMapper {
                 user.getId(),
                 user.getSmartschoolId(),
                 user.getKlas(),
-                user.getRol() != null ? user.getRol().toString() : null);
+                user.getRol() != null ? user.getRol().toString() : null,
+                user.isBeheerder());
     }
 }

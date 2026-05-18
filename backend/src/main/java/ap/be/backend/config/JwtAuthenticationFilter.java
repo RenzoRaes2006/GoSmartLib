@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
@@ -67,9 +68,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 String smartschoolId = jwtService.extractSmartschoolId(token);
                 String role = jwtService.extractRole(token);
 
-                List<SimpleGrantedAuthority> authorities = List.of(
-                        new SimpleGrantedAuthority("ROLE_" + role.toUpperCase())
-                );
+                List<SimpleGrantedAuthority> authorities = new ArrayList<>();
+                authorities.add(new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()));
+                if (jwtService.extractIsBeheerder(token)) {
+                    authorities.add(new SimpleGrantedAuthority("ROLE_BEHEERDER"));
+                }
 
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         smartschoolId, null, authorities);

@@ -93,7 +93,8 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         final Rol rolEnum = mapRol(rol);
 
         // Bestaande user bijwerken of nieuw aanmaken. Geen persoonsdata opslaan.
-        userRepository.findBySmartschoolId(smartschoolId)
+        // De isBeheerder-flag leeft naast de rol en wordt hier niet aangeraakt.
+        User user = userRepository.findBySmartschoolId(smartschoolId)
                 .map(existing -> {
                     existing.setKlas(klasFinal);
                     existing.setRol(rolEnum);
@@ -101,7 +102,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                 })
                 .orElseGet(() -> userRepository.save(new User(smartschoolId, klasFinal, rolEnum)));
 
-        String jwtToken = jwtService.generateToken(smartschoolId, rol, naam, klas);
+        String jwtToken = jwtService.generateToken(smartschoolId, rol, naam, klas, user.isBeheerder());
 
         response.sendRedirect(frontendBaseUrl + "/login-success?token=" + jwtToken);
     }

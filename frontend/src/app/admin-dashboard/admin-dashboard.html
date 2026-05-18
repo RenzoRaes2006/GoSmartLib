@@ -19,6 +19,9 @@
       <button [class.active]="activeTab() === 'wizard'" (click)="wisselTab('wizard')">
         Nieuwe school toevoegen
       </button>
+      <button [class.active]="activeTab() === 'rollen'" (click)="wisselTab('rollen')">
+        Rollen beheren
+      </button>
     </div>
   </nav>
 
@@ -120,6 +123,63 @@
           }
         </div>
       }
+    }
+
+    <!-- tab 3: rollen beheren -->
+    @if (activeTab() === 'rollen') {
+      <div class="admin-card">
+        <div class="card-header">
+          <h2>Leerkrachten promoveren tot beheerder</h2>
+        </div>
+
+        @if (leerkrachtenLaden()) {
+          <div class="text-center" style="padding: 40px; color: var(--go-bordeaux);">
+            <strong>Leerkrachten ophalen...</strong>
+          </div>
+        } @else {
+          <div class="table-responsive">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Smartschool-ID</th>
+                  <th>Klas</th>
+                  <th>Rol</th>
+                  <th>Beheerder?</th>
+                  <th>Acties</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (leerkracht of leerkrachten(); track leerkracht.id) {
+                  <tr>
+                    <td><strong>{{ leerkracht.smartschoolId }}</strong></td>
+                    <td>{{ leerkracht.klas || '-' }}</td>
+                    <td>{{ leerkracht.rol }}</td>
+                    <td>{{ leerkracht.isBeheerder ? 'Ja' : 'Nee' }}</td>
+                    <td>
+                      <button
+                        class="btn-go btn-sm"
+                        (click)="toggleBeheerder(leerkracht)"
+                        [disabled]="promotieBezig() === leerkracht.id">
+                        @if (promotieBezig() === leerkracht.id) {
+                          Bezig...
+                        } @else if (leerkracht.isBeheerder) {
+                          Beheerder-rol intrekken
+                        } @else {
+                          Maak beheerder
+                        }
+                      </button>
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="5" class="text-muted text-center">Geen leerkrachten gevonden.</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
     }
 
     <!-- tab 2: wizard -->

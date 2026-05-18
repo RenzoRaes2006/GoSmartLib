@@ -2,6 +2,9 @@
   <div class="banner">
     <h1>Beheerdersdashboard</h1>
     <p>GO! SmartLib Antwerpen</p>
+    @if (isOokLeerkracht()) {
+      <a routerLink="/leerkracht-dashboard" class="btn-go">← Terug naar leerkracht-dashboard</a>
+    }
   </div>
 
   <h3 class="section-title">Snelle acties</h3>
