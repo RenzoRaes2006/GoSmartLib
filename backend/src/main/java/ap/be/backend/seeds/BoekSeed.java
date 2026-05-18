@@ -16,7 +16,7 @@ import ap.be.backend.entity.Boek;
 import ap.be.backend.repository.BoekRepository;
 
 @Component
-@Profile("!test")
+@Profile("dev")
 public class BoekSeed implements CommandLineRunner {
 
     private static final Logger log = LoggerFactory.getLogger(BoekSeed.class);

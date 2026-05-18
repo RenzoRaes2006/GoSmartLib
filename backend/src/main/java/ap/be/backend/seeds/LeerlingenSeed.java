@@ -11,7 +11,7 @@ import ap.be.backend.entity.User;
 import ap.be.backend.repository.UserRepository;
 
 @Component
-@Profile("!test")
+@Profile("dev")
 public class LeerlingenSeed implements CommandLineRunner {
     private final UserRepository repo;
 
