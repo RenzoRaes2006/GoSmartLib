@@ -3,11 +3,13 @@ import { HttpInterceptorFn } from '@angular/common/http';
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
     // Externe API's (zoals Google Books) niet aanraken: een custom header
     // triggert een CORS preflight die de externe server afwijst.
-    // Eigen backend op localhost (andere poort) telt NIET als extern.
+    // Eigen backend op localhost (andere poort) of op het productie-API-domein
+    // telt NIET als extern.
     const isOwnBackend =
         req.url.startsWith('/') ||
         req.url.startsWith(window.location.origin) ||
-        /^https?:\/\/localhost(:\d+)?\//i.test(req.url);
+        /^https?:\/\/localhost(:\d+)?\//i.test(req.url) ||
+        req.url.startsWith('https://api-sp09.cloud-ap.be');
     if (!isOwnBackend) {
         return next(req);
     }
