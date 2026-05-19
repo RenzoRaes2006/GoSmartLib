@@ -1,14 +1,15 @@
 import { HttpInterceptorFn } from '@angular/common/http';
-import { isDevMode } from '@angular/core';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
     // Externe API's (zoals Google Books) niet aanraken: een custom header
     // triggert een CORS preflight die de externe server afwijst.
-    // Eigen backend op localhost (andere poort) telt NIET als extern.
+    // Eigen backend op localhost (andere poort) of op het productie-API-domein
+    // telt NIET als extern.
     const isOwnBackend =
         req.url.startsWith('/') ||
         req.url.startsWith(window.location.origin) ||
-        /^https?:\/\/localhost(:\d+)?\//i.test(req.url);
+        /^https?:\/\/localhost(:\d+)?\//i.test(req.url) ||
+        req.url.startsWith('https://api-sp09.cloud-ap.be');
     if (!isOwnBackend) {
         return next(req);
     }
@@ -20,12 +21,19 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         return next(req);
     }
 
-    // Dev-modus: stuur X-Dev-Role mee zodat de backend DevAuthFilter
-    // weet welke rol hij moet simuleren. De rol kan tijdens het testen
-    // overruled worden via localStorage.setItem('devRole', 'STUDENT').
-    if (isDevMode()) {
+    // Dev-modus: enkel op localhost. In de VM/productie zou een dev-build
+    // anders X-Dev-Role meesturen i.p.v. het JWT-token, wat een OAuth-redirect
+    // veroorzaakt omdat DevAuthFilter daar niet draait.
+    const isLocalhost = window.location.hostname === 'localhost';
+    if (isLocalhost) {
         const devRole = (localStorage.getItem('devRole') || 'BEHEERDER').toUpperCase();
-        const devReq = req.clone({ setHeaders: { 'X-Dev-Role': devRole } });
+        const devBeheerder = localStorage.getItem('devBeheerder') === 'true';
+        const devReq = req.clone({
+            setHeaders: {
+                'X-Dev-Role': devRole,
+                'X-Dev-Beheerder': String(devBeheerder),
+            },
+        });
         return next(devReq);
     }
 

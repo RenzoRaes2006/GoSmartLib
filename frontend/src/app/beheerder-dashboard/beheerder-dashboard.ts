@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { BoekService } from '../services/boek.service';
 import { InstellingService } from '../services/instelling-service';
 import { StatistiekService } from '../services/statistiek.service';
+import { AuthService } from '../services/AuthService';
 
 @Component({
   selector: 'app-beheerder-dashboard',
@@ -17,6 +18,12 @@ export class BeheerderDashboard implements OnInit {
   huidigeTermijn = signal<number>(14);
   instellingService = inject(InstellingService);
   statistiekService = inject(StatistiekService);
+  private authService = inject(AuthService);
+
+  isOokLeerkracht = computed(() => {
+    const user = this.authService.currentUser();
+    return !!user && user.role === 'teacher' && user.isBeheerder;
+  });
   recenteLeningen: any[] = [];
 
   toastActief = signal<boolean>(false);

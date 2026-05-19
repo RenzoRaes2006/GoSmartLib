@@ -11,7 +11,7 @@ export const beheerderGuard: CanActivateFn = (route, state) => {
 
   const user = authService.currentUser();
 
-  if (user && user.role === 'beheerder') {
+  if (user && (user.role === 'beheerder' || user.isBeheerder)) {
     return true;
   }
 

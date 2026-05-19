@@ -22,6 +22,9 @@
       <button [class.active]="activeTab() === 'tags'" (click)="wisselTab('tags')">
         Tag-beheer
       </button>
+      <button [class.active]="activeTab() === 'rollen'" (click)="wisselTab('rollen')">
+        Rollen beheren
+      </button>
     </div>
   </nav>
 
@@ -123,6 +126,73 @@
           }
         </div>
       }
+    }
+
+    <!-- tab 3: rollen beheren -->
+    @if (activeTab() === 'rollen') {
+      <div class="admin-card">
+        <div class="card-header">
+          <h2>Leerkrachten promoveren tot beheerder</h2>
+        </div>
+
+        @if (leerkrachtenLaden()) {
+          <div class="text-center" style="padding: 40px; color: var(--go-bordeaux);">
+            <strong>Leerkrachten ophalen...</strong>
+          </div>
+        } @else {
+          <div class="table-responsive">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Smartschool-ID</th>
+                  <th>Klas</th>
+                  <th>Rol</th>
+                  <th>Beheerder?</th>
+                  <th>Acties</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (leerkracht of leerkrachten(); track leerkracht.id) {
+                  <tr>
+                    <td><strong>{{ leerkracht.smartschoolId }}</strong></td>
+                    <td>{{ leerkracht.klas || '-' }}</td>
+                    <td>{{ leerkracht.rol }}</td>
+                    <td>{{ leerkracht.isBeheerder ? 'Ja' : 'Nee' }}</td>
+                    <td>
+                      <label class="toggle-switch"
+                             [class.is-on]="leerkracht.isBeheerder"
+                             [class.is-busy]="promotieBezig() === leerkracht.id"
+                             [attr.title]="leerkracht.isBeheerder ? 'Beheerder-rol intrekken' : 'Maak beheerder'">
+                        <input
+                          type="checkbox"
+                          [checked]="leerkracht.isBeheerder"
+                          [disabled]="promotieBezig() === leerkracht.id"
+                          (change)="toggleBeheerder(leerkracht)">
+                        <span class="toggle-track">
+                          <span class="toggle-thumb"></span>
+                        </span>
+                        <span class="toggle-label">
+                          @if (promotieBezig() === leerkracht.id) {
+                            Bezig...
+                          } @else if (leerkracht.isBeheerder) {
+                            Beheerder
+                          } @else {
+                            Leerkracht
+                          }
+                        </span>
+                      </label>
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="5" class="text-muted text-center">Geen leerkrachten gevonden.</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
     }
 
     <!-- tab 2: wizard -->

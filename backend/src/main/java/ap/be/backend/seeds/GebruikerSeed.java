@@ -11,7 +11,7 @@ import ap.be.backend.repository.LeeslijstMapRepository;
 import ap.be.backend.repository.UserRepository;
 
 @Component
-@Profile("!test")
+@Profile("dev")
 public class GebruikerSeed implements CommandLineRunner {
     private final UserRepository userRepository;
     private final LeeslijstMapRepository mapRepository;
@@ -40,6 +40,11 @@ public class GebruikerSeed implements CommandLineRunner {
         ensureLeerling("12359");
         ensureLeerling("12360");
 
+        ensureLeerkracht("LK-001", "5SOF", false);
+        ensureLeerkracht("LK-002", "6WET", false);
+        ensureLeerkracht("LK-003", "4LAT", false);
+        ensureLeerkracht("LK-BEH-001", "6SOF", true);
+
         if (test != null && mapRepository.findByUser_Id(test.getId()).isEmpty()) {
             mapRepository.save(new LeeslijstMap("Favorieten", test));
         }
@@ -50,6 +55,17 @@ public class GebruikerSeed implements CommandLineRunner {
             User u = new User();
             u.setSmartschoolId(smartschoolId);
             u.setRol(Rol.LEERLING);
+            return userRepository.save(u);
+        });
+    }
+
+    private User ensureLeerkracht(String smartschoolId, String klas, boolean isBeheerder) {
+        return userRepository.findBySmartschoolId(smartschoolId).orElseGet(() -> {
+            User u = new User();
+            u.setSmartschoolId(smartschoolId);
+            u.setKlas(klas);
+            u.setRol(Rol.LEERKRACHT);
+            u.setBeheerder(isBeheerder);
             return userRepository.save(u);
         });
     }

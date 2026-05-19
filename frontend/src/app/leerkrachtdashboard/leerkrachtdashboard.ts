@@ -5,6 +5,7 @@ import { RouterModule } from '@angular/router';
 import { LeerlingService } from '../services/Leerling.service';
 import { BoekService } from '../services/boek.service';
 import { StatistiekService } from '../services/statistiek.service';
+import { AuthService } from '../services/AuthService';
 
 @Component({
   selector: 'app-leerkrachtdashboard',
@@ -17,6 +18,9 @@ export class Leerkrachtdashboard implements OnInit {
   private leerlingService = inject(LeerlingService);
   private boekService = inject(BoekService);
   private statistiekService = inject(StatistiekService);
+  private authService = inject(AuthService);
+
+  isOokBeheerder = computed(() => this.authService.currentUser()?.isBeheerder ?? false);
 
   boekenAfgelopenWeek = signal<number>(0);
   topBoeken = signal<string[]>([]);

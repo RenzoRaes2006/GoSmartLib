@@ -19,7 +19,7 @@ import ap.be.backend.repository.BoekRepository;
 import ap.be.backend.repository.TagRepository;
 
 @Component
-@Profile("!test")
+@Profile("dev")
 public class BoekSeed implements CommandLineRunner {
 
     private static final Logger log = LoggerFactory.getLogger(BoekSeed.class);

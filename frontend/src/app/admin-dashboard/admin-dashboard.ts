@@ -3,6 +3,7 @@ import { Component, computed, OnInit, signal, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { SchoolService } from '../services/School.Service';
 import { AdminTags } from '../admin-tags/admin-tags';
+import { AdminGebruiker, AdminGebruikerService } from '../services/AdminGebruikerService';
 
 // static list of all official secondary schools under go! scholengroep antwerpen
 const GO_ANTWERPEN_SCHOLEN = [
@@ -36,9 +37,15 @@ export class AdminDashboard implements OnInit {
 
   // inject the service to communicate with spring boot
   private schoolService = inject(SchoolService);
+  private adminGebruikerService = inject(AdminGebruikerService);
 
   // tab navigation state
-  activeTab = signal<'scholen' | 'wizard' | 'tags'>('scholen');
+  activeTab = signal<'scholen' | 'wizard' | 'tags' | 'rollen'>('scholen');
+
+  // rollen-tab state
+  leerkrachten = signal<AdminGebruiker[]>([]);
+  leerkrachtenLaden = signal<boolean>(false);
+  promotieBezig = signal<number | null>(null);
 
   // state for the selected school detail view
   geselecteerdeSchool = signal<any>(null);
@@ -83,9 +90,49 @@ export class AdminDashboard implements OnInit {
     });
   }
 
-  wisselTab(tab: 'scholen' | 'wizard' | 'tags') {
+  wisselTab(tab: 'scholen' | 'wizard' | 'tags' | 'rollen') {
     this.activeTab.set(tab);
     this.sluitSchoolDetails();
+    if (tab === 'rollen') {
+      this.laadLeerkrachten();
+    }
+  }
+
+  laadLeerkrachten() {
+    this.leerkrachtenLaden.set(true);
+    this.adminGebruikerService.getAlleLeerkrachten().subscribe({
+      next: (lijst) => {
+        this.leerkrachten.set(lijst ?? []);
+        this.leerkrachtenLaden.set(false);
+      },
+      error: (err) => {
+        console.error('error fetching teachers:', err);
+        this.leerkrachten.set([]);
+        this.leerkrachtenLaden.set(false);
+      }
+    });
+  }
+
+  toggleBeheerder(leerkracht: AdminGebruiker) {
+    const nieuweWaarde = !leerkracht.isBeheerder;
+    const actie = nieuweWaarde ? 'beheerder maken' : 'de beheerder-rol intrekken bij';
+    const bevestigd = confirm(`Weet je zeker dat je ${leerkracht.smartschoolId} wilt ${actie}?`);
+    if (!bevestigd) return;
+
+    this.promotieBezig.set(leerkracht.id);
+    this.adminGebruikerService.setBeheerder(leerkracht.id, nieuweWaarde).subscribe({
+      next: (geupdate) => {
+        this.leerkrachten.update(lijst =>
+          lijst.map(l => (l.id === geupdate.id ? geupdate : l))
+        );
+        this.promotieBezig.set(null);
+      },
+      error: (err) => {
+        console.error('error toggling beheerder:', err);
+        alert('Kan de status niet wijzigen. Probeer opnieuw.');
+        this.promotieBezig.set(null);
+      }
+    });
   }
 
   // fetch live data from smartschool when editing a school
