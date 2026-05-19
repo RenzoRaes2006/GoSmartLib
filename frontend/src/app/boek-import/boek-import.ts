@@ -109,20 +109,12 @@ export class BoekImport {
 
     this.boekService.uploadVoorPreview(this.selectedFile).subscribe({
       next: (boekenLijst) => {
-        // Zorg dat genre en tag altíjd arrays zijn in de frontend,
-        // zelfs als de backend per ongeluk null of string stuurde.
+        // Tag-beheer gebeurt via de admin/tags-pagina + boek-beheer, niet hier.
+        // We houden lokale lijsten enkel om de preview-tabel UI te laten werken.
         const veiligeLijst = boekenLijst.map((b: any) => ({
           ...b,
-          genre: Array.isArray(b.genre)
-            ? b.genre
-            : b.genre
-              ? b.genre.split(',').map((x: string) => x.trim())
-              : [],
-          thematischeTag: Array.isArray(b.thematischeTag)
-            ? b.thematischeTag
-            : b.thematischeTag
-              ? b.thematischeTag.split(',').map((x: string) => x.trim())
-              : [],
+          genre: (b.tags ?? []).filter((t: any) => t.type === 'GENRE').map((t: any) => t.naam),
+          thematischeTag: (b.tags ?? []).filter((t: any) => t.type === 'THEMATISCH').map((t: any) => t.naam),
         }));
 
         this.previewLijst.set(veiligeLijst);

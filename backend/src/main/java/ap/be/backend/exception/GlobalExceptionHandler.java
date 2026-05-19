@@ -115,4 +115,19 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
 
+    @ExceptionHandler(TagNotFoundException.class)
+    public ResponseEntity<String> handleTagNotFound(TagNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(DuplicateTagException.class)
+    public ResponseEntity<String> handleDuplicateTag(DuplicateTagException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(TagInGebruikException.class)
+    public ResponseEntity<String> handleTagInGebruik(TagInGebruikException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+    }
+
 }

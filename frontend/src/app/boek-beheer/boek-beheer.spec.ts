@@ -1,5 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
 import { of } from 'rxjs';
 
 import { BoekBeheer } from './boek-beheer';
@@ -22,6 +24,8 @@ describe('BoekBeheer', () => {
       imports: [BoekBeheer],
       providers: [
         provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
         { provide: ActivatedRoute, useValue: { queryParams: of({}) } },
         { provide: BoekService, useValue: boekSpy },
         { provide: GoogleBookService, useValue: googleSpy },
@@ -31,6 +35,9 @@ describe('BoekBeheer', () => {
     fixture = TestBed.createComponent(BoekBeheer);
     component = fixture.componentInstance;
     fixture.detectChanges();
+
+    const http = TestBed.inject(HttpTestingController);
+    http.match((r) => r.url.includes('/api/tags')).forEach((r) => r.flush([]));
   });
 
   it('moet aangemaakt kunnen worden', () => {

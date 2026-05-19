@@ -1,7 +1,9 @@
 package ap.be.backend.entity;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -40,11 +42,11 @@ public class Boek {
     @Column
     private String uitgaveJaar;
 
-    @ElementCollection
-    private List<String> genre;
-
-    @ElementCollection
-    private List<String> thematischeTag;
+    @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @JoinTable(name = "boek_tags",
+            joinColumns = @JoinColumn(name = "boek_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id"))
+    private Set<Tag> tags = new HashSet<>();
 
     @Lob
     @Column(length = 100000)
@@ -67,10 +69,6 @@ public class Boek {
 
     @Column(nullable = false, columnDefinition = "boolean default false")
     private boolean didactischMateriaal;
-
-    @Enumerated(EnumType.STRING)
-    @Column
-    private DidactischeSubcategorie didactischeSubcategorie;
 
     @OneToMany(mappedBy = "boek", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Beoordeling> beoordelingen;

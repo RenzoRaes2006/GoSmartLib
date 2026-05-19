@@ -1,3 +1,5 @@
+import { Tag } from './Tag';
+
 export interface NieuwBoek {
   titel: string;
   auteur: string;
@@ -5,13 +7,11 @@ export interface NieuwBoek {
   uitgever: string;
   uitgaveJaar: string;
   pagina: string;
-  genre: string | string[];
-  thematischeTag: string | string[];
+  tags: Tag[];
   beschrijving: string;
   aantalExemplaren: string;
   locatie: string;
   afbeelding: string;
   leesniveau?: string;
   didactischMateriaal?: boolean;
-  didactischeSubcategorie?: string;
 }

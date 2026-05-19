@@ -19,7 +19,7 @@ describe('Detail', () => {
 
   beforeEach(async () => {
     boekSpy = jasmine.createSpyObj('BoekService', ['getBoekOpId', 'getBoekenGefilterd', 'checkLeenStatus']);
-    boekSpy.getBoekOpId.and.returnValue(of({ id: 1, titel: 'Test', auteur: 'A', genre: [], thematischeTag: [] } as any));
+    boekSpy.getBoekOpId.and.returnValue(of({ id: 1, titel: 'Test', auteur: 'A', tags: [] } as any));
     boekSpy.getBoekenGefilterd.and.returnValue(of({ content: [] } as any));
     boekSpy.checkLeenStatus.and.returnValue(of({ magLenen: true, reden: 'Beschikbaar' } as any));
 

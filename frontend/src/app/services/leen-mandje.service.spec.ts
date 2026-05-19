@@ -7,7 +7,7 @@ describe('LeenMandjeService', () => {
   let service: LeenMandjeService;
 
   const boek = (id: number, aantal = 1): Boek =>
-    ({ id, titel: 'B' + id, auteur: 'A', uitgever: '', genre: [], thematischeTag: [], pagina: 0, uitgaveJaar: '', beschrijving: '', afbeelding: '', isbn: '', aantalExemplaren: aantal, locatie: '' }) as unknown as Boek;
+    ({ id, titel: 'B' + id, auteur: 'A', uitgever: '', tags: [], pagina: 0, uitgaveJaar: '', beschrijving: '', afbeelding: '', isbn: '', aantalExemplaren: aantal, locatie: '' }) as unknown as Boek;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});

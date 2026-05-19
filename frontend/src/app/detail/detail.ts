@@ -8,7 +8,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { RouterLink, ActivatedRoute } from '@angular/router';
-import { forkJoin, of } from 'rxjs';
+import { of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { BoekService } from '../services/boek.service';
 import { Boek } from '../models/Boek';
@@ -18,10 +18,11 @@ import { RapportageService } from '../services/rapportage-service';
 import { Beoordeling } from '../models/review.model';
 import { LeeslijstService } from '../services/leeslijstService';
 import { LeenMandjeService } from '../services/leen-mandje.service';
+import { TagsByTypePipe } from '../models/tags-by-type.pipe';
 
 @Component({
   selector: 'app-detail',
-  imports: [ReactiveFormsModule, RouterLink, FormsModule],
+  imports: [ReactiveFormsModule, RouterLink, FormsModule, TagsByTypePipe],
   templateUrl: './detail.html',
   styleUrl: './detail.css',
 })
@@ -114,9 +115,8 @@ export class Detail implements OnInit {
   }
 
   private laadGelijkaardigeBoeken(boek: Boek) {
-    const genres = boek.genre ?? [];
-    const tags = boek.thematischeTag ?? [];
-    if (genres.length === 0 && tags.length === 0) {
+    const tagIds = (boek.tags ?? []).map((t) => t.id).filter((id) => id != null);
+    if (tagIds.length === 0) {
       this.gelijkaardigeBoeken = [];
       return;
     }
@@ -125,37 +125,21 @@ export class Detail implements OnInit {
       content: [],
     } as unknown as PageResponse<Boek>;
 
-    const genreCall = genres.length
-      ? this.boekService
-          .getBoekenGefilterd({ genres, size: 30 })
-          .pipe(catchError(() => of(empty)))
-      : of(empty);
+    this.boekService
+      .getBoekenGefilterd({ tagIds, size: 30 })
+      .pipe(catchError(() => of(empty)))
+      .subscribe((page) => {
+        const tagSet = new Set(tagIds);
+        const score = (b: Boek) => (b.tags ?? []).filter((t) => tagSet.has(t.id)).length;
 
-    const tagCall = tags.length
-      ? this.boekService
-          .getBoekenGefilterd({ thematischeTags: tags, size: 30 })
-          .pipe(catchError(() => of(empty)))
-      : of(empty);
-
-    forkJoin([genreCall, tagCall]).subscribe(([genrePage, tagPage]) => {
-      const merged = new Map<number, Boek>();
-      [...(genrePage.content ?? []), ...(tagPage.content ?? [])].forEach((b) => {
-        if (b.id != null && b.id !== boek.id) merged.set(b.id, b);
+        this.gelijkaardigeBoeken = (page.content ?? [])
+          .filter((b) => b.id != null && b.id !== boek.id)
+          .map((b) => ({ b, s: score(b) }))
+          .filter((x) => x.s > 0)
+          .sort((a, b) => b.s - a.s)
+          .slice(0, 6)
+          .map((x) => x.b);
       });
-
-      const score = (b: Boek) => {
-        const g = (b.genre ?? []).filter((x) => genres.includes(x)).length;
-        const t = (b.thematischeTag ?? []).filter((x) => tags.includes(x)).length;
-        return g + t;
-      };
-
-      this.gelijkaardigeBoeken = Array.from(merged.values())
-        .map((b) => ({ b, s: score(b) }))
-        .filter((x) => x.s > 0)
-        .sort((a, b) => b.s - a.s)
-        .slice(0, 6)
-        .map((x) => x.b);
-    });
   }
 
   laadBeoordelingenVanBoek() {

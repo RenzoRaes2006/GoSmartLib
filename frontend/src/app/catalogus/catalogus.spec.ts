@@ -1,5 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
 import { of } from 'rxjs';
 
 import { Catalogus } from './catalogus';
@@ -19,12 +21,21 @@ describe('Catalogus', () => {
 
     await TestBed.configureTestingModule({
       imports: [Catalogus],
-      providers: [provideRouter([]), { provide: BoekService, useValue: boekSpy }],
+      providers: [
+        provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: BoekService, useValue: boekSpy },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(Catalogus);
     component = fixture.componentInstance;
     fixture.detectChanges();
+
+    // TagService laadt 3 keer dropdowns bij init — flush ze
+    const http = TestBed.inject(HttpTestingController);
+    http.match((r) => r.url.includes('/api/tags')).forEach((r) => r.flush([]));
   });
 
   afterEach(() => sessionStorage.clear());

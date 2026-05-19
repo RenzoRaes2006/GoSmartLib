@@ -13,7 +13,10 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import ap.be.backend.entity.Boek;
+import ap.be.backend.entity.Tag;
+import ap.be.backend.entity.TagType;
 import ap.be.backend.repository.BoekRepository;
+import ap.be.backend.repository.TagRepository;
 
 @Component
 @Profile("!test")
@@ -22,6 +25,7 @@ public class BoekSeed implements CommandLineRunner {
     private static final Logger log = LoggerFactory.getLogger(BoekSeed.class);
 
     private final BoekRepository boekRepository;
+    private final TagRepository tagRepository;
     private final RestTemplate restTemplate;
 
     String[] locaties = { "GO! Spectrumschool", "GO! muzische basisschool K’DO", "GO! basisschool VONK!",
@@ -36,12 +40,18 @@ public class BoekSeed implements CommandLineRunner {
             "Familie", "School & prestatiedruk", "Sociale media", "Migratie & afkomst",
             "Armoede & ongelijkheid", "Macht & onrecht", "Avontuur & ontdekking", "Overleven",
             "Toekomst & technologie" };
+    String[] didactischeTags = { "LESMETHODES", "DIDACTISCHE_HANDBOEKEN", "EVALUATIEMATERIAAL", "NASLAGWERKEN" };
     Random random = new Random();
 
-    // Spring injecteert de repository automatisch via de constructor
-    public BoekSeed(BoekRepository boekRepository, RestTemplate restTemplate) {
+    public BoekSeed(BoekRepository boekRepository, TagRepository tagRepository, RestTemplate restTemplate) {
         this.boekRepository = boekRepository;
+        this.tagRepository = tagRepository;
         this.restTemplate = restTemplate;
+    }
+
+    private Tag findOrCreateTag(TagType type, String naam) {
+        return tagRepository.findByTypeAndNaamIgnoreCase(type, naam)
+                .orElseGet(() -> tagRepository.save(new Tag(naam, type)));
     }
 
     @Override
@@ -81,22 +91,14 @@ public class BoekSeed implements CommandLineRunner {
                     nieuwBoek.setPagina(pages != null ? pages : 0);
 
                     // Genres: wijs 1-2 random genres toe uit de vaste lijst
-                    String genre1 = genres[random.nextInt(genres.length)];
-                    String genre2 = genres[random.nextInt(genres.length)];
-                    if (genre1.equals(genre2)) {
-                        nieuwBoek.setGenre(List.of(genre1));
-                    } else {
-                        nieuwBoek.setGenre(List.of(genre1, genre2));
-                    }
+                    nieuwBoek.getTags().add(findOrCreateTag(TagType.GENRE, genres[random.nextInt(genres.length)]));
+                    nieuwBoek.getTags().add(findOrCreateTag(TagType.GENRE, genres[random.nextInt(genres.length)]));
 
                     // Thematische tags: wijs 1-2 random tags toe
-                    String tag1 = thematischeTags[random.nextInt(thematischeTags.length)];
-                    String tag2 = thematischeTags[random.nextInt(thematischeTags.length)];
-                    if (tag1.equals(tag2)) {
-                        nieuwBoek.setThematischeTag(List.of(tag1));
-                    } else {
-                        nieuwBoek.setThematischeTag(List.of(tag1, tag2));
-                    }
+                    nieuwBoek.getTags().add(findOrCreateTag(TagType.THEMATISCH,
+                            thematischeTags[random.nextInt(thematischeTags.length)]));
+                    nieuwBoek.getTags().add(findOrCreateTag(TagType.THEMATISCH,
+                            thematischeTags[random.nextInt(thematischeTags.length)]));
 
                     // Afbeelding
                     Map<String, String> imageLinks = (Map<String, String>) volumeInfo.get("imageLinks");
@@ -121,7 +123,12 @@ public class BoekSeed implements CommandLineRunner {
                     nieuwBoek.setAantalExemplaren(random.nextInt(11));
 
                     // Ongeveer 1 op 4 boeken markeren als didactisch materiaal.
-                    nieuwBoek.setDidactischMateriaal(random.nextDouble() < 0.25);
+                    boolean isDidactisch = random.nextDouble() < 0.25;
+                    nieuwBoek.setDidactischMateriaal(isDidactisch);
+                    if (isDidactisch) {
+                        nieuwBoek.getTags().add(findOrCreateTag(TagType.DIDACTISCH,
+                                didactischeTags[random.nextInt(didactischeTags.length)]));
+                    }
 
                     // Random locatie
                     nieuwBoek.setLocatie(locaties[random.nextInt(locaties.length)]);

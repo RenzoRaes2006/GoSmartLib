@@ -2,8 +2,11 @@ import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BoekService } from '../services/boek.service';
+import { TagService } from '../services/tag.service';
 import { Boek } from '../models/Boek';
+import { Tag } from '../models/Tag';
 import { FilterOptions } from '../models/FilterOptions';
+import { TagsByTypePipe } from '../models/tags-by-type.pipe';
 
 // Nieuwe interface om het aantal per boek bij te houden
 interface CartItem {
@@ -14,23 +17,18 @@ interface CartItem {
 @Component({
   selector: 'app-bulk-ontlenen',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TagsByTypePipe],
   templateUrl: './bulk-ontlenen-component.html',
   styleUrl: './bulk-ontlenen-component.css',
 })
 export class BulkOntlenenComponent implements OnInit {
   private boekService = inject(BoekService);
+  private tagService = inject(TagService);
 
   zoekterm = signal<string>('');
-  selectedGenre = signal<string>('');
+  selectedGenreId = signal<number | null>(null);
 
-  beschikbareGenres = [
-    'Avontuur',
-    'Fantasy',
-    'Historische roman',
-    'Spanning / thriller',
-    'Non-fictie algemeen',
-  ];
+  beschikbareGenres = signal<Tag[]>([]);
 
   zoekResultaten = signal<Boek[]>([]);
   isSearching = signal<boolean>(false);
@@ -47,6 +45,7 @@ export class BulkOntlenenComponent implements OnInit {
   isSubmitting = signal<boolean>(false);
 
   ngOnInit(): void {
+    this.tagService.list('GENRE').subscribe((tags) => this.beschikbareGenres.set(tags));
     this.zoekBoeken();
   }
 
@@ -55,7 +54,7 @@ export class BulkOntlenenComponent implements OnInit {
 
     const filters: FilterOptions = {};
     if (this.zoekterm().trim()) filters.zoekterm = this.zoekterm();
-    if (this.selectedGenre()) filters.genres = [this.selectedGenre()];
+    if (this.selectedGenreId()) filters.tagIds = [this.selectedGenreId()!];
     filters.beschikbaarheid = 'true';
 
     this.boekService.getBoekenGefilterd(filters).subscribe({

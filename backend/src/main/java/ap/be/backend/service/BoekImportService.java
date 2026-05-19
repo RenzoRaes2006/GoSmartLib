@@ -19,7 +19,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import ap.be.backend.entity.Boek;
+import ap.be.backend.entity.Tag;
+import ap.be.backend.entity.TagType;
 import ap.be.backend.repository.BoekRepository;
+import ap.be.backend.repository.TagRepository;
 import ap.be.backend.exception.InvalidImportDataException;
 
 /**
@@ -35,9 +38,11 @@ import ap.be.backend.exception.InvalidImportDataException;
 public class BoekImportService {
 
     private final BoekRepository boekRepository;
+    private final TagRepository tagRepository;
 
-    public BoekImportService(BoekRepository boekRepository) {
+    public BoekImportService(BoekRepository boekRepository, TagRepository tagRepository) {
         this.boekRepository = boekRepository;
+        this.tagRepository = tagRepository;
     }
 
     /**
@@ -222,15 +227,23 @@ public class BoekImportService {
                                         : 1);
 
                         String genreString = getWaarde(currentRow, headerMap.get("Genre"), dataFormatter);
-                        boek.setGenre(genreString != null && !genreString.isEmpty()
-                                ? new ArrayList<>(List.of(genreString.split("\\s*,\\s*")))
-                                : new ArrayList<>());
+                        if (genreString != null && !genreString.isEmpty()) {
+                            for (String naam : genreString.split("\\s*,\\s*")) {
+                                if (!naam.isBlank()) {
+                                    boek.getTags().add(findOrCreateTag(TagType.GENRE, naam.trim()));
+                                }
+                            }
+                        }
 
                         String thematischeTagString = getWaarde(currentRow, headerMap.get("Thematische tags"),
                                 dataFormatter);
-                        boek.setThematischeTag(thematischeTagString != null && !thematischeTagString.isEmpty()
-                                ? new ArrayList<>(List.of(thematischeTagString.split("\\s*,\\s*")))
-                                : new ArrayList<>());
+                        if (thematischeTagString != null && !thematischeTagString.isEmpty()) {
+                            for (String naam : thematischeTagString.split("\\s*,\\s*")) {
+                                if (!naam.isBlank()) {
+                                    boek.getTags().add(findOrCreateTag(TagType.THEMATISCH, naam.trim()));
+                                }
+                            }
+                        }
 
                         String populariteitStr = getWaarde(currentRow, headerMap.get("Populariteit"), dataFormatter);
                         if (populariteitStr != null && !populariteitStr.isEmpty()) {
@@ -278,6 +291,11 @@ public class BoekImportService {
      * @param formatter de DataFormatter voor niet-numerieke cellen
      * @return de celwaarde als string, of null als de cel leeg of afwezig is
      */
+    private Tag findOrCreateTag(TagType type, String naam) {
+        return tagRepository.findByTypeAndNaamIgnoreCase(type, naam)
+                .orElseGet(() -> tagRepository.save(new Tag(naam, type)));
+    }
+
     private String getWaarde(Row row, Integer colIndex, DataFormatter formatter) {
         if (colIndex == null)
             return null;

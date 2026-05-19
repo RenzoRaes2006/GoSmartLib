@@ -20,9 +20,9 @@ import ap.be.backend.dto.BoekenFilters;
 import ap.be.backend.dto.BoekenSort;
 import ap.be.backend.dto.PageRequestParams;
 import ap.be.backend.entity.Boek;
-import ap.be.backend.entity.DidactischeSubcategorie;
 import ap.be.backend.exception.InvalidYearRangeException;
 import ap.be.backend.repository.BoekRepository;
+import ap.be.backend.repository.TagRepository;
 import ap.be.backend.service.BoekService;
 
 @ExtendWith(MockitoExtension.class)
@@ -31,6 +31,9 @@ public class BoekFilterServiceTest {
     @Mock
     private BoekRepository boekRepository;
 
+    @Mock
+    private TagRepository tagRepository;
+
     @InjectMocks
     private BoekService boekService;
 
@@ -38,58 +41,58 @@ public class BoekFilterServiceTest {
     private final PageRequestParams defaultPaging = new PageRequestParams(0, 10);
 
     private BoekenFilters filters(
-            String zoekterm, List<String> genre, List<String> tag, String uitgever,
+            String zoekterm, List<Long> tagIds, String uitgever,
             Integer minPagina, Integer maxPagina, String beschikbaar,
             Integer jaarVan, Integer jaarTot, String leesniveau,
-            Boolean didactisch, DidactischeSubcategorie subcat) {
-        return new BoekenFilters(zoekterm, genre, tag, uitgever, minPagina, maxPagina,
-                beschikbaar, jaarVan, jaarTot, leesniveau, didactisch, subcat);
+            Boolean didactisch) {
+        return new BoekenFilters(zoekterm, tagIds, uitgever, minPagina, maxPagina,
+                beschikbaar, jaarVan, jaarTot, leesniveau, didactisch);
     }
 
     private void mockRepo(Page<Boek> returnPage) {
         when(boekRepository.filterBoeken(any(), any(), any(), any(), any(),
-                any(), any(), any(), any(), any(), any(), any(), any()))
+                any(), any(), any(), any(), any(), any()))
                 .thenReturn(returnPage);
     }
 
     @Test
-    void givenGeenFilters_whenFilterBoeken_thenRoeptRepositoryAanMetNullGenres() {
+    void givenGeenFilters_whenFilterBoeken_thenRoeptRepositoryAanMetNullTagIds() {
         Page<Boek> verwacht = new PageImpl<>(List.of(new Boek("Boek A", "Auteur A")));
         mockRepo(verwacht);
 
         Page<BoekDTO> resultaat = boekService.filterBoeken(
-                filters(null, null, null, null, null, null, null, null, null, null, null, null),
+                filters(null, null, null, null, null, null, null, null, null, null),
                 defaultSort, defaultPaging);
 
         assertEquals(verwacht.getContent().size(), resultaat.getContent().size());
         verify(boekRepository).filterBoeken(isNull(), isNull(), isNull(), isNull(), isNull(),
-                isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), any());
+                isNull(), isNull(), isNull(), isNull(), isNull(), any());
     }
 
     @Test
-    void givenEnkelGenreInLijst_whenFilterBoeken_thenGeeftLijstAanRepository() {
-        List<String> genres = List.of("Filosofie");
+    void givenTagIds_whenFilterBoeken_thenGeeftLijstAanRepository() {
+        List<Long> tagIds = List.of(1L, 2L);
         mockRepo(new PageImpl<>(List.of(new Boek("Socrates", "Plato"))));
 
         boekService.filterBoeken(
-                filters(null, genres, null, null, null, null, null, null, null, null, null, null),
+                filters(null, tagIds, null, null, null, null, null, null, null, null),
                 defaultSort, defaultPaging);
 
-        verify(boekRepository).filterBoeken(any(), eq(genres), any(), any(), any(),
-                any(), any(), any(), any(), any(), any(), any(), any());
+        verify(boekRepository).filterBoeken(any(), eq(tagIds), any(), any(), any(),
+                any(), any(), any(), any(), any(), any());
     }
 
     @Test
-    void givenLegeGenresLijst_whenFilterBoeken_thenRoeptRepositoryAanMetNull() {
-        List<String> legeGenres = Collections.emptyList();
+    void givenLegeTagIdsLijst_whenFilterBoeken_thenRoeptRepositoryAanMetNull() {
+        List<Long> legeIds = Collections.emptyList();
         mockRepo(new PageImpl<>(List.of()));
 
         boekService.filterBoeken(
-                filters(null, legeGenres, null, null, null, null, null, null, null, null, null, null),
+                filters(null, legeIds, null, null, null, null, null, null, null, null),
                 defaultSort, defaultPaging);
 
         verify(boekRepository).filterBoeken(any(), isNull(), any(), any(), any(),
-                any(), any(), any(), any(), any(), any(), any(), any());
+                any(), any(), any(), any(), any(), any());
     }
 
     @Test
@@ -97,25 +100,24 @@ public class BoekFilterServiceTest {
         mockRepo(new PageImpl<>(List.of(new Boek("Didactisch Boek", "Auteur"))));
 
         boekService.filterBoeken(
-                filters(null, null, null, null, null, null, null, null, null, null, true,
-                        DidactischeSubcategorie.LESMETHODES),
+                filters(null, null, null, null, null, null, null, null, null, true),
                 defaultSort, defaultPaging);
 
         verify(boekRepository).filterBoeken(any(), any(), any(), any(), any(),
-                any(), any(), any(), any(), any(), eq(true), eq(DidactischeSubcategorie.LESMETHODES), any());
+                any(), any(), any(), any(), eq(true), any());
     }
 
     @Test
     void givenJaarVanKleinerDan1900_whenFilterBoeken_thenGooitInvalidYearRangeException() {
         assertThrows(InvalidYearRangeException.class, () -> boekService.filterBoeken(
-                filters(null, null, null, null, null, null, null, 1899, null, null, null, null),
+                filters(null, null, null, null, null, null, 1899, null, null, null),
                 defaultSort, defaultPaging));
     }
 
     @Test
     void givenJaarVanGroterDanJaarTot_whenFilterBoeken_thenGooitInvalidYearRangeException() {
         assertThrows(InvalidYearRangeException.class, () -> boekService.filterBoeken(
-                filters(null, null, null, null, null, null, null, 2020, 2010, null, null, null),
+                filters(null, null, null, null, null, null, 2020, 2010, null, null),
                 defaultSort, defaultPaging));
     }
 
@@ -125,11 +127,11 @@ public class BoekFilterServiceTest {
         mockRepo(new PageImpl<>(List.of()));
 
         boekService.filterBoeken(
-                filters(null, null, null, null, null, null, null, null, null, niveau, null, null),
+                filters(null, null, null, null, null, null, null, null, niveau, null),
                 defaultSort, defaultPaging);
 
         verify(boekRepository).filterBoeken(any(), any(), any(), any(), any(),
-                any(), any(), any(), any(), eq(niveau), any(), any(), any());
+                any(), any(), any(), eq(niveau), any(), any());
     }
 
     @Test
@@ -138,11 +140,11 @@ public class BoekFilterServiceTest {
         mockRepo(new PageImpl<>(List.of()));
 
         boekService.filterBoeken(
-                filters(term, null, null, null, null, null, null, null, null, null, null, null),
+                filters(term, null, null, null, null, null, null, null, null, null),
                 defaultSort, defaultPaging);
 
         verify(boekRepository).filterBoeken(eq(term), any(), any(), any(), any(),
-                any(), any(), any(), any(), any(), any(), any(), any());
+                any(), any(), any(), any(), any(), any());
     }
 
     @Test
@@ -150,10 +152,10 @@ public class BoekFilterServiceTest {
         mockRepo(new PageImpl<>(List.of()));
 
         boekService.filterBoeken(
-                filters(null, null, null, null, 100, 300, null, null, null, null, null, null),
+                filters(null, null, null, 100, 300, null, null, null, null, null),
                 defaultSort, defaultPaging);
 
-        verify(boekRepository).filterBoeken(any(), any(), any(), any(), eq(100), eq(300),
-                any(), any(), any(), any(), any(), any(), any());
+        verify(boekRepository).filterBoeken(any(), any(), any(), eq(100), eq(300),
+                any(), any(), any(), any(), any(), any());
     }
 }

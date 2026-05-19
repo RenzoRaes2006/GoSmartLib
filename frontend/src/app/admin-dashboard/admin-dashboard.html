@@ -19,6 +19,9 @@
       <button [class.active]="activeTab() === 'wizard'" (click)="wisselTab('wizard')">
         Nieuwe school toevoegen
       </button>
+      <button [class.active]="activeTab() === 'tags'" (click)="wisselTab('tags')">
+        Tag-beheer
+      </button>
     </div>
   </nav>
 
@@ -202,6 +205,11 @@
           }
         </div>
       </div>
+    }
+
+    <!-- tab 3: tag-beheer -->
+    @if (activeTab() === 'tags') {
+      <app-admin-tags />
     }
 
   </main>

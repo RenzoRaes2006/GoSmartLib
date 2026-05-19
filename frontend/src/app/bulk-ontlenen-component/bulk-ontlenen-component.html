@@ -23,10 +23,10 @@
           placeholder="Zoek op titel, auteur of ISBN..."
           class="search-input"
         />
-        <select [(ngModel)]="selectedGenre" (change)="onFilterChange()" class="filter-select">
-          <option value="">Alle genres</option>
-          @for (genre of beschikbareGenres; track genre) {
-            <option [value]="genre">{{ genre }}</option>
+        <select [(ngModel)]="selectedGenreId" (change)="onFilterChange()" class="filter-select">
+          <option [ngValue]="null">Alle genres</option>
+          @for (genre of beschikbareGenres(); track genre.id) {
+            <option [ngValue]="genre.id">{{ genre.naam }}</option>
           }
         </select>
         <button class="btn-primary" (click)="onFilterChange()">Zoeken</button>
@@ -48,8 +48,8 @@
                 </div>
                 <p class="author">{{ boek.auteur }}</p>
                 <div class="tags">
-                  @if (boek.genre && boek.genre.length > 0) {
-                    <span class="genre-tag">{{ boek.genre[0] }}</span>
+                  @for (tag of boek.tags | tagsByType:'GENRE'; track tag.id) {
+                    <span class="genre-tag">{{ tag.naam }}</span>
                   }
                 </div>
               </div>

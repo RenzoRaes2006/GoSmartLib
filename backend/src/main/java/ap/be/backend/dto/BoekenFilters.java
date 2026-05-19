@@ -2,12 +2,9 @@ package ap.be.backend.dto;
 
 import java.util.List;
 
-import ap.be.backend.entity.DidactischeSubcategorie;
-
 public record BoekenFilters(
         String zoekterm,
-        List<String> genre,
-        List<String> thematischeTag,
+        List<Long> tagIds,
         String uitgever,
         Integer minPagina,
         Integer maxPagina,
@@ -15,8 +12,7 @@ public record BoekenFilters(
         Integer uitgaveJaarVan,
         Integer uitgaveJaarTot,
         String leesniveau,
-        Boolean didactischMateriaal,
-        DidactischeSubcategorie didactischeSubcategorie) {
+        Boolean didactischMateriaal) {
 
     public Boolean beschikbaarAsBoolean() {
         return beschikbaar != null ? Boolean.parseBoolean(beschikbaar) : null;

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, OnInit, signal, viewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, signal, viewChild, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import {
   FormBuilder,
@@ -11,9 +11,11 @@ import {
 } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { BoekService } from '../services/boek.service';
+import { TagService } from '../services/tag.service';
 import { NieuwBoek } from '../models/NieuwBoek';
 import { GoogleBookService } from '../services/googleBook.service';
 import { Boek } from '../models/Boek';
+import { Tag, TagType } from '../models/Tag';
 import { FilterOptions } from '../models/FilterOptions';
 
 @Component({
@@ -60,59 +62,17 @@ export class BoekBeheer implements OnInit {
   uploadModus = signal<'url' | 'bestand'>('url');
   uploadBezig = signal(false);
 
-  // Genre dropdown
-  genreHiërarchie: Record<string, string[]> = {
-    Avontuur: [],
-    'Coming-of-age': [],
-    'Detective / misdaad': [],
-    Dystopie: [],
-    Fantasy: [],
-    'Fictie algemeen': [],
-    'Graphic novel / strip': [],
-    'Historische roman': [],
-    Horror: [],
-    Humor: [],
-    'Literaire roman': [],
-    'Non-fictie algemeen': [
-      'Biografie / autobiografie',
-      'Filosofie',
-      'Geschiedenis',
-      'Kunst & cultuur',
-      'Maatschappij & politiek',
-      'Psychologie',
-      'Wetenschap & technologie',
-    ],
-    'Oorlog & conflict': [],
-    Poëzie: [],
-    Romantiek: [],
-    'Spanning / thriller': [],
-  };
-  selectedHoofdGenre = signal('');
-  selectedSubGenre = signal('');
-  geselecteerdeGenres = signal<string[]>([]);
-  hoofdGenres = Object.keys(this.genreHiërarchie);
+  // Tag dropdowns — gevuld uit /api/tags door tagService.list()
+  private tagService = inject(TagService);
+  beschikbareGenres = signal<Tag[]>([]);
+  beschikbareThematischeTags = signal<Tag[]>([]);
+  beschikbareDidactischeTags = signal<Tag[]>([]);
 
-  // Thematische tags dropdown
-  beschikbareTags: string[] = [
-    'Armoede & ongelijkheid',
-    'Avontuur & ontdekking',
-    'Diversiteit & inclusie',
-    'Familie',
-    'Gender & seksualiteit',
-    'Identiteit & zelfbeeld',
-    'Liefde & relaties',
-    'Macht & onrecht',
-    'Mentale gezondheid',
-    'Migratie & afkomst',
-    'Overleven',
-    'Rouw & verlies',
-    'School & prestatiedruk',
-    'Sociale media',
-    'Toekomst & technologie',
-    'Vriendschap',
-  ];
-  selectedTag = signal('');
-  geselecteerdeTags = signal<string[]>([]);
+  selectedGenreId = signal<number | null>(null);
+  selectedThematischeId = signal<number | null>(null);
+  selectedDidactischeId = signal<number | null>(null);
+
+  geselecteerdeTags = signal<Tag[]>([]);
 
   constructor(
     private fb: FormBuilder,
@@ -127,20 +87,20 @@ export class BoekBeheer implements OnInit {
       uitgever: [''],
       uitgaveJaar: [''],
       pagina: [''],
-      genre: [''],
-      thematischeTag: [''],
       beschrijving: ['', [Validators.required, Validators.minLength(10)]],
       aantalExemplaren: ['', [Validators.required, Validators.pattern(/^\d+$/)]],
       locatie: [''],
       afbeelding: [''],
       leesniveau: [''],
       didactischMateriaal: [false],
-      didactischeSubcategorie: [null as string | null],
     });
   }
 
-  // laad boekenoverzicht als we in wijzigmodus starten
   ngOnInit(): void {
+    this.tagService.list('GENRE').subscribe((t) => this.beschikbareGenres.set(t));
+    this.tagService.list('THEMATISCH').subscribe((t) => this.beschikbareThematischeTags.set(t));
+    this.tagService.list('DIDACTISCH').subscribe((t) => this.beschikbareDidactischeTags.set(t));
+
     this.route.queryParams.subscribe((params) => {
       const urlMode = params['mode'];
       if (urlMode === 'toevoegen' || urlMode === 'wijzigen') {
@@ -174,19 +134,13 @@ export class BoekBeheer implements OnInit {
     }
   }
 
-  // Reset het formulier en statusberichten
   resetForm() {
     this.boekForm.reset();
-    this.boekForm.patchValue({ didactischMateriaal: false, didactischeSubcategorie: null });
+    this.boekForm.patchValue({ didactischMateriaal: false });
     this.errorMessage.set('');
     this.successMessage.set('');
     this.boekGevonden.set(false);
     this.naarTeWijzigenBoek.set(null);
-    this.geselecteerdeGenres.set([]);
-    this.selectedHoofdGenre.set('');
-    this.selectedSubGenre.set('');
-    this.geselecteerdeTags.set([]);
-    this.selectedTag.set('');
 
     this.resetDropdowns();
 
@@ -196,14 +150,12 @@ export class BoekBeheer implements OnInit {
   }
 
   private resetDropdowns() {
-    this.geselecteerdeGenres.set([]);
-    this.selectedHoofdGenre.set('');
-    this.selectedSubGenre.set('');
     this.geselecteerdeTags.set([]);
-    this.selectedTag.set('');
+    this.selectedGenreId.set(null);
+    this.selectedThematischeId.set(null);
+    this.selectedDidactischeId.set(null);
   }
 
-  // Populeren van het formulier met de gegevens van een boek dat geselecteerd is voor wijziging
   private mapBoekNaarFormValue(boek: Boek) {
     return {
       titel: boek.titel,
@@ -212,16 +164,37 @@ export class BoekBeheer implements OnInit {
       uitgever: boek.uitgever,
       uitgaveJaar: boek.uitgaveJaar,
       pagina: String(boek.pagina),
-      genre: Array.isArray(boek.genre) ? boek.genre.join(', ') : '',
-      thematischeTag: Array.isArray(boek.thematischeTag) ? boek.thematischeTag.join(', ') : '',
       beschrijving: boek.beschrijving,
       aantalExemplaren: String(boek.aantalExemplaren),
       locatie: boek.locatie,
       afbeelding: boek.afbeelding,
       leesniveau: boek.leesniveau || '',
       didactischMateriaal: !!boek.didactischMateriaal,
-      didactischeSubcategorie: boek.didactischeSubcategorie || null,
     };
+  }
+
+  geselecteerdeTagsVanType(type: TagType): Tag[] {
+    return this.geselecteerdeTags().filter((t) => t.type === type);
+  }
+
+  voegTagToe(type: TagType, idSignal: ReturnType<typeof signal<number | null>>): void {
+    const id = idSignal();
+    if (!id) return;
+    const lijst =
+      type === 'GENRE'
+        ? this.beschikbareGenres()
+        : type === 'THEMATISCH'
+          ? this.beschikbareThematischeTags()
+          : this.beschikbareDidactischeTags();
+    const tag = lijst.find((t) => t.id === id);
+    if (!tag) return;
+    if (this.geselecteerdeTags().some((t) => t.id === tag.id)) return;
+    this.geselecteerdeTags.set([...this.geselecteerdeTags(), tag]);
+    idSignal.set(null);
+  }
+
+  verwijderTag(tag: Tag): void {
+    this.geselecteerdeTags.set(this.geselecteerdeTags().filter((t) => t.id !== tag.id));
   }
 
   // Custom ISBN validator - accepteert ISBN-10 en ISBN-13 en "GO" nummers
@@ -307,16 +280,6 @@ export class BoekBeheer implements OnInit {
       next: (boekData) => {
         if (boekData) {
           this.boekForm.patchValue(boekData);
-          // Populeer genre tags vanuit de Google Books data
-          if (boekData.genre && typeof boekData.genre === 'string') {
-            this.geselecteerdeGenres.set(
-              boekData.genre
-                .split(',')
-                .map((g: string) => g.trim())
-                .filter((g: string) => g.length > 0),
-            );
-            this.updateGenreFormControl();
-          }
           this.boekForm.updateValueAndValidity();
           this.zoekMessage.set('Boek gevonden! vul de overige velden aan.');
           setTimeout(() => this.toonIsbnZoek.set(false), 3000);
@@ -348,27 +311,12 @@ export class BoekBeheer implements OnInit {
       this.boekForm.markAllAsTouched();
       return;
     } else {
-      const nieuwBoek = this.boekForm.value as NieuwBoek;
-      // Converteer kommagescheiden genre-string naar array
-      if (typeof nieuwBoek.genre === 'string') {
-        nieuwBoek.genre = nieuwBoek.genre
-          .split(',')
-          .map((g) => g.trim())
-          .filter((g) => g.length > 0);
-      }
-      // Converteer kommagescheiden thematischeTag-string naar array
-      if (typeof nieuwBoek.thematischeTag === 'string') {
-        nieuwBoek.thematischeTag = nieuwBoek.thematischeTag
-          .split(',')
-          .map((t) => t.trim())
-          .filter((t) => t.length > 0);
-      }
+      const nieuwBoek = { ...this.boekForm.value, tags: this.geselecteerdeTags() } as NieuwBoek;
       this.boekService.toevoegen(nieuwBoek).subscribe({
         next: () => {
-          console.log('Boek succesvol toegevoegd');
           this.successMessage.set('Boek succesvol toegevoegd!');
           this.boekForm.reset();
-          this.boekForm.patchValue({ didactischMateriaal: false, didactischeSubcategorie: null });
+          this.boekForm.patchValue({ didactischMateriaal: false });
           this.resetDropdowns();
           setTimeout(() => this.successMessage.set(''), 5000);
         },
@@ -402,27 +350,13 @@ export class BoekBeheer implements OnInit {
       return;
     }
 
-    const bijgewerktBoek = this.boekForm.value as NieuwBoek;
-    // Converteer kommagescheiden genre-string naar array
-    if (typeof bijgewerktBoek.genre === 'string') {
-      bijgewerktBoek.genre = bijgewerktBoek.genre
-        .split(',')
-        .map((g) => g.trim())
-        .filter((g) => g.length > 0);
-    }
-    // Converteer kommagescheiden thematischeTag-string naar array
-    if (typeof bijgewerktBoek.thematischeTag === 'string') {
-      bijgewerktBoek.thematischeTag = bijgewerktBoek.thematischeTag
-        .split(',')
-        .map((t) => t.trim())
-        .filter((t) => t.length > 0);
-    }
+    const bijgewerktBoek = { ...this.boekForm.value, tags: this.geselecteerdeTags() } as NieuwBoek;
 
     this.boekService.wijzigen(boek.id, bijgewerktBoek as unknown as Boek).subscribe({
       next: () => {
         this.successMessage.set('Boek succesvol bijgewerkt!');
         this.boekForm.reset();
-        this.boekForm.patchValue({ didactischMateriaal: false, didactischeSubcategorie: null });
+        this.boekForm.patchValue({ didactischMateriaal: false });
         this.resetDropdowns();
         this.boekGevonden.set(false);
         this.naarTeWijzigenBoek.set(null);
@@ -469,7 +403,7 @@ export class BoekBeheer implements OnInit {
       next: () => {
         this.successMessage.set('Boek succesvol verwijderd!');
         this.boekForm.reset();
-        this.boekForm.patchValue({ didactischMateriaal: false, didactischeSubcategorie: null });
+        this.boekForm.patchValue({ didactischMateriaal: false });
         this.resetDropdowns();
         this.boekGevonden.set(false);
         this.naarTeWijzigenBoek.set(null);
@@ -582,74 +516,14 @@ export class BoekBeheer implements OnInit {
       this.openVerwijderModal();
     } else {
       this.naarTeWijzigenBoek.set(boek);
-      // Populeer geselecteerde genres vanuit het boek
-      this.geselecteerdeGenres.set(Array.isArray(boek.genre) ? [...boek.genre] : []);
-      this.updateGenreFormControl();
-      // Populeer geselecteerde thematische tags vanuit het boek
-      this.geselecteerdeTags.set(
-        Array.isArray(boek.thematischeTag) ? [...boek.thematischeTag] : [],
-      );
-      this.updateTagFormControl();
-      // Formulier tonen voor wijzigen
+      this.geselecteerdeTags.set([...(boek.tags ?? [])]);
       this.boekForm.patchValue(this.mapBoekNaarFormValue(boek));
       this.boekGevonden.set(true);
       this.boekForm.enable();
     }
   }
 
-  // Haal subgenres op basis van het geselecteerde hoofdgenre
-  getSubGenres(hoofdGenre: string): string[] {
-    return this.genreHiërarchie[hoofdGenre] || [];
-  }
-
-  // Voeg een genre toe aan de lijst van geselecteerde genres, gebaseerd op de dropdownselecties
-  voegGenreToe() {
-    const genre = this.selectedSubGenre() || this.selectedHoofdGenre();
-    if (genre && !this.geselecteerdeGenres().includes(genre)) {
-      this.geselecteerdeGenres.set([...this.geselecteerdeGenres(), genre]);
-      this.updateGenreFormControl();
-    }
-    this.selectedHoofdGenre.set('');
-    this.selectedSubGenre.set('');
-  }
-
-  // Verwijder een genre uit de lijst van geselecteerde genres
-  verwijderGenre(genre: string) {
-    this.geselecteerdeGenres.set(this.geselecteerdeGenres().filter((g) => g !== genre));
-    this.updateGenreFormControl();
-  }
-
-  // Update de genre form control met de huidige lijst van geselecteerde genres
-  private updateGenreFormControl() {
-    const value = this.geselecteerdeGenres().join(', ');
-    this.boekForm.patchValue({ genre: value });
-    this.boekForm.get('genre')?.markAsDirty();
-    this.boekForm.get('genre')?.updateValueAndValidity();
-  }
-
-  // Voeg een thematische tag toe aan de lijst van geselecteerde tags
-  voegTagToe() {
-    const tag = this.selectedTag();
-    if (tag && !this.geselecteerdeTags().includes(tag)) {
-      this.geselecteerdeTags.set([...this.geselecteerdeTags(), tag]);
-      this.updateTagFormControl();
-    }
-    this.selectedTag.set('');
-  }
-
-  // Verwijder een thematische tag uit de lijst
-  verwijderTag(tag: string) {
-    this.geselecteerdeTags.set(this.geselecteerdeTags().filter((t) => t !== tag));
-    this.updateTagFormControl();
-  }
-
-  // Update de thematischeTag form control
-  private updateTagFormControl() {
-    const value = this.geselecteerdeTags().join(', ');
-    this.boekForm.patchValue({ thematischeTag: value });
-    this.boekForm.get('thematischeTag')?.markAsDirty();
-    this.boekForm.get('thematischeTag')?.updateValueAndValidity();
-  }
+  naamFn = (t: Tag): string => t.naam;
 
   verwijderAfbeelding(): void {
     this.boekForm.patchValue({ afbeelding: '' });

@@ -20,7 +20,6 @@ import org.springframework.data.domain.PageImpl;
 import ap.be.backend.dto.BoekDTO;
 import ap.be.backend.dto.BoekenFilters;
 import ap.be.backend.dto.BoekenSort;
-import ap.be.backend.entity.DidactischeSubcategorie;
 import ap.be.backend.service.BoekService;
 
 public class BoekFilterControllerTest extends AbstractIntegrationTest {
@@ -30,7 +29,7 @@ public class BoekFilterControllerTest extends AbstractIntegrationTest {
 
         private BoekDTO dto(String titel, String auteur) {
                 return new BoekDTO(1L, titel, auteur, "1234567890", "Uitg", "2020", 100,
-                                List.of(), List.of(), "Beschrijving", 1, "Loc", "", null, null, false, null);
+                                List.of(), "Beschrijving", 1, "Loc", "", null, null, false);
         }
 
         private BoekenFilters captureFilters() {
@@ -67,36 +66,35 @@ public class BoekFilterControllerTest extends AbstractIntegrationTest {
         }
 
         @Test
-        void givenEnkelGenreParam_whenGetAlleBoeken_thenGenreWordtAlsLijstDoorgegevenAanService() throws Exception {
+        void givenEnkelTagIdParam_whenGetAlleBoeken_thenTagIdWordtAlsLijstDoorgegevenAanService() throws Exception {
                 when(boekService.filterBoeken(any(), any(), any()))
                                 .thenReturn(new PageImpl<>(List.of(dto("Socrates", "Plato"))));
 
-                mockMvc.perform(get("/api/boeken").param("genre", "Filosofie"))
+                mockMvc.perform(get("/api/boeken").param("tagIds", "42"))
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$.content").isArray());
 
-                assertEquals(List.of("Filosofie"), captureFilters().genre());
+                assertEquals(List.of(42L), captureFilters().tagIds());
         }
 
         @Test
-        void givenMeerdereGenreParams_whenGetAlleBoeken_thenAlleGenresWordenVerzameldInLijst() throws Exception {
-                List<String> verwachteGenres = List.of("Non-fictie algemeen", "Filosofie", "Psychologie");
+        void givenMeerdereTagIdParams_whenGetAlleBoeken_thenAlleTagIdsWordenVerzameldInLijst() throws Exception {
                 when(boekService.filterBoeken(any(), any(), any()))
                                 .thenReturn(new PageImpl<>(List.of(dto("Sapiens", "Harari"))));
 
                 mockMvc.perform(get("/api/boeken")
-                                .param("genre", "Non-fictie algemeen")
-                                .param("genre", "Filosofie")
-                                .param("genre", "Psychologie"))
+                                .param("tagIds", "1")
+                                .param("tagIds", "2")
+                                .param("tagIds", "3"))
                                 .andExpect(status().isOk());
 
-                assertEquals(verwachteGenres, captureFilters().genre());
+                assertEquals(List.of(1L, 2L, 3L), captureFilters().tagIds());
         }
 
         @Test
         void givenLeesniveauParam_whenGetAlleBoeken_thenLeesniveauWordtDoorgegevenAanService() throws Exception {
                 BoekDTO boek = new BoekDTO(1L, "Eenvoudig Boek", "Auteur", "1234567890", "U", "2020", 50,
-                                List.of(), List.of(), "B", 1, "L", "", null, "A (eenvoudig taalgebruik)", false, null);
+                                List.of(), "B", 1, "L", "", null, "A (eenvoudig taalgebruik)", false);
                 when(boekService.filterBoeken(any(), any(), any()))
                                 .thenReturn(new PageImpl<>(List.of(boek)));
 
@@ -161,7 +159,7 @@ public class BoekFilterControllerTest extends AbstractIntegrationTest {
         @Test
         void givenZoektermOpIsbn_whenGetAlleBoeken_thenGeeftMatchendeBoeken() throws Exception {
                 BoekDTO boek = new BoekDTO(1L, "Clean Code", "Robert Martin", "9780132350884", "U", "2020", 100,
-                                List.of(), List.of(), "B", 1, "L", "", null, null, false, null);
+                                List.of(), "B", 1, "L", "", null, null, false);
                 when(boekService.filterBoeken(any(), any(), any()))
                                 .thenReturn(new PageImpl<>(List.of(boek)));
 
@@ -219,20 +217,5 @@ public class BoekFilterControllerTest extends AbstractIntegrationTest {
                                 .andExpect(jsonPath("$.content[0].titel").value("Lesmethode Wiskunde"));
 
                 assertEquals(Boolean.TRUE, captureFilters().didactischMateriaal());
-        }
-
-        @Test
-        void givenDidactischeSubcategorie_whenGetAlleBoeken_thenFiltertOpSubcategorie() throws Exception {
-                BoekDTO boek = new BoekDTO(1L, "Evaluatie 101", "Auteur", "1234567890", "U", "2020", 50,
-                                List.of(), List.of(), "B", 1, "L", "", null, null, false,
-                                DidactischeSubcategorie.EVALUATIEMATERIAAL);
-                when(boekService.filterBoeken(any(), any(), any()))
-                                .thenReturn(new PageImpl<>(List.of(boek)));
-
-                mockMvc.perform(get("/api/boeken").param("didactischeSubcategorie", "EVALUATIEMATERIAAL"))
-                                .andExpect(status().isOk())
-                                .andExpect(jsonPath("$.content[0].titel").value("Evaluatie 101"));
-
-                assertEquals(DidactischeSubcategorie.EVALUATIEMATERIAAL, captureFilters().didactischeSubcategorie());
         }
 }

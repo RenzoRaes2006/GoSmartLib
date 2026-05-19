@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, computed, OnInit, signal, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { SchoolService } from '../services/School.Service';
+import { AdminTags } from '../admin-tags/admin-tags';
 
 // static list of all official secondary schools under go! scholengroep antwerpen
 const GO_ANTWERPEN_SCHOLEN = [
@@ -27,7 +28,7 @@ const GO_ANTWERPEN_SCHOLEN = [
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, AdminTags],
   templateUrl: './admin-dashboard.html',
   styleUrl: './admin-dashboard.css'
 })
@@ -37,7 +38,7 @@ export class AdminDashboard implements OnInit {
   private schoolService = inject(SchoolService);
 
   // tab navigation state
-  activeTab = signal<'scholen' | 'wizard'>('scholen');
+  activeTab = signal<'scholen' | 'wizard' | 'tags'>('scholen');
 
   // state for the selected school detail view
   geselecteerdeSchool = signal<any>(null);
@@ -82,7 +83,7 @@ export class AdminDashboard implements OnInit {
     });
   }
 
-  wisselTab(tab: 'scholen' | 'wizard') {
+  wisselTab(tab: 'scholen' | 'wizard' | 'tags') {
     this.activeTab.set(tab);
     this.sluitSchoolDetails();
   }
