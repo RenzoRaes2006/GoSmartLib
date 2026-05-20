@@ -34,11 +34,9 @@
           aria-label="Filter op klas"
         >
           <option value="">Alle klassen</option>
-          <option value="1a">Klas 1A</option>
-          <option value="1b">Klas 1B</option>
-          <option value="2a">Klas 2A</option>
-          <option value="2b">Klas 2B</option>
-          <option value="3a">Klas 3A</option>
+          @for (klas of beschikbareKlassen(); track klas) {
+            <option [value]="klas">{{ klas }}</option>
+          }
         </select>
       </div>
 

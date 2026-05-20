@@ -46,7 +46,4 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT DISTINCT u.klas FROM User u WHERE u.klas IS NOT NULL AND u.klas <> '' ORDER BY u.klas")
     List<String> findDistinctKlassen();
 
-    @Query("SELECT DISTINCT u.klas FROM User u WHERE u.school.id = :schoolId AND " +
-            "u.klas IS NOT NULL AND u.klas <> '' ORDER BY u.klas")
-    List<String> findDistinctKlassenBySchool(@Param("schoolId") Long schoolId);
 }
