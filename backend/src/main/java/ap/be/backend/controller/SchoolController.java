@@ -10,12 +10,12 @@ import ap.be.backend.dto.SchoolOnboardDTO;
 import ap.be.backend.entity.Campus;
 import ap.be.backend.entity.School;
 import ap.be.backend.mappers.SchoolMapper;
-import ap.be.backend.entity.Rol;
 import ap.be.backend.entity.User;
 import ap.be.backend.repository.CampusRepository;
 import ap.be.backend.repository.SchoolRepository;
 import ap.be.backend.repository.UserRepository;
 import ap.be.backend.service.OneRosterClient;
+import ap.be.backend.service.OneRosterImportService;
 import ap.be.backend.service.SchoolOnboardingService;
 
 import java.util.List;
@@ -33,17 +33,20 @@ public class SchoolController {
     private final SchoolRepository schoolRepository;
     private final SchoolOnboardingService onboardingService;
     private final OneRosterClient oneRosterClient;
+    private final OneRosterImportService importService;
     private final CampusRepository campusRepository;
     private final UserRepository userRepository;
 
     public SchoolController(SchoolRepository schoolRepository,
                             SchoolOnboardingService onboardingService,
                             OneRosterClient oneRosterClient,
+                            OneRosterImportService importService,
                             CampusRepository campusRepository,
                             UserRepository userRepository) {
         this.schoolRepository = schoolRepository;
         this.onboardingService = onboardingService;
         this.oneRosterClient = oneRosterClient;
+        this.importService = importService;
         this.campusRepository = campusRepository;
         this.userRepository = userRepository;
     }
@@ -183,71 +186,26 @@ public class SchoolController {
     }
 
     @PostMapping("/{id}/sync-gebruikers")
-    @SuppressWarnings("unchecked")
     public ResponseEntity<?> syncGebruikers(@PathVariable Long id) {
-        Optional<School> schoolOpt = schoolRepository.findById(id);
-        if (schoolOpt.isEmpty()) return ResponseEntity.notFound().build();
-        School school = schoolOpt.get();
-        if (school.getSmartschoolDomein() == null
-                || school.getOauthClientId() == null
-                || school.getOauthClientSecret() == null) {
-            return ResponseEntity.badRequest().body(Map.of("error", "School heeft geen OneRoster-credentials"));
-        }
-
-        Map<String, Object> data;
         try {
-            data = oneRosterClient.haalLiveSchoolDataOp(
-                    school.getSmartschoolDomein(),
-                    school.getOauthClientId(),
-                    school.getOauthClientSecret());
+            OneRosterImportService.ImportResultaat r = importService.importSchool(id);
+            return ResponseEntity.ok(Map.of(
+                    "message", "Sync voltooid",
+                    "leerlingenNieuw", r.leerlingenNieuw(),
+                    "leerlingenGeupdatet", r.leerlingenGeupdatet(),
+                    "leerlingenOngewijzigd", r.leerlingenOngewijzigd(),
+                    "leerkrachtenNieuw", r.leerkrachtenNieuw(),
+                    "leerkrachtenGeupdatet", r.leerkrachtenGeupdatet(),
+                    "leerkrachtenOngewijzigd", r.leerkrachtenOngewijzigd(),
+                    "aantalKlassen", r.aantalKlassen()
+            ));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(502).body(Map.of("error", "OneRoster onbereikbaar: " + e.getMessage()));
         }
-
-        int gekoppeld = 0;
-        int nieuw = 0;
-
-        for (Map<String, Object> ll : (List<Map<String, Object>>) data.getOrDefault("leerlingen", List.of())) {
-            String smartschoolId = String.valueOf(ll.get("id"));
-            Optional<User> bestaand = userRepository.findBySmartschoolId(smartschoolId);
-            if (bestaand.isPresent()) {
-                User u = bestaand.get();
-                if (u.getSchool() == null) {
-                    u.setSchool(school);
-                    userRepository.save(u);
-                    gekoppeld++;
-                }
-            } else {
-                User u = new User(smartschoolId, (String) ll.get("klas"), Rol.LEERLING);
-                u.setSchool(school);
-                userRepository.save(u);
-                nieuw++;
-            }
-        }
-
-        for (Map<String, Object> lk : (List<Map<String, Object>>) data.getOrDefault("leerkrachten", List.of())) {
-            String smartschoolId = String.valueOf(lk.get("id"));
-            Optional<User> bestaand = userRepository.findBySmartschoolId(smartschoolId);
-            if (bestaand.isPresent()) {
-                User u = bestaand.get();
-                if (u.getSchool() == null) {
-                    u.setSchool(school);
-                    userRepository.save(u);
-                    gekoppeld++;
-                }
-            } else {
-                User u = new User(smartschoolId, (String) lk.getOrDefault("klas", ""), Rol.LEERKRACHT);
-                u.setSchool(school);
-                userRepository.save(u);
-                nieuw++;
-            }
-        }
-
-        return ResponseEntity.ok(Map.of(
-                "message", "Sync voltooid",
-                "gekoppeld", gekoppeld,
-                "nieuw", nieuw
-        ));
     }
 
     @DeleteMapping("/{id}")
