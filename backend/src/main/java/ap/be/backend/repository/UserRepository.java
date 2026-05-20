@@ -33,14 +33,20 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<User> findBySchool_Id(Long schoolId);
 
     @Query("SELECT u FROM User u WHERE u.rol = ap.be.backend.entity.Rol.LEERLING AND " +
+            "u.school.id = :schoolId AND " +
             "(:klas IS NULL OR :klas = '' OR u.klas = :klas) AND " +
             "(:zoekterm IS NULL OR :zoekterm = '' OR " +
             "LOWER(u.smartschoolId) LIKE LOWER(CONCAT('%', :zoekterm, '%')))")
     Page<User> findLeerlingenMetFilters(
+            @Param("schoolId") Long schoolId,
             @Param("klas") String klas,
             @Param("zoekterm") String zoekterm,
             Pageable pageable);
 
     @Query("SELECT DISTINCT u.klas FROM User u WHERE u.klas IS NOT NULL AND u.klas <> '' ORDER BY u.klas")
     List<String> findDistinctKlassen();
+
+    @Query("SELECT DISTINCT u.klas FROM User u WHERE u.school.id = :schoolId AND " +
+            "u.klas IS NOT NULL AND u.klas <> '' ORDER BY u.klas")
+    List<String> findDistinctKlassenBySchool(@Param("schoolId") Long schoolId);
 }
