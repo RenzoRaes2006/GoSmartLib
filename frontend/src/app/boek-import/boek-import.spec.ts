@@ -28,16 +28,6 @@ describe('BoekImport', () => {
     expect(component).toBeTruthy();
   });
 
-  it('voegGenreToe voegt unieke genre toe en wist actief-state', () => {
-    const boek = { genre: ['Fantasy'] };
-    component.actiefHoofdGenre.set('Avontuur');
-
-    component.voegGenreToe(boek);
-
-    expect(boek.genre).toContain('Avontuur');
-    expect(component.actiefHoofdGenre()).toBe('');
-  });
-
   it('verwijderUitPreview haalt boek uit lijst en toont succesmelding', () => {
     component.previewLijst.set([{ titel: 'A' }, { titel: 'B' }] as any);
 

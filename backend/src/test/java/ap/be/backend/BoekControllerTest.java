@@ -2,7 +2,6 @@ package ap.be.backend;
 
 import ap.be.backend.dto.BoekDTO;
 import ap.be.backend.entity.Boek;
-import ap.be.backend.entity.DidactischeSubcategorie;
 import ap.be.backend.service.BoekImportService;
 import ap.be.backend.service.BoekService;
 import org.junit.jupiter.api.Test;
@@ -58,8 +57,7 @@ public class BoekControllerTest extends AbstractIntegrationTest {
                 Mockito.when(boekService.filterBoeken(any(), any(), any())).thenReturn(page);
 
                 mockMvc.perform(get("/api/boeken")
-                                .param("didactischMateriaal", "true")
-                                .param("didactischeSubcategorie", "LESMETHODES"))
+                                .param("didactischMateriaal", "true"))
                                 .andExpect(status().isOk());
 
                 Mockito.verify(boekService).filterBoeken(any(), any(), any());
@@ -74,7 +72,6 @@ public class BoekControllerTest extends AbstractIntegrationTest {
                 opgeslagen.setId(1L);
                 opgeslagen.setIsbn("9780132350884");
                 opgeslagen.setDidactischMateriaal(true);
-                opgeslagen.setDidactischeSubcategorie(DidactischeSubcategorie.LESMETHODES);
                 Mockito.when(boekService.addBoek(any(BoekDTO.class))).thenReturn(opgeslagen);
 
                 String json = """
@@ -85,25 +82,22 @@ public class BoekControllerTest extends AbstractIntegrationTest {
                                     "uitgever": "Prentice Hall",
                                     "uitgaveJaar": "2008",
                                     "pagina": 464,
-                                    "genre": ["Software"],
+                                    "tags": [],
                                     "beschrijving": "A handbook of agile software craftsmanship",
                                     "aantalExemplaren": 3,
                                     "locatie": "A1",
                                     "afbeelding": "",
-                                    "didactischMateriaal": true,
-                                    "didactischeSubcategorie": "LESMETHODES"
+                                    "didactischMateriaal": true
                                 }
                                 """;
 
-                // Act & Then
                 mockMvc.perform(post("/api/boeken")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(json))
                                 .andExpect(status().isCreated())
                                 .andExpect(jsonPath("$.titel").value("Clean Code"))
                                 .andExpect(jsonPath("$.auteur").value("Robert Martin"))
-                                .andExpect(jsonPath("$.didactischMateriaal").value(true))
-                                .andExpect(jsonPath("$.didactischeSubcategorie").value("LESMETHODES"));
+                                .andExpect(jsonPath("$.didactischMateriaal").value(true));
         }
 
         @Test
@@ -117,7 +111,7 @@ public class BoekControllerTest extends AbstractIntegrationTest {
                                     "uitgever": "Uitgever",
                                     "uitgaveJaar": "2020",
                                     "pagina": 100,
-                                    "genre": ["Fictie"],
+                                    "tags": [],
                                     "beschrijving": "Beschrijving",
                                     "aantalExemplaren": 1,
                                     "locatie": "A1",
@@ -143,7 +137,7 @@ public class BoekControllerTest extends AbstractIntegrationTest {
                                     "uitgever": "Uitgever",
                                     "uitgaveJaar": "2020",
                                     "pagina": 100,
-                                    "genre": ["Fictie"],
+                                    "tags": [],
                                     "beschrijving": "Beschrijving",
                                     "aantalExemplaren": 1,
                                     "locatie": "A1",
@@ -176,7 +170,7 @@ public class BoekControllerTest extends AbstractIntegrationTest {
                                     "uitgever": "Uitgever",
                                     "uitgaveJaar": "2023",
                                     "pagina": 300,
-                                    "genre": ["Fictie"],
+                                    "tags": [],
                                     "beschrijving": "Bijgewerkte beschrijving",
                                     "aantalExemplaren": 5,
                                     "locatie": "B2",
@@ -207,7 +201,7 @@ public class BoekControllerTest extends AbstractIntegrationTest {
                                     "uitgever": "Test",
                                     "uitgaveJaar": "2023",
                                     "pagina": 100,
-                                    "genre": ["Fictie"],
+                                    "tags": [],
                                     "beschrijving": "Beschrijving",
                                     "aantalExemplaren": 1,
                                     "locatie": "A1",

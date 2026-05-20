@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
 import { of } from 'rxjs';
 
 import { BulkOntlenenComponent } from './bulk-ontlenen-component';
@@ -16,12 +18,19 @@ describe('BulkOntlenenComponent', () => {
 
     await TestBed.configureTestingModule({
       imports: [BulkOntlenenComponent],
-      providers: [{ provide: BoekService, useValue: boekSpy }],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: BoekService, useValue: boekSpy },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(BulkOntlenenComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
+
+    const http = TestBed.inject(HttpTestingController);
+    http.match((r) => r.url.includes('/api/tags')).forEach((r) => r.flush([]));
   });
 
   it('moet aangemaakt kunnen worden', () => {

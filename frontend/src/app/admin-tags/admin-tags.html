@@ -1,0 +1,91 @@
+<div class="tag-beheer">
+  <nav class="tag-subnav">
+    <div class="nav-container">
+      @for (tab of tabs; track tab) {
+        <button [class.active]="activeTab() === tab" (click)="wisselTab(tab)">
+          {{ tabLabel(tab) }}
+        </button>
+      }
+    </div>
+  </nav>
+
+  <div class="admin-card">
+      <div class="card-header">
+        <h2>{{ tabLabel(activeTab()) }}</h2>
+      </div>
+
+      <div class="toevoegen-rij">
+        <input
+          type="text"
+          placeholder="Nieuwe tag-naam"
+          [(ngModel)]="nieuweNaam"
+          (keydown.enter)="toevoegen()"
+        />
+        <button class="primary" (click)="toevoegen()" [disabled]="!nieuweNaam.trim()">
+          + Toevoegen
+        </button>
+      </div>
+
+      @if (fout()) {
+        <div class="foutmelding">{{ fout() }}</div>
+      }
+
+      @if (laden()) {
+        <p>Laden…</p>
+      } @else if (tags().length === 0) {
+        <p class="leeg">Nog geen tags in deze categorie.</p>
+      } @else {
+        <ul class="tag-lijst">
+          @for (tag of zichtbareTags(); track tag.id) {
+            <li>
+              @if (bewerktId === tag.id) {
+                <input
+                  type="text"
+                  [(ngModel)]="bewerktNaam"
+                  (keydown.enter)="bewaarBewerken(tag)"
+                  (keydown.escape)="annuleerBewerken()"
+                />
+                <button class="primary" (click)="bewaarBewerken(tag)">Opslaan</button>
+                <button (click)="annuleerBewerken()">Annuleren</button>
+              } @else {
+                <span class="tag-naam">{{ tag.naam }}</span>
+                <button (click)="startBewerken(tag)">Hernoemen</button>
+                <button class="danger" (click)="verwijderen(tag)">Verwijderen</button>
+              }
+            </li>
+          }
+        </ul>
+
+        <div class="paginatie">
+          <button (click)="vorigePagina()" [disabled]="huidigePagina() === 1">‹ Vorige</button>
+          <span>Pagina {{ huidigePagina() }} van {{ totaalPaginas() }}</span>
+          <button (click)="volgendePagina()" [disabled]="huidigePagina() === totaalPaginas()">Volgende ›</button>
+        </div>
+      }
+  </div>
+
+  @if (teVerwijderenTag()) {
+    <div class="modal-overlay" (click)="sluitVerwijderModal()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Tag verwijderen</h3>
+        </div>
+        <div class="modal-body">
+          <p>Weet je zeker dat je deze tag wilt verwijderen?</p>
+          <p class="tag-info">
+            <strong>{{ teVerwijderenTag()!.naam }}</strong>
+          </p>
+          <p class="warning-text">Deze actie kan niet ongedaan worden gemaakt.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-annuleren" (click)="sluitVerwijderModal()">
+            Annuleren
+          </button>
+          <button type="button" class="btn-verwijderen" (click)="bevestigVerwijderen()">
+            Verwijderen
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

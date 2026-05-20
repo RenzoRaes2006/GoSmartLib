@@ -1,8 +1,6 @@
 export interface FilterOptions {
   zoekterm?: string;
-  genre?: string;
-  genres?: string[];
-  thematischeTags?: string[];
+  tagIds?: number[];
   uitgever?: string;
   minPagina?: number;
   maxPagina?: number;
@@ -13,7 +11,6 @@ export interface FilterOptions {
   uitgaveJaarTot?: number;
   leesniveau?: string;
   didactischMateriaal?: string;
-  didactischeSubcategorie?: string;
   page?: number;
   size?: number;
 }

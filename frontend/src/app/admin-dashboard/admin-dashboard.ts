@@ -3,6 +3,7 @@ import { Component, computed, OnInit, signal, inject } from '@angular/core';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { SchoolService } from '../services/School.Service';
+import { AdminTags } from '../admin-tags/admin-tags';
 import { AdminGebruiker, AdminGebruikerService } from '../services/AdminGebruikerService';
 
 // static list of all official secondary schools under go! scholengroep antwerpen
@@ -30,7 +31,7 @@ const GO_ANTWERPEN_SCHOLEN = [
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, AdminTags],
   templateUrl: './admin-dashboard.html',
   styleUrl: './admin-dashboard.css'
 })
@@ -47,7 +48,7 @@ export class AdminDashboard implements OnInit {
     : 'https://api-sp09.cloud-ap.be/api/scholen';
 
   // tab navigation state
-  activeTab = signal<'scholen' | 'wizard' | 'rollen'>('scholen');
+  activeTab = signal<'scholen' | 'wizard' | 'tags' | 'rollen'>('scholen');
 
   // rollen-tab state
   leerkrachten = signal<AdminGebruiker[]>([]);
@@ -233,7 +234,7 @@ export class AdminDashboard implements OnInit {
     });
   }
 
-  wisselTab(tab: 'scholen' | 'wizard' | 'rollen') {
+  wisselTab(tab: 'scholen' | 'wizard' | 'tags' | 'rollen') {
     this.activeTab.set(tab);
     this.sluitBewerken(); // Sluit campussen editor indien open
     if (tab === 'rollen') {

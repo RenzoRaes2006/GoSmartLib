@@ -1,7 +1,6 @@
 package ap.be.backend;
 
 import ap.be.backend.entity.Boek;
-import ap.be.backend.entity.DidactischeSubcategorie;
 import ap.be.backend.repository.BoekRepository;
 
 import org.junit.jupiter.api.Test;
@@ -27,7 +26,6 @@ class BoekRepositoryTest {
 
     @Test
     void givenBooksInDatabase_whenFindAllOrderByLocatie_thenReturnsSortedBooks() {
-        // --- ARRANGE ---
         Boek boek1 = new Boek();
         boek1.setTitel("ZZZ Test Boek");
         boek1.setLocatie("MaGO! Antwerpen");
@@ -39,10 +37,8 @@ class BoekRepositoryTest {
         boekRepository.save(boek1);
         boekRepository.save(boek2);
 
-        // --- ACT ---
         List<Boek> resultaat = boekRepository.findAll();
 
-        // --- ASSERT ---
         assertThat(resultaat.size()).isGreaterThanOrEqualTo(2);
 
         List<String> locaties = resultaat.stream()
@@ -58,16 +54,13 @@ class BoekRepositoryTest {
 
     @Test
     void givenBookWithZeroExemplaren_whenSaved_thenIsbnIsStoredCorrectly() {
-        // --- ARRANGE (Given) ---
         Boek testBoek = new Boek();
         testBoek.setTitel("Test Boek");
         testBoek.setIsbn("1234567890123");
         testBoek.setAantalExemplaren(0);
 
-        // --- ACT (When) ---
         Boek savedBoek = boekRepository.save(testBoek);
 
-        // --- ASSERT (Then) ---
         assertThat(savedBoek.getId()).isNotNull();
         assertThat(savedBoek.getAantalExemplaren()).isEqualTo(0);
         assertThat(savedBoek.getIsbn()).isEqualTo("1234567890123");
@@ -75,7 +68,6 @@ class BoekRepositoryTest {
 
     @Test
     public void givenBoekenInDatabase_whenSearchWithExistingTitle_thenReturnsFilteredList() {
-        // Arrange
         Boek b1 = new Boek();
         b1.setTitel("Java for Beginners");
         b1.setAuteur("John Doe");
@@ -87,18 +79,15 @@ class BoekRepositoryTest {
         boekRepository.saveAll(List.of(b1, b2));
         Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Direction.ASC, "locatie"));
 
-        // Act - Aangepast naar 12 filter parameters + pageable
-        Page<Boek> result = boekRepository.filterBoeken("java", null, null, null, null, null, null, null, null, null, null, null,
+        Page<Boek> result = boekRepository.filterBoeken("java", null, null, null, null, null, null, null, null, null,
                 pageable);
 
-        // Assert
         assertThat(result.getContent()).isNotEmpty();
         assertThat(result.getContent().stream().map(Boek::getTitel).toList()).contains("Java for Beginners");
     }
 
     @Test
     public void givenBoekWithAuthor_whenSearchOnAuthorName_thenReturnsMatchingBoek() {
-        // Arrange
         Boek b1 = new Boek();
         b1.setTitel("Effective Java");
         b1.setAuteur("Joshua Bloch");
@@ -106,20 +95,15 @@ class BoekRepositoryTest {
         boekRepository.save(b1);
         Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Direction.ASC, "locatie"));
 
-        // Act - Aangepast naar 12 filter parameters + pageable
-        Page<Boek> result = boekRepository.filterBoeken("Bloch", null, null, null, null, null, null, null, null, null, null, null,
+        Page<Boek> result = boekRepository.filterBoeken("Bloch", null, null, null, null, null, null, null, null, null,
                 pageable);
 
-        // Assert
         assertThat(result.getContent()).isNotEmpty();
         assertThat(result.getContent().get(0).getAuteur()).isEqualTo("Joshua Bloch");
     }
 
-    // --- DIDACTISCH MATERIAAL FILTERS ---
-
     @Test
     void givenDidactischMateriaal_whenFilteredOnDidactischTrue_thenReturnsOnlyDidactisch() {
-        // Arrange
         Boek d1 = new Boek();
         d1.setTitel("Didactisch Materiaal 1");
         d1.setDidactischMateriaal(true);
@@ -129,37 +113,14 @@ class BoekRepositoryTest {
         boekRepository.saveAll(List.of(d1, n1));
         Pageable pageable = PageRequest.of(0, 100);
 
-        // Act
-        Page<Boek> result = boekRepository.filterBoeken(null, null, null, null, null, null, null, null, null, null, true, null, pageable);
+        Page<Boek> result = boekRepository.filterBoeken(null, null, null, null, null, null, null, null, null, true, pageable);
 
-        // Assert
         assertThat(result.getContent().stream().map(Boek::getTitel)).contains("Didactisch Materiaal 1");
         assertThat(result.getContent().stream().map(Boek::getTitel)).doesNotContain("Normaal Boek 1");
     }
 
     @Test
-    void givenBoekMetDidactischeSubcategorie_whenFilteredOnSubcategorie_thenReturnsMatch() {
-        // Arrange
-        Boek b = new Boek();
-        b.setTitel("Handboek Engels");
-        b.setDidactischMateriaal(true);
-        b.setDidactischeSubcategorie(DidactischeSubcategorie.DIDACTISCHE_HANDBOEKEN);
-        boekRepository.save(b);
-        Pageable pageable = PageRequest.of(0, 100);
-
-        // Act
-        Page<Boek> result = boekRepository.filterBoeken(null, null, null, null, null, null, null, null, null, null, null, DidactischeSubcategorie.DIDACTISCHE_HANDBOEKEN, pageable);
-
-        // Assert
-        assertThat(result.getContent()).isNotEmpty();
-        assertThat(result.getContent().get(0).getDidactischeSubcategorie()).isEqualTo(DidactischeSubcategorie.DIDACTISCHE_HANDBOEKEN);
-    }
-
-    // --- FIND BY ISBN ---
-
-    @Test
     void givenBoekMetIsbn_whenFindByIsbn_thenGeeftBoekTerug() {
-        // Arrange
         String uniekIsbn = "978" + (System.currentTimeMillis() % 10000000000L);
         uniekIsbn = uniekIsbn.substring(0, 13);
         Boek boek = new Boek();
@@ -168,10 +129,8 @@ class BoekRepositoryTest {
         boek.setIsbn(uniekIsbn);
         boekRepository.save(boek);
 
-        // Act
         Optional<Boek> result = boekRepository.findByIsbn(uniekIsbn);
 
-        // Assert
         assertThat(result).isPresent();
         assertThat(result.get().getIsbn()).isEqualTo(uniekIsbn);
         assertThat(result.get().getTitel()).isEqualTo("ISBN Test Boek");
@@ -179,10 +138,8 @@ class BoekRepositoryTest {
 
     @Test
     void givenGeenBoekMetIsbn_whenFindByIsbn_thenGeeftLegeOptional() {
-        // Act
         Optional<Boek> result = boekRepository.findByIsbn("0000000000000");
 
-        // Assert
         assertThat(result).isEmpty();
     }
 }

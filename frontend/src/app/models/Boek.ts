@@ -1,10 +1,11 @@
+import { Tag } from './Tag';
+
 export interface Boek {
   id?: number;
   titel: string;
   auteur: string;
   uitgever: string;
-  genre: string[];
-  thematischeTag: string[];
+  tags: Tag[];
   pagina: number;
   uitgaveJaar: string;
   beschrijving: string;
@@ -14,5 +15,4 @@ export interface Boek {
   locatie: string;
   leesniveau?: string;
   didactischMateriaal?: boolean;
-  didactischeSubcategorie?: string;
 }

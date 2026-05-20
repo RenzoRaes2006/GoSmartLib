@@ -23,7 +23,6 @@ export class GoogleBookService {
             uitgever: boekInfo.publisher || '',
             uitgaveJaar: boekInfo.publishedDate ? boekInfo.publishedDate.substring(0, 4) : '',
             pagina: boekInfo.pageCount ? boekInfo.pageCount.toString() : '',
-            genre: boekInfo.categories ? boekInfo.categories.join(', ') : '',
             beschrijving: boekInfo.description || '',
             afbeelding: boekInfo.imageLinks ? boekInfo.imageLinks.thumbnail.replace('http://', 'https://') : '',
           };

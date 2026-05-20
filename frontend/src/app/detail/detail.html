@@ -23,8 +23,8 @@
           <div class="tags-section">
             <span class="tags-label">Genres</span>
             <div class="tags-list">
-              @for (genre of boek?.genre; track $index) {
-                <span class="tag">{{ genre }}</span>
+              @for (tag of (boek?.tags ?? []) | tagsByType:'GENRE'; track tag.id) {
+                <span class="tag">{{ tag.naam }}</span>
               } @empty {
                 <span class="tag">Geen genres</span>
               }
@@ -34,8 +34,8 @@
           <div class="tags-section">
             <span class="tags-label">Thematische tags</span>
             <div class="tags-list">
-              @for (tag of boek?.thematischeTag; track $index) {
-                <span class="tag">{{ tag }}</span>
+              @for (tag of (boek?.tags ?? []) | tagsByType:'THEMATISCH'; track tag.id) {
+                <span class="tag">{{ tag.naam }}</span>
               } @empty {
                 <span class="tag">Geen thema's</span>
               }

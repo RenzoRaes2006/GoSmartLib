@@ -112,7 +112,7 @@
               <td>{{ boek.titel }}</td>
               <td>{{ boek.auteur }}</td>
               <td>{{ boek.isbn }}</td>
-              <td>{{ boek.genre.join(', ') }}</td>
+              <td>{{ boek.tags.map(naamFn).join(', ') }}</td>
               <td>
                 <button
                   type="button"
@@ -264,53 +264,33 @@
     <div class="genre-leesniveau-row">
       <div>
         <label>Genre:</label>
-        <input type="hidden" formControlName="genre" />
         <div class="genre-dropdown-row">
           <select
-            [ngModel]="selectedHoofdGenre()"
-            (ngModelChange)="selectedHoofdGenre.set($event); selectedSubGenre.set('')"
+            [ngModel]="selectedGenreId()"
+            (ngModelChange)="selectedGenreId.set($event)"
             [ngModelOptions]="{ standalone: true }"
           >
-            <option value="">Kies een genre</option>
-            @for (genre of hoofdGenres; track genre) {
-              <option [value]="genre">{{ genre }}</option>
+            <option [ngValue]="null">Kies een genre</option>
+            @for (g of beschikbareGenres(); track g.id) {
+              <option [ngValue]="g.id">{{ g.naam }}</option>
             }
           </select>
-          @if (selectedHoofdGenre() && getSubGenres(selectedHoofdGenre()).length > 0) {
-            <select
-              [ngModel]="selectedSubGenre()"
-              (ngModelChange)="selectedSubGenre.set($event)"
-              [ngModelOptions]="{ standalone: true }"
-            >
-              <option value="">Kies subgenre</option>
-              @for (sub of getSubGenres(selectedHoofdGenre()); track sub) {
-                <option [value]="sub">{{ sub }}</option>
-              }
-            </select>
-          }
           <button
             type="button"
             class="genre-toevoegen-btn"
-            (click)="voegGenreToe()"
-            [disabled]="!selectedHoofdGenre()"
+            (click)="voegTagToe('GENRE', selectedGenreId)"
+            [disabled]="!selectedGenreId()"
           >
             +
           </button>
         </div>
-        @if (geselecteerdeGenres().length > 0) {
+        @if (geselecteerdeTagsVanType('GENRE').length > 0) {
           <div class="genre-tags">
-            @for (genre of geselecteerdeGenres(); track genre) {
+            @for (tag of geselecteerdeTagsVanType('GENRE'); track tag.id) {
               <span class="genre-tag">
-                {{ genre }}
-                <button type="button" (click)="verwijderGenre(genre)">&times;</button>
+                {{ tag.naam }}
+                <button type="button" (click)="verwijderTag(tag)">&times;</button>
               </span>
-            }
-          </div>
-        }
-        @if (boekForm.get('genre')?.invalid && boekForm.get('genre')?.touched) {
-          <div>
-            @if (boekForm.get('genre')?.errors?.['required']) {
-              <small>Genre is verplicht.</small>
             }
           </div>
         }
@@ -329,32 +309,31 @@
 
       <div>
         <label>Thematische tags:</label>
-        <input type="hidden" formControlName="thematischeTag" />
         <div class="genre-dropdown-row">
           <select
-            [ngModel]="selectedTag()"
-            (ngModelChange)="selectedTag.set($event)"
+            [ngModel]="selectedThematischeId()"
+            (ngModelChange)="selectedThematischeId.set($event)"
             [ngModelOptions]="{ standalone: true }"
           >
-            <option value="">Kies een thematische tag</option>
-            @for (tag of beschikbareTags; track tag) {
-              <option [value]="tag">{{ tag }}</option>
+            <option [ngValue]="null">Kies een thematische tag</option>
+            @for (t of beschikbareThematischeTags(); track t.id) {
+              <option [ngValue]="t.id">{{ t.naam }}</option>
             }
           </select>
           <button
             type="button"
             class="genre-toevoegen-btn"
-            (click)="voegTagToe()"
-            [disabled]="!selectedTag()"
+            (click)="voegTagToe('THEMATISCH', selectedThematischeId)"
+            [disabled]="!selectedThematischeId()"
           >
             +
           </button>
         </div>
-        @if (geselecteerdeTags().length > 0) {
+        @if (geselecteerdeTagsVanType('THEMATISCH').length > 0) {
           <div class="genre-tags">
-            @for (tag of geselecteerdeTags(); track tag) {
+            @for (tag of geselecteerdeTagsVanType('THEMATISCH'); track tag.id) {
               <span class="genre-tag">
-                {{ tag }}
+                {{ tag.naam }}
                 <button type="button" (click)="verwijderTag(tag)">&times;</button>
               </span>
             }
@@ -466,19 +445,39 @@
         </label>
 
         @if (boekForm.get('didactischMateriaal')?.value) {
-          <select
-            id="didactischeSubcategorie"
-            formControlName="didactischeSubcategorie"
-            class="didactisch-subcategorie-select"
-          >
-            <option value="">Kies subcategorie</option>
-            <option value="LESMETHODES">Lesmethodes</option>
-            <option value="DIDACTISCHE_HANDBOEKEN">Didactische handboeken</option>
-            <option value="EVALUATIEMATERIAAL">Evaluatiemateriaal</option>
-            <option value="NASLAGWERKEN">Naslagwerken</option>
-          </select>
+          <div class="genre-dropdown-row">
+            <select
+              [ngModel]="selectedDidactischeId()"
+              (ngModelChange)="selectedDidactischeId.set($event)"
+              [ngModelOptions]="{ standalone: true }"
+              class="didactisch-subcategorie-select"
+            >
+              <option [ngValue]="null">Kies didactische tag</option>
+              @for (d of beschikbareDidactischeTags(); track d.id) {
+                <option [ngValue]="d.id">{{ d.naam }}</option>
+              }
+            </select>
+            <button
+              type="button"
+              class="genre-toevoegen-btn"
+              (click)="voegTagToe('DIDACTISCH', selectedDidactischeId)"
+              [disabled]="!selectedDidactischeId()"
+            >
+              +
+            </button>
+          </div>
         }
       </div>
+      @if (geselecteerdeTagsVanType('DIDACTISCH').length > 0) {
+        <div class="genre-tags">
+          @for (tag of geselecteerdeTagsVanType('DIDACTISCH'); track tag.id) {
+            <span class="genre-tag">
+              {{ tag.naam }}
+              <button type="button" (click)="verwijderTag(tag)">&times;</button>
+            </span>
+          }
+        </div>
+      }
     </div>
     <!-- End toegevoegd door Jouw baas Mohamed -->
 

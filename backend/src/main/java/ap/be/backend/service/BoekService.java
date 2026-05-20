@@ -1,31 +1,37 @@
 package ap.be.backend.service;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import ap.be.backend.dto.BoekDTO;
 import ap.be.backend.dto.BoekenFilters;
 import ap.be.backend.dto.BoekenSort;
 import ap.be.backend.dto.PageRequestParams;
+import ap.be.backend.dto.TagDTO;
 import ap.be.backend.entity.Boek;
+import ap.be.backend.entity.Tag;
 import ap.be.backend.exception.InvalidYearRangeException;
 import ap.be.backend.exception.IsbnAlreadyExistsException;
 import ap.be.backend.mappers.BoekMapper;
 import ap.be.backend.repository.BoekRepository;
-import org.springframework.transaction.annotation.Transactional;
+import ap.be.backend.repository.TagRepository;
 
 @Service
 public class BoekService {
     private final BoekRepository boekRepository;
+    private final TagRepository tagRepository;
 
-    public BoekService(BoekRepository boekRepository) {
+    public BoekService(BoekRepository boekRepository, TagRepository tagRepository) {
         this.boekRepository = boekRepository;
+        this.tagRepository = tagRepository;
     }
 
     public Boek addBoek(BoekDTO boekDTO) {
@@ -41,10 +47,7 @@ public class BoekService {
         boek.setIsbn(trimmedIsbn);
         boek.setUitgever(isNotBlank(boekDTO.uitgever()) ? boekDTO.uitgever() : "Geen uitgever");
         boek.setUitgaveJaar(isNotBlank(boekDTO.uitgaveJaar()) ? boekDTO.uitgaveJaar() : "Geen uitgavejaar");
-        boek.setGenre(boekDTO.genre() != null && !boekDTO.genre().isEmpty() ? boekDTO.genre() : new ArrayList<>());
-        boek.setThematischeTag(
-                boekDTO.thematischeTag() != null && !boekDTO.thematischeTag().isEmpty() ? boekDTO.thematischeTag()
-                        : new ArrayList<>());
+        boek.setTags(resolveTags(boekDTO.tags()));
         boek.setPagina(boekDTO.pagina());
         boek.setBeschrijving(boekDTO.beschrijving());
         boek.setAantalExemplaren(boekDTO.aantalExemplaren());
@@ -52,7 +55,6 @@ public class BoekService {
         boek.setAfbeelding(isNotBlank(boekDTO.afbeelding()) ? boekDTO.afbeelding() : "");
         boek.setLeesniveau(isNotBlank(boekDTO.leesniveau()) ? boekDTO.leesniveau() : "Geen leesniveau");
         boek.setDidactischMateriaal(Boolean.TRUE.equals(boekDTO.didactischMateriaal()));
-        boek.setDidactischeSubcategorie(boekDTO.didactischeSubcategorie());
         return boekRepository.save(boek);
     }
 
@@ -68,10 +70,9 @@ public class BoekService {
         boek.setIsbn(boekDTO.isbn());
         boek.setUitgever(isNotBlank(boekDTO.uitgever()) ? boekDTO.uitgever() : "Geen uitgever");
         boek.setUitgaveJaar(isNotBlank(boekDTO.uitgaveJaar()) ? boekDTO.uitgaveJaar() : "Geen uitgavejaar");
-        boek.setGenre(boekDTO.genre() != null && !boekDTO.genre().isEmpty() ? boekDTO.genre() : new ArrayList<>());
-        boek.setThematischeTag(
-                boekDTO.thematischeTag() != null && !boekDTO.thematischeTag().isEmpty() ? boekDTO.thematischeTag()
-                        : new ArrayList<>());
+        Set<Tag> nieuweTags = resolveTags(boekDTO.tags());
+        boek.getTags().clear();
+        boek.getTags().addAll(nieuweTags);
         boek.setPagina(boekDTO.pagina());
         boek.setBeschrijving(boekDTO.beschrijving());
         boek.setAantalExemplaren(boekDTO.aantalExemplaren());
@@ -79,7 +80,6 @@ public class BoekService {
         boek.setAfbeelding(isNotBlank(boekDTO.afbeelding()) ? boekDTO.afbeelding() : "");
         boek.setLeesniveau(isNotBlank(boekDTO.leesniveau()) ? boekDTO.leesniveau() : "Geen leesniveau");
         boek.setDidactischMateriaal(Boolean.TRUE.equals(boekDTO.didactischMateriaal()));
-        boek.setDidactischeSubcategorie(boekDTO.didactischeSubcategorie());
         return boekRepository.save(boek);
     }
 
@@ -98,13 +98,10 @@ public class BoekService {
 
     public Page<BoekDTO> filterBoeken(BoekenFilters filters, BoekenSort sort, PageRequestParams paging) {
         validateYearRange(filters.uitgaveJaarVan(), filters.uitgaveJaarTot());
-        List<String> genresParam = (filters.genre() == null || filters.genre().isEmpty()) ? null : filters.genre();
-        List<String> tagsParam = (filters.thematischeTag() == null || filters.thematischeTag().isEmpty()) ? null
-                : filters.thematischeTag();
+        List<Long> tagIdsParam = (filters.tagIds() == null || filters.tagIds().isEmpty()) ? null : filters.tagIds();
         Page<Boek> page = boekRepository.filterBoeken(
                 filters.zoekterm(),
-                genresParam,
-                tagsParam,
+                tagIdsParam,
                 filters.uitgever(),
                 filters.minPagina(),
                 filters.maxPagina(),
@@ -113,9 +110,20 @@ public class BoekService {
                 filters.uitgaveJaarTot(),
                 filters.leesniveau(),
                 filters.didactischMateriaal(),
-                filters.didactischeSubcategorie(),
                 paging.toPageable(sort.toSort()));
         return page.map(BoekMapper::toDTO);
+    }
+
+    private Set<Tag> resolveTags(List<TagDTO> tagDtos) {
+        if (tagDtos == null || tagDtos.isEmpty()) {
+            return new HashSet<>();
+        }
+        Set<Tag> resolved = new HashSet<>();
+        for (TagDTO dto : tagDtos) {
+            if (dto == null || dto.id() == null) continue;
+            tagRepository.findById(dto.id()).ifPresent(resolved::add);
+        }
+        return resolved;
     }
 
     private void validateYearRange(Integer uitgaveJaarVan, Integer uitgaveJaarTot) {

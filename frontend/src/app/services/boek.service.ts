@@ -29,16 +29,12 @@ export class BoekService {
   getBoekenGefilterd(filters: FilterOptions): Observable<PageResponse<Boek>> {
     let params = new HttpParams();
 
-    if (filters.genres?.length) {
-      filters.genres.forEach((g) => (params = params.append('genre', g)));
-    }
-
-    if (filters.thematischeTags?.length) {
-      filters.thematischeTags.forEach((t) => (params = params.append('thematischeTag', t)));
+    if (filters.tagIds?.length) {
+      filters.tagIds.forEach((id) => (params = params.append('tagIds', id.toString())));
     }
 
     Object.entries(filters).forEach(([key, value]) => {
-      if (key === 'genres' || key === 'thematischeTags') return;
+      if (key === 'tagIds') return;
       if (value !== undefined && value !== null && value !== '') {
         const paramKey = key === 'beschikbaarheid' ? 'beschikbaar' : key;
         params = params.set(paramKey, value.toString());

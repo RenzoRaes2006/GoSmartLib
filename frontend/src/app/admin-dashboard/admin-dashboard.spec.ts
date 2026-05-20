@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { of } from 'rxjs';
 
 import { AdminDashboard } from './admin-dashboard';
@@ -15,7 +16,7 @@ describe('AdminDashboard', () => {
 
     await TestBed.configureTestingModule({
       imports: [AdminDashboard],
-      providers: [{ provide: SchoolService, useValue: schoolSpy }],
+      providers: [provideRouter([]), { provide: SchoolService, useValue: schoolSpy }],
     }).compileComponents();
 
     fixture = TestBed.createComponent(AdminDashboard);

@@ -42,54 +42,30 @@
       </div>
 
       <!-- 3. Genre -->
-      <label>Genre</label>
-      <div class="genre-filter">
-        <select
-          [(ngModel)]="selectedHoofdGenre"
-          (change)="onHoofdGenreChange()"
-          class="sidebar-input"
-        >
-          <option value="">Alle genres</option>
-          <option value="Avontuur">Avontuur</option>
-          <option value="Coming-of-age">Coming-of-age</option>
-          <option value="Detective / misdaad">Detective / misdaad</option>
-          <option value="Dystopie">Dystopie</option>
-          <option value="Fantasy">Fantasy</option>
-          <option value="Fictie algemeen">Fictie algemeen</option>
-          <option value="Graphic novel / strip">Graphic novel / strip</option>
-          <option value="Historische roman">Historische roman</option>
-          <option value="Horror">Horror</option>
-          <option value="Humor">Humor</option>
-          <option value="Literaire roman">Literaire roman</option>
-          <option value="Non-fictie algemeen">Non-fictie algemeen</option>
-          <option value="Oorlog & conflict">Oorlog & conflict</option>
-          <option value="Poëzie">Poëzie</option>
-          <option value="Romantiek">Romantiek</option>
-          <option value="Sciencefiction">Sciencefiction</option>
-          <option value="Spanning / thriller">Spanning / thriller</option>
-        </select>
-
-        @if (selectedHoofdGenre() && getSubGenres(selectedHoofdGenre()).length > 0) {
-          <select [(ngModel)]="selectedGenre" (change)="updateFilters()" class="sidebar-input">
-            <option [ngValue]="undefined">Alle subgenres</option>
-            @for (subGenre of getSubGenres(selectedHoofdGenre()); track subGenre) {
-              <option [value]="subGenre">{{ subGenre }}</option>
-            }
-          </select>
+      <label for="genre-filter">Genre</label>
+      <select
+        id="genre-filter"
+        [ngModel]="selectedGenreId()"
+        (ngModelChange)="selectedGenreId.set($event); updateFilters()"
+        class="sidebar-input"
+      >
+        <option [ngValue]="null">Alle genres</option>
+        @for (g of beschikbareGenres(); track g.id) {
+          <option [ngValue]="g.id">{{ g.naam }}</option>
         }
-      </div>
+      </select>
 
       <!-- 4. Thematische tag -->
       <label for="thematische-tag-filter">Thematische tag</label>
       <select
         id="thematische-tag-filter"
-        [(ngModel)]="selectedThematischeTag"
-        (change)="updateFilters()"
+        [ngModel]="selectedThematischeId()"
+        (ngModelChange)="selectedThematischeId.set($event); updateFilters()"
         class="sidebar-input"
       >
-        <option [ngValue]="undefined">Alle thema's</option>
-        @for (tag of beschikbareTags; track tag) {
-          <option [value]="tag">{{ tag }}</option>
+        <option [ngValue]="null">Alle thema's</option>
+        @for (t of beschikbareThematischeTags(); track t.id) {
+          <option [ngValue]="t.id">{{ t.naam }}</option>
         }
       </select>
 
@@ -115,25 +91,24 @@
           <input
             type="checkbox"
             [(ngModel)]="toonDidactisch"
-            (change)="selectedDidactischeSubcategorie.set(undefined); updateFilters()"
+            (change)="selectedDidactischeId.set(null); updateFilters()"
           />
           <span>Toon alléén didactisch materiaal</span>
         </label>
       </div>
 
       @if (toonDidactisch()) {
-        <label for="didactische-subcategorie-filter">Subcategorie</label>
+        <label for="didactische-tag-filter">Subcategorie</label>
         <select
-          id="didactische-subcategorie-filter"
-          [(ngModel)]="selectedDidactischeSubcategorie"
-          (change)="updateFilters()"
+          id="didactische-tag-filter"
+          [ngModel]="selectedDidactischeId()"
+          (ngModelChange)="selectedDidactischeId.set($event); updateFilters()"
           class="sidebar-input"
         >
-          <option [ngValue]="undefined">Alle didactische categorieën</option>
-          <option value="LESMETHODES">Lesmethodes</option>
-          <option value="DIDACTISCHE_HANDBOEKEN">Didactische handboeken</option>
-          <option value="EVALUATIEMATERIAAL">Evaluatiemateriaal</option>
-          <option value="NASLAGWERKEN">Naslagwerken</option>
+          <option [ngValue]="null">Alle didactische categorieën</option>
+          @for (d of beschikbareDidactischeTags(); track d.id) {
+            <option [ngValue]="d.id">{{ d.naam }}</option>
+          }
         </select>
       }
 
@@ -236,8 +211,8 @@
             <p class="auteur">{{ boek.auteur }}</p>
 
             <p class="genres">
-              @for (g of boek.genre; track g; let last = $last) {
-                <small>{{ g }}{{ !last ? ' • ' : '' }}</small>
+              @for (g of boek.tags | tagsByType:'GENRE'; track g.id; let last = $last) {
+                <small>{{ g.naam }}{{ !last ? ' • ' : '' }}</small>
               } @empty {
                 <small>Geen genres</small>
               }
@@ -252,7 +227,7 @@
     </div>
     <div class="paginering">
       <button
-        (click)="gaNaarVorigePagina()"
+        (click)="vorigePagina()"
         [disabled]="huidigePagina() === 0"
         class="pagination-btn"
       >
@@ -260,7 +235,7 @@
       </button>
       <span class="pagina-info">Pagina {{ huidigePagina() + 1 }} van {{ totaalPaginas() }}</span>
       <button
-        (click)="gaNaarVolgendePagina()"
+        (click)="volgendePagina()"
         [disabled]="huidigePagina() >= totaalPaginas() - 1"
         class="pagination-btn"
       >

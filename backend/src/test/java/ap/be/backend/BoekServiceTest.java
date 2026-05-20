@@ -29,6 +29,7 @@ import ap.be.backend.dto.BoekDTO;
 import ap.be.backend.entity.Boek;
 import ap.be.backend.exception.IsbnAlreadyExistsException;
 import ap.be.backend.repository.BoekRepository;
+import ap.be.backend.repository.TagRepository;
 import ap.be.backend.service.BoekService;
 
 @ExtendWith(MockitoExtension.class)
@@ -36,6 +37,9 @@ public class BoekServiceTest {
 
     @Mock
     private BoekRepository boekRepository;
+
+    @Mock
+    private TagRepository tagRepository;
 
     @InjectMocks
     private BoekService boekService;
@@ -50,12 +54,11 @@ public class BoekServiceTest {
                 "Prentice Hall",
                 "2008",
                 464,
-                List.of("Software", "Programming"),
                 null,
                 "A handbook of agile software craftsmanship",
                 3,
                 "A1",
-                "", null, null, true, null);
+                "", null, null, true);
 
         when(boekRepository.findByIsbn("9780132350884")).thenReturn(Optional.empty());
 
@@ -82,19 +85,17 @@ public class BoekServiceTest {
                 "Titel",
                 "Auteur",
                 "9780132350884",
-                "",    // uitgever leeg
-                null,  // uitgaveJaar null
-                0,     // pagina
-                null,  // genre null
-                null,  // thematischeTag null
+                "",
+                null,
+                0,
+                null,
                 "Dit is een beschrijving",
                 5,
-                "",    // locatie leeg
-                null,  // afbeelding null
+                "",
                 null,
-                "",    // leesniveau leeg
-                null,  // didactischMateriaal null
-                null); // didactischeSubcategorie null
+                null,
+                "",
+                null);
 
         when(boekRepository.findByIsbn("9780132350884")).thenReturn(Optional.empty());
 
@@ -106,7 +107,7 @@ public class BoekServiceTest {
         Boek opgeslagen = boekCaptor.getValue();
         assertEquals("Geen uitgever", opgeslagen.getUitgever());
         assertEquals("Geen uitgavejaar", opgeslagen.getUitgaveJaar());
-        assertTrue(opgeslagen.getGenre().isEmpty());
+        assertTrue(opgeslagen.getTags().isEmpty());
         assertEquals("Geen locatie", opgeslagen.getLocatie());
         assertEquals("", opgeslagen.getAfbeelding());
         assertEquals("Geen leesniveau", opgeslagen.getLeesniveau());
@@ -123,12 +124,11 @@ public class BoekServiceTest {
                 "Addison-Wesley",
                 "2003",
                 560,
-                List.of("Architecture"),
                 null,
                 "DDD blue book",
                 2,
                 "B2",
-                "", null, null, false, null);
+                "", null, null, false);
 
         when(boekRepository.findByIsbn("9780321125217")).thenReturn(Optional.of(new Boek()));
 
@@ -180,12 +180,11 @@ public class BoekServiceTest {
                 "New Publisher",
                 "2025",
                 320,
-                List.of("Tech"),
                 null,
                 "Updated description",
                 7,
                 "C3",
-                "", null, null, true, null);
+                "", null, null, true);
 
         when(boekRepository.findById(boekId)).thenReturn(Optional.of(bestaandBoek));
         when(boekRepository.save(bestaandBoek)).thenReturn(bestaandBoek);
@@ -198,7 +197,6 @@ public class BoekServiceTest {
         assertEquals("New Publisher", result.getUitgever());
         assertEquals("2025", result.getUitgaveJaar());
         assertEquals(320, result.getPagina());
-        assertEquals(1, result.getGenre().size());
         assertEquals("Updated description", result.getBeschrijving());
         assertEquals(7, result.getAantalExemplaren());
         assertEquals("C3", result.getLocatie());
@@ -219,12 +217,11 @@ public class BoekServiceTest {
                 "Any",
                 "2024",
                 100,
-                List.of("Any"),
                 null,
                 "Any",
                 1,
                 "Z1",
-                "", null, null, false, null);
+                "", null, null, false);
 
         when(boekRepository.findById(boekId)).thenReturn(Optional.empty());
 
@@ -235,19 +232,14 @@ public class BoekServiceTest {
         verify(boekRepository, never()).save(org.mockito.ArgumentMatchers.any(Boek.class));
     }
 
-    // --- GET BOEK BY ISBN ---
-
     @Test
     void givenBestaandIsbn_whenGetBoekByIsbn_thenGeeftBoekTerug() {
-        // Arrange
         Boek boek = new Boek("Clean Code", "Robert Martin");
         boek.setIsbn("9780132350884");
         when(boekRepository.findByIsbn("9780132350884")).thenReturn(Optional.of(boek));
 
-        // Act
         Boek result = boekService.getBoekByIsbn("9780132350884");
 
-        // Assert
         assertNotNull(result);
         assertEquals("9780132350884", result.getIsbn());
         assertEquals("Clean Code", result.getTitel());
@@ -256,47 +248,36 @@ public class BoekServiceTest {
 
     @Test
     void givenNietBestaandIsbn_whenGetBoekByIsbn_thenGeeftNullTerug() {
-        // Arrange
         when(boekRepository.findByIsbn("0000000000000")).thenReturn(Optional.empty());
 
-        // Act
         Boek result = boekService.getBoekByIsbn("0000000000000");
 
-        // Assert
         assertNull(result);
         verify(boekRepository, times(1)).findByIsbn("0000000000000");
     }
 
     @Test
     void givenIsbnMetSpaties_whenGetBoekByIsbn_thenTrimsEnZoekt() {
-        // Arrange - ISBN met leading/trailing spaties
         Boek boek = new Boek("Test Boek", "Auteur");
         boek.setIsbn("9781234567890");
         when(boekRepository.findByIsbn("9781234567890")).thenReturn(Optional.of(boek));
 
-        // Act
         Boek result = boekService.getBoekByIsbn(" 9781234567890 ");
 
-        // Assert
         assertNotNull(result);
         assertEquals("9781234567890", result.getIsbn());
     }
 
-    // --- GET BOEKEN PAGED ---
-
     @Test
     void givenBoeken_whenGetBoekenPaged_thenGeeftPaginaTerug() {
-        // Arrange
         Boek boek1 = new Boek("Boek A", "Auteur A");
         Boek boek2 = new Boek("Boek B", "Auteur B");
         PageRequest pageRequest = PageRequest.of(0, 6, Sort.by("titel").ascending());
         Page<Boek> verwacht = new PageImpl<>(List.of(boek1, boek2), pageRequest, 2);
         when(boekRepository.findAll(pageRequest)).thenReturn(verwacht);
 
-        // Act
         Page<Boek> result = boekService.getBoekenPaged(0, 6);
 
-        // Assert
         assertEquals(2, result.getTotalElements());
         assertEquals("Boek A", result.getContent().get(0).getTitel());
         assertEquals("Boek B", result.getContent().get(1).getTitel());
@@ -305,34 +286,27 @@ public class BoekServiceTest {
 
     @Test
     void givenGeenBoeken_whenGetBoekenPaged_thenGeeftLegePaginaTerug() {
-        // Arrange
         PageRequest pageRequest = PageRequest.of(0, 6, Sort.by("titel").ascending());
         Page<Boek> verwacht = new PageImpl<>(List.of(), pageRequest, 0);
         when(boekRepository.findAll(pageRequest)).thenReturn(verwacht);
 
-        // Act
         Page<Boek> result = boekService.getBoekenPaged(0, 6);
 
-        // Assert
         assertEquals(0, result.getTotalElements());
         assertTrue(result.getContent().isEmpty());
     }
 
     @Test
     void givenTweedePagina_whenGetBoekenPaged_thenGeeftJuistePaginaTerug() {
-        // Arrange - pagina 1 (tweede pagina, 0-indexed)
         Boek boek = new Boek("Boek C", "Auteur C");
         PageRequest pageRequest = PageRequest.of(1, 6, Sort.by("titel").ascending());
         Page<Boek> verwacht = new PageImpl<>(List.of(boek), pageRequest, 7);
         when(boekRepository.findAll(pageRequest)).thenReturn(verwacht);
 
-        // Act
         Page<Boek> result = boekService.getBoekenPaged(1, 6);
 
-        // Assert
         assertEquals(7, result.getTotalElements());
         assertEquals(1, result.getContent().size());
         assertEquals(1, result.getNumber());
     }
-
 }

@@ -23,8 +23,9 @@ public interface UitleningRepository extends JpaRepository<Uitlening, Long> {
 
     long countByIsIngeleverdFalseAndStatusInAndInleverDatumBefore(List<String> statussen, LocalDate datum);
 
-    @Query("SELECT g FROM Uitlening u JOIN u.boek b JOIN b.genre g " +
-            "WHERE u.status IN :statussen GROUP BY g ORDER BY COUNT(g) DESC")
+    @Query("SELECT t.naam FROM Uitlening u JOIN u.boek b JOIN b.tags t " +
+            "WHERE u.status IN :statussen AND t.type = ap.be.backend.entity.TagType.GENRE " +
+            "GROUP BY t.naam ORDER BY COUNT(t) DESC")
     List<String> findPopulairsteGenres(@Param("statussen") List<String> statussen, Pageable pageable);
 
     @Query("SELECT COUNT(u) FROM Uitlening u WHERE u.uitleenDatum >= :sinds AND u.status IN :statussen")
