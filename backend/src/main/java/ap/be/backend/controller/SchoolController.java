@@ -10,8 +10,11 @@ import ap.be.backend.dto.SchoolOnboardDTO;
 import ap.be.backend.entity.Campus;
 import ap.be.backend.entity.School;
 import ap.be.backend.mappers.SchoolMapper;
+import ap.be.backend.entity.Rol;
+import ap.be.backend.entity.User;
 import ap.be.backend.repository.CampusRepository;
 import ap.be.backend.repository.SchoolRepository;
+import ap.be.backend.repository.UserRepository;
 import ap.be.backend.service.OneRosterClient;
 import ap.be.backend.service.SchoolOnboardingService;
 
@@ -31,15 +34,18 @@ public class SchoolController {
     private final SchoolOnboardingService onboardingService;
     private final OneRosterClient oneRosterClient;
     private final CampusRepository campusRepository;
+    private final UserRepository userRepository;
 
     public SchoolController(SchoolRepository schoolRepository,
                             SchoolOnboardingService onboardingService,
                             OneRosterClient oneRosterClient,
-                            CampusRepository campusRepository) {
+                            CampusRepository campusRepository,
+                            UserRepository userRepository) {
         this.schoolRepository = schoolRepository;
         this.onboardingService = onboardingService;
         this.oneRosterClient = oneRosterClient;
         this.campusRepository = campusRepository;
+        this.userRepository = userRepository;
     }
 
     @GetMapping
@@ -79,10 +85,7 @@ public class SchoolController {
                 "aantalKlassen", klassen.size(),
                 "aantalGebruikers", leerlingen.size() + leerkrachten.size(),
                 "aantalLeerlingen", leerlingen.size(),
-                "aantalLeerkrachten", leerkrachten.size(),
-                "klassen", klassen,
-                "leerlingen", leerlingen,
-                "leerkrachten", leerkrachten
+                "aantalLeerkrachten", leerkrachten.size()
         ));
     }
 
@@ -164,9 +167,8 @@ public class SchoolController {
         Campus campus = new Campus();
         campus.setNaam(dto.getNaam().trim());
         campus.setSchool(school);
-        school.getCampussen().add(campus);
-        schoolRepository.save(school);
-        return ResponseEntity.ok(Map.of("id", campus.getId(), "naam", campus.getNaam()));
+        Campus opgeslagen = campusRepository.save(campus);
+        return ResponseEntity.ok(Map.of("id", opgeslagen.getId(), "naam", opgeslagen.getNaam()));
     }
 
     @DeleteMapping("/{id}/campussen/{campusId}")
@@ -180,11 +182,85 @@ public class SchoolController {
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping("/{id}/sync-gebruikers")
+    @SuppressWarnings("unchecked")
+    public ResponseEntity<?> syncGebruikers(@PathVariable Long id) {
+        Optional<School> schoolOpt = schoolRepository.findById(id);
+        if (schoolOpt.isEmpty()) return ResponseEntity.notFound().build();
+        School school = schoolOpt.get();
+        if (school.getSmartschoolDomein() == null
+                || school.getOauthClientId() == null
+                || school.getOauthClientSecret() == null) {
+            return ResponseEntity.badRequest().body(Map.of("error", "School heeft geen OneRoster-credentials"));
+        }
+
+        Map<String, Object> data;
+        try {
+            data = oneRosterClient.haalLiveSchoolDataOp(
+                    school.getSmartschoolDomein(),
+                    school.getOauthClientId(),
+                    school.getOauthClientSecret());
+        } catch (Exception e) {
+            return ResponseEntity.status(502).body(Map.of("error", "OneRoster onbereikbaar: " + e.getMessage()));
+        }
+
+        int gekoppeld = 0;
+        int nieuw = 0;
+
+        for (Map<String, Object> ll : (List<Map<String, Object>>) data.getOrDefault("leerlingen", List.of())) {
+            String smartschoolId = String.valueOf(ll.get("id"));
+            Optional<User> bestaand = userRepository.findBySmartschoolId(smartschoolId);
+            if (bestaand.isPresent()) {
+                User u = bestaand.get();
+                if (u.getSchool() == null) {
+                    u.setSchool(school);
+                    userRepository.save(u);
+                    gekoppeld++;
+                }
+            } else {
+                User u = new User(smartschoolId, (String) ll.get("klas"), Rol.LEERLING);
+                u.setSchool(school);
+                userRepository.save(u);
+                nieuw++;
+            }
+        }
+
+        for (Map<String, Object> lk : (List<Map<String, Object>>) data.getOrDefault("leerkrachten", List.of())) {
+            String smartschoolId = String.valueOf(lk.get("id"));
+            Optional<User> bestaand = userRepository.findBySmartschoolId(smartschoolId);
+            if (bestaand.isPresent()) {
+                User u = bestaand.get();
+                if (u.getSchool() == null) {
+                    u.setSchool(school);
+                    userRepository.save(u);
+                    gekoppeld++;
+                }
+            } else {
+                User u = new User(smartschoolId, (String) lk.getOrDefault("klas", ""), Rol.LEERKRACHT);
+                u.setSchool(school);
+                userRepository.save(u);
+                nieuw++;
+            }
+        }
+
+        return ResponseEntity.ok(Map.of(
+                "message", "Sync voltooid",
+                "gekoppeld", gekoppeld,
+                "nieuw", nieuw
+        ));
+    }
+
     @DeleteMapping("/{id}")
+    @org.springframework.transaction.annotation.Transactional
     public ResponseEntity<Void> verwijderSchool(@PathVariable Long id) {
         if (!schoolRepository.existsById(id)) {
             return ResponseEntity.notFound().build();
         }
+        List<User> gekoppeld = userRepository.findBySchool_Id(id);
+        for (User u : gekoppeld) {
+            u.setSchool(null);
+        }
+        userRepository.saveAll(gekoppeld);
         schoolRepository.deleteById(id);
         return ResponseEntity.noContent().build();
     }

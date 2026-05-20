@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 export interface AdminGebruiker {
   id: number;
   smartschoolId: string;
+  naam: string | null;
   klas: string;
   rol: 'LEERLING' | 'LEERKRACHT' | 'BEHEERDER' | 'ADMIN' | null;
   isBeheerder: boolean;
@@ -20,8 +21,11 @@ export class AdminGebruikerService {
     ? 'http://localhost:8081/api/admin'
     : 'https://api-sp09.cloud-ap.be/api/admin';
 
-  getAlleLeerkrachten(): Observable<AdminGebruiker[]> {
-    return this.http.get<AdminGebruiker[]>(`${this.apiUrl}/leerkrachten`);
+  getAlleLeerkrachten(schoolId?: number): Observable<AdminGebruiker[]> {
+    const url = schoolId != null
+      ? `${this.apiUrl}/leerkrachten?schoolId=${schoolId}`
+      : `${this.apiUrl}/leerkrachten`;
+    return this.http.get<AdminGebruiker[]>(url);
   }
 
   setBeheerder(id: number, isBeheerder: boolean): Observable<AdminGebruiker> {

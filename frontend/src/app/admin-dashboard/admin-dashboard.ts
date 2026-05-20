@@ -53,6 +53,7 @@ export class AdminDashboard implements OnInit {
   leerkrachten = signal<AdminGebruiker[]>([]);
   leerkrachtenLaden = signal<boolean>(false);
   promotieBezig = signal<number | null>(null);
+  geselecteerdeRollenSchoolId = signal<number | null>(null);
 
   // state for the list of saved schools
   geregistreerdeScholen = signal<any[]>([]);
@@ -70,9 +71,6 @@ export class AdminDashboard implements OnInit {
     aantalGebruikers: number;
     aantalLeerlingen: number;
     aantalLeerkrachten: number;
-    klassen: any[];
-    leerlingen: any[];
-    leerkrachten: any[];
   } | null>(null);
   onboardSucces = signal<boolean>(false);
 
@@ -81,6 +79,8 @@ export class AdminDashboard implements OnInit {
   bewerkCampussen = signal<{ id: number; naam: string }[]>([]);
   nieuweCampusNaam = signal<string>('');
   bewerkFout = signal<string>('');
+  syncBezig = signal<boolean>(false);
+  syncResultaat = signal<string>('');
 
   wizardForm: FormGroup = this.fb.group({
     stap1: this.fb.group({
@@ -237,13 +237,28 @@ export class AdminDashboard implements OnInit {
     this.activeTab.set(tab);
     this.sluitBewerken(); // Sluit campussen editor indien open
     if (tab === 'rollen') {
-      this.laadLeerkrachten();
+      // Zorg dat scholenlijst klaar is voor de dropdown
+      if (this.geregistreerdeScholen().length === 0) {
+        this.laadScholenUitDatabase();
+      }
+      this.leerkrachten.set([]);
     }
   }
 
-  laadLeerkrachten() {
+  onRollenSchoolGeselecteerd(event: Event) {
+    const value = (event.target as HTMLSelectElement).value;
+    const schoolId = value ? Number(value) : null;
+    this.geselecteerdeRollenSchoolId.set(schoolId);
+    if (schoolId != null) {
+      this.laadLeerkrachten(schoolId);
+    } else {
+      this.leerkrachten.set([]);
+    }
+  }
+
+  laadLeerkrachten(schoolId: number) {
     this.leerkrachtenLaden.set(true);
-    this.adminGebruikerService.getAlleLeerkrachten().subscribe({
+    this.adminGebruikerService.getAlleLeerkrachten(schoolId).subscribe({
       next: (lijst) => {
         this.leerkrachten.set(lijst ?? []);
         this.leerkrachtenLaden.set(false);
@@ -259,7 +274,8 @@ export class AdminDashboard implements OnInit {
   toggleBeheerder(leerkracht: AdminGebruiker) {
     const nieuweWaarde = !leerkracht.isBeheerder;
     const actie = nieuweWaarde ? 'beheerder maken' : 'de beheerder-rol intrekken bij';
-    const bevestigd = confirm(`Weet je zeker dat je ${leerkracht.smartschoolId} wilt ${actie}?`);
+    const wie = leerkracht.naam || leerkracht.smartschoolId;
+    const bevestigd = confirm(`Weet je zeker dat je ${wie} wilt ${actie}?`);
     if (!bevestigd) return;
 
     this.promotieBezig.set(leerkracht.id);
@@ -295,6 +311,7 @@ export class AdminDashboard implements OnInit {
     this.bewerkCampussen.set([]);
     this.nieuweCampusNaam.set('');
     this.bewerkFout.set('');
+    this.syncResultaat.set('');
   }
 
   private laadCampussen(schoolId: number) {
@@ -316,6 +333,24 @@ export class AdminDashboard implements OnInit {
         this.nieuweCampusNaam.set('');
       },
       error: (err) => this.bewerkFout.set(err?.error?.error ?? 'Toevoegen mislukt.')
+    });
+  }
+
+  syncGebruikersVanSchool() {
+    const schoolId = this.bewerkSchoolId();
+    if (schoolId == null) return;
+    this.syncBezig.set(true);
+    this.syncResultaat.set('');
+    this.bewerkFout.set('');
+    this.http.post<any>(`${this.apiBase}/${schoolId}/sync-gebruikers`, {}).subscribe({
+      next: (res) => {
+        this.syncResultaat.set(`✓ ${res.gekoppeld} bestaande gekoppeld, ${res.nieuw} nieuwe geïmporteerd.`);
+        this.syncBezig.set(false);
+      },
+      error: (err) => {
+        this.bewerkFout.set(err?.error?.error ?? 'Sync mislukt.');
+        this.syncBezig.set(false);
+      }
     });
   }
 

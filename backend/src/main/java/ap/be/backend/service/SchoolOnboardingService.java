@@ -61,7 +61,7 @@ public class SchoolOnboardingService {
 
         School opgeslagen = schoolRepository.save(nieuweSchool);
 
-        importeerGebruikers(dto);
+        importeerGebruikers(dto, opgeslagen);
         if (dto.getBeheerder() != null
                 && dto.getBeheerder().getGebruikersnaam() != null
                 && !dto.getBeheerder().getGebruikersnaam().isBlank()) {
@@ -102,7 +102,7 @@ public class SchoolOnboardingService {
     }
 
     @SuppressWarnings("unchecked")
-    private void importeerGebruikers(SchoolOnboardDTO dto) {
+    private void importeerGebruikers(SchoolOnboardDTO dto, School school) {
         if (dto.getSmartschoolDomein() == null || dto.getSmartschoolDomein().isBlank()) {
             return;
         }
@@ -115,8 +115,9 @@ public class SchoolOnboardingService {
             if (userRepository.findBySmartschoolId(smartschoolId).isPresent()) {
                 continue;
             }
-            String klas = (String) ll.get("klas");
-            userRepository.save(new User(smartschoolId, klas, Rol.LEERLING));
+            User user = new User(smartschoolId, (String) ll.get("klas"), Rol.LEERLING);
+            user.setSchool(school);
+            userRepository.save(user);
         }
 
         List<Map<String, Object>> leerkrachten = (List<Map<String, Object>>) data.getOrDefault("leerkrachten", List.of());
@@ -125,8 +126,9 @@ public class SchoolOnboardingService {
             if (userRepository.findBySmartschoolId(smartschoolId).isPresent()) {
                 continue;
             }
-            String klas = (String) lk.getOrDefault("klas", "");
-            userRepository.save(new User(smartschoolId, klas, Rol.LEERKRACHT));
+            User user = new User(smartschoolId, (String) lk.getOrDefault("klas", ""), Rol.LEERKRACHT);
+            user.setSchool(school);
+            userRepository.save(user);
         }
     }
 

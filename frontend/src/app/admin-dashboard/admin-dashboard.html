@@ -85,6 +85,22 @@
                         </button>
                       </div>
 
+                      <hr style="margin: 20px 0;">
+
+                      <div>
+                        <h4 style="margin-top:0;">Leerkrachten en leerlingen synchroniseren</h4>
+                        <p class="text-muted" style="margin-top:0;">
+                          Haalt opnieuw alle leerlingen en leerkrachten op uit OneRoster en koppelt ze aan deze school.
+                          Nodig voor scholen die geïmporteerd zijn vóór de school-koppeling bestond, of om nieuwe gebruikers binnen te halen.
+                        </p>
+                        <button type="button" class="btn-go btn-sm" (click)="syncGebruikersVanSchool()" [disabled]="syncBezig()">
+                          {{ syncBezig() ? 'Bezig met synchroniseren...' : 'Synchroniseer gebruikers' }}
+                        </button>
+                        @if (syncResultaat()) {
+                          <p style="color:#348a45; margin-top:10px; font-weight:600;">{{ syncResultaat() }}</p>
+                        }
+                      </div>
+
                       @if (bewerkFout()) {
                         <p style="color:#c0392b; margin-top:10px;">{{ bewerkFout() }}</p>
                       }
@@ -110,7 +126,19 @@
           <h2>Leerkrachten promoveren tot beheerder</h2>
         </div>
 
-        @if (leerkrachtenLaden()) {
+        <div class="form-group" style="max-width: 500px; margin-bottom: 20px;">
+          <label>Selecteer school</label>
+          <select class="form-input" (change)="onRollenSchoolGeselecteerd($event)">
+            <option value="" selected>-- Kies een geregistreerde school --</option>
+            @for (s of geregistreerdeScholen(); track s.id) {
+              <option [value]="s.id">{{ s.naam }}</option>
+            }
+          </select>
+        </div>
+
+        @if (geselecteerdeRollenSchoolId() == null) {
+          <p class="text-muted" style="padding: 20px;">Kies eerst een school om de leerkrachten te zien.</p>
+        } @else if (leerkrachtenLaden()) {
           <div class="text-center" style="padding: 40px; color: var(--go-bordeaux);">
             <strong>Leerkrachten ophalen...</strong>
           </div>
@@ -119,7 +147,7 @@
             <table class="admin-table">
               <thead>
                 <tr>
-                  <th>Smartschool-ID</th>
+                  <th>Naam</th>
                   <th>Klas</th>
                   <th>Rol</th>
                   <th>Beheerder?</th>
@@ -129,7 +157,9 @@
               <tbody>
                 @for (leerkracht of leerkrachten(); track leerkracht.id) {
                   <tr>
-                    <td><strong>{{ leerkracht.smartschoolId }}</strong></td>
+                    <td>
+                      <strong>{{ leerkracht.naam || leerkracht.smartschoolId }}</strong>
+                    </td>
                     <td>{{ leerkracht.klas || '-' }}</td>
                     <td>{{ leerkracht.rol }}</td>
                     <td>{{ leerkracht.isBeheerder ? 'Ja' : 'Nee' }}</td>
@@ -290,38 +320,6 @@
                     <strong>{{ p.aantalLeerlingen }}</strong> leerlingen en
                     <strong>{{ p.aantalLeerkrachten }}</strong> leerkrachten zullen worden geïmporteerd.
                   </p>
-
-                  <div style="display: flex; gap: 30px; margin-top: 15px;">
-                    <div style="flex: 1;">
-                      <h4>Klassen</h4>
-                      <ul style="padding-left: 18px;">
-                        @for (k of p.klassen; track k.id) {
-                          <li>{{ k.naam }}</li>
-                        }
-                      </ul>
-                    </div>
-                    <div style="flex: 1;">
-                      <h4>Leerlingen</h4>
-                      <ul style="padding-left: 18px;">
-                        @for (l of p.leerlingen; track l.id) {
-                          <li>
-                            {{ l.voorNaam }} {{ l.achternaam }}
-                            @if (l.klas) {
-                              <small class="text-muted">({{ l.klas }})</small>
-                            }
-                          </li>
-                        }
-                      </ul>
-                    </div>
-                    <div style="flex: 1;">
-                      <h4>Leerkrachten</h4>
-                      <ul style="padding-left: 18px;">
-                        @for (lk of p.leerkrachten; track lk.id) {
-                          <li>{{ lk.voorNaam }} {{ lk.achternaam }}</li>
-                        }
-                      </ul>
-                    </div>
-                  </div>
                 </div>
               }
             </div>

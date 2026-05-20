@@ -28,6 +28,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     List<User> findByRol(Rol rol);
 
+    List<User> findByRolAndSchool_Id(Rol rol, Long schoolId);
+
+    List<User> findBySchool_Id(Long schoolId);
+
     @Query("SELECT u FROM User u WHERE u.rol = ap.be.backend.entity.Rol.LEERLING AND " +
             "(:klas IS NULL OR :klas = '' OR u.klas = :klas) AND " +
             "(:zoekterm IS NULL OR :zoekterm = '' OR " +

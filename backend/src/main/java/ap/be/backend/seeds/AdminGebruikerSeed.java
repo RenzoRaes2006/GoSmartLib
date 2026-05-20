@@ -26,7 +26,7 @@ public class AdminGebruikerSeed implements CommandLineRunner {
         if (adminGebruikerRepository.findByGebruikersnaam("admin").isEmpty()) {
             AdminGebruiker admin = new AdminGebruiker(
                     "admin",
-                    passwordEncoder.encode("Admin@2024!"),
+                    passwordEncoder.encode("Admin@2024!"), //moet anders gedaan worden
                     "Beheerder"
             );
             adminGebruikerRepository.save(admin);
