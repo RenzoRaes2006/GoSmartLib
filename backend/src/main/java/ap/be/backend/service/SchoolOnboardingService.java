@@ -4,37 +4,28 @@ import ap.be.backend.dto.CampusDTO;
 import ap.be.backend.dto.SchoolOnboardDTO;
 import ap.be.backend.entity.AdminGebruiker;
 import ap.be.backend.entity.Campus;
-import ap.be.backend.entity.Rol;
 import ap.be.backend.entity.School;
-import ap.be.backend.entity.User;
 import ap.be.backend.repository.AdminGebruikerRepository;
 import ap.be.backend.repository.SchoolRepository;
-import ap.be.backend.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.Map;
 
 @Service
 public class SchoolOnboardingService {
 
     private final SchoolRepository schoolRepository;
     private final AdminGebruikerRepository adminGebruikerRepository;
-    private final UserRepository userRepository;
-    private final OneRosterClient oneRosterClient;
+    private final OneRosterImportService oneRosterImportService;
     private final PasswordEncoder passwordEncoder;
 
     public SchoolOnboardingService(SchoolRepository schoolRepository,
                                    AdminGebruikerRepository adminGebruikerRepository,
-                                   UserRepository userRepository,
-                                   OneRosterClient oneRosterClient,
+                                   OneRosterImportService oneRosterImportService,
                                    PasswordEncoder passwordEncoder) {
         this.schoolRepository = schoolRepository;
         this.adminGebruikerRepository = adminGebruikerRepository;
-        this.userRepository = userRepository;
-        this.oneRosterClient = oneRosterClient;
+        this.oneRosterImportService = oneRosterImportService;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -61,7 +52,9 @@ public class SchoolOnboardingService {
 
         School opgeslagen = schoolRepository.save(nieuweSchool);
 
-        importeerGebruikers(dto, opgeslagen);
+        if (dto.getSmartschoolDomein() != null && !dto.getSmartschoolDomein().isBlank()) {
+            oneRosterImportService.importSchool(opgeslagen.getId());
+        }
         if (dto.getBeheerder() != null
                 && dto.getBeheerder().getGebruikersnaam() != null
                 && !dto.getBeheerder().getGebruikersnaam().isBlank()) {
@@ -99,37 +92,6 @@ public class SchoolOnboardingService {
                 : b.getWachtwoord();
         return adminGebruikerRepository.save(new AdminGebruiker(
                 b.getGebruikersnaam(), passwordEncoder.encode(wachtwoord), b.getNaam()));
-    }
-
-    @SuppressWarnings("unchecked")
-    private void importeerGebruikers(SchoolOnboardDTO dto, School school) {
-        if (dto.getSmartschoolDomein() == null || dto.getSmartschoolDomein().isBlank()) {
-            return;
-        }
-        Map<String, Object> data = oneRosterClient.haalLiveSchoolDataOp(
-                dto.getSmartschoolDomein(), dto.getOauthClientId(), dto.getOauthClientSecret());
-
-        List<Map<String, Object>> leerlingen = (List<Map<String, Object>>) data.getOrDefault("leerlingen", List.of());
-        for (Map<String, Object> ll : leerlingen) {
-            String smartschoolId = String.valueOf(ll.get("id"));
-            if (userRepository.findBySmartschoolId(smartschoolId).isPresent()) {
-                continue;
-            }
-            User user = new User(smartschoolId, (String) ll.get("klas"), Rol.LEERLING);
-            user.setSchool(school);
-            userRepository.save(user);
-        }
-
-        List<Map<String, Object>> leerkrachten = (List<Map<String, Object>>) data.getOrDefault("leerkrachten", List.of());
-        for (Map<String, Object> lk : leerkrachten) {
-            String smartschoolId = String.valueOf(lk.get("id"));
-            if (userRepository.findBySmartschoolId(smartschoolId).isPresent()) {
-                continue;
-            }
-            User user = new User(smartschoolId, (String) lk.getOrDefault("klas", ""), Rol.LEERKRACHT);
-            user.setSchool(school);
-            userRepository.save(user);
-        }
     }
 
     private void maakBeheerderAan(SchoolOnboardDTO dto) {

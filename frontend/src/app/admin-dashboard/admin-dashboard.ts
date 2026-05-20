@@ -345,7 +345,10 @@ export class AdminDashboard implements OnInit {
     this.bewerkFout.set('');
     this.http.post<any>(`${this.apiBase}/${schoolId}/sync-gebruikers`, {}).subscribe({
       next: (res) => {
-        this.syncResultaat.set(`✓ ${res.gekoppeld} bestaande gekoppeld, ${res.nieuw} nieuwe geïmporteerd.`);
+        const nieuw = (res.leerlingenNieuw ?? 0) + (res.leerkrachtenNieuw ?? 0);
+        const geupdatet = (res.leerlingenGeupdatet ?? 0) + (res.leerkrachtenGeupdatet ?? 0);
+        const ongewijzigd = (res.leerlingenOngewijzigd ?? 0) + (res.leerkrachtenOngewijzigd ?? 0);
+        this.syncResultaat.set(`✓ ${nieuw} nieuw, ${geupdatet} bijgewerkt, ${ongewijzigd} ongewijzigd.`);
         this.syncBezig.set(false);
       },
       error: (err) => {
