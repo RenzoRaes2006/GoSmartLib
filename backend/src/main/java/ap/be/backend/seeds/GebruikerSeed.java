@@ -1,6 +1,7 @@
 package ap.be.backend.seeds;
 
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
@@ -12,6 +13,7 @@ import ap.be.backend.repository.UserRepository;
 
 @Component
 @Profile("dev")
+@ConditionalOnProperty(name = "gosmartlib.seeds.enabled", havingValue = "true")
 public class GebruikerSeed implements CommandLineRunner {
     private final UserRepository userRepository;
     private final LeeslijstMapRepository mapRepository;
@@ -23,22 +25,9 @@ public class GebruikerSeed implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        User test = ensureLeerling("12345");
-        ensureLeerling("12346");
-        ensureLeerling("12347");
-        ensureLeerling("12348");
-        ensureLeerling("12349");
-        ensureLeerling("12350");
-        ensureLeerling("12351");
-        ensureLeerling("12352");
-        ensureLeerling("12353");
-        ensureLeerling("12354");
-        ensureLeerling("12355");
-        ensureLeerling("12356");
-        ensureLeerling("12357");
-        ensureLeerling("12358");
-        ensureLeerling("12359");
-        ensureLeerling("12360");
+        // Dev-user voor DevAuthFilter (smartschoolId "12357"). Andere leerlingen
+        // worden via de school-onboarding-wizard live geïmporteerd uit OneRoster.
+        User test = ensureLeerling("12357");
 
         ensureLeerkracht("LK-001", "5SOF", false);
         ensureLeerkracht("LK-002", "6WET", false);

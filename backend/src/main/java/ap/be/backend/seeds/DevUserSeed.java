@@ -1,6 +1,7 @@
 package ap.be.backend.seeds;
 
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -16,6 +17,7 @@ import ap.be.backend.repository.UserRepository;
  */
 @Component
 @Profile("dev")
+@ConditionalOnProperty(name = "gosmartlib.seeds.enabled", havingValue = "true")
 @Order(100)
 public class DevUserSeed implements CommandLineRunner {
 

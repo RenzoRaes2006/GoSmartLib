@@ -58,16 +58,19 @@ public class AdminGebruikerController {
             users = userRepository.findByRol(Rol.LEERKRACHT);
         }
 
-        Map<String, String> naamPerSmartschoolId = haalNamenOpVoorSchool(school);
+        Map<String, String[]> naamPerSmartschoolId = haalNamenOpVoorSchool(school);
 
         List<GebruikerDTO> result = users.stream()
-                .map(u -> GebruikerMapper.toDTO(u, naamPerSmartschoolId.get(u.getSmartschoolId())))
+                .map(u -> {
+                    String[] paar = naamPerSmartschoolId.getOrDefault(u.getSmartschoolId(), new String[]{null, null});
+                    return GebruikerMapper.toDTO(u, paar[0], paar[1]);
+                })
                 .toList();
         return ResponseEntity.ok(result);
     }
 
     @SuppressWarnings("unchecked")
-    private Map<String, String> haalNamenOpVoorSchool(School school) {
+    private Map<String, String[]> haalNamenOpVoorSchool(School school) {
         if (school == null
                 || school.getSmartschoolDomein() == null
                 || school.getOauthClientId() == null
@@ -80,16 +83,15 @@ public class AdminGebruikerController {
                     school.getOauthClientId(),
                     school.getOauthClientSecret());
 
-            Map<String, String> lookup = new HashMap<>();
+            Map<String, String[]> lookup = new HashMap<>();
             for (String sleutel : new String[]{"leerkrachten", "leerlingen"}) {
                 List<Map<String, Object>> lijst = (List<Map<String, Object>>) data.getOrDefault(sleutel, List.of());
                 for (Map<String, Object> u : lijst) {
                     String id = String.valueOf(u.getOrDefault("id", ""));
                     String voornaam = String.valueOf(u.getOrDefault("voorNaam", ""));
                     String achternaam = String.valueOf(u.getOrDefault("achternaam", ""));
-                    String volledig = (voornaam + " " + achternaam).trim();
-                    if (!id.isBlank() && !volledig.isBlank()) {
-                        lookup.put(id, volledig);
+                    if (!id.isBlank() && (!voornaam.isBlank() || !achternaam.isBlank())) {
+                        lookup.put(id, new String[]{voornaam, achternaam});
                     }
                 }
             }
