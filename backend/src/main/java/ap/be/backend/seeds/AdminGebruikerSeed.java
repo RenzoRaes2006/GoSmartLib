@@ -31,5 +31,5 @@ public class AdminGebruikerSeed implements CommandLineRunner {
             );
             adminGebruikerRepository.save(admin);
         }
-    }
+    } 
 }
