@@ -100,11 +100,11 @@ public class KlassLeeslijstService {
     }
 
     /**
-     * Geeft alle leeslijsten terug van een bepaalde leerkracht.
+     * Geeft alle actieve (niet-gearchiveerde) leeslijsten terug van een bepaalde leerkracht.
      */
     @Transactional(readOnly = true)
     public List<KlassLeeslijstResponseDTO> getLeeslijstenByLeerkracht(Long leerkrachtId) {
-        return leeslijstRepository.findByLeerkrachtIdOrderByAangemaaktOpDesc(leerkrachtId).stream()
+        return leeslijstRepository.findByLeerkrachtIdAndGearchiveerdFalseOrderByAangemaaktOpDesc(leerkrachtId).stream()
                 .map(KlassLeeslijstMapper::toDTO)
                 .toList();
     }
@@ -241,6 +241,54 @@ public class KlassLeeslijstService {
     }
 
     /**
+     * Geeft het archief van gearchiveerde leeslijsten terug.
+     * - Bibbeheerder (isBeheerder=true): ziet alle gearchiveerde lijsten van alle leerkrachten.
+     * - Leerkracht: ziet alleen zijn eigen gearchiveerde lijsten.
+     */
+    @Transactional(readOnly = true)
+    public List<KlassLeeslijstResponseDTO> getArchief() {
+        User huidigeGebruiker = SecurityUtils.getCurrentUser(userRepository);
+        if (huidigeGebruiker.isBeheerder()) {
+            return leeslijstRepository.findByGearchiveerdTrueOrderByAangemaaktOpDesc().stream()
+                    .map(KlassLeeslijstMapper::toDTO)
+                    .toList();
+        }
+        return leeslijstRepository.findByLeerkrachtIdAndGearchiveerdTrueOrderByAangemaaktOpDesc(huidigeGebruiker.getId()).stream()
+                .map(KlassLeeslijstMapper::toDTO)
+                .toList();
+    }
+
+    /**
+     * Kopieert een gearchiveerde leeslijst naar een nieuwe actieve klas.
+     * Het origineel blijft gearchiveerd. De kopie start als onzichtbaar zodat
+     * de leerkracht hem eerst kan aanpassen voor hij hem publiceert aan leerlingen.
+     *
+     * @param id        ID van de te kopiëren (gearchiveerde) leeslijst
+     * @param nieuweKlas de klas waaraan de kopie gekoppeld wordt
+     */
+    @Transactional
+    public KlassLeeslijstResponseDTO kopieerNaarKlas(Long id, String nieuweKlas) {
+        if (nieuweKlas == null || nieuweKlas.isBlank()) {
+            throw new IllegalArgumentException("Nieuwe klas mag niet leeg zijn.");
+        }
+
+        KlassLeeslijst origineel = leeslijstRepository.findById(id)
+                .orElseThrow(() -> new KlassLeeslijstNotFoundException("Leeslijst niet gevonden"));
+
+        KlassLeeslijst kopie = new KlassLeeslijst();
+        kopie.setNaam(origineel.getNaam());
+        kopie.setLeerkracht(origineel.getLeerkracht());
+        kopie.setKlas(nieuweKlas);
+        kopie.setLeerling(null);
+        kopie.setBeschrijving(origineel.getBeschrijving());
+        kopie.setZichtbaar(false); // Leerkracht moet hem eerst zelf activeren
+        kopie.setGearchiveerd(false);
+        kopie.setBoeken(new java.util.HashSet<>(origineel.getBoeken()));
+
+        return KlassLeeslijstMapper.toDTO(leeslijstRepository.save(kopie));
+    }
+
+    /**
      * Geeft alle leeslijsten terug die zichtbaar zijn voor de huidige ingelogde
      * leerling: zowel klas-leeslijsten van de eigen klas als persoonlijk
      * toegewezen lijsten. Onzichtbare lijsten worden gefilterd.
@@ -254,9 +302,9 @@ public class KlassLeeslijstService {
         List<KlassLeeslijst> resultaat = new ArrayList<>();
 
         if (huidigeLeerling.getKlas() != null && !huidigeLeerling.getKlas().isBlank()) {
-            resultaat.addAll(leeslijstRepository.findByKlasAndZichtbaarTrueOrderByAangemaaktOpDesc(huidigeLeerling.getKlas()));
+            resultaat.addAll(leeslijstRepository.findByKlasAndZichtbaarTrueAndGearchiveerdFalseOrderByAangemaaktOpDesc(huidigeLeerling.getKlas()));
         }
-        resultaat.addAll(leeslijstRepository.findByLeerlingIdAndZichtbaarTrueOrderByAangemaaktOpDesc(huidigeLeerling.getId()));
+        resultaat.addAll(leeslijstRepository.findByLeerlingIdAndZichtbaarTrueAndGearchiveerdFalseOrderByAangemaaktOpDesc(huidigeLeerling.getId()));
 
         resultaat.sort((a, b) -> {
             LocalDateTime aDate = a.getAangemaaktOp();

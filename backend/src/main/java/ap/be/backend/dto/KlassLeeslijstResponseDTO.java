@@ -10,5 +10,8 @@ public record KlassLeeslijstResponseDTO(
         String leerlingNaam,
         String beschrijving,
         boolean zichtbaar,
+        // Geeft aan of deze leeslijst gearchiveerd is na een schooljaar-rollover.
+        // Gearchiveerde lijsten zijn niet zichtbaar in de actieve weergave maar wel via het archief.
+        boolean gearchiveerd,
         List<BoekDTO> boeken) {
 }
