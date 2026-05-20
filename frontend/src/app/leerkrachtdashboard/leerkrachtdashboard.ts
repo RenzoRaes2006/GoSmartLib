@@ -41,6 +41,7 @@ export class Leerkrachtdashboard implements OnInit {
 
   zichtbareLeerlingen = signal<any[]>([]);
   selectedStudent = signal<any | null>(null);
+  beschikbareKlassen = signal<string[]>([]);
 
   actieveKlassenLeningen = signal<any[]>([]);
 
@@ -48,6 +49,14 @@ export class Leerkrachtdashboard implements OnInit {
     this.haalLeerlingenOp();
     this.haalKlassenLeningenOp();
     this.haalStatistiekenOp();
+    this.haalKlassenOp();
+  }
+
+  haalKlassenOp() {
+    this.leerlingService.getKlassen().subscribe({
+      next: (klassen) => this.beschikbareKlassen.set(klassen ?? []),
+      error: (err) => console.error('fout bij ophalen klassen:', err),
+    });
   }
 
   haalKlassenLeningenOp() {

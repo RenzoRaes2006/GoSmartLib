@@ -49,19 +49,47 @@ public class LeerlingController {
     }
 
     /**
-     * Geeft de klassen terug binnen de school van de ingelogde leerkracht.
+     * Geeft de klassen terug van de school van de ingelogde leerkracht.
+     * Wordt live opgehaald uit OneRoster — er wordt geen klassenlijst
+     * gepersisteerd. Bij OneRoster-fouten of ontbrekende credentials valt de
+     * lijst leeg uit zodat de dropdown niet crasht.
      */
     @GetMapping("/klassen")
-    public java.util.List<String> getKlassen() {
-        return repo.findDistinctKlassenBySchool(huidigeSchoolId());
+    @SuppressWarnings("unchecked")
+    public List<String> getKlassen() {
+        School school = huidigeSchool();
+        if (school.getSmartschoolDomein() == null
+                || school.getOauthClientId() == null
+                || school.getOauthClientSecret() == null) {
+            return List.of();
+        }
+        try {
+            Map<String, Object> data = oneRosterClient.haalLiveSchoolDataOp(
+                    school.getSmartschoolDomein(),
+                    school.getOauthClientId(),
+                    school.getOauthClientSecret());
+            List<Map<String, Object>> klassen = (List<Map<String, Object>>) data.getOrDefault("klassen", List.of());
+            return klassen.stream()
+                    .map(k -> String.valueOf(k.getOrDefault("naam", "")))
+                    .filter(n -> !n.isBlank())
+                    .distinct()
+                    .sorted()
+                    .toList();
+        } catch (Exception e) {
+            return List.of();
+        }
     }
 
-    private Long huidigeSchoolId() {
+    private School huidigeSchool() {
         User huidige = SecurityUtils.getCurrentUser(repo);
         if (huidige.getSchool() == null) {
             throw new IllegalStateException("Ingelogde gebruiker heeft geen school toegewezen.");
         }
-        return huidige.getSchool().getId();
+        return huidige.getSchool();
+    }
+
+    private Long huidigeSchoolId() {
+        return huidigeSchool().getId();
     }
 
     @GetMapping("/{id}/stats")
