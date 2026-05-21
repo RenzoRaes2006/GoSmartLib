@@ -9,11 +9,13 @@ import ap.be.backend.repository.UitleningRepository;
 import ap.be.backend.repository.UserRepository;
 import ap.be.backend.service.OneRosterClient;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.*;
 
@@ -40,12 +42,39 @@ public class LeerlingController {
             @RequestParam(required = false) String klas,
             @RequestParam(required = false) String zoekterm) {
         Long schoolId = huidigeSchoolId();
-        Page<User> users = repo.findLeerlingenMetFilters(schoolId, klas, zoekterm, PageRequest.of(page, size));
-        Map<String, String[]> naamLookup = bouwNaamLookup(users.getContent());
-        return users.map(u -> {
+        PageRequest pageable = PageRequest.of(page, size);
+
+        // Geen zoekterm: paginering in de DB volstaat (efficiënt).
+        if (zoekterm == null || zoekterm.isBlank()) {
+            Page<User> users = repo.findLeerlingenMetFilters(schoolId, klas, pageable);
+            Map<String, String[]> naamLookup = bouwNaamLookup(users.getContent());
+            return users.map(u -> {
+                String[] paar = naamLookup.getOrDefault(u.getSmartschoolId(), new String[]{null, null});
+                return GebruikerMapper.toDTO(u, paar[0], paar[1]);
+            });
+        }
+
+        // Wel zoekterm: namen staan niet in de DB, dus filteren we in-memory op
+        // de live opgehaalde voor-/achternaam uit OneRoster.
+        List<User> alleLeerlingen = repo.findLeerlingenVoorZoekopdracht(schoolId, klas);
+        Map<String, String[]> naamLookup = bouwNaamLookup(alleLeerlingen);
+        String term = zoekterm.toLowerCase().trim();
+
+        List<GebruikerDTO> gefilterd = new ArrayList<>();
+        for (User u : alleLeerlingen) {
             String[] paar = naamLookup.getOrDefault(u.getSmartschoolId(), new String[]{null, null});
-            return GebruikerMapper.toDTO(u, paar[0], paar[1]);
-        });
+            String voor = paar[0] == null ? "" : paar[0].toLowerCase();
+            String achter = paar[1] == null ? "" : paar[1].toLowerCase();
+            String volledig = (voor + " " + achter).trim();
+            String ssid = u.getSmartschoolId() == null ? "" : u.getSmartschoolId().toLowerCase();
+            if (voor.contains(term) || achter.contains(term) || volledig.contains(term) || ssid.contains(term)) {
+                gefilterd.add(GebruikerMapper.toDTO(u, paar[0], paar[1]));
+            }
+        }
+
+        int from = Math.min(page * size, gefilterd.size());
+        int to = Math.min(from + size, gefilterd.size());
+        return new PageImpl<>(gefilterd.subList(from, to), pageable, gefilterd.size());
     }
 
     /**
