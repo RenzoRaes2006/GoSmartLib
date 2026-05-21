@@ -183,8 +183,6 @@ class SchooljaarServiceTest {
                 .thenReturn(List.of(openUitlening));
         when(userRepository.findBySchool_IdAndRol(SCHOOL_ID, Rol.LEERKRACHT))
                 .thenReturn(List.of());
-        when(leeslijstRepository.findByLeerling_IdInAndGearchiveerdFalse(List.of(10L)))
-                .thenReturn(List.of());
 
         RolloverPreviewDTO result = schooljaarService.previewRollover(SCHOOL_ID);
 
@@ -263,7 +261,6 @@ class SchooljaarServiceTest {
         when(beoordelingRepository.findByUser_IdInAndIsAnoniemFalse(List.of(10L)))
                 .thenReturn(List.of());
         when(userRepository.findBySchool_IdAndRol(SCHOOL_ID, Rol.LEERKRACHT)).thenReturn(List.of());
-        when(leeslijstRepository.findByLeerling_IdInAndGearchiveerdFalse(List.of(10L))).thenReturn(List.of());
         when(schooljaarRepository.findByActiefTrue()).thenReturn(Optional.empty());
         when(schooljaarRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
@@ -291,7 +288,6 @@ class SchooljaarServiceTest {
         when(beoordelingRepository.findByUser_IdInAndIsAnoniemFalse(List.of(10L)))
                 .thenReturn(List.of(beoordeling));
         when(userRepository.findBySchool_IdAndRol(SCHOOL_ID, Rol.LEERKRACHT)).thenReturn(List.of());
-        when(leeslijstRepository.findByLeerling_IdInAndGearchiveerdFalse(List.of(10L))).thenReturn(List.of());
         when(schooljaarRepository.findByActiefTrue()).thenReturn(Optional.empty());
         when(schooljaarRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 

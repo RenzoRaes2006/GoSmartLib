@@ -15,6 +15,5 @@ public record RolloverPreviewDTO(
         int aantalVertrokkenLeerlingen,
         List<OpenLeningPreviewDTO> openLeningenVertrokkenen,
         int aantalTeArchiverenKlasLeeslijsten,
-        int aantalTeArchiverenLeerlingLeeslijsten,
         boolean kanDoorgaan
 ) {}

@@ -27,7 +27,4 @@ public interface KlassLeeslijstRepository extends JpaRepository<KlassLeeslijst, 
 
     // Klas-gebonden leeslijsten die nog actief zijn — gebruikt bij rollover om te archiveren
     List<KlassLeeslijst> findByLeerkracht_IdInAndKlasIsNotNullAndGearchiveerdFalse(Collection<Long> leerkrachtIds);
-
-    // Leerling-gebonden leeslijsten voor specifieke leerlingen — gebruikt bij rollover
-    List<KlassLeeslijst> findByLeerling_IdInAndGearchiveerdFalse(Collection<Long> leerlingIds);
 }

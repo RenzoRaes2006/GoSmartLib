@@ -90,15 +90,10 @@ public class SchooljaarService {
         int aantalKlasLeeslijsten = leerkrachtIds.isEmpty() ? 0 :
                 leeslijstRepository.findByLeerkracht_IdInAndKlasIsNotNullAndGearchiveerdFalse(leerkrachtIds).size();
 
-        // Leerling-leeslijsten van vertrekkende leerlingen
-        int aantalLeerlingLeeslijsten = vertrokkenIds.isEmpty() ? 0 :
-                leeslijstRepository.findByLeerling_IdInAndGearchiveerdFalse(vertrokkenIds).size();
-
         return new RolloverPreviewDTO(
                 vertrokken.size(),
                 openLeningDTOs,
                 aantalKlasLeeslijsten,
-                aantalLeerlingLeeslijsten,
                 openLeningen.isEmpty()
         );
     }
@@ -171,7 +166,9 @@ public class SchooljaarService {
         // --- Stap 6: KlassLeeslijsten archiveren ---
         // Alle klas-gebonden leeslijsten van leerkrachten van deze school worden gearchiveerd:
         // de klassen zijn volgend jaar anders samengesteld, dus de lijsten zijn niet meer actueel.
-        // Leerling-gebonden leeslijsten van vertrokken leerlingen worden ook gearchiveerd.
+        // Leerling-gebonden leeslijsten worden NIET gearchiveerd: vertrokken leerlingen kunnen
+        // niet meer inloggen, dus hun lijsten zijn al onbereikbaar — archiveren zou alleen het
+        // archief van de bibbeheerder vervuilen.
         int aantalGearchiveerd = 0;
 
         List<Long> leerkrachtIds = userRepository.findBySchool_IdAndRol(schoolId, Rol.LEERKRACHT)
@@ -183,14 +180,6 @@ public class SchooljaarService {
             klasLeeslijsten.forEach(l -> l.setGearchiveerd(true));
             leeslijstRepository.saveAll(klasLeeslijsten);
             aantalGearchiveerd += klasLeeslijsten.size();
-        }
-
-        if (!vertrokkenIds.isEmpty()) {
-            List<KlassLeeslijst> leerlingLeeslijsten =
-                    leeslijstRepository.findByLeerling_IdInAndGearchiveerdFalse(vertrokkenIds);
-            leerlingLeeslijsten.forEach(l -> l.setGearchiveerd(true));
-            leeslijstRepository.saveAll(leerlingLeeslijsten);
-            aantalGearchiveerd += leerlingLeeslijsten.size();
         }
 
         log.info("Rollover school {}: {} leeslijsten gearchiveerd", schoolId, aantalGearchiveerd);
