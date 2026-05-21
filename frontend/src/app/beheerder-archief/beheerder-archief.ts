@@ -28,7 +28,7 @@ export class BeheerderArchiefComponent implements OnInit {
     return this.archief().filter(l =>
       l.naam.toLowerCase().includes(term) ||
       (l.klas?.toLowerCase().includes(term) ?? false) ||
-      (l.leerlingNaam?.toLowerCase().includes(term) ?? false)
+      (l.leerlingNamen?.some(n => n.toLowerCase().includes(term)) ?? false)
     );
   });
 
