@@ -313,20 +313,35 @@ button.danger:hover {
   margin: 0;
 }
 
-.tag-lijst li {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.tag-lijst > li {
   padding: 10px 0;
   border-bottom: 1px solid var(--border-color);
 }
 
-.tag-lijst li:last-child {
+.tag-lijst > li:last-child {
   border-bottom: none;
+}
+
+.tag-rij {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .tag-naam {
   flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sub-badge {
+  background: var(--go-beige);
+  color: var(--go-bordeaux);
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
 }
 
 .tag-lijst input {
@@ -334,4 +349,65 @@ button.danger:hover {
   padding: 6px 10px;
   border: 1px solid var(--border-color);
   border-radius: 4px;
+}
+
+.uitklap-knop {
+  width: 28px;
+  padding: 4px;
+  text-align: center;
+  border-color: transparent;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.uitklap-knop:hover:not(:disabled) {
+  color: var(--go-bordeaux);
+  background: var(--go-beige);
+}
+
+.sub-blok {
+  margin: 8px 0 4px 36px;
+  padding: 8px 12px;
+  background: var(--go-beige);
+  border-radius: 6px;
+  border-left: 3px solid var(--go-bordeaux);
+}
+
+.sub-lijst {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 8px;
+}
+
+.sub-lijst li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px dashed var(--border-color);
+}
+
+.sub-lijst li:last-child {
+  border-bottom: none;
+}
+
+.sub-lijst input {
+  flex: 1;
+  padding: 6px 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+}
+
+.sub-toevoegen {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.sub-toevoegen input {
+  flex: 1;
+  padding: 6px 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background: #fff;
 }

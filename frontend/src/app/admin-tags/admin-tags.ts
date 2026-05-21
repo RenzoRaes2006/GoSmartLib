@@ -31,11 +31,16 @@ export class AdminTags implements OnInit {
   bewerktId: number | null = null;
   bewerktNaam = '';
 
+  uitgeklapt = signal<Set<number>>(new Set<number>());
+  nieuweSubNaam: Record<number, string> = {};
+
   pageSize = signal(3);
   huidigePagina = signal(1);
 
   teVerwijderenTag = signal<Tag | null>(null);
   private foutTimer: ReturnType<typeof setTimeout> | null = null;
+
+  isGenreTab = computed(() => this.activeTab() === 'GENRE');
 
   totaalPaginas = computed(() => {
     return Math.max(1, Math.ceil(this.tags().length / this.pageSize()));
@@ -68,6 +73,8 @@ export class AdminTags implements OnInit {
     this.activeTab.set(type);
     this.bewerktId = null;
     this.nieuweNaam = '';
+    this.nieuweSubNaam = {};
+    this.uitgeklapt.set(new Set<number>());
     this.fout.set(null);
     this.huidigePagina.set(1);
     this.laadTags();
@@ -81,10 +88,27 @@ export class AdminTags implements OnInit {
     if (this.huidigePagina() < this.totaalPaginas()) this.huidigePagina.update((p) => p + 1);
   }
 
+  isUitgeklapt(id: number): boolean {
+    return this.uitgeklapt().has(id);
+  }
+
+  toggleUitklap(id: number): void {
+    const next = new Set(this.uitgeklapt());
+    if (next.has(id)) {
+      next.delete(id);
+    } else {
+      next.add(id);
+    }
+    this.uitgeklapt.set(next);
+  }
+
   laadTags(): void {
     this.laden.set(true);
     this.fout.set(null);
-    this.tagService.list(this.activeTab()).subscribe({
+    const obs = this.isGenreTab()
+      ? this.tagService.tree('GENRE')
+      : this.tagService.list(this.activeTab());
+    obs.subscribe({
       next: (data) => {
         this.tags.set(data);
         const max = Math.max(1, Math.ceil(data.length / this.pageSize()));
@@ -102,9 +126,25 @@ export class AdminTags implements OnInit {
     const naam = this.nieuweNaam.trim();
     if (!naam) return;
     this.fout.set(null);
-    this.tagService.create(naam, this.activeTab()).subscribe({
+    this.tagService.create(naam, this.activeTab(), null).subscribe({
       next: () => {
         this.nieuweNaam = '';
+        this.laadTags();
+      },
+      error: (err: HttpErrorResponse) => this.toonFout(err.error ?? 'Aanmaken mislukt.'),
+    });
+  }
+
+  subToevoegen(hoofd: Tag): void {
+    const naam = (this.nieuweSubNaam[hoofd.id] ?? '').trim();
+    if (!naam) return;
+    this.fout.set(null);
+    this.tagService.create(naam, 'GENRE', hoofd.id).subscribe({
+      next: () => {
+        this.nieuweSubNaam[hoofd.id] = '';
+        const open = new Set(this.uitgeklapt());
+        open.add(hoofd.id);
+        this.uitgeklapt.set(open);
         this.laadTags();
       },
       error: (err: HttpErrorResponse) => this.toonFout(err.error ?? 'Aanmaken mislukt.'),

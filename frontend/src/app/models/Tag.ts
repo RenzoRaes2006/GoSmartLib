@@ -4,4 +4,6 @@ export interface Tag {
   id: number;
   naam: string;
   type: TagType;
+  parentId?: number | null;
+  subTags?: Tag[] | null;
 }

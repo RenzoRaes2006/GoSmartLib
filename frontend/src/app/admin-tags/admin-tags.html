@@ -17,7 +17,7 @@
       <div class="toevoegen-rij">
         <input
           type="text"
-          placeholder="Nieuwe tag-naam"
+          [placeholder]="isGenreTab() ? 'Nieuw hoofdgenre' : 'Nieuwe tag-naam'"
           [(ngModel)]="nieuweNaam"
           (keydown.enter)="toevoegen()"
         />
@@ -37,20 +37,80 @@
       } @else {
         <ul class="tag-lijst">
           @for (tag of zichtbareTags(); track tag.id) {
-            <li>
-              @if (bewerktId === tag.id) {
-                <input
-                  type="text"
-                  [(ngModel)]="bewerktNaam"
-                  (keydown.enter)="bewaarBewerken(tag)"
-                  (keydown.escape)="annuleerBewerken()"
-                />
-                <button class="primary" (click)="bewaarBewerken(tag)">Opslaan</button>
-                <button (click)="annuleerBewerken()">Annuleren</button>
-              } @else {
-                <span class="tag-naam">{{ tag.naam }}</span>
-                <button (click)="startBewerken(tag)">Hernoemen</button>
-                <button class="danger" (click)="verwijderen(tag)">Verwijderen</button>
+            <li [class.hoofd-tag]="isGenreTab()">
+              <div class="tag-rij">
+                @if (isGenreTab()) {
+                  <button
+                    class="uitklap-knop"
+                    type="button"
+                    (click)="toggleUitklap(tag.id)"
+                    [attr.aria-expanded]="isUitgeklapt(tag.id)"
+                    [title]="isUitgeklapt(tag.id) ? 'Inklappen' : 'Uitklappen'"
+                  >
+                    {{ isUitgeklapt(tag.id) ? '▾' : '▸' }}
+                  </button>
+                }
+
+                @if (bewerktId === tag.id) {
+                  <input
+                    type="text"
+                    [(ngModel)]="bewerktNaam"
+                    (keydown.enter)="bewaarBewerken(tag)"
+                    (keydown.escape)="annuleerBewerken()"
+                  />
+                  <button class="primary" (click)="bewaarBewerken(tag)">Opslaan</button>
+                  <button (click)="annuleerBewerken()">Annuleren</button>
+                } @else {
+                  <span class="tag-naam">
+                    {{ tag.naam }}
+                    @if (isGenreTab() && (tag.subTags?.length ?? 0) > 0) {
+                      <span class="sub-badge">{{ tag.subTags!.length }} sub</span>
+                    }
+                  </span>
+                  <button (click)="startBewerken(tag)">Hernoemen</button>
+                  <button class="danger" (click)="verwijderen(tag)">Verwijderen</button>
+                }
+              </div>
+
+              @if (isGenreTab() && isUitgeklapt(tag.id)) {
+                <div class="sub-blok">
+                  <ul class="sub-lijst">
+                    @for (sub of tag.subTags ?? []; track sub.id) {
+                      <li>
+                        @if (bewerktId === sub.id) {
+                          <input
+                            type="text"
+                            [(ngModel)]="bewerktNaam"
+                            (keydown.enter)="bewaarBewerken(sub)"
+                            (keydown.escape)="annuleerBewerken()"
+                          />
+                          <button class="primary" (click)="bewaarBewerken(sub)">Opslaan</button>
+                          <button (click)="annuleerBewerken()">Annuleren</button>
+                        } @else {
+                          <span class="tag-naam">{{ sub.naam }}</span>
+                          <button (click)="startBewerken(sub)">Hernoemen</button>
+                          <button class="danger" (click)="verwijderen(sub)">Verwijderen</button>
+                        }
+                      </li>
+                    }
+                  </ul>
+
+                  <div class="sub-toevoegen">
+                    <input
+                      type="text"
+                      placeholder="Nieuw subgenre"
+                      [(ngModel)]="nieuweSubNaam[tag.id]"
+                      (keydown.enter)="subToevoegen(tag)"
+                    />
+                    <button
+                      class="primary"
+                      (click)="subToevoegen(tag)"
+                      [disabled]="!(nieuweSubNaam[tag.id] || '').trim()"
+                    >
+                      + Subgenre
+                    </button>
+                  </div>
+                </div>
               }
             </li>
           }

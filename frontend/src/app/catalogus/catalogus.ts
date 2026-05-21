@@ -24,6 +24,7 @@ export class Catalogus implements OnInit, OnDestroy {
   filters = signal<FilterOptions>({});
 
   selectedGenreId = signal<number | null>(null);
+  selectedSubGenreId = signal<number | null>(null);
   selectedThematischeId = signal<number | null>(null);
   selectedDidactischeId = signal<number | null>(null);
 
@@ -68,8 +69,24 @@ export class Catalogus implements OnInit, OnDestroy {
     this.navSub.unsubscribe();
   }
 
+  geselecteerdHoofdGenre(): Tag | null {
+    const id = this.selectedGenreId();
+    if (id == null) return null;
+    return this.beschikbareGenres().find((g) => g.id === id) ?? null;
+  }
+
+  subGenresVanGeselecteerd(): Tag[] {
+    return this.geselecteerdHoofdGenre()?.subTags ?? [];
+  }
+
+  onHoofdGenreFilterChange(id: number | null): void {
+    this.selectedGenreId.set(id);
+    this.selectedSubGenreId.set(null);
+    this.updateFilters();
+  }
+
   ngOnInit(): void {
-    this.tagService.list('GENRE').subscribe((t) => this.beschikbareGenres.set(t));
+    this.tagService.tree('GENRE').subscribe((t) => this.beschikbareGenres.set(t));
     this.tagService.list('THEMATISCH').subscribe((t) => this.beschikbareThematischeTags.set(t));
     this.tagService.list('DIDACTISCH').subscribe((t) => this.beschikbareDidactischeTags.set(t));
 
@@ -79,6 +96,7 @@ export class Catalogus implements OnInit, OnDestroy {
         const f = JSON.parse(stored);
         this.zoekTerm.set(f.zoekTerm || '');
         this.selectedGenreId.set(f.selectedGenreId ?? null);
+        this.selectedSubGenreId.set(f.selectedSubGenreId ?? null);
         this.selectedThematischeId.set(f.selectedThematischeId ?? null);
         this.selectedDidactischeId.set(f.selectedDidactischeId ?? null);
         this.selectedUitgever.set(f.selectedUitgever);
@@ -122,7 +140,13 @@ export class Catalogus implements OnInit, OnDestroy {
     }
 
     const tagIds: number[] = [];
-    if (this.selectedGenreId()) tagIds.push(this.selectedGenreId()!);
+    const subId = this.selectedSubGenreId();
+    const hoofdId = this.selectedGenreId();
+    if (subId) {
+      tagIds.push(subId);
+    } else if (hoofdId) {
+      tagIds.push(hoofdId);
+    }
     if (this.selectedThematischeId()) tagIds.push(this.selectedThematischeId()!);
     if (this.toonDidactisch() && this.selectedDidactischeId()) {
       tagIds.push(this.selectedDidactischeId()!);
@@ -154,6 +178,7 @@ export class Catalogus implements OnInit, OnDestroy {
     const huidigeFilters = {
       zoekTerm: this.zoekTerm(),
       selectedGenreId: this.selectedGenreId(),
+      selectedSubGenreId: this.selectedSubGenreId(),
       selectedThematischeId: this.selectedThematischeId(),
       selectedDidactischeId: this.selectedDidactischeId(),
       selectedUitgever: this.selectedUitgever(),
@@ -210,6 +235,7 @@ export class Catalogus implements OnInit, OnDestroy {
   resetFilters(): void {
     this.zoekTerm.set('');
     this.selectedGenreId.set(null);
+    this.selectedSubGenreId.set(null);
     this.selectedThematischeId.set(null);
     this.selectedDidactischeId.set(null);
     this.selectedUitgever.set(undefined);

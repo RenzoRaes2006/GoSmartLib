@@ -16,8 +16,13 @@ export class TagService {
     return this.http.get<Tag[]>(this.apiUrl, { params });
   }
 
-  create(naam: string, type: TagType): Observable<Tag> {
-    return this.http.post<Tag>(this.apiUrl, { naam, type });
+  tree(type: TagType): Observable<Tag[]> {
+    const params = new HttpParams().set('type', type).set('tree', 'true');
+    return this.http.get<Tag[]>(this.apiUrl, { params });
+  }
+
+  create(naam: string, type: TagType, parentId?: number | null): Observable<Tag> {
+    return this.http.post<Tag>(this.apiUrl, { naam, type, parentId: parentId ?? null });
   }
 
   rename(id: number, naam: string): Observable<Tag> {

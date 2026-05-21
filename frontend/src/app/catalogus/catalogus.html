@@ -46,7 +46,7 @@
       <select
         id="genre-filter"
         [ngModel]="selectedGenreId()"
-        (ngModelChange)="selectedGenreId.set($event); updateFilters()"
+        (ngModelChange)="onHoofdGenreFilterChange($event)"
         class="sidebar-input"
       >
         <option [ngValue]="null">Alle genres</option>
@@ -54,6 +54,20 @@
           <option [ngValue]="g.id">{{ g.naam }}</option>
         }
       </select>
+      @if (subGenresVanGeselecteerd().length > 0) {
+        <label for="subgenre-filter">Subgenre</label>
+        <select
+          id="subgenre-filter"
+          [ngModel]="selectedSubGenreId()"
+          (ngModelChange)="selectedSubGenreId.set($event); updateFilters()"
+          class="sidebar-input"
+        >
+          <option [ngValue]="null">Alle subgenres</option>
+          @for (s of subGenresVanGeselecteerd(); track s.id) {
+            <option [ngValue]="s.id">{{ s.naam }}</option>
+          }
+        </select>
+      }
 
       <!-- 4. Thematische tag -->
       <label for="thematische-tag-filter">Thematische tag</label>

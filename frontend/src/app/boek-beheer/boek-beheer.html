@@ -267,7 +267,7 @@
         <div class="genre-dropdown-row">
           <select
             [ngModel]="selectedGenreId()"
-            (ngModelChange)="selectedGenreId.set($event)"
+            (ngModelChange)="onHoofdGenreChange($event)"
             [ngModelOptions]="{ standalone: true }"
           >
             <option [ngValue]="null">Kies een genre</option>
@@ -275,10 +275,22 @@
               <option [ngValue]="g.id">{{ g.naam }}</option>
             }
           </select>
+          @if (subGenresVanGeselecteerd().length > 0) {
+            <select
+              [ngModel]="selectedSubGenreId()"
+              (ngModelChange)="selectedSubGenreId.set($event)"
+              [ngModelOptions]="{ standalone: true }"
+            >
+              <option [ngValue]="null">Kies subgenre</option>
+              @for (s of subGenresVanGeselecteerd(); track s.id) {
+                <option [ngValue]="s.id">{{ s.naam }}</option>
+              }
+            </select>
+          }
           <button
             type="button"
             class="genre-toevoegen-btn"
-            (click)="voegTagToe('GENRE', selectedGenreId)"
+            (click)="voegGenreToe()"
             [disabled]="!selectedGenreId()"
           >
             +
