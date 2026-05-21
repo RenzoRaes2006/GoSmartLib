@@ -84,4 +84,20 @@ export class KlassLeeslijstService {
   getAllKlassenLeeslijsten(): Observable<KlassLeeslijst[]> {
     return this.http.get<KlassLeeslijst[]>(`${this.apiUrl}/alle`);
   }
+
+  /**
+   * Haalt het archief op: voor een leerkracht zijn eigen gearchiveerde lijsten,
+   * voor de bibbeheerder alle gearchiveerde lijsten. Backend bepaalt op basis van rol.
+   */
+  getArchief(): Observable<KlassLeeslijst[]> {
+    return this.http.get<KlassLeeslijst[]>(`${this.apiUrl}/archief`);
+  }
+
+  /**
+   * Dearchiveert een leeslijst: zet gearchiveerd=false en zichtbaar=false zodat
+   * de leerkracht hem als concept terugkrijgt en bewust moet publiceren.
+   */
+  dearchiveer(id: number): Observable<KlassLeeslijst> {
+    return this.http.patch<KlassLeeslijst>(`${this.apiUrl}/${id}/dearchiveer`, {});
+  }
 }

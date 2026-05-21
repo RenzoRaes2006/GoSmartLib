@@ -23,6 +23,9 @@
       <button [class.active]="activeTab() === 'rollen'" (click)="wisselTab('rollen')">
         Rollen beheren
       </button>
+      <button [class.active]="activeTab() === 'schooljaar'" (click)="wisselTab('schooljaar')">
+        Schooljaar
+      </button>
     </div>
   </nav>
 
@@ -386,6 +389,11 @@
     <!-- tab 3: tag-beheer -->
     @if (activeTab() === 'tags') {
       <app-admin-tags />
+    }
+
+    <!-- tab 5: schooljaar rollover -->
+    @if (activeTab() === 'schooljaar') {
+      <app-admin-schooljaar />
     }
 
   </main>

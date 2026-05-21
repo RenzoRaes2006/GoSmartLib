@@ -8,5 +8,6 @@ export interface KlassLeeslijst {
   leerlingNaam?: string | null;
   beschrijving?: string | null;
   zichtbaar: boolean;
+  gearchiveerd: boolean;
   boeken: Boek[];
 }

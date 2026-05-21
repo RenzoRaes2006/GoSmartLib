@@ -1,0 +1,156 @@
+<div class="schooljaar-container">
+
+  <section class="card huidig-schooljaar">
+    <h2>Huidig schooljaar</h2>
+    @if (actiefSchooljaar(); as s) {
+      <div class="schooljaar-info">
+        <div class="schooljaar-naam">{{ s.naam }}</div>
+        <div class="schooljaar-periode">
+          {{ s.startDatum | date:'dd MMM yyyy' }} – {{ s.eindDatum | date:'dd MMM yyyy' }}
+        </div>
+      </div>
+    } @else {
+      <p class="leeg">Geen actief schooljaar gevonden.</p>
+    }
+  </section>
+
+  <section class="card start-rollover">
+    <h2>Nieuw schooljaar starten</h2>
+    <p class="uitleg">
+      Bij het starten van een nieuw schooljaar worden vertrokken leerlingen gedeactiveerd,
+      hun reviews geanonimiseerd, en klas-leeslijsten gearchiveerd.
+      De rollover gebeurt per school omdat OneRoster per school synchroniseert.
+    </p>
+
+    <div class="rollover-rij">
+      <select (change)="onSchoolGeselecteerd($event)" [disabled]="laden()">
+        <option value="">-- Kies een school --</option>
+        @for (school of scholen(); track school.id) {
+          <option [value]="school.id">{{ school.naam }}</option>
+        }
+      </select>
+
+      <button
+        class="primary"
+        [disabled]="!geselecteerdeSchoolId() || laden()"
+        (click)="startRollover()">
+        {{ laden() ? 'Bezig…' : 'Rollover voorbereiden' }}
+      </button>
+    </div>
+
+    @if (fout() && !preview() && !resultaat()) {
+      <p class="foutmelding">{{ fout() }}</p>
+    }
+  </section>
+
+  @if (toonPreviewModal()) {
+    <div class="modal-overlay" (click)="annuleerPreview()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Rollover bevestigen</h3>
+        </div>
+        <div class="modal-body">
+          @if (preview(); as p) {
+            <div class="preview-grid">
+              <div class="stat">
+                <span class="label">Vertrekkende leerlingen</span>
+                <span class="value">{{ p.aantalVertrokkenLeerlingen }}</span>
+              </div>
+              <div class="stat">
+                <span class="label">Klas-leeslijsten te archiveren</span>
+                <span class="value">{{ p.aantalTeArchiverenKlasLeeslijsten }}</span>
+              </div>
+              <div class="stat">
+                <span class="label">Leerling-leeslijsten te archiveren</span>
+                <span class="value">{{ p.aantalTeArchiverenLeerlingLeeslijsten }}</span>
+              </div>
+            </div>
+
+            @if (p.openLeningenVertrokkenen.length > 0) {
+              <div class="open-leningen">
+                <p class="warning-text">
+                  ⚠ Er zijn nog {{ p.openLeningenVertrokkenen.length }} open uitleningen bij vertrekkende leerlingen:
+                </p>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Leerling</th>
+                      <th>Boek</th>
+                      <th>ISBN</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (l of p.openLeningenVertrokkenen; track l.uitleningId) {
+                      <tr>
+                        <td>{{ l.leerlingSmartschoolId }}</td>
+                        <td>{{ l.boekTitel }}</td>
+                        <td>{{ l.boekIsbn }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+
+                <label class="checkbox-rij">
+                  <input
+                    type="checkbox"
+                    [checked]="forceerVerloren()"
+                    (change)="forceerVerloren.set($any($event.target).checked)">
+                  Markeer deze uitleningen als <strong>VERLOREN</strong>
+                </label>
+              </div>
+            }
+
+            <div class="nieuwe-jaar-form">
+              <h4>Nieuw schooljaar</h4>
+              <label>
+                Naam
+                <input type="text" [(ngModel)]="nieuwNaam" placeholder="2025-2026">
+              </label>
+              <label>
+                Startdatum
+                <input type="date" [(ngModel)]="nieuwStartDatum">
+              </label>
+              <label>
+                Einddatum
+                <input type="date" [(ngModel)]="nieuwEindDatum">
+              </label>
+            </div>
+
+            @if (fout()) {
+              <p class="foutmelding">{{ fout() }}</p>
+            }
+          }
+        </div>
+        <div class="modal-footer">
+          <button class="btn-annuleren" (click)="annuleerPreview()" [disabled]="bezig()">Annuleren</button>
+          <button class="primary" (click)="bevestigRollover()" [disabled]="bezig()">
+            {{ bezig() ? 'Bezig…' : 'Bevestigen' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (resultaat(); as r) {
+    <div class="modal-overlay" (click)="sluitResultaat()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Rollover voltooid</h3>
+        </div>
+        <div class="modal-body">
+          <p>Het nieuwe schooljaar <strong>{{ r.nieuwSchooljaar }}</strong> is actief.</p>
+          <ul class="resultaat-lijst">
+            <li><strong>{{ r.leerlingenGedeactiveerd }}</strong> leerlingen gedeactiveerd</li>
+            <li><strong>{{ r.beoordelingenGeanonimiseerd }}</strong> beoordelingen geanonimiseerd</li>
+            <li><strong>{{ r.leeslijstenGearchiveerd }}</strong> leeslijsten gearchiveerd</li>
+            <li><strong>{{ r.leningenAlsVerlorenGemarkeerd }}</strong> uitleningen als verloren gemarkeerd</li>
+          </ul>
+        </div>
+        <div class="modal-footer">
+          <button class="primary" (click)="sluitResultaat()">Sluiten</button>
+        </div>
+      </div>
+    </div>
+  }
+
+</div>

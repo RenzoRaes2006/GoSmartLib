@@ -23,6 +23,8 @@ import { LeningenBeheerder } from './leningen-beheerder/leningen-beheerder';
 import { BeheerderDashboard } from './beheerder-dashboard/beheerder-dashboard';
 import { KlassLeeslijstenOverzichtComponent } from './klass-leeslijsten-overzicht/klass-leeslijsten-overzicht';
 import { KlassLeeslijstBeheerComponent } from './klass-leeslijst-beheer/klass-leeslijst-beheer';
+import { KlassLeeslijstenArchiefComponent } from './klass-leeslijsten-archief/klass-leeslijsten-archief';
+import { BeheerderArchiefComponent } from './beheerder-archief/beheerder-archief';
 import { BulkOntlenenComponent } from './bulk-ontlenen-component/bulk-ontlenen-component';
 import { KlassenleeslijstenLeerlingComponent } from './klassenleeslijsten-leerling/klassenleeslijsten-leerling';
 import { KlassenleeslijstDetailLeerlingComponent } from './klassenleeslijst-detail-leerling/klassenleeslijst-detail-leerling';
@@ -49,6 +51,7 @@ export const routes: Routes = [
   // teacherGuard — enkel leerkrachten
   { path: 'leerkracht-dashboard', component: Leerkrachtdashboard, canActivate: [teacherGuard] },
   { path: 'leeslijsten', component: KlassLeeslijstenOverzichtComponent, canActivate: [teacherGuard] },
+  { path: 'leeslijsten/archief', component: KlassLeeslijstenArchiefComponent, canActivate: [teacherGuard] },
   { path: 'leeslijsten/:id', component: KlassLeeslijstBeheerComponent, canActivate: [teacherGuard] },
   { path: 'bulk-ontlenen', component: BulkOntlenenComponent, canActivate: [teacherGuard] },
 
@@ -57,6 +60,7 @@ export const routes: Routes = [
 
   // beheerderGuard — enkel de bibliotheekbeheerder ('beheerder')
   { path: 'beheerder', component: BeheerderDashboard, canActivate: [beheerderGuard] },
+  { path: 'beheerder/archief', component: BeheerderArchiefComponent, canActivate: [beheerderGuard] },
   { path: 'beheer/aanvragen', component: AanvragenBeheer, canActivate: [beheerderGuard] },
   { path: 'beheer/scan', component: ScanModus, canActivate: [beheerderGuard] },
   { path: 'beheer/actieve-leningen', component: LeningenBeheerder, canActivate: [beheerderGuard] },
