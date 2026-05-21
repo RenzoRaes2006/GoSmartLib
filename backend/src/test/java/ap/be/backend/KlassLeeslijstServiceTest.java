@@ -326,9 +326,9 @@ public class KlassLeeslijstServiceTest {
         persoonlijkeLijst.setZichtbaar(true);
         persoonlijkeLijst.setBoeken(new HashSet<>());
 
-        when(leeslijstRepository.findByKlasAndZichtbaarTrueOrderByAangemaaktOpDesc("5INF1"))
+        when(leeslijstRepository.findByKlasAndZichtbaarTrueAndGearchiveerdFalseOrderByAangemaaktOpDesc("5INF1"))
                 .thenReturn(List.of(klasLijst));
-        when(leeslijstRepository.findByLeerlingIdAndZichtbaarTrueOrderByAangemaaktOpDesc(42L))
+        when(leeslijstRepository.findByLeerlingIdAndZichtbaarTrueAndGearchiveerdFalseOrderByAangemaaktOpDesc(42L))
                 .thenReturn(List.of(persoonlijkeLijst));
 
         try (MockedStatic<SecurityUtils> securityMock = Mockito.mockStatic(SecurityUtils.class)) {
