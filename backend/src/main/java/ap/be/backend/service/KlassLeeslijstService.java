@@ -100,11 +100,11 @@ public class KlassLeeslijstService {
     }
 
     /**
-     * Geeft alle leeslijsten terug van een bepaalde leerkracht.
+     * Geeft alle actieve (niet-gearchiveerde) leeslijsten terug van een bepaalde leerkracht.
      */
     @Transactional(readOnly = true)
     public List<KlassLeeslijstResponseDTO> getLeeslijstenByLeerkracht(Long leerkrachtId) {
-        return leeslijstRepository.findByLeerkrachtIdOrderByAangemaaktOpDesc(leerkrachtId).stream()
+        return leeslijstRepository.findByLeerkrachtIdAndGearchiveerdFalseOrderByAangemaaktOpDesc(leerkrachtId).stream()
                 .map(KlassLeeslijstMapper::toDTO)
                 .toList();
     }
@@ -241,6 +241,40 @@ public class KlassLeeslijstService {
     }
 
     /**
+     * Geeft het archief van gearchiveerde leeslijsten terug.
+     * - Bibbeheerder (isBeheerder=true): ziet alle gearchiveerde lijsten van alle leerkrachten.
+     * - Leerkracht: ziet alleen zijn eigen gearchiveerde lijsten.
+     */
+    @Transactional(readOnly = true)
+    public List<KlassLeeslijstResponseDTO> getArchief() {
+        User huidigeGebruiker = SecurityUtils.getCurrentUser(userRepository);
+        if (huidigeGebruiker.isBeheerder()) {
+            return leeslijstRepository.findByGearchiveerdTrueOrderByAangemaaktOpDesc().stream()
+                    .map(KlassLeeslijstMapper::toDTO)
+                    .toList();
+        }
+        return leeslijstRepository.findByLeerkrachtIdAndGearchiveerdTrueOrderByAangemaaktOpDesc(huidigeGebruiker.getId()).stream()
+                .map(KlassLeeslijstMapper::toDTO)
+                .toList();
+    }
+
+    /**
+     * Dearchiveert een gearchiveerde leeslijst zodat hij terug actief is.
+     * De lijst komt terug als concept (zichtbaar=false) zodat de leerkracht
+     * hem eerst kan aanpassen (klas/leerling toewijzen) vóór hij hem publiceert.
+     */
+    @Transactional
+    public KlassLeeslijstResponseDTO dearchiveer(Long id) {
+        KlassLeeslijst lijst = leeslijstRepository.findById(id)
+                .orElseThrow(() -> new KlassLeeslijstNotFoundException("Leeslijst niet gevonden"));
+
+        lijst.setGearchiveerd(false);
+        lijst.setZichtbaar(false);
+
+        return KlassLeeslijstMapper.toDTO(leeslijstRepository.save(lijst));
+    }
+
+    /**
      * Geeft alle leeslijsten terug die zichtbaar zijn voor de huidige ingelogde
      * leerling: zowel klas-leeslijsten van de eigen klas als persoonlijk
      * toegewezen lijsten. Onzichtbare lijsten worden gefilterd.
@@ -254,9 +288,9 @@ public class KlassLeeslijstService {
         List<KlassLeeslijst> resultaat = new ArrayList<>();
 
         if (huidigeLeerling.getKlas() != null && !huidigeLeerling.getKlas().isBlank()) {
-            resultaat.addAll(leeslijstRepository.findByKlasAndZichtbaarTrueOrderByAangemaaktOpDesc(huidigeLeerling.getKlas()));
+            resultaat.addAll(leeslijstRepository.findByKlasAndZichtbaarTrueAndGearchiveerdFalseOrderByAangemaaktOpDesc(huidigeLeerling.getKlas()));
         }
-        resultaat.addAll(leeslijstRepository.findByLeerlingIdAndZichtbaarTrueOrderByAangemaaktOpDesc(huidigeLeerling.getId()));
+        resultaat.addAll(leeslijstRepository.findByLeerlingIdAndZichtbaarTrueAndGearchiveerdFalseOrderByAangemaaktOpDesc(huidigeLeerling.getId()));
 
         resultaat.sort((a, b) -> {
             LocalDateTime aDate = a.getAangemaaktOp();

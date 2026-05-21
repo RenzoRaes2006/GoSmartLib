@@ -1,0 +1,341 @@
+:host {
+  --go-bordeaux: #8c1b3f;
+  --go-bordeaux-hover: #6d1531;
+  --go-beige: #f0efe4;
+  --text-dark: #2d3748;
+  --text-muted: #718096;
+  --border-color: #e2dfd5;
+  --danger: #c53030;
+  --warning-bg: #fefcbf;
+  --warning-border: #ecc94b;
+}
+
+.schooljaar-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  color: var(--text-dark);
+}
+
+.card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 24px;
+  border: 1px solid var(--border-color);
+}
+
+.card h2 {
+  margin: 0 0 16px;
+  color: var(--go-bordeaux);
+  font-size: 1.3rem;
+}
+
+.uitleg {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-bottom: 16px;
+}
+
+.huidig-schooljaar .schooljaar-info {
+  display: flex;
+  align-items: baseline;
+  gap: 20px;
+}
+
+.schooljaar-naam {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--go-bordeaux);
+}
+
+.schooljaar-periode {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+.leeg {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.rollover-rij {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.rollover-rij select {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-size: 1rem;
+  background: #fff;
+}
+
+button {
+  padding: 8px 16px;
+  border: 1px solid var(--border-color);
+  background: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-family: inherit;
+}
+
+button:hover:not(:disabled) {
+  background: var(--go-beige);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+button.primary {
+  background: var(--go-bordeaux);
+  color: #fff;
+  border-color: var(--go-bordeaux);
+}
+
+button.primary:hover:not(:disabled) {
+  background: var(--go-bordeaux-hover);
+}
+
+.foutmelding {
+  background: #fed7d7;
+  color: var(--danger);
+  padding: 10px;
+  border-radius: 4px;
+  margin-top: 12px;
+  font-size: 0.9rem;
+}
+
+/* MODAL */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(45, 55, 72, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: #fff;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 700px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  border-top: 5px solid var(--go-bordeaux);
+  animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes popIn {
+  0% { transform: scale(0.8); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.modal-header {
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--go-bordeaux);
+}
+
+.modal-body {
+  padding: 20px 22px;
+}
+
+.modal-footer {
+  padding: 16px 22px;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.modal-footer button {
+  padding: 9px 18px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.btn-annuleren {
+  background: #fff;
+  border-color: var(--border-color);
+  color: var(--text-muted);
+}
+
+.btn-annuleren:hover:not(:disabled) {
+  background: var(--go-beige);
+  color: var(--go-bordeaux);
+  border-color: var(--go-bordeaux);
+}
+
+/* PREVIEW */
+.preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.stat {
+  background: var(--go-beige);
+  border-radius: 8px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  border-left: 4px solid var(--go-bordeaux);
+}
+
+.stat .label {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.stat .value {
+  color: var(--go-bordeaux);
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+.open-leningen-alert {
+  background: #fff5f5;
+  border: 2px solid var(--danger);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.alert-titel {
+  color: var(--danger);
+  font-weight: 700;
+  font-size: 1rem;
+  margin: 0 0 6px;
+}
+
+.alert-uitleg {
+  color: #742a2a;
+  font-size: 0.9rem;
+  margin: 0 0 12px;
+}
+
+.open-leningen-alert table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  background: #fff;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.open-leningen-alert th,
+.open-leningen-alert td {
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.open-leningen-alert th {
+  background: #fed7d7;
+  font-weight: 600;
+  color: #742a2a;
+}
+
+.open-leningen {
+  background: var(--warning-bg);
+  border: 1px solid var(--warning-border);
+  border-radius: 8px;
+  padding: 14px;
+  margin: 16px 0;
+}
+
+.warning-text {
+  color: #744210;
+  font-weight: 600;
+  margin: 0 0 10px;
+}
+
+.open-leningen table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  background: #fff;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.open-leningen th,
+.open-leningen td {
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.open-leningen th {
+  background: var(--go-beige);
+  font-weight: 600;
+}
+
+.checkbox-rij {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  font-size: 0.95rem;
+}
+
+/* NIEUW JAAR FORM */
+.nieuwe-jaar-form h4 {
+  margin: 16px 0 12px;
+  color: var(--go-bordeaux);
+  font-size: 1rem;
+}
+
+.nieuwe-jaar-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 12px;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.nieuwe-jaar-form input {
+  padding: 8px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.resultaat-lijst {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0;
+}
+
+.resultaat-lijst li {
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.resultaat-lijst li:last-child {
+  border-bottom: none;
+}

@@ -22,7 +22,6 @@ export class HomePage implements OnInit {
 
   // Gebruikersinfo & Gamification
   naam = computed(() => this.authService.currentUser()?.name ?? '');
-  gebruikerId = 1; // Tijdelijk hardcoded, pas aan naar ingelogde gebruiker
   schoolId = '12345'; // Tijdelijk hardcoded — komt later uit AuthService/Smartschool
 
   gelezenBoeken = signal<number>(0);
@@ -63,7 +62,7 @@ export class HomePage implements OnInit {
     });
 
     // 2. Haal mappen/leeslijsten op voor deze gebruiker
-    this.leeslijstService.getMappenVanGebruiker(this.gebruikerId).subscribe({
+    this.leeslijstService.getMijnMappen().subscribe({
       next: (mappen) => {
         this.leeslijsten.set(mappen.slice(0, 3));
       },
@@ -85,7 +84,7 @@ export class HomePage implements OnInit {
   }
 
   haalLeningenOp() {
-    this.boekService.getActieveLeningen(this.gebruikerId).subscribe({
+    this.boekService.getMijnActieveLeningen().subscribe({
       next: (data) => {
         const verwerkteLeningen = data.map((uitlening) => {
           // 1. Check of de lening een gloednieuwe aanvraag is (nog niet uitgeleend)

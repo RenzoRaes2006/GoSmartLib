@@ -115,9 +115,7 @@ export class BulkOntlenenComponent implements OnInit {
       }
     });
 
-    const leraarId = 1; // Vervang dit door de daadwerkelijke ID van de aangelogde leerkracht
-
-    this.boekService.leenBoekenBulk(leraarId, boekIdsVoorBackend).subscribe({
+    this.boekService.leenBoekenBulk(boekIdsVoorBackend).subscribe({
       next: (bericht) => {
         this.successMessage.set(bericht);
         this.mandje.set([]);

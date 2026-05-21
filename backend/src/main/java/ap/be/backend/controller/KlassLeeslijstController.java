@@ -174,4 +174,25 @@ public class KlassLeeslijstController {
         leeslijstService.deleteLeeslijst(id);
         return ResponseEntity.noContent().build();
     }
+
+    /**
+     * Geeft het archief van gearchiveerde leeslijsten terug.
+     * Leerkracht ziet alleen zijn eigen archief.
+     * Bibbeheerder (isBeheerder=true) ziet het archief van alle leerkrachten.
+     */
+    @PreAuthorize("hasRole('TEACHER') or hasRole('BEHEERDER')")
+    @GetMapping("/archief")
+    public ResponseEntity<List<KlassLeeslijstResponseDTO>> getArchief() {
+        return ResponseEntity.ok(leeslijstService.getArchief());
+    }
+
+    /**
+     * Dearchiveert een gearchiveerde leeslijst. De lijst komt terug als concept
+     * (zichtbaar=false) zodat de leerkracht hem eerst kan aanpassen.
+     */
+    @PreAuthorize("hasRole('TEACHER')")
+    @PatchMapping("/{id}/dearchiveer")
+    public ResponseEntity<KlassLeeslijstResponseDTO> dearchiveer(@PathVariable Long id) {
+        return ResponseEntity.ok(leeslijstService.dearchiveer(id));
+    }
 }

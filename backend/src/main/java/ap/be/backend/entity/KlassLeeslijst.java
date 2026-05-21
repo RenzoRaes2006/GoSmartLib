@@ -46,6 +46,11 @@ public class KlassLeeslijst {
     @Column(name = "aangemaakt_op", updatable = false)
     private LocalDateTime aangemaaktOp;
 
+    // Wordt true gezet bij schooljaar-rollover zodat de lijst niet meer actief zichtbaar is,
+    // maar nog wel bereikbaar is via het archief voor de leerkracht en bibbeheerder.
+    @Column(nullable = false)
+    private boolean gearchiveerd = false;
+
     @PrePersist
     void prePersist() {
         if (aangemaaktOp == null) {

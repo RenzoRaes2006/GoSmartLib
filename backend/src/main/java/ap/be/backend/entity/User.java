@@ -50,6 +50,11 @@ public class User {
     @Column(nullable = false)
     private boolean isBeheerder = false;
 
+    // Wordt false gezet bij schooljaar-rollover als de leerling niet meer in OneRoster staat.
+    // Inactieve gebruikers kunnen niet meer inloggen of uitlenen, maar hun historiek blijft bewaard.
+    @Column(nullable = false)
+    private boolean actief = true;
+
     @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<LeeslijstMap> mappen = new HashSet<>();

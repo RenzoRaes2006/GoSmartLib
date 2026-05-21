@@ -90,9 +90,8 @@ export class Detail implements OnInit {
         next: (boek) => {
           this.boek = boek;
           this.laadGelijkaardigeBoeken(boek);
-          // Vriend's toevoeging: check leen status
-          const gebruikerId = 1;
-          this.boekService.checkLeenStatus(gebruikerId, boekId).subscribe({
+          // Vriend's toevoeging: check leen status (ingelogde user wordt server-side bepaald)
+          this.boekService.checkLeenStatus(boekId).subscribe({
             next: (status) => {
               this.magLenen = status.magLenen;
               this.leenReden = status.reden;
@@ -105,8 +104,7 @@ export class Detail implements OnInit {
       this.laadBeoordelingenVanBoek();
     });
 
-    const gebruikerId = 1;
-    this.leeslijstService.getMappenVanGebruiker(gebruikerId).subscribe({
+    this.leeslijstService.getMijnMappen().subscribe({
       next: (data) => {
         // Vriend's toevoeging: filter Favorieten eruit
         this.mappen = data.filter((map) => map.naam.toLowerCase() !== 'favorieten');
@@ -170,10 +168,9 @@ export class Detail implements OnInit {
 
   voegToeAanFavorieten() {
     if (!this.boek || this.isFavoriet) return;
-    const gebruikerId = 1;
     // Vriend's toevoeging: emoji meegeven
     this.leeslijstService
-      .voegBoekToeAanMap(gebruikerId, 'Favorieten', this.boek.id!, '⭐')
+      .voegBoekToeAanMijnMap('Favorieten', this.boek.id!, '⭐')
       .subscribe({
         next: () => {
           this.isFavoriet = true;
@@ -198,13 +195,12 @@ export class Detail implements OnInit {
     const doelMap = nieuweMap.trim() !== '' ? nieuweMap.trim() : bestaandeMap;
 
     if (doelMap && doelMap !== '') {
-      const gebruikerId = 1;
       this.leeslijstService
-        .voegBoekToeAanMap(gebruikerId, doelMap, this.boek!.id!, this.selectedEmoji)
+        .voegBoekToeAanMijnMap(doelMap, this.boek!.id!, this.selectedEmoji)
         .subscribe({
           next: () => {
             this.succesMeldingMap = `Boek toegevoegd aan '${doelMap}'!`;
-            this.leeslijstService.getMappenVanGebruiker(gebruikerId).subscribe((data) => {
+            this.leeslijstService.getMijnMappen().subscribe((data) => {
               this.mappen = data.filter((map) => map.naam.toLowerCase() !== 'favorieten');
             });
             setTimeout(() => this.sluitModal(), 1500);

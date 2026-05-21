@@ -59,6 +59,7 @@ public class KlassLeeslijstMapper {
                 leerlingNaam,
                 entity.getBeschrijving(),
                 entity.isZichtbaar(),
+                entity.isGearchiveerd(),
                 boekDTOs);
     }
 }

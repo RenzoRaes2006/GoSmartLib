@@ -6,3 +6,9 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+
+# Claude Code lokale instellingen
+.claude/settings.local.json
+
+# Lokale context- en planningsbestanden (niet voor productie)
+**/*_CONTEXT.md
