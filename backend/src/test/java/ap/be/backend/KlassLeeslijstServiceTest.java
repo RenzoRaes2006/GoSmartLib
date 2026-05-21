@@ -342,4 +342,36 @@ public class KlassLeeslijstServiceTest {
             assertTrue(result.stream().anyMatch(l -> l.leerlingId() != null && l.leerlingId() == 42L));
         }
     }
+
+    /**
+     * Test of een gearchiveerde leeslijst wordt teruggezet naar actief (gearchiveerd=false)
+     * en gedwongen wordt naar concept-status (zichtbaar=false) zodat de leerkracht hem
+     * eerst bewust moet publiceren.
+     */
+    @Test
+    void givenGearchiveerdeLijst_whenDearchiveer_thenZetGearchiveerdFalseEnZichtbaarFalse() {
+        testLijst.setGearchiveerd(true);
+        testLijst.setZichtbaar(true);
+        when(leeslijstRepository.findById(10L)).thenReturn(Optional.of(testLijst));
+        when(leeslijstRepository.save(any(KlassLeeslijst.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        KlassLeeslijstResponseDTO result = leeslijstService.dearchiveer(10L);
+
+        assertFalse(testLijst.isGearchiveerd());
+        assertFalse(testLijst.isZichtbaar());
+        assertFalse(result.gearchiveerd());
+        assertFalse(result.zichtbaar());
+        verify(leeslijstRepository, times(1)).save(testLijst);
+    }
+
+    /**
+     * Test of dearchiveer een exceptie gooit wanneer de leeslijst niet bestaat.
+     */
+    @Test
+    void givenLijstNietGevonden_whenDearchiveer_thenThrowsKlassLeeslijstNotFoundException() {
+        when(leeslijstRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(KlassLeeslijstNotFoundException.class,
+                () -> leeslijstService.dearchiveer(99L));
+    }
 }

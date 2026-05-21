@@ -187,15 +187,12 @@ public class KlassLeeslijstController {
     }
 
     /**
-     * Kopieert een gearchiveerde leeslijst naar een nieuwe actieve klas.
-     * Het origineel blijft gearchiveerd. De kopie start als onzichtbaar.
-     * De klas wordt meegegeven als request-body string.
+     * Dearchiveert een gearchiveerde leeslijst. De lijst komt terug als concept
+     * (zichtbaar=false) zodat de leerkracht hem eerst kan aanpassen.
      */
     @PreAuthorize("hasRole('TEACHER')")
-    @PostMapping("/{id}/kopieer")
-    public ResponseEntity<KlassLeeslijstResponseDTO> kopieerNaarKlas(
-            @PathVariable Long id,
-            @RequestBody String nieuweKlas) {
-        return ResponseEntity.ok(leeslijstService.kopieerNaarKlas(id, nieuweKlas));
+    @PatchMapping("/{id}/dearchiveer")
+    public ResponseEntity<KlassLeeslijstResponseDTO> dearchiveer(@PathVariable Long id) {
+        return ResponseEntity.ok(leeslijstService.dearchiveer(id));
     }
 }

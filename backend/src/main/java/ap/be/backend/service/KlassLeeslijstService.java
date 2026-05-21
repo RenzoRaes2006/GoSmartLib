@@ -259,33 +259,19 @@ public class KlassLeeslijstService {
     }
 
     /**
-     * Kopieert een gearchiveerde leeslijst naar een nieuwe actieve klas.
-     * Het origineel blijft gearchiveerd. De kopie start als onzichtbaar zodat
-     * de leerkracht hem eerst kan aanpassen voor hij hem publiceert aan leerlingen.
-     *
-     * @param id        ID van de te kopiëren (gearchiveerde) leeslijst
-     * @param nieuweKlas de klas waaraan de kopie gekoppeld wordt
+     * Dearchiveert een gearchiveerde leeslijst zodat hij terug actief is.
+     * De lijst komt terug als concept (zichtbaar=false) zodat de leerkracht
+     * hem eerst kan aanpassen (klas/leerling toewijzen) vóór hij hem publiceert.
      */
     @Transactional
-    public KlassLeeslijstResponseDTO kopieerNaarKlas(Long id, String nieuweKlas) {
-        if (nieuweKlas == null || nieuweKlas.isBlank()) {
-            throw new IllegalArgumentException("Nieuwe klas mag niet leeg zijn.");
-        }
-
-        KlassLeeslijst origineel = leeslijstRepository.findById(id)
+    public KlassLeeslijstResponseDTO dearchiveer(Long id) {
+        KlassLeeslijst lijst = leeslijstRepository.findById(id)
                 .orElseThrow(() -> new KlassLeeslijstNotFoundException("Leeslijst niet gevonden"));
 
-        KlassLeeslijst kopie = new KlassLeeslijst();
-        kopie.setNaam(origineel.getNaam());
-        kopie.setLeerkracht(origineel.getLeerkracht());
-        kopie.setKlas(nieuweKlas);
-        kopie.setLeerling(null);
-        kopie.setBeschrijving(origineel.getBeschrijving());
-        kopie.setZichtbaar(false); // Leerkracht moet hem eerst zelf activeren
-        kopie.setGearchiveerd(false);
-        kopie.setBoeken(new java.util.HashSet<>(origineel.getBoeken()));
+        lijst.setGearchiveerd(false);
+        lijst.setZichtbaar(false);
 
-        return KlassLeeslijstMapper.toDTO(leeslijstRepository.save(kopie));
+        return KlassLeeslijstMapper.toDTO(leeslijstRepository.save(lijst));
     }
 
     /**
