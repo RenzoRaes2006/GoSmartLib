@@ -109,6 +109,41 @@
     background: #fef2f2;
 }
 
+.btn-toewijzen {
+    background: #8c1b3f;
+    color: #fff;
+    border: 2px solid #8c1b3f;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: all 0.2s;
+}
+
+.btn-toewijzen:hover {
+    background: #6d1531;
+    border-color: #6d1531;
+    transform: translateY(-2px);
+}
+
+.btn-toewijzing-aanpassen {
+    background: #fff;
+    color: #8c1b3f;
+    border: 1px solid #8c1b3f;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: all 0.2s;
+}
+
+.btn-toewijzing-aanpassen:hover {
+    background: #fdf2f5;
+    transform: translateY(-1px);
+}
+
 /* ==========================================================================
    3. SIDEBAR (Filters)
    ========================================================================== */
@@ -149,6 +184,7 @@
     color: #8c1b3f;
     text-transform: uppercase;
     letter-spacing: 0.6px;
+    font-family: inherit;
 }
 
 .sidebar-input {
@@ -158,6 +194,8 @@
     border-radius: 8px;
     font-size: 14px;
     background-color: #fff;
+    box-sizing: border-box;
+    margin-bottom: 14px;
     transition: all 0.2s;
 }
 
@@ -541,6 +579,7 @@
 .badge-prive { background: #f3f4f6; color: #4b5563; }
 .badge-zichtbaar { background: #d1fae5; color: #065f46; }
 .badge-concept { background: #e5e7eb; color: #6b7280; }
+.badge-niet-toegewezen { background: #fef9c3; color: #854d0e; border: 1px dashed #fbbf24; }
 
 .beschrijving-tekst {
     font-style: italic;
@@ -549,8 +588,46 @@
     max-width: 700px;
 }
 
-.beschrijving-tekst .btn-edit-icon {
-    margin-left: 8px;
+.editable-titel {
+    cursor: pointer;
+    border-radius: 6px;
+    padding: 4px 6px;
+    margin-left: -6px;
+    transition: background 0.15s;
+}
+
+.editable-titel:hover {
+    background: rgba(140, 27, 63, 0.06);
+}
+
+.editable-beschrijving {
+    cursor: pointer;
+    border-radius: 6px;
+    padding: 4px 6px;
+    margin-left: -6px;
+    transition: background 0.15s, color 0.15s;
+}
+
+.editable-beschrijving:hover {
+    background: rgba(140, 27, 63, 0.06);
+    color: #4a5568;
+}
+
+.edit-hint {
+    font-size: 0.7rem;
+    font-weight: 400;
+    color: #8c1b3f;
+    opacity: 0;
+    margin-left: 10px;
+    transition: opacity 0.15s;
+    vertical-align: middle;
+    font-style: italic;
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+.editable-titel:hover .edit-hint {
+    opacity: 1;
 }
 
 .btn-terug {

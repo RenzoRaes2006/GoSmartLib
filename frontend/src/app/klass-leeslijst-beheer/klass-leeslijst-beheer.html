@@ -10,30 +10,35 @@
                     <span class="badge badge-klas">Klas: {{ lijst()!.klas }}</span>
                 } @else if (lijst()!.leerlingId) {
                     <span class="badge badge-leerling">Leerling: {{ lijst()!.leerlingNaam }}</span>
+                } @else {
+                    <span class="badge badge-niet-toegewezen">Niet toegewezen</span>
                 }
                 @if (lijst()!.zichtbaar) {
                     <span class="badge badge-zichtbaar">Zichtbaar voor leerlingen</span>
                 } @else {
                     <span class="badge badge-concept">Concept</span>
                 }
-                <button class="btn-edit-icon" (click)="openKoppelingModal()" title="Koppeling wijzigen">✎</button>
             </div>
-            <h1 class="header-titel">
+            <h1 class="header-titel editable-titel" (click)="openEditModal()" title="Klik om naam te wijzigen">
                 Beheer: {{ lijst()!.naam }}
-                <button class="btn-edit-icon" (click)="openEditModal()" title="Naam wijzigen">✎</button>
+                <span class="edit-hint">klik om te wijzigen</span>
             </h1>
-            <p class="beschrijving-tekst">
+            <p class="beschrijving-tekst editable-beschrijving" (click)="openBeschrijvingModal()" title="Klik om beschrijving te wijzigen">
                 @if (lijst()!.beschrijving) {
                     {{ lijst()!.beschrijving }}
                 } @else {
-                    <em>Geen beschrijving</em>
+                    <em>Klik om een beschrijving toe te voegen...</em>
                 }
-                <button class="btn-edit-icon" (click)="openBeschrijvingModal()" title="Beschrijving wijzigen">✎</button>
             </p>
             <p class="leeslijst-stats">Er zitten momenteel {{ lijst()!.boeken.length }} boeken in deze lijst.</p>
         </div>
 
         <div class="header-acties">
+            @if (lijst()!.klas || lijst()!.leerlingId) {
+                <button class="btn-toewijzing-aanpassen" (click)="openKoppelingModal()">Toewijzing aanpassen</button>
+            } @else {
+                <button class="btn-toewijzen" (click)="openKoppelingModal()">+ Toewijzen aan klas of leerling</button>
+            }
             <button class="btn-assign" (click)="toggleZichtbaar()">
                 {{ lijst()!.zichtbaar ? 'Verbergen voor leerlingen' : 'Zichtbaar maken voor leerlingen' }}
             </button>
