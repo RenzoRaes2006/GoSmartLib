@@ -28,10 +28,12 @@ import ap.be.backend.repository.TagRepository;
 public class BoekService {
     private final BoekRepository boekRepository;
     private final TagRepository tagRepository;
+    private final TagService tagService;
 
-    public BoekService(BoekRepository boekRepository, TagRepository tagRepository) {
+    public BoekService(BoekRepository boekRepository, TagRepository tagRepository, TagService tagService) {
         this.boekRepository = boekRepository;
         this.tagRepository = tagRepository;
+        this.tagService = tagService;
     }
 
     public Boek addBoek(BoekDTO boekDTO) {
@@ -98,7 +100,9 @@ public class BoekService {
 
     public Page<BoekDTO> filterBoeken(BoekenFilters filters, BoekenSort sort, PageRequestParams paging) {
         validateYearRange(filters.uitgaveJaarVan(), filters.uitgaveJaarTot());
-        List<Long> tagIdsParam = (filters.tagIds() == null || filters.tagIds().isEmpty()) ? null : filters.tagIds();
+        List<Long> tagIdsParam = (filters.tagIds() == null || filters.tagIds().isEmpty())
+                ? null
+                : tagService.expandWithSubtags(filters.tagIds());
         Page<Boek> page = boekRepository.filterBoeken(
                 filters.zoekterm(),
                 tagIdsParam,

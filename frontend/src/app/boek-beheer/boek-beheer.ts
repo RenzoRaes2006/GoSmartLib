@@ -69,6 +69,7 @@ export class BoekBeheer implements OnInit {
   beschikbareDidactischeTags = signal<Tag[]>([]);
 
   selectedGenreId = signal<number | null>(null);
+  selectedSubGenreId = signal<number | null>(null);
   selectedThematischeId = signal<number | null>(null);
   selectedDidactischeId = signal<number | null>(null);
 
@@ -97,7 +98,7 @@ export class BoekBeheer implements OnInit {
   }
 
   ngOnInit(): void {
-    this.tagService.list('GENRE').subscribe((t) => this.beschikbareGenres.set(t));
+    this.tagService.tree('GENRE').subscribe((t) => this.beschikbareGenres.set(t));
     this.tagService.list('THEMATISCH').subscribe((t) => this.beschikbareThematischeTags.set(t));
     this.tagService.list('DIDACTISCH').subscribe((t) => this.beschikbareDidactischeTags.set(t));
 
@@ -152,8 +153,47 @@ export class BoekBeheer implements OnInit {
   private resetDropdowns() {
     this.geselecteerdeTags.set([]);
     this.selectedGenreId.set(null);
+    this.selectedSubGenreId.set(null);
     this.selectedThematischeId.set(null);
     this.selectedDidactischeId.set(null);
+  }
+
+  geselecteerdHoofdGenre(): Tag | null {
+    const id = this.selectedGenreId();
+    if (id == null) return null;
+    return this.beschikbareGenres().find((g) => g.id === id) ?? null;
+  }
+
+  subGenresVanGeselecteerd(): Tag[] {
+    return this.geselecteerdHoofdGenre()?.subTags ?? [];
+  }
+
+  onHoofdGenreChange(id: number | null): void {
+    this.selectedGenreId.set(id);
+    this.selectedSubGenreId.set(null);
+  }
+
+  voegGenreToe(): void {
+    const subId = this.selectedSubGenreId();
+    const hoofdId = this.selectedGenreId();
+    const idOmToeTeVoegen = subId ?? hoofdId;
+    if (idOmToeTeVoegen == null) return;
+    const tag = this.vindGenreTag(idOmToeTeVoegen);
+    if (!tag) return;
+    if (this.geselecteerdeTags().some((t) => t.id === tag.id)) return;
+    this.geselecteerdeTags.set([...this.geselecteerdeTags(), tag]);
+    this.selectedGenreId.set(null);
+    this.selectedSubGenreId.set(null);
+  }
+
+  private vindGenreTag(id: number): Tag | null {
+    for (const hoofd of this.beschikbareGenres()) {
+      if (hoofd.id === id) return hoofd;
+      for (const sub of hoofd.subTags ?? []) {
+        if (sub.id === id) return sub;
+      }
+    }
+    return null;
   }
 
   private mapBoekNaarFormValue(boek: Boek) {

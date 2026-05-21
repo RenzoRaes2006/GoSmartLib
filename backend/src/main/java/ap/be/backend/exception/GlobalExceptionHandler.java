@@ -130,6 +130,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
     }
 
+    @ExceptionHandler(TagHeeftSubtagsException.class)
+    public ResponseEntity<String> handleTagHeeftSubtags(TagHeeftSubtagsException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+    }
+
     @ExceptionHandler(GebruikerNotFoundException.class)
     public ResponseEntity<String> handleGebruikerNotFound(GebruikerNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());

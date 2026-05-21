@@ -1,6 +1,7 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BoekService } from '../services/boek.service';
+import { TagService } from '../services/tag.service';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import * as XLSX from 'xlsx';
@@ -12,8 +13,9 @@ import * as XLSX from 'xlsx';
   templateUrl: './boek-import.html',
   styleUrl: './boek-import.css',
 })
-export class BoekImport {
+export class BoekImport implements OnInit {
   boekService = inject(BoekService);
+  private tagService = inject(TagService);
 
   selectedFile: File | null = null;
   isUploading = signal(false);
@@ -26,53 +28,23 @@ export class BoekImport {
   itemsPerPage = 10;
   currentPage = signal<number>(1);
 
-  // --- NIEUWE SELECTIE DATA ---
-  genreHiërarchie: Record<string, string[]> = {
-    Avontuur: [],
-    'Coming-of-age': [],
-    'Detective / misdaad': [],
-    Dystopie: [],
-    Fantasy: [],
-    'Fictie algemeen': [],
-    'Graphic novel / strip': [],
-    'Historische roman': [],
-    Horror: [],
-    Humor: [],
-    'Literaire roman': [],
-    'Non-fictie algemeen': [
-      'Biografie / autobiografie',
-      'Filosofie',
-      'Geschiedenis',
-      'Kunst & cultuur',
-      'Maatschappij & politiek',
-      'Psychologie',
-      'Wetenschap & technologie',
-    ],
-    'Oorlog & conflict': [],
-    Poëzie: [],
-    Romantiek: [],
-    'Spanning / thriller': [],
-  };
-  hoofdGenres = Object.keys(this.genreHiërarchie);
+  hoofdGenres = signal<string[]>([]);
+  private subGenresMap = signal<Record<string, string[]>>({});
+  beschikbareTags = signal<string[]>([]);
 
-  beschikbareTags: string[] = [
-    'Armoede & ongelijkheid',
-    'Avontuur & ontdekking',
-    'Diversiteit & inclusie',
-    'Familie',
-    'Gender & seksualiteit',
-    'Identiteit & zelfbeeld',
-    'Liefde & relaties',
-    'Macht & onrecht',
-    'Mentale gezondheid',
-    'Migratie & afkomst',
-    'Overleven',
-    'Rouw & verlies',
-    'School & prestatiedruk',
-    'Sociale media',
-    'Toekomst & technologie',
-    'Vriendschap',
-  ];
+  ngOnInit(): void {
+    this.tagService.tree('GENRE').subscribe((tree) => {
+      this.hoofdGenres.set(tree.map((t) => t.naam));
+      const map: Record<string, string[]> = {};
+      for (const hoofd of tree) {
+        map[hoofd.naam] = (hoofd.subTags ?? []).map((s) => s.naam);
+      }
+      this.subGenresMap.set(map);
+    });
+    this.tagService.list('THEMATISCH').subscribe((tags) => {
+      this.beschikbareTags.set(tags.map((t) => t.naam));
+    });
+  }
 
   // --- TIJDELIJKE STAAT PER RIJ ---
   // We houden per geopende rij bij welke dropdown-waarden actief zijn, en of hij uploadt of url-invoer wil
@@ -162,7 +134,7 @@ export class BoekImport {
 
   // --- GENRE LOGICA (AANGEPAST VOOR ARRAYS IN EEN LIJST) ---
   getSubGenres(hoofdGenre: string): string[] {
-    return this.genreHiërarchie[hoofdGenre] || [];
+    return this.subGenresMap()[hoofdGenre] || [];
   }
 
   voegGenreToe(boek: any) {

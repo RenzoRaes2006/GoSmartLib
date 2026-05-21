@@ -31,6 +31,7 @@ import ap.be.backend.exception.IsbnAlreadyExistsException;
 import ap.be.backend.repository.BoekRepository;
 import ap.be.backend.repository.TagRepository;
 import ap.be.backend.service.BoekService;
+import ap.be.backend.service.TagService;
 
 @ExtendWith(MockitoExtension.class)
 public class BoekServiceTest {
@@ -40,6 +41,9 @@ public class BoekServiceTest {
 
     @Mock
     private TagRepository tagRepository;
+
+    @Mock
+    private TagService tagService;
 
     @InjectMocks
     private BoekService boekService;

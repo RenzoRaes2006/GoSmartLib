@@ -10,34 +10,47 @@
   </nav>
 
   <div class="admin-card">
-      <div class="card-header">
-        <h2>{{ tabLabel(activeTab()) }}</h2>
-      </div>
+    <div class="card-header">
+      <h2>{{ tabLabel(activeTab()) }}</h2>
+    </div>
 
-      <div class="toevoegen-rij">
-        <input
-          type="text"
-          placeholder="Nieuwe tag-naam"
-          [(ngModel)]="nieuweNaam"
-          (keydown.enter)="toevoegen()"
-        />
-        <button class="primary" (click)="toevoegen()" [disabled]="!nieuweNaam.trim()">
-          + Toevoegen
-        </button>
-      </div>
+    <div class="toevoegen-rij">
+      <input
+        type="text"
+        [placeholder]="isGenreTab() ? 'Nieuw hoofdgenre' : 'Nieuwe tag-naam'"
+        [(ngModel)]="nieuweNaam"
+        (keydown.enter)="toevoegen()"
+      />
+      <button class="primary" (click)="toevoegen()" [disabled]="!nieuweNaam.trim()">
+        + Toevoegen
+      </button>
+    </div>
 
-      @if (fout()) {
-        <div class="foutmelding">{{ fout() }}</div>
-      }
+    @if (fout()) {
+      <div class="foutmelding">{{ fout() }}</div>
+    }
 
-      @if (laden()) {
-        <p>Laden…</p>
-      } @else if (tags().length === 0) {
-        <p class="leeg">Nog geen tags in deze categorie.</p>
-      } @else {
-        <ul class="tag-lijst">
-          @for (tag of zichtbareTags(); track tag.id) {
-            <li>
+    @if (laden()) {
+      <p>Laden…</p>
+    } @else if (tags().length === 0) {
+      <p class="leeg">Nog geen tags in deze categorie.</p>
+    } @else {
+      <ul class="tag-lijst">
+        @for (tag of zichtbareTags(); track tag.id) {
+          <li [class.hoofd-tag]="isGenreTab()">
+            <div class="tag-rij">
+              @if (isGenreTab()) {
+                <button
+                  class="uitklap-knop"
+                  type="button"
+                  (click)="toggleUitklap(tag.id)"
+                  [attr.aria-expanded]="isUitgeklapt(tag.id)"
+                  [title]="isUitgeklapt(tag.id) ? 'Inklappen' : 'Uitklappen'"
+                >
+                  {{ isUitgeklapt(tag.id) ? '▾' : '▸' }}
+                </button>
+              }
+
               @if (bewerktId === tag.id) {
                 <input
                   type="text"
@@ -48,20 +61,69 @@
                 <button class="primary" (click)="bewaarBewerken(tag)">Opslaan</button>
                 <button (click)="annuleerBewerken()">Annuleren</button>
               } @else {
-                <span class="tag-naam">{{ tag.naam }}</span>
+                <span class="tag-naam">
+                  {{ tag.naam }}
+                  @if (isGenreTab() && (tag.subTags?.length ?? 0) > 0) {
+                    <span class="sub-badge">{{ tag.subTags!.length }} subgenres</span>
+                  }
+                </span>
                 <button (click)="startBewerken(tag)">Hernoemen</button>
                 <button class="danger" (click)="verwijderen(tag)">Verwijderen</button>
               }
-            </li>
-          }
-        </ul>
+            </div>
 
-        <div class="paginatie">
-          <button (click)="vorigePagina()" [disabled]="huidigePagina() === 1">‹ Vorige</button>
-          <span>Pagina {{ huidigePagina() }} van {{ totaalPaginas() }}</span>
-          <button (click)="volgendePagina()" [disabled]="huidigePagina() === totaalPaginas()">Volgende ›</button>
-        </div>
-      }
+            @if (isGenreTab() && isUitgeklapt(tag.id)) {
+              <div class="sub-blok">
+                <ul class="sub-lijst">
+                  @for (sub of tag.subTags ?? []; track sub.id) {
+                    <li>
+                      @if (bewerktId === sub.id) {
+                        <input
+                          type="text"
+                          [(ngModel)]="bewerktNaam"
+                          (keydown.enter)="bewaarBewerken(sub)"
+                          (keydown.escape)="annuleerBewerken()"
+                        />
+                        <button class="primary" (click)="bewaarBewerken(sub)">Opslaan</button>
+                        <button (click)="annuleerBewerken()">Annuleren</button>
+                      } @else {
+                        <span class="tag-naam">{{ sub.naam }}</span>
+                        <button (click)="startBewerken(sub)">Hernoemen</button>
+                        <button class="danger" (click)="verwijderen(sub)">Verwijderen</button>
+                      }
+                    </li>
+                  }
+                </ul>
+
+                <div class="sub-toevoegen">
+                  <input
+                    type="text"
+                    placeholder="Nieuw subgenre"
+                    [(ngModel)]="nieuweSubNaam[tag.id]"
+                    (keydown.enter)="subToevoegen(tag)"
+                  />
+                  <button
+                    class="primary"
+                    (click)="subToevoegen(tag)"
+                    [disabled]="!(nieuweSubNaam[tag.id] || '').trim()"
+                  >
+                    + Subgenre
+                  </button>
+                </div>
+              </div>
+            }
+          </li>
+        }
+      </ul>
+
+      <div class="paginatie">
+        <button (click)="vorigePagina()" [disabled]="huidigePagina() === 1">‹ Vorige</button>
+        <span>Pagina {{ huidigePagina() }} van {{ totaalPaginas() }}</span>
+        <button (click)="volgendePagina()" [disabled]="huidigePagina() === totaalPaginas()">
+          Volgende ›
+        </button>
+      </div>
+    }
   </div>
 
   @if (teVerwijderenTag()) {

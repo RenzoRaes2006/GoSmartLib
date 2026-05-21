@@ -29,7 +29,15 @@ public class TagController {
     }
 
     @GetMapping
-    public ResponseEntity<List<TagDTO>> list(@RequestParam(required = false) TagType type) {
+    public ResponseEntity<List<TagDTO>> list(
+            @RequestParam(required = false) TagType type,
+            @RequestParam(required = false, defaultValue = "false") boolean tree) {
+        if (tree) {
+            if (type == null) {
+                return ResponseEntity.badRequest().build();
+            }
+            return ResponseEntity.ok(tagService.getTreeByType(type));
+        }
         List<TagDTO> tags = (type == null ? tagService.getAll() : tagService.getByType(type))
                 .stream().map(TagDTO::from).toList();
         return ResponseEntity.ok(tags);
@@ -38,7 +46,7 @@ public class TagController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<TagDTO> create(@RequestBody TagRequest request) {
-        TagDTO created = TagDTO.from(tagService.create(request.type(), request.naam()));
+        TagDTO created = TagDTO.from(tagService.create(request.type(), request.naam(), request.parentId()));
         return ResponseEntity.ok(created);
     }
 
@@ -55,7 +63,7 @@ public class TagController {
         return ResponseEntity.noContent().build();
     }
 
-    public record TagRequest(String naam, TagType type) {
+    public record TagRequest(String naam, TagType type, Long parentId) {
     }
 
     public record RenameRequest(String naam) {

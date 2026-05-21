@@ -239,7 +239,7 @@
                         class="edit-input"
                       >
                         <option value="">Kies een genre</option>
-                        @for (genre of hoofdGenres; track genre) {
+                        @for (genre of hoofdGenres(); track genre) {
                           <option [value]="genre">{{ genre }}</option>
                         }
                       </select>
@@ -277,7 +277,7 @@
                     <div class="genre-dropdown-row">
                       <select [(ngModel)]="actieveTag" class="edit-input">
                         <option value="">Kies een thematische tag</option>
-                        @for (tag of beschikbareTags; track tag) {
+                        @for (tag of beschikbareTags(); track tag) {
                           <option [value]="tag">{{ tag }}</option>
                         }
                       </select>

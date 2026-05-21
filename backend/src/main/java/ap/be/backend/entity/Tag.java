@@ -27,8 +27,18 @@ public class Tag {
     @Column(nullable = false)
     private TagType type;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_id")
+    private Tag parent;
+
     public Tag(String naam, TagType type) {
         this.naam = naam;
         this.type = type;
+    }
+
+    public Tag(String naam, TagType type, Tag parent) {
+        this.naam = naam;
+        this.type = type;
+        this.parent = parent;
     }
 }

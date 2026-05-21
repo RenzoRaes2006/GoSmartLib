@@ -63,7 +63,7 @@ public class TagControllerTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     void create_als_admin_werkt() throws Exception {
-        when(tagService.create(eq(TagType.GENRE), eq("Fantasy")))
+        when(tagService.create(eq(TagType.GENRE), eq("Fantasy"), eq(null)))
                 .thenReturn(tag(1L, "Fantasy", TagType.GENRE));
 
         mockMvc.perform(post("/api/tags")
@@ -85,7 +85,7 @@ public class TagControllerTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     void create_duplicate_gooit_409() throws Exception {
-        when(tagService.create(any(), any())).thenThrow(new DuplicateTagException("Fantasy"));
+        when(tagService.create(any(), any(), any())).thenThrow(new DuplicateTagException("Fantasy"));
 
         mockMvc.perform(post("/api/tags")
                 .contentType(MediaType.APPLICATION_JSON)
