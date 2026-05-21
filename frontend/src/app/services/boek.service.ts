@@ -87,22 +87,22 @@ export class BoekService {
     return this.http.get<Boek[]>(`${this.apiUrl}/top/populair`);
   }
 
-  checkLeenStatus(gebruikerId: number, boekId: number) {
+  checkLeenStatus(boekId: number) {
     return this.http.get<{ magLenen: boolean; reden: string }>(
-      `${this.apiGebruikerUrl}/${gebruikerId}/lenen/${boekId}/status`,
+      `${this.apiGebruikerUrl}/me/lenen/${boekId}/status`,
     );
   }
 
-  leenBoek(gebruikerId: number, boekId: number) {
+  leenBoek(boekId: number) {
     return this.http.post(
-      `${this.apiGebruikerUrl}/${gebruikerId}/lenen/${boekId}`,
+      `${this.apiGebruikerUrl}/me/lenen/${boekId}`,
       {},
       { responseType: 'text' },
     );
   }
 
-  leenBoekenBulk(gebruikerId: number, boekIds: number[]) {
-    return this.http.post(`${this.apiGebruikerUrl}/${gebruikerId}/lenen/bulk`, boekIds, {
+  leenBoekenBulk(boekIds: number[]) {
+    return this.http.post(`${this.apiGebruikerUrl}/me/lenen/bulk`, boekIds, {
       responseType: 'text',
     });
   }

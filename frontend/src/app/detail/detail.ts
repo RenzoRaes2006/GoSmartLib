@@ -90,9 +90,8 @@ export class Detail implements OnInit {
         next: (boek) => {
           this.boek = boek;
           this.laadGelijkaardigeBoeken(boek);
-          // Vriend's toevoeging: check leen status
-          const gebruikerId = 1;
-          this.boekService.checkLeenStatus(gebruikerId, boekId).subscribe({
+          // Vriend's toevoeging: check leen status (ingelogde user wordt server-side bepaald)
+          this.boekService.checkLeenStatus(boekId).subscribe({
             next: (status) => {
               this.magLenen = status.magLenen;
               this.leenReden = status.reden;
