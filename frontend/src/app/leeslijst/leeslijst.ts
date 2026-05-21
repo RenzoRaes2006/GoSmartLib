@@ -32,9 +32,8 @@ export class Leeslijst implements OnInit {
   }
 
   haalMappenOp(autoOpenMapId: string | null = null) {
-    const gebruikerId = 1;
     this.isLoading = true;
-    this.leeslijstService.getMappenVanGebruiker(gebruikerId).subscribe({
+    this.leeslijstService.getMijnMappen().subscribe({
       next: (data) => {
         const mapLijst = data || [];
 
@@ -83,9 +82,8 @@ export class Leeslijst implements OnInit {
     if (!this.geselecteerdeMap) return;
 
     const mapNaam = this.geselecteerdeMap.naam;
-    const gebruikerId = 1;
 
-    this.leeslijstService.verwijderBoekUitMap(gebruikerId, mapNaam, boekId).subscribe({
+    this.leeslijstService.verwijderBoekUitMijnMap(mapNaam, boekId).subscribe({
       next: () => {
         this.geselecteerdeMap.boeken = this.geselecteerdeMap.boeken.filter(
           (b: any) => b.id !== boekId,

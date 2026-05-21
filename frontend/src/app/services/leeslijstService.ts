@@ -12,20 +12,20 @@ export class LeeslijstService {
 
   constructor(private http: HttpClient) {}
 
-  voegBoekToeAanMap(gebruikerId: number, mapNaam: string, boekId: number, emoji: string = '📁') {
+  voegBoekToeAanMijnMap(mapNaam: string, boekId: number, emoji: string = '📁') {
     return this.http.post(
-      `${this.apiUrl}/${gebruikerId}/mappen/${mapNaam}/boeken/${boekId}?emoji=${emoji}`,
+      `${this.apiUrl}/me/mappen/${mapNaam}/boeken/${boekId}?emoji=${emoji}`,
       {},
       { responseType: 'text' },
     );
   }
 
-  getMappenVanGebruiker(gebruikerId: number) {
-    return this.http.get<any[]>(`${this.apiUrl}/${gebruikerId}/mappen`);
+  getMijnMappen() {
+    return this.http.get<any[]>(`${this.apiUrl}/me/mappen`);
   }
 
-  verwijderBoekUitMap(gebruikerId: number, mapNaam: string, boekId: number) {
-    return this.http.delete(`${this.apiUrl}/${gebruikerId}/mappen/${mapNaam}/boeken/${boekId}`, {
+  verwijderBoekUitMijnMap(mapNaam: string, boekId: number) {
+    return this.http.delete(`${this.apiUrl}/me/mappen/${mapNaam}/boeken/${boekId}`, {
       responseType: 'text',
     });
   }

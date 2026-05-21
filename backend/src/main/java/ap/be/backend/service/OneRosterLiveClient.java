@@ -1,6 +1,7 @@
 package ap.be.backend.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatusCode;
@@ -15,6 +16,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Echte OneRoster v1.1 client tegen Smartschool. Volgt dezelfde token- en
@@ -31,6 +33,18 @@ public class OneRosterLiveClient implements OneRosterClient {
     private static final int MAX_PAGES = 50; // safety cap
 
     private final RestClient restClient = RestClient.builder().build();
+
+    /**
+     * In-memory cache van de zware OneRoster-fetch per school. PII zit in deze
+     * map maar wordt nooit gepersisteerd — bij restart of TTL-verloop wordt er
+     * vers opgehaald via OneRoster.
+     */
+    private final ConcurrentHashMap<String, CacheEntry> dataCache = new ConcurrentHashMap<>();
+
+    @Value("${gosmartlib.oneroster.cache-ttl-seconds:1800}")
+    private long cacheTtlSeconds;
+
+    private record CacheEntry(Map<String, Object> data, long expiresAt) {}
 
     private String haalAccessTokenOp(String domein, String clientId, String clientSecret) {
         String tokenUrl = baseUrl(domein) + "/ims/oneroster/token";
@@ -72,6 +86,19 @@ public class OneRosterLiveClient implements OneRosterClient {
 
     @Override
     public Map<String, Object> haalLiveSchoolDataOp(String domein, String clientId, String clientSecret) {
+        String cacheKey = domein + "|" + clientId;
+        long nu = System.currentTimeMillis();
+        CacheEntry cached = dataCache.get(cacheKey);
+        if (cached != null && cached.expiresAt() > nu) {
+            return cached.data();
+        }
+
+        Map<String, Object> data = fetchVerseData(domein, clientId, clientSecret);
+        dataCache.put(cacheKey, new CacheEntry(data, nu + cacheTtlSeconds * 1000L));
+        return data;
+    }
+
+    private Map<String, Object> fetchVerseData(String domein, String clientId, String clientSecret) {
         String token = haalAccessTokenOp(domein, clientId, clientSecret);
         String base = baseUrl(domein) + "/ims/oneroster/v1p1";
 

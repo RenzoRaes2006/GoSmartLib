@@ -60,9 +60,7 @@ export class Leerkrachtdashboard implements OnInit {
   }
 
   haalKlassenLeningenOp() {
-    const leraarId = 1;
-
-    this.boekService.getActieveLeningen(leraarId).subscribe({
+    this.boekService.getMijnActieveLeningen().subscribe({
       next: (leningen) => {
         const gegroepeerd = leningen.reduce((acc: any, lening: any) => {
           const boekId = lening.boek.id;
