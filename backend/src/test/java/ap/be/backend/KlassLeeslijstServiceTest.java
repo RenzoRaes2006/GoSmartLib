@@ -7,6 +7,7 @@ import static org.mockito.Mockito.*;
 import java.util.Optional;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.Collections;
 
 import org.junit.jupiter.api.AfterEach;
@@ -98,7 +99,7 @@ public class KlassLeeslijstServiceTest {
         KlassLeeslijstResponseDTO result = leeslijstService.createLeeslijst(request, 1L);
 
         assertEquals("5INF1", result.klas());
-        assertNull(result.leerlingId());
+        assertTrue(result.leerlingIds() == null || result.leerlingIds().isEmpty());
         assertEquals("Voor het rekenen-hoofdstuk", result.beschrijving());
         assertTrue(result.zichtbaar());
     }
@@ -109,7 +110,7 @@ public class KlassLeeslijstServiceTest {
     @Test
     void givenLeerlingKoppeling_whenCreateLeeslijst_thenZetLeerling() {
         KlassLeeslijstRequestDTO request = new KlassLeeslijstRequestDTO(
-                "Persoonlijk lijstje", null, 42L, null, false);
+                "Persoonlijk lijstje", null, List.of(42L), null, false);
         when(userRepository.findById(1L)).thenReturn(Optional.of(testLeerkracht));
         when(userRepository.findById(42L)).thenReturn(Optional.of(testLeerling));
         when(leeslijstRepository.save(any(KlassLeeslijst.class))).thenAnswer(inv -> inv.getArgument(0));
@@ -117,8 +118,8 @@ public class KlassLeeslijstServiceTest {
         KlassLeeslijstResponseDTO result = leeslijstService.createLeeslijst(request, 1L);
 
         assertNull(result.klas());
-        assertEquals(42L, result.leerlingId());
-        assertEquals("leerling42", result.leerlingNaam());
+        assertTrue(result.leerlingIds().contains(42L));
+        assertTrue(result.leerlingNamen().contains("leerling42"));
     }
 
     /**
@@ -128,7 +129,7 @@ public class KlassLeeslijstServiceTest {
     @Test
     void givenBeideKoppelingen_whenCreateLeeslijst_thenThrowsIllegalArgumentException() {
         KlassLeeslijstRequestDTO request = new KlassLeeslijstRequestDTO(
-                "Foute lijst", "5INF1", 42L, null, false);
+                "Foute lijst", "5INF1", List.of(42L), null, false);
 
         assertThrows(IllegalArgumentException.class,
                 () -> leeslijstService.createLeeslijst(request, 1L));
@@ -173,10 +174,10 @@ public class KlassLeeslijstServiceTest {
         when(userRepository.findById(42L)).thenReturn(Optional.of(testLeerling));
         when(leeslijstRepository.save(any(KlassLeeslijst.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        KlassLeeslijstResponseDTO result = leeslijstService.updateKoppeling(10L, null, 42L);
+        KlassLeeslijstResponseDTO result = leeslijstService.updateKoppeling(10L, null, List.of(42L));
 
         assertNull(result.klas());
-        assertEquals(42L, result.leerlingId());
+        assertTrue(result.leerlingIds().contains(42L));
     }
 
     /**
@@ -322,13 +323,13 @@ public class KlassLeeslijstServiceTest {
         persoonlijkeLijst.setId(21L);
         persoonlijkeLijst.setNaam("Persoonlijke lijst");
         persoonlijkeLijst.setLeerkracht(testLeerkracht);
-        persoonlijkeLijst.setLeerling(testLeerling);
+        persoonlijkeLijst.setLeerlingen(new HashSet<>(Set.of(testLeerling)));
         persoonlijkeLijst.setZichtbaar(true);
         persoonlijkeLijst.setBoeken(new HashSet<>());
 
         when(leeslijstRepository.findByKlasAndZichtbaarTrueAndGearchiveerdFalseOrderByAangemaaktOpDesc("5INF1"))
                 .thenReturn(List.of(klasLijst));
-        when(leeslijstRepository.findByLeerlingIdAndZichtbaarTrueAndGearchiveerdFalseOrderByAangemaaktOpDesc(42L))
+        when(leeslijstRepository.findByLeerlingIdAndZichtbaarTrueAndGearchiveerdFalse(42L))
                 .thenReturn(List.of(persoonlijkeLijst));
 
         try (MockedStatic<SecurityUtils> securityMock = Mockito.mockStatic(SecurityUtils.class)) {
@@ -339,7 +340,7 @@ public class KlassLeeslijstServiceTest {
 
             assertEquals(2, result.size());
             assertTrue(result.stream().anyMatch(l -> "5INF1".equals(l.klas())));
-            assertTrue(result.stream().anyMatch(l -> l.leerlingId() != null && l.leerlingId() == 42L));
+            assertTrue(result.stream().anyMatch(l -> l.leerlingIds() != null && l.leerlingIds().contains(42L)));
         }
     }
 

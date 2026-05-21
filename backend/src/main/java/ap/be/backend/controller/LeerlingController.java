@@ -90,7 +90,7 @@ public class LeerlingController {
         if (school.getSmartschoolDomein() == null
                 || school.getOauthClientId() == null
                 || school.getOauthClientSecret() == null) {
-            return List.of();
+            return repo.findDistinctKlassen();
         }
         try {
             Map<String, Object> data = oneRosterClient.haalLiveSchoolDataOp(
@@ -98,14 +98,15 @@ public class LeerlingController {
                     school.getOauthClientId(),
                     school.getOauthClientSecret());
             List<Map<String, Object>> klassen = (List<Map<String, Object>>) data.getOrDefault("klassen", List.of());
-            return klassen.stream()
+            List<String> result = klassen.stream()
                     .map(k -> String.valueOf(k.getOrDefault("naam", "")))
                     .filter(n -> !n.isBlank())
                     .distinct()
                     .sorted()
                     .toList();
+            return result.isEmpty() ? repo.findDistinctKlassen() : result;
         } catch (Exception e) {
-            return List.of();
+            return repo.findDistinctKlassen();
         }
     }
 

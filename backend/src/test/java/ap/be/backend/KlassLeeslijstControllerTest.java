@@ -79,13 +79,13 @@ class KlassLeeslijstControllerTest extends AbstractIntegrationTest {
     void getLeeslijstenVoorHuidigeLeerling_ReturnsList() throws Exception {
         when(leeslijstService.getLeeslijstenVoorHuidigeLeerling()).thenReturn(List.of(
                 new KlassLeeslijstResponseDTO(1L, "Klas-lijst", "5INF1", null, null, null, true, false, List.of()),
-                new KlassLeeslijstResponseDTO(2L, "Persoonlijke lijst", null, 42L, "leerling42", null, true, false, List.of())));
+                new KlassLeeslijstResponseDTO(2L, "Persoonlijke lijst", null, List.of(42L), List.of("leerling42"), null, true, false, List.of())));
 
         mockMvc.perform(get("/api/leeslijsten/mijn-leerling-lijsten"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(2))
                 .andExpect(jsonPath("$[0].klas").value("5INF1"))
-                .andExpect(jsonPath("$[1].leerlingId").value(42));
+                .andExpect(jsonPath("$[1].leerlingIds[0]").value(42));
     }
 
     @Test
