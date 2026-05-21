@@ -215,6 +215,50 @@ button.primary:hover:not(:disabled) {
   margin-top: 4px;
 }
 
+.open-leningen-alert {
+  background: #fff5f5;
+  border: 2px solid var(--danger);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.alert-titel {
+  color: var(--danger);
+  font-weight: 700;
+  font-size: 1rem;
+  margin: 0 0 6px;
+}
+
+.alert-uitleg {
+  color: #742a2a;
+  font-size: 0.9rem;
+  margin: 0 0 12px;
+}
+
+.open-leningen-alert table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  background: #fff;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.open-leningen-alert th,
+.open-leningen-alert td {
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.open-leningen-alert th {
+  background: #fed7d7;
+  font-weight: 600;
+  color: #742a2a;
+}
+
 .open-leningen {
   background: var(--warning-bg);
   border: 1px solid var(--warning-border);

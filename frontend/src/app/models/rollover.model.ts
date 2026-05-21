@@ -9,7 +9,6 @@ export interface RolloverPreview {
   aantalVertrokkenLeerlingen: number;
   openLeningenVertrokkenen: OpenLeningPreview[];
   aantalTeArchiverenKlasLeeslijsten: number;
-  aantalTeArchiverenLeerlingLeeslijsten: number;
   kanDoorgaan: boolean;
 }
 

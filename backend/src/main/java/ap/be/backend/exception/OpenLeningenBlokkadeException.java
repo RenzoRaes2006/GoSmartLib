@@ -2,7 +2,7 @@ package ap.be.backend.exception;
 
 public class OpenLeningenBlokkadeException extends RuntimeException {
     public OpenLeningenBlokkadeException(int aantalOpenLeningen) {
-        super("Er zijn nog " + aantalOpenLeningen + " open uitleningen voor vertrekkende leerlingen. " +
-              "Gebruik forceerVerloren=true om deze als verloren te markeren en de rollover toch door te zetten.");
+        super("Er " + (aantalOpenLeningen == 1 ? "is nog 1 open uitlening" : "zijn nog " + aantalOpenLeningen + " open uitleningen") +
+              " bij vertrekkende leerlingen. Vink 'Markeer als verloren' aan om de rollover door te zetten.");
     }
 }

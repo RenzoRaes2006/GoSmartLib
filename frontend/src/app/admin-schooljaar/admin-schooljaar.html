@@ -51,21 +51,14 @@
         </div>
         <div class="modal-body">
           @if (preview(); as p) {
-            <div class="preview-grid">
-              <div class="stat">
-                <span class="label">Vertrekkende leerlingen</span>
-                <span class="value">{{ p.aantalVertrokkenLeerlingen }}</span>
-              </div>
-              <div class="stat">
-                <span class="label">Klas-leeslijsten te archiveren</span>
-                <span class="value">{{ p.aantalTeArchiverenKlasLeeslijsten }}</span>
-              </div>
-            </div>
-
             @if (p.openLeningenVertrokkenen.length > 0) {
-              <div class="open-leningen">
-                <p class="warning-text">
-                  ⚠ Er zijn nog {{ p.openLeningenVertrokkenen.length }} open uitleningen bij vertrekkende leerlingen:
+              <div class="open-leningen-alert">
+                <p class="alert-titel">
+                  Opgelet: {{ p.openLeningenVertrokkenen.length === 1 ? '1 boek nog niet ingeleverd' : p.openLeningenVertrokkenen.length + ' boeken nog niet ingeleverd' }}
+                </p>
+                <p class="alert-uitleg">
+                  Onderstaande leerlingen vertrekken maar hebben nog een boek uitstaan.
+                  Vink de optie hieronder aan om deze uitleningen als <strong>verloren</strong> te markeren voor je doorgaat.
                 </p>
                 <table>
                   <thead>
@@ -91,10 +84,21 @@
                     type="checkbox"
                     [checked]="forceerVerloren()"
                     (change)="forceerVerloren.set($any($event.target).checked)">
-                  Markeer deze uitleningen als <strong>VERLOREN</strong>
+                  Markeer deze uitleningen als <strong>verloren</strong>
                 </label>
               </div>
             }
+
+            <div class="preview-grid">
+              <div class="stat">
+                <span class="label">Vertrekkende leerlingen</span>
+                <span class="value">{{ p.aantalVertrokkenLeerlingen }}</span>
+              </div>
+              <div class="stat">
+                <span class="label">Klas-leeslijsten te archiveren</span>
+                <span class="value">{{ p.aantalTeArchiverenKlasLeeslijsten }}</span>
+              </div>
+            </div>
 
             <div class="nieuwe-jaar-form">
               <h4>Nieuw schooljaar</h4>
@@ -119,7 +123,8 @@
         </div>
         <div class="modal-footer">
           <button class="btn-annuleren" (click)="annuleerPreview()" [disabled]="bezig()">Annuleren</button>
-          <button class="primary" (click)="bevestigRollover()" [disabled]="bezig()">
+          <button class="primary" (click)="bevestigRollover()"
+            [disabled]="bezig() || (!preview()?.kanDoorgaan && !forceerVerloren())">
             {{ bezig() ? 'Bezig…' : 'Bevestigen' }}
           </button>
         </div>
