@@ -155,6 +155,51 @@ public class GebruikerController {
     }
 
     /**
+     * Geeft alle leeslijstmappen terug van de ingelogde gebruiker.
+     */
+    @GetMapping("/me/mappen")
+    public ResponseEntity<List<LeeslijstMapDTO>> getMappenVoorMij() {
+        return ResponseEntity.ok(gebruikerService.getMappenVoorGebruiker(currentUserId()));
+    }
+
+    /**
+     * Voegt een boek toe aan een leeslijstmap van de ingelogde gebruiker.
+     */
+    @PostMapping("/me/mappen/{mapNaam}/boeken/{boekId}")
+    public ResponseEntity<String> voegBoekToeVoorMij(@PathVariable String mapNaam,
+            @PathVariable Long boekId,
+            @RequestParam(required = false, defaultValue = "📁") String emoji) {
+        gebruikerService.voegBoekToeAanMap(currentUserId(), mapNaam, boekId, emoji);
+        return ResponseEntity.ok("Boek succesvol toegevoegd aan map");
+    }
+
+    /**
+     * Verwijdert een boek uit een leeslijstmap van de ingelogde gebruiker.
+     */
+    @DeleteMapping("/me/mappen/{mapNaam}/boeken/{boekId}")
+    public ResponseEntity<String> verwijderBoekVoorMij(@PathVariable String mapNaam,
+            @PathVariable Long boekId) {
+        gebruikerService.verwijderBoekUitMap(currentUserId(), mapNaam, boekId);
+        return ResponseEntity.ok("Boek succesvol verwijderd uit map");
+    }
+
+    /**
+     * Geeft de actieve leningen van de ingelogde gebruiker terug.
+     */
+    @GetMapping("/me/leningen")
+    public ResponseEntity<List<UitleningDTO>> getActieveLeningenVoorMij() {
+        return ResponseEntity.ok(gebruikerService.getActieveLeningenVanGebruikerDTO(currentUserId()));
+    }
+
+    /**
+     * Geeft de volledige leengeschiedenis van de ingelogde gebruiker terug.
+     */
+    @GetMapping("/me/geschiedenis")
+    public ResponseEntity<List<UitleningDTO>> getLeengeschiedenisVoorMij() {
+        return ResponseEntity.ok(gebruikerService.getLeengeschiedenisDTO(currentUserId()));
+    }
+
+    /**
      * Dient leenaanvragen in voor meerdere boeken tegelijk.
      *
      * @param gebruikerId het ID van de gebruiker

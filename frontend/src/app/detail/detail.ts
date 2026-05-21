@@ -104,8 +104,7 @@ export class Detail implements OnInit {
       this.laadBeoordelingenVanBoek();
     });
 
-    const gebruikerId = 1;
-    this.leeslijstService.getMappenVanGebruiker(gebruikerId).subscribe({
+    this.leeslijstService.getMijnMappen().subscribe({
       next: (data) => {
         // Vriend's toevoeging: filter Favorieten eruit
         this.mappen = data.filter((map) => map.naam.toLowerCase() !== 'favorieten');
@@ -169,10 +168,9 @@ export class Detail implements OnInit {
 
   voegToeAanFavorieten() {
     if (!this.boek || this.isFavoriet) return;
-    const gebruikerId = 1;
     // Vriend's toevoeging: emoji meegeven
     this.leeslijstService
-      .voegBoekToeAanMap(gebruikerId, 'Favorieten', this.boek.id!, '⭐')
+      .voegBoekToeAanMijnMap('Favorieten', this.boek.id!, '⭐')
       .subscribe({
         next: () => {
           this.isFavoriet = true;
@@ -197,13 +195,12 @@ export class Detail implements OnInit {
     const doelMap = nieuweMap.trim() !== '' ? nieuweMap.trim() : bestaandeMap;
 
     if (doelMap && doelMap !== '') {
-      const gebruikerId = 1;
       this.leeslijstService
-        .voegBoekToeAanMap(gebruikerId, doelMap, this.boek!.id!, this.selectedEmoji)
+        .voegBoekToeAanMijnMap(doelMap, this.boek!.id!, this.selectedEmoji)
         .subscribe({
           next: () => {
             this.succesMeldingMap = `Boek toegevoegd aan '${doelMap}'!`;
-            this.leeslijstService.getMappenVanGebruiker(gebruikerId).subscribe((data) => {
+            this.leeslijstService.getMijnMappen().subscribe((data) => {
               this.mappen = data.filter((map) => map.naam.toLowerCase() !== 'favorieten');
             });
             setTimeout(() => this.sluitModal(), 1500);

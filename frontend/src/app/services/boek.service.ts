@@ -111,6 +111,16 @@ export class BoekService {
     return this.http.get<any[]>(`${this.apiGebruikerUrl}/${gebruikerId}/leningen`);
   }
 
+  /** Actieve leningen van de ingelogde gebruiker (server bepaalt user). */
+  getMijnActieveLeningen(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiGebruikerUrl}/me/leningen`);
+  }
+
+  /** Volledige leengeschiedenis van de ingelogde gebruiker. */
+  getMijnLeengeschiedenis(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiGebruikerUrl}/me/geschiedenis`);
+  }
+
   // Fetch all pending loan requests
   getAlleAanvragen(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiGebruikerUrl}/aanvragen`);

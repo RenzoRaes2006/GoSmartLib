@@ -20,9 +20,6 @@ export class ReserverenComponent implements OnInit {
 
   boekenInMandje: Boek[] = [];
 
-  // simulate user login
-  ingelogdeGebruikerId = 1;
-
   // signal to keep track of active loans
   actieveLeningen = signal<number>(0);
 
@@ -37,7 +34,7 @@ export class ReserverenComponent implements OnInit {
     });
 
     // fetch active loans to calculate the limit
-    this.boekService.getActieveLeningen(this.ingelogdeGebruikerId).subscribe({
+    this.boekService.getMijnActieveLeningen().subscribe({
       next: (leningen) => {
         this.actieveLeningen.set(leningen.length);
       },

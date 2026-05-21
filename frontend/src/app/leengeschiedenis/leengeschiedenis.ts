@@ -14,7 +14,6 @@ import { BoekService } from '../services/boek.service';
 export class Leengeschiedenis implements OnInit {
   private boekService = inject(BoekService);
   
-  gebruikerId = 1; // Jouw ingelogde gebruiker
   alleLeningen = signal<any[]>([]);
 
   // Filters en dropdown data
@@ -25,7 +24,7 @@ export class Leengeschiedenis implements OnInit {
   maandenNamen = ['September', 'Oktober', 'November', 'December', 'Januari', 'Februari', 'Maart', 'April', 'Mei', 'Juni', 'Juli', 'Augustus'];
 
   ngOnInit() {
-    this.boekService.getLeengeschiedenis(this.gebruikerId).subscribe({
+    this.boekService.getMijnLeengeschiedenis().subscribe({
       next: (data) => {
         // Filter gewijgerde aanvragen eruit als je die niet in de geschiedenis wil zien
         const geldigeLeningen = data.filter(l => l.status !== 'GEWEIGERD');
