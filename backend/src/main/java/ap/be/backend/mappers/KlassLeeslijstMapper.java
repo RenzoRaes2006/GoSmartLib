@@ -39,24 +39,27 @@ public class KlassLeeslijstMapper {
                 .map(BoekMapper::toDTO)
                 .toList();
 
-        User leerling = entity.getLeerling();
-        Long leerlingId = leerling != null ? leerling.getId() : null;
-        String leerlingNaam = null;
-        if (leerling != null) {
-            String smartschoolId = leerling.getSmartschoolId();
-            String naamUitOneRoster = null;
-            if (oneRosterServiceStatic != null && smartschoolId != null) {
-                naamUitOneRoster = oneRosterServiceStatic.getNaamBySourcedId(smartschoolId);
-            }
-            leerlingNaam = naamUitOneRoster != null ? naamUitOneRoster : smartschoolId;
-        }
+        List<Long> leerlingIds = entity.getLeerlingen().stream()
+                .map(User::getId)
+                .toList();
+
+        List<String> leerlingNamen = entity.getLeerlingen().stream()
+                .map(leerling -> {
+                    String smartschoolId = leerling.getSmartschoolId();
+                    String naamUitOneRoster = null;
+                    if (oneRosterServiceStatic != null && smartschoolId != null) {
+                        naamUitOneRoster = oneRosterServiceStatic.getNaamBySourcedId(smartschoolId);
+                    }
+                    return naamUitOneRoster != null ? naamUitOneRoster : smartschoolId;
+                })
+                .toList();
 
         return new KlassLeeslijstResponseDTO(
                 entity.getId(),
                 entity.getNaam(),
                 entity.getKlas(),
-                leerlingId,
-                leerlingNaam,
+                leerlingIds,
+                leerlingNamen,
                 entity.getBeschrijving(),
                 entity.isZichtbaar(),
                 entity.isGearchiveerd(),

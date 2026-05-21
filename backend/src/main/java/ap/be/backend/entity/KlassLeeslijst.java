@@ -29,9 +29,13 @@ public class KlassLeeslijst {
     @Column(name = "klas")
     private String klas;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "leerling_id")
-    private User leerling;
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "klassleeslijst_leerlingen",
+        joinColumns = @JoinColumn(name = "klassleeslijst_id"),
+        inverseJoinColumns = @JoinColumn(name = "leerling_id")
+    )
+    private Set<User> leerlingen = new HashSet<>();
 
     @Column(length = 500)
     private String beschrijving;

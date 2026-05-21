@@ -17,7 +17,7 @@ export class KlassenleeslijstenLeerlingComponent implements OnInit {
   fout = signal<string>('');
 
   klasLijsten = computed(() => this.leeslijsten().filter((l) => !!l.klas));
-  persoonlijkeLijsten = computed(() => this.leeslijsten().filter((l) => !!l.leerlingId));
+  persoonlijkeLijsten = computed(() => this.leeslijsten().filter((l) => l.leerlingIds && l.leerlingIds.length > 0));
 
   ngOnInit(): void {
     this.leeslijstService.getLeeslijstenVoorMij().subscribe({

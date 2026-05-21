@@ -19,7 +19,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Beheert de klassen-leeslijsten die leerkrachten aanmaken.
@@ -49,13 +51,13 @@ public class KlassLeeslijstService {
     @Transactional
     public KlassLeeslijstResponseDTO createLeeslijst(KlassLeeslijstRequestDTO request, Long leerkrachtId) {
         boolean heeftKlas = request.klas() != null && !request.klas().isBlank();
-        boolean heeftLeerling = request.leerlingId() != null;
+        boolean heeftLeerlingen = request.leerlingIds() != null && !request.leerlingIds().isEmpty();
 
-        if (heeftKlas && heeftLeerling) {
-            throw new IllegalArgumentException("Een leeslijst kan niet tegelijk aan een klas en een leerling gekoppeld worden.");
+        if (heeftKlas && heeftLeerlingen) {
+            throw new IllegalArgumentException("Een leeslijst kan niet tegelijk aan een klas en leerlingen gekoppeld worden.");
         }
-        if (!heeftKlas && !heeftLeerling) {
-            throw new IllegalArgumentException("Een leeslijst moet aan een klas of een leerling gekoppeld worden.");
+        if (!heeftKlas && !heeftLeerlingen) {
+            throw new IllegalArgumentException("Een leeslijst moet aan een klas of leerling(en) gekoppeld worden.");
         }
         if (heeftKlas && !userRepository.findDistinctKlassen().contains(request.klas())) {
             throw new IllegalArgumentException("Klas '" + request.klas() + "' bestaat niet.");
@@ -70,12 +72,16 @@ public class KlassLeeslijstService {
         leeslijst.setBeschrijving(request.beschrijving());
         leeslijst.setZichtbaar(Boolean.TRUE.equals(request.zichtbaar()));
 
-        if (request.klas() != null && !request.klas().isBlank()) {
+        if (heeftKlas) {
             leeslijst.setKlas(request.klas());
-        } else if (request.leerlingId() != null) {
-            User leerling = userRepository.findById(request.leerlingId())
-                    .orElseThrow(() -> new GebruikerNotFoundException("Leerling niet gevonden"));
-            leeslijst.setLeerling(leerling);
+        } else {
+            Set<User> leerlingen = new HashSet<>();
+            for (Long leerlingId : request.leerlingIds()) {
+                User leerling = userRepository.findById(leerlingId)
+                        .orElseThrow(() -> new GebruikerNotFoundException("Leerling niet gevonden: " + leerlingId));
+                leerlingen.add(leerling);
+            }
+            leeslijst.setLeerlingen(leerlingen);
         }
 
         return KlassLeeslijstMapper.toDTO(leeslijstRepository.save(leeslijst));
@@ -179,15 +185,15 @@ public class KlassLeeslijstService {
      * (als opgegeven) bestaan in de database.
      */
     @Transactional
-    public KlassLeeslijstResponseDTO updateKoppeling(Long id, String nieuweKlas, Long nieuweLeerlingId) {
+    public KlassLeeslijstResponseDTO updateKoppeling(Long id, String nieuweKlas, List<Long> nieuweLeerlingIds) {
         boolean heeftKlas = nieuweKlas != null && !nieuweKlas.isBlank();
-        boolean heeftLeerling = nieuweLeerlingId != null;
+        boolean heeftLeerlingen = nieuweLeerlingIds != null && !nieuweLeerlingIds.isEmpty();
 
-        if (heeftKlas && heeftLeerling) {
-            throw new IllegalArgumentException("Een leeslijst kan niet tegelijk aan een klas en een leerling gekoppeld worden.");
+        if (heeftKlas && heeftLeerlingen) {
+            throw new IllegalArgumentException("Een leeslijst kan niet tegelijk aan een klas en leerlingen gekoppeld worden.");
         }
-        if (!heeftKlas && !heeftLeerling) {
-            throw new IllegalArgumentException("Een leeslijst moet aan een klas of een leerling gekoppeld worden.");
+        if (!heeftKlas && !heeftLeerlingen) {
+            throw new IllegalArgumentException("Een leeslijst moet aan een klas of leerling(en) gekoppeld worden.");
         }
         if (heeftKlas && !userRepository.findDistinctKlassen().contains(nieuweKlas)) {
             throw new IllegalArgumentException("Klas '" + nieuweKlas + "' bestaat niet.");
@@ -198,11 +204,15 @@ public class KlassLeeslijstService {
 
         if (heeftKlas) {
             leeslijst.setKlas(nieuweKlas);
-            leeslijst.setLeerling(null);
+            leeslijst.getLeerlingen().clear();
         } else {
-            User leerling = userRepository.findById(nieuweLeerlingId)
-                    .orElseThrow(() -> new GebruikerNotFoundException("Leerling niet gevonden"));
-            leeslijst.setLeerling(leerling);
+            Set<User> leerlingen = new HashSet<>();
+            for (Long leerlingId : nieuweLeerlingIds) {
+                User leerling = userRepository.findById(leerlingId)
+                        .orElseThrow(() -> new GebruikerNotFoundException("Leerling niet gevonden: " + leerlingId));
+                leerlingen.add(leerling);
+            }
+            leeslijst.setLeerlingen(leerlingen);
             leeslijst.setKlas(null);
         }
 
@@ -290,7 +300,7 @@ public class KlassLeeslijstService {
         if (huidigeLeerling.getKlas() != null && !huidigeLeerling.getKlas().isBlank()) {
             resultaat.addAll(leeslijstRepository.findByKlasAndZichtbaarTrueAndGearchiveerdFalseOrderByAangemaaktOpDesc(huidigeLeerling.getKlas()));
         }
-        resultaat.addAll(leeslijstRepository.findByLeerlingIdAndZichtbaarTrueAndGearchiveerdFalseOrderByAangemaaktOpDesc(huidigeLeerling.getId()));
+        resultaat.addAll(leeslijstRepository.findByLeerlingIdAndZichtbaarTrueAndGearchiveerdFalse(huidigeLeerling.getId()));
 
         resultaat.sort((a, b) -> {
             LocalDateTime aDate = a.getAangemaaktOp();

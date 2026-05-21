@@ -54,8 +54,12 @@
               <td>
                 @if (lijst.klas) {
                   <span class="badge badge-klas">Klas: {{ lijst.klas }}</span>
-                } @else if (lijst.leerlingNaam) {
-                  <span class="badge badge-leerling">Leerling: {{ lijst.leerlingNaam }}</span>
+                } @else if (lijst.leerlingIds && lijst.leerlingIds.length > 0) {
+                  @if (lijst.leerlingIds.length === 1) {
+                    <span class="badge badge-leerling">Leerling: {{ lijst.leerlingNamen?.[0] }}</span>
+                  } @else {
+                    <span class="badge badge-leerling">{{ lijst.leerlingIds.length }} leerlingen</span>
+                  }
                 }
               </td>
               <td>{{ lijst.boeken.length }}</td>

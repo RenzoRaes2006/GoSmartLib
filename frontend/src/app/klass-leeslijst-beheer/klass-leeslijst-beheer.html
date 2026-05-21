@@ -8,8 +8,12 @@
             <div class="koppel-badges">
                 @if (lijst()!.klas) {
                     <span class="badge badge-klas">Klas: {{ lijst()!.klas }}</span>
-                } @else if (lijst()!.leerlingId) {
-                    <span class="badge badge-leerling">Leerling: {{ lijst()!.leerlingNaam }}</span>
+                } @else if (lijst()!.leerlingIds && lijst()!.leerlingIds!.length > 0) {
+                    @if (lijst()!.leerlingIds!.length === 1) {
+                        <span class="badge badge-leerling">Leerling: {{ lijst()!.leerlingNamen?.[0] }}</span>
+                    } @else {
+                        <span class="badge badge-leerling">{{ lijst()!.leerlingIds!.length }} leerlingen</span>
+                    }
                 } @else {
                     <span class="badge badge-niet-toegewezen">Niet toegewezen</span>
                 }
@@ -34,7 +38,7 @@
         </div>
 
         <div class="header-acties">
-            @if (lijst()!.klas || lijst()!.leerlingId) {
+            @if (lijst()!.klas || (lijst()!.leerlingIds && lijst()!.leerlingIds!.length > 0)) {
                 <button class="btn-toewijzing-aanpassen" (click)="openKoppelingModal()">Toewijzing aanpassen</button>
             } @else {
                 <button class="btn-toewijzen" (click)="openKoppelingModal()">+ Toewijzen aan klas of leerling</button>
@@ -188,7 +192,7 @@
         <p class="modal-label" style="text-align: left; margin-left: 5%;">Koppelen aan:</p>
         <div class="radio-row" style="margin: 0 5% 10px 5%;">
             <label><input type="radio" name="koppelType" [value]="'KLAS'" [checked]="koppelType() === 'KLAS'" (change)="koppelType.set('KLAS')"> Klas</label>
-            <label><input type="radio" name="koppelType" [value]="'LEERLING'" [checked]="koppelType() === 'LEERLING'" (change)="koppelType.set('LEERLING')"> Specifieke leerling</label>
+            <label><input type="radio" name="koppelType" [value]="'LEERLING'" [checked]="koppelType() === 'LEERLING'" (change)="koppelType.set('LEERLING')"> Specifieke leerling(en)</label>
         </div>
 
         @if (koppelType() === 'KLAS') {
@@ -202,7 +206,7 @@
         }
 
         @if (koppelType() === 'LEERLING') {
-            <label class="modal-label" style="text-align: left; margin-left: 5%;">Kies eerst een klas</label>
+            <label class="modal-label" style="text-align: left; margin-left: 5%;">Kies een klas om leerlingen te zien</label>
             <select [ngModel]="koppelLeerlingKlas()" (ngModelChange)="koppelLeerlingKlas.set($event); onKoppelLeerlingKlasChange()" class="form-input">
                 <option value="" disabled>-- Selecteer een klas --</option>
                 @for (k of klassen(); track k) {
@@ -210,18 +214,22 @@
                 }
             </select>
 
+            @if (koppelLeerlingIds().length > 0) {
+                <p class="geselecteerd-melding" style="margin: 0 5% 8px 5%;">
+                    {{ koppelLeerlingIds().length }} leerling(en) geselecteerd
+                </p>
+            }
+
             @if (koppelLeerlingKlas() && koppelLeerlingen().length > 0) {
-                <label class="modal-label" style="text-align: left; margin-left: 5%;">Kies een leerling</label>
+                <label class="modal-label" style="text-align: left; margin-left: 5%;">Selecteer leerlingen</label>
                 <ul class="leerling-resultaten">
                     @for (l of koppelLeerlingen(); track l.id) {
-                        <li (click)="kiesKoppelLeerling(l)" [class.geselecteerd]="koppelLeerlingId() === l.id">
+                        <li (click)="toggleLeerling(l.id)" [class.geselecteerd]="isLeerlingGeselecteerd(l.id)">
+                            <input type="checkbox" [checked]="isLeerlingGeselecteerd(l.id)" (click)="$event.stopPropagation()" (change)="toggleLeerling(l.id)" style="margin-right: 8px; accent-color: #8c1b3f;">
                             {{ l.smartschoolId || ('Leerling ' + l.id) }}
                         </li>
                     }
                 </ul>
-            }
-            @if (koppelLeerlingId()) {
-                <p class="geselecteerd-melding">Geselecteerd: <strong>{{ koppelLeerlingNaam() }}</strong></p>
             }
         }
 

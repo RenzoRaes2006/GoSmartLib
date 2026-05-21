@@ -41,8 +41,7 @@ export class KlassLeeslijstBeheerComponent {
   koppelKlas = signal<string>('');
   koppelLeerlingKlas = signal<string>('');
   koppelLeerlingen = signal<any[]>([]);
-  koppelLeerlingId = signal<number | null>(null);
-  koppelLeerlingNaam = signal<string>('');
+  koppelLeerlingIds = signal<number[]>([]);
   koppelFout = signal<string>('');
 
   private router = inject(Router);
@@ -222,29 +221,25 @@ export class KlassLeeslijstBeheerComponent {
     const lijst = this.lijst();
     if (!lijst) return;
     this.koppelFout.set('');
+    this.koppelLeerlingKlas.set('');
+    this.koppelLeerlingen.set([]);
     if (lijst.klas) {
       this.koppelType.set('KLAS');
       this.koppelKlas.set(lijst.klas);
-      this.koppelLeerlingKlas.set('');
-      this.koppelLeerlingen.set([]);
-      this.koppelLeerlingId.set(null);
-      this.koppelLeerlingNaam.set('');
-    } else if (lijst.leerlingId) {
+      this.koppelLeerlingIds.set([]);
+    } else if (lijst.leerlingIds && lijst.leerlingIds.length > 0) {
       this.koppelType.set('LEERLING');
       this.koppelKlas.set('');
-      this.koppelLeerlingId.set(lijst.leerlingId);
-      this.koppelLeerlingNaam.set(lijst.leerlingNaam || '');
-      this.koppelLeerlingKlas.set('');
-      this.koppelLeerlingen.set([]);
+      this.koppelLeerlingIds.set([...lijst.leerlingIds]);
     } else {
       this.koppelType.set('KLAS');
+      this.koppelKlas.set('');
+      this.koppelLeerlingIds.set([]);
     }
     this.showKoppelingModal.set(true);
   }
 
   onKoppelLeerlingKlasChange(): void {
-    this.koppelLeerlingId.set(null);
-    this.koppelLeerlingNaam.set('');
     const klas = this.koppelLeerlingKlas();
     if (!klas) {
       this.koppelLeerlingen.set([]);
@@ -256,14 +251,22 @@ export class KlassLeeslijstBeheerComponent {
     });
   }
 
-  kiesKoppelLeerling(leerling: any): void {
-    this.koppelLeerlingId.set(leerling.id);
-    this.koppelLeerlingNaam.set(leerling.smartschoolId || `Leerling ${leerling.id}`);
+  toggleLeerling(id: number): void {
+    const current = this.koppelLeerlingIds();
+    if (current.includes(id)) {
+      this.koppelLeerlingIds.set(current.filter((i) => i !== id));
+    } else {
+      this.koppelLeerlingIds.set([...current, id]);
+    }
+  }
+
+  isLeerlingGeselecteerd(id: number): boolean {
+    return this.koppelLeerlingIds().includes(id);
   }
 
   get kanKoppelingOpslaan(): boolean {
     if (this.koppelType() === 'KLAS') return !!this.koppelKlas();
-    return this.koppelLeerlingId() !== null;
+    return this.koppelLeerlingIds().length > 0;
   }
 
   slaKoppelingOp(): void {
@@ -272,8 +275,8 @@ export class KlassLeeslijstBeheerComponent {
 
     const payload =
       this.koppelType() === 'KLAS'
-        ? { klas: this.koppelKlas(), leerlingId: null }
-        : { klas: null, leerlingId: this.koppelLeerlingId() };
+        ? { klas: this.koppelKlas(), leerlingIds: null }
+        : { klas: null, leerlingIds: this.koppelLeerlingIds() };
 
     this.leeslijstService.updateKoppeling(lijst.id, payload).subscribe({
       next: (data) => {

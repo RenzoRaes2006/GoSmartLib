@@ -25,8 +25,12 @@
           <div class="card-badges">
             @if (lijst.klas) {
               <span class="badge badge-klas">Klas: {{ lijst.klas }}</span>
-            } @else if (lijst.leerlingId) {
-              <span class="badge badge-leerling">Leerling: {{ lijst.leerlingNaam }}</span>
+            } @else if (lijst.leerlingIds && lijst.leerlingIds.length > 0) {
+              @if (lijst.leerlingIds.length === 1) {
+                <span class="badge badge-leerling">Leerling: {{ lijst.leerlingNamen?.[0] }}</span>
+              } @else {
+                <span class="badge badge-leerling">{{ lijst.leerlingIds.length }} leerlingen</span>
+              }
             }
             @if (lijst.zichtbaar) {
               <span class="badge badge-zichtbaar">Zichtbaar</span>

@@ -151,7 +151,7 @@ public class KlassLeeslijstController {
     public ResponseEntity<KlassLeeslijstResponseDTO> updateKoppeling(
             @PathVariable Long id,
             @RequestBody KoppelingRequestDTO request) {
-        return ResponseEntity.ok(leeslijstService.updateKoppeling(id, request.klas(), request.leerlingId()));
+        return ResponseEntity.ok(leeslijstService.updateKoppeling(id, request.klas(), request.leerlingIds()));
     }
 
     /**

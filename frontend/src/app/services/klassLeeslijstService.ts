@@ -73,7 +73,7 @@ export class KlassLeeslijstService {
     return this.http.put<KlassLeeslijst>(`${this.apiUrl}/${id}/zichtbaar`, zichtbaar);
   }
 
-  updateKoppeling(id: number, koppeling: { klas?: string | null; leerlingId?: number | null }): Observable<KlassLeeslijst> {
+  updateKoppeling(id: number, koppeling: { klas?: string | null; leerlingIds?: number[] | null }): Observable<KlassLeeslijst> {
     return this.http.put<KlassLeeslijst>(`${this.apiUrl}/${id}/koppeling`, koppeling);
   }
 
