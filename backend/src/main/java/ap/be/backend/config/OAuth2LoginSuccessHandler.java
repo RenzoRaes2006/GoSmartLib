@@ -73,36 +73,46 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
 
-        Object idAttr = oAuth2User.getAttribute("userID");
-        String smartschoolId = idAttr == null ? null : idAttr.toString();
-
         String naam = oAuth2User.getAttribute("name");
         String username = oAuth2User.getAttribute("username");
 
         String rol = "onbekend";
         String klas = "onbekend";
+        String smartschoolId = null;
 
         OneRosterUser orUser = oneRosterService.getUserByUsername(username);
 
         if (orUser != null) {
             rol = orUser.getRole();
             klas = oneRosterService.getKlasBySourcedId(orUser.getSourcedId());
+            smartschoolId = orUser.getSourcedId();
         }
 
+        if (smartschoolId == null) {
+            Object idAttr = oAuth2User.getAttribute("userID");
+            smartschoolId = idAttr == null ? null : idAttr.toString();
+        }
+
+        if (smartschoolId == null) {
+            response.sendRedirect(frontendBaseUrl + "/login-error?reason=missing-smartschool-id");
+            return;
+        }
+
+        final String smartschoolIdFinal = smartschoolId;
         final String klasFinal = klas;
         final Rol rolEnum = mapRol(rol);
 
         // Bestaande user bijwerken of nieuw aanmaken. Geen persoonsdata opslaan.
         // De isBeheerder-flag leeft naast de rol en wordt hier niet aangeraakt.
-        User user = userRepository.findBySmartschoolId(smartschoolId)
+        User user = userRepository.findBySmartschoolId(smartschoolIdFinal)
                 .map(existing -> {
                     existing.setKlas(klasFinal);
                     existing.setRol(rolEnum);
                     return userRepository.save(existing);
                 })
-                .orElseGet(() -> userRepository.save(new User(smartschoolId, klasFinal, rolEnum)));
+                .orElseGet(() -> userRepository.save(new User(smartschoolIdFinal, klasFinal, rolEnum)));
 
-        String jwtToken = jwtService.generateToken(smartschoolId, rol, naam, klas, user.isBeheerder());
+        String jwtToken = jwtService.generateToken(smartschoolIdFinal, rol, naam, klas, user.isBeheerder());
 
         response.sendRedirect(frontendBaseUrl + "/login-success?token=" + jwtToken);
     }
