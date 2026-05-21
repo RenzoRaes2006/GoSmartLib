@@ -1,0 +1,68 @@
+<div class="container">
+  <div class="header">
+    <h2>Archief — gearchiveerde leeslijsten</h2>
+    <a routerLink="/beheerder" class="terug-link">← Terug naar dashboard</a>
+  </div>
+
+  <p class="uitleg">
+    Overzicht van alle gearchiveerde leeslijsten van alle leerkrachten in deze school.
+    Read-only weergave. Leerkrachten kunnen hun eigen lijsten dearchiveren via hun eigen archief-pagina.
+  </p>
+
+  <div class="zoek-rij">
+    <input
+      type="text"
+      placeholder="Zoek op naam, klas of leerling…"
+      [ngModel]="zoekterm()"
+      (ngModelChange)="zoekterm.set($event)">
+    <span class="aantal">{{ gefilterd().length }} resultaten</span>
+  </div>
+
+  @if (fout()) {
+    <p class="fout-melding">{{ fout() }}</p>
+  }
+
+  @if (laden()) {
+    <p class="laden">Laden…</p>
+  } @else if (gefilterd().length === 0) {
+    <div class="empty-state">
+      @if (zoekterm()) {
+        <p>Geen lijsten gevonden voor "{{ zoekterm() }}".</p>
+      } @else {
+        <p>Er zijn geen gearchiveerde leeslijsten.</p>
+      }
+    </div>
+  } @else {
+    <div class="table-wrapper">
+      <table class="archief-tabel">
+        <thead>
+          <tr>
+            <th>Naam</th>
+            <th>Koppeling</th>
+            <th>Aantal boeken</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (lijst of gefilterd(); track lijst.id) {
+            <tr>
+              <td>
+                <strong>{{ lijst.naam }}</strong>
+                @if (lijst.beschrijving) {
+                  <div class="beschrijving">{{ lijst.beschrijving }}</div>
+                }
+              </td>
+              <td>
+                @if (lijst.klas) {
+                  <span class="badge badge-klas">Klas: {{ lijst.klas }}</span>
+                } @else if (lijst.leerlingNaam) {
+                  <span class="badge badge-leerling">Leerling: {{ lijst.leerlingNaam }}</span>
+                }
+              </td>
+              <td>{{ lijst.boeken.length }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

@@ -1,0 +1,56 @@
+<div class="container">
+  <div class="header">
+    <h2>Archief — gearchiveerde leeslijsten</h2>
+    <a routerLink="/leeslijsten" class="terug-link">← Terug naar mijn leeslijsten</a>
+  </div>
+
+  <p class="uitleg">
+    Dit zijn de leeslijsten die zijn gearchiveerd bij een schooljaar-rollover.
+    Klik op <strong>Dearchiveer</strong> om een lijst terug actief te maken.
+    De lijst komt terug als concept (onzichtbaar voor leerlingen) zodat je hem kan herzien
+    voor je hem opnieuw publiceert.
+  </p>
+
+  @if (succesMelding()) {
+    <div class="succes-melding">{{ succesMelding() }}</div>
+  }
+
+  @if (fout()) {
+    <p class="fout-melding">{{ fout() }}</p>
+  }
+
+  @if (laden()) {
+    <p class="laden">Laden…</p>
+  } @else if (archief().length === 0) {
+    <div class="empty-state">
+      <p>Je hebt geen gearchiveerde leeslijsten.</p>
+    </div>
+  } @else {
+    <div class="list-container">
+      @for (lijst of archief(); track lijst.id) {
+        <div class="card">
+          <div class="card-badges">
+            @if (lijst.klas) {
+              <span class="badge badge-klas">Klas: {{ lijst.klas }}</span>
+            } @else if (lijst.leerlingId) {
+              <span class="badge badge-leerling">Leerling: {{ lijst.leerlingNaam }}</span>
+            }
+            <span class="badge badge-archief">Gearchiveerd</span>
+          </div>
+          <h3>{{ lijst.naam }}</h3>
+          @if (lijst.beschrijving) {
+            <p class="beschrijving">{{ lijst.beschrijving }}</p>
+          }
+          <p class="meta">{{ lijst.boeken.length }} boeken</p>
+
+          <button
+            class="btn-dearchiveer"
+            [disabled]="bezigMetId() === lijst.id"
+            (click)="dearchiveer(lijst)">
+            {{ bezigMetId() === lijst.id ? 'Bezig…' : 'Dearchiveer' }}
+          </button>
+        </div>
+      }
+    </div>
+  }
+</div>

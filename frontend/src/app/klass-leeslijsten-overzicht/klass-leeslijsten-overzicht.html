@@ -1,9 +1,12 @@
 <div class="container">
   <h2>Mijn leeslijsten</h2>
 
-  <button (click)="openNieuweLijstModal()" class="btn-primary">
-    + Nieuwe leeslijst maken
-  </button>
+  <div class="header-acties">
+    <button (click)="openNieuweLijstModal()" class="btn-primary">
+      + Nieuwe leeslijst maken
+    </button>
+    <a routerLink="/leeslijsten/archief" class="archief-link">Archief bekijken →</a>
+  </div>
 
   @if (laadFout()) {
     <p class="fout-melding">{{ laadFout() }}</p>
