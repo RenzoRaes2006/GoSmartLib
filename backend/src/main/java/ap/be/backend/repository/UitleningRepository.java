@@ -1,6 +1,7 @@
 package ap.be.backend.repository;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -92,4 +93,8 @@ public interface UitleningRepository extends JpaRepository<Uitlening, Long> {
 
     @Query("SELECT COUNT(u) FROM Uitlening u WHERE u.user.id = :id AND u.isIngeleverd = true")
     long countOnTime(@Param("id") Long id);
+
+    // Geeft alle open uitleningen voor een lijst van gebruikers — gebruikt bij rollover preview
+    // om te controleren of vertrekkende leerlingen nog boeken hebben uitstaan.
+    List<Uitlening> findByUser_IdInAndIsIngeleverdFalse(Collection<Long> userIds);
 }

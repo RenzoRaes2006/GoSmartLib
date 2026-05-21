@@ -10,10 +10,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Bulk-import vanuit OneRoster naar de lokale database. Idempotent: een tweede
@@ -67,10 +69,14 @@ public class OneRosterImportService {
         Telling leerkrachten = importeerType(castLijst(data.get("leerkrachten")), Rol.LEERKRACHT, school);
         int aantalKlassen = castLijst(data.get("klassen")).size();
 
+        // Verzamel de smartschoolIds van leerlingen die OneRoster teruggeeft.
+        // De SchooljaarService gebruikt deze set om te bepalen wie vertrokken is.
+        Set<String> gevondenLeerlingIds = extractSmartschoolIds(castLijst(data.get("leerlingen")));
+
         ImportResultaat resultaat = new ImportResultaat(
                 leerlingen.nieuw, leerlingen.geupdatet, leerlingen.ongewijzigd,
                 leerkrachten.nieuw, leerkrachten.geupdatet, leerkrachten.ongewijzigd,
-                aantalKlassen);
+                aantalKlassen, gevondenLeerlingIds);
 
         log.info("OneRoster import school {}: leerlingen +{}/~{}/={}, leerkrachten +{}/~{}/={}, klassen {}",
                 school.getId(),
@@ -134,6 +140,18 @@ public class OneRosterImportService {
                 school.getOauthClientSecret());
     }
 
+    // Haalt alle smartschoolIds op uit een lijst van OneRoster-rijen.
+    private Set<String> extractSmartschoolIds(List<Map<String, Object>> rijen) {
+        Set<String> ids = new HashSet<>();
+        for (Map<String, Object> rij : rijen) {
+            String id = String.valueOf(rij.get("id"));
+            if (id != null && !id.isBlank() && !"null".equals(id)) {
+                ids.add(id);
+            }
+        }
+        return ids;
+    }
+
     @SuppressWarnings("unchecked")
     private List<Map<String, Object>> castLijst(Object obj) {
         if (obj instanceof List<?> lst) {
@@ -161,6 +179,9 @@ public class OneRosterImportService {
             int leerkrachtenNieuw,
             int leerkrachtenGeupdatet,
             int leerkrachtenOngewijzigd,
-            int aantalKlassen
+            int aantalKlassen,
+            // Set van smartschoolIds die OneRoster terugstuurde voor leerlingen.
+            // Gebruikt door SchooljaarService om vertrokken leerlingen te detecteren.
+            Set<String> gevondenLeerlingSmartschoolIds
     ) {}
 }

@@ -140,4 +140,19 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }
 
+    @ExceptionHandler(SchoolNotFoundException.class)
+    public ResponseEntity<String> handleSchoolNotFound(SchoolNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(SchooljaarNotFoundException.class)
+    public ResponseEntity<String> handleSchooljaarNotFound(SchooljaarNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(OpenLeningenBlokkadeException.class)
+    public ResponseEntity<String> handleOpenLeningenBlokkade(OpenLeningenBlokkadeException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+    }
+
 }

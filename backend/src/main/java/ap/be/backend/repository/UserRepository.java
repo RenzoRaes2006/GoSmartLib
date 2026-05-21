@@ -13,6 +13,8 @@ import org.springframework.stereotype.Repository;
 import ap.be.backend.entity.Rol;
 import ap.be.backend.entity.User;
 
+import java.util.Set;
+
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
@@ -45,5 +47,14 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("SELECT DISTINCT u.klas FROM User u WHERE u.klas IS NOT NULL AND u.klas <> '' ORDER BY u.klas")
     List<String> findDistinctKlassen();
+
+    // Geeft alle actieve leerlingen van een school waarvan de smartschoolId NIET in de meegegeven set zit.
+    // Wordt gebruikt bij rollover om te bepalen welke leerlingen vertrokken zijn (niet meer in OneRoster).
+    // LET OP: gooi een fout in de service als smartschoolIds leeg is — dan zou iedereen als vertrokken worden gemarkeerd.
+    @Query("SELECT u FROM User u WHERE u.school.id = :schoolId AND u.rol = ap.be.backend.entity.Rol.LEERLING AND u.actief = true AND u.smartschoolId NOT IN :smartschoolIds")
+    List<User> findVertrokkenLeerlingen(@Param("schoolId") Long schoolId, @Param("smartschoolIds") Set<String> smartschoolIds);
+
+    // Geeft alle leerkrachten van een school — nodig om bij rollover hun leeslijsten te archiveren.
+    List<User> findBySchool_IdAndRol(Long schoolId, Rol rol);
 
 }
