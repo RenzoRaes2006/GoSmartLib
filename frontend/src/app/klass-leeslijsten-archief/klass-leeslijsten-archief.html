@@ -53,4 +53,25 @@
       }
     </div>
   }
+
+  @if (teBevestigenLijst(); as lijst) {
+    <div class="modal-overlay" (click)="annuleerDearchiveer()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Leeslijst terugzetten</h3>
+        </div>
+        <div class="modal-body">
+          <p>Wil je <strong>{{ lijst.naam }}</strong> terugzetten naar je actieve leeslijsten?</p>
+          <p class="modal-uitleg">
+            De lijst komt terug als <strong>concept</strong> — onzichtbaar voor leerlingen totdat je
+            hem opnieuw publiceert
+          </p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-annuleren" (click)="annuleerDearchiveer()">Annuleren</button>
+          <button class="btn-bevestigen" (click)="bevestigDearchiveer()">Terugzetten</button>
+        </div>
+      </div>
+    </div>
+  }
 </div>

@@ -41,14 +41,23 @@ export class KlassLeeslijstenArchiefComponent implements OnInit {
     });
   }
 
+  teBevestigenLijst = signal<KlassLeeslijst | null>(null);
+
   dearchiveer(lijst: KlassLeeslijst): void {
-    const bevestigd = confirm(
-      `Wil je "${lijst.naam}" dearchiveren? De lijst komt terug bij je actieve leeslijsten als concept (niet zichtbaar voor leerlingen).`
-    );
-    if (!bevestigd) return;
+    this.fout.set(null);
+    this.teBevestigenLijst.set(lijst);
+  }
+
+  annuleerDearchiveer(): void {
+    this.teBevestigenLijst.set(null);
+  }
+
+  bevestigDearchiveer(): void {
+    const lijst = this.teBevestigenLijst();
+    if (!lijst) return;
 
     this.bezigMetId.set(lijst.id);
-    this.fout.set(null);
+    this.teBevestigenLijst.set(null);
     this.leeslijstService.dearchiveer(lijst.id).subscribe({
       next: () => {
         this.archief.update(list => list.filter(l => l.id !== lijst.id));
