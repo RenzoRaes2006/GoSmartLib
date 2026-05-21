@@ -37,10 +37,10 @@ describe('BoekService', () => {
     req.flush('Boek is verwijderd.');
   });
 
-  it('leenBoek stuurt POST naar gebruiker-leen-endpoint', () => {
-    service.leenBoek(2, 5).subscribe();
+  it('leenBoek stuurt POST naar gebruiker-leen-endpoint voor ingelogde user', () => {
+    service.leenBoek(5).subscribe();
 
-    const req = httpMock.expectOne((r) => r.url.endsWith('/api/gebruiker/2/lenen/5'));
+    const req = httpMock.expectOne((r) => r.url.endsWith('/api/gebruiker/me/lenen/5'));
     expect(req.request.method).toBe('POST');
     req.flush('OK');
   });

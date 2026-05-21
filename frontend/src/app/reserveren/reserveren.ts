@@ -67,7 +67,7 @@ export class ReserverenComponent implements OnInit {
     let heeftFouten = false;
 
     this.boekenInMandje.forEach((boek) => {
-      this.boekService.leenBoek(this.ingelogdeGebruikerId, boek.id!).subscribe({
+      this.boekService.leenBoek(boek.id!).subscribe({
         next: () => {
           aantalKlaar++;
           this.checkOfWeKlaarZijn(aantalKlaar, heeftFouten);

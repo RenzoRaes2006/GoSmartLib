@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import ap.be.backend.config.SecurityUtils;
+import ap.be.backend.repository.UserRepository;
 import ap.be.backend.service.GebruikerService;
 import ap.be.backend.dto.GebruikerDTO;
 import ap.be.backend.dto.LeenStatusResponse;
@@ -36,9 +38,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 @RequestMapping("/api/gebruiker")
 public class GebruikerController {
     private final GebruikerService gebruikerService;
+    private final UserRepository userRepository;
 
-    public GebruikerController(GebruikerService gebruikerService) {
+    public GebruikerController(GebruikerService gebruikerService, UserRepository userRepository) {
         this.gebruikerService = gebruikerService;
+        this.userRepository = userRepository;
+    }
+
+    private Long currentUserId() {
+        return SecurityUtils.getCurrentUser(userRepository).getId();
     }
 
     /**
@@ -113,6 +121,37 @@ public class GebruikerController {
             @PathVariable Long boekId) {
         gebruikerService.bevestigUitlening(gebruikerId, boekId);
         return ResponseEntity.ok("Boek succesvol geleend! Je hebt 1 maand de tijd om het terug te brengen.");
+    }
+
+    /**
+     * Variant van checkLeenStatus die de ingelogde gebruiker uit de
+     * SecurityContext (Smartschool JWT) haalt in plaats van uit de URL.
+     * Hierdoor is een lening altijd gekoppeld aan het echte smartschool-account.
+     */
+    @GetMapping("/me/lenen/{boekId}/status")
+    public ResponseEntity<LeenStatusResponse> checkLeenStatusVoorMij(@PathVariable Long boekId) {
+        return ResponseEntity.ok(gebruikerService.checkLeenStatus(currentUserId(), boekId));
+    }
+
+    /**
+     * Variant van leenBoek die de ingelogde gebruiker uit de SecurityContext
+     * (Smartschool JWT) haalt. Voorkomt dat de frontend per ongeluk (of moedwillig)
+     * een andere user-id meestuurt.
+     */
+    @PostMapping("/me/lenen/{boekId}")
+    public ResponseEntity<String> leenBoekVoorMij(@PathVariable Long boekId) {
+        gebruikerService.bevestigUitlening(currentUserId(), boekId);
+        return ResponseEntity.ok("Boek succesvol geleend! Je hebt 1 maand de tijd om het terug te brengen.");
+    }
+
+    /**
+     * Variant van leenBoekenBulk die de ingelogde gebruiker gebruikt.
+     */
+    @PostMapping("/me/lenen/bulk")
+    public ResponseEntity<String> leenBoekenBulkVoorMij(@RequestBody List<Long> boekIds) {
+        gebruikerService.bevestigBulkUitlening(currentUserId(), boekIds);
+        return ResponseEntity
+                .ok(boekIds.size() + " boeken succesvol geleend! Je hebt 1 maand de tijd om ze terug te brengen.");
     }
 
     /**
