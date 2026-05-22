@@ -425,10 +425,12 @@ export class AdminDashboard implements OnInit {
       this.toonLifecycleFout('SmartschoolId is verplicht.');
       return;
     }
+    // Leerkrachten hebben in OneRoster geen klas; alleen leerling-form vraagt 'm.
+    const klas = rol === 'LEERLING' ? (this.nieuweGebruikerKlas().trim() || null) : null;
     const payload: GebruikerCreatePayload = {
       smartschoolId,
       schoolId,
-      klas: this.nieuweGebruikerKlas().trim() || null
+      klas
     };
     this.nieuweGebruikerBezig.set(true);
     this.toonLifecycleFout('');
