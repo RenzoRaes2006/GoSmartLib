@@ -1,5 +1,7 @@
 package ap.be.backend.dto;
 
+import java.time.LocalDate;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public record GebruikerDTO(
@@ -10,5 +12,8 @@ public record GebruikerDTO(
         @JsonProperty("naam") String naam,
         @JsonProperty("klas") String klas,
         @JsonProperty("rol") String rol,
-        @JsonProperty("isBeheerder") boolean isBeheerder) {
+        @JsonProperty("isBeheerder") boolean isBeheerder,
+        @JsonProperty("actief") boolean actief,
+        @JsonProperty("aangekomenOp") LocalDate aangekomenOp,
+        @JsonProperty("vertrokkenOp") LocalDate vertrokkenOp) {
 }

@@ -100,6 +100,7 @@ public class OneRosterImportService {
             if (bestaand.isEmpty()) {
                 User nieuw = new User(smartschoolId, klas, rol);
                 nieuw.setSchool(school);
+                nieuw.setAangekomenOp(java.time.LocalDate.now());
                 userRepository.save(nieuw);
                 t.nieuw++;
                 log.debug("OneRoster {} nieuw: {} (klas={})", rol, smartschoolId, klas);

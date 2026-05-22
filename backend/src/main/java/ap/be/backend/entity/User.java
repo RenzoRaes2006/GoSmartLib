@@ -1,5 +1,6 @@
 package ap.be.backend.entity;
 
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -50,10 +51,18 @@ public class User {
     @Column(nullable = false)
     private boolean isBeheerder = false;
 
-    // Wordt false gezet bij schooljaar-rollover als de leerling niet meer in OneRoster staat.
-    // Inactieve gebruikers kunnen niet meer inloggen of uitlenen, maar hun historiek blijft bewaard.
+    // Wordt false gezet bij schooljaar-rollover als de leerling niet meer in OneRoster staat,
+    // of bij handmatig vertrek via de admin-UI. Inactieve gebruikers kunnen niet meer inloggen
+    // of uitlenen, maar hun historiek blijft bewaard.
     @Column(nullable = false)
     private boolean actief = true;
+
+    // Datum waarop deze gebruiker is toegevoegd (handmatig of via OneRoster-sync). Optioneel
+    // — bestaande rijen blijven null tot ze opnieuw geseed/toegevoegd worden.
+    private LocalDate aangekomenOp;
+
+    // Datum waarop deze gebruiker als vertrokken is gemarkeerd. Null zolang actief=true.
+    private LocalDate vertrokkenOp;
 
     @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)

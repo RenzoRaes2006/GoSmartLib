@@ -1,22 +1,32 @@
 package ap.be.backend.controller;
 
 import ap.be.backend.config.SecurityUtils;
+import ap.be.backend.dto.GebruikerCreateRequest;
 import ap.be.backend.dto.GebruikerDTO;
+import ap.be.backend.entity.Rol;
 import ap.be.backend.entity.School;
 import ap.be.backend.entity.User;
+import ap.be.backend.exception.SchoolNotFoundException;
 import ap.be.backend.mappers.GebruikerMapper;
+import ap.be.backend.repository.SchoolRepository;
 import ap.be.backend.repository.UitleningRepository;
 import ap.be.backend.repository.UserRepository;
+import ap.be.backend.service.GebruikerLifecycleService;
 import ap.be.backend.service.OneRosterClient;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -26,13 +36,19 @@ public class LeerlingController {
     private final UserRepository repo;
     private final UitleningRepository uitleningRepo;
     private final OneRosterClient oneRosterClient;
+    private final GebruikerLifecycleService lifecycleService;
+    private final SchoolRepository schoolRepository;
 
     public LeerlingController(UserRepository repo,
                               UitleningRepository uitlening,
-                              OneRosterClient oneRosterClient) {
+                              OneRosterClient oneRosterClient,
+                              GebruikerLifecycleService lifecycleService,
+                              SchoolRepository schoolRepository) {
         this.repo = repo;
         this.uitleningRepo = uitlening;
         this.oneRosterClient = oneRosterClient;
+        this.lifecycleService = lifecycleService;
+        this.schoolRepository = schoolRepository;
     }
 
     @GetMapping
@@ -122,6 +138,82 @@ public class LeerlingController {
         return huidigeSchool().getId();
     }
 
+    /**
+     * Admin-only: klassen van een specifieke school — bedoeld om de klas-suggesties
+     * te vullen in het admin "nieuwe gebruiker"-form. Probeert eerst OneRoster
+     * (volledige officiële klassenlijst), valt terug op DB als OneRoster onbereikbaar
+     * is of de school geen credentials heeft.
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/admin/klassen")
+    @SuppressWarnings("unchecked")
+    public List<String> getKlassenVoorSchool(@RequestParam Long schoolId) {
+        School school = schoolRepository.findById(schoolId)
+                .orElseThrow(() -> new SchoolNotFoundException(schoolId));
+        if (school.getSmartschoolDomein() == null
+                || school.getOauthClientId() == null
+                || school.getOauthClientSecret() == null) {
+            return repo.findDistinctKlassenBySchoolId(schoolId);
+        }
+        try {
+            Map<String, Object> data = oneRosterClient.haalLiveSchoolDataOp(
+                    school.getSmartschoolDomein(),
+                    school.getOauthClientId(),
+                    school.getOauthClientSecret());
+            List<Map<String, Object>> klassen = (List<Map<String, Object>>) data.getOrDefault("klassen", List.of());
+            List<String> result = klassen.stream()
+                    .map(k -> String.valueOf(k.getOrDefault("naam", "")))
+                    .filter(n -> !n.isBlank())
+                    .distinct()
+                    .sorted()
+                    .toList();
+            return result.isEmpty() ? repo.findDistinctKlassenBySchoolId(schoolId) : result;
+        } catch (Exception e) {
+            return repo.findDistinctKlassenBySchoolId(schoolId);
+        }
+    }
+
+    /**
+     * Admin-only: lijst alle leerlingen van een school inclusief vertrokkenen,
+     * gesorteerd op actief-status. Server-side paging. Bedoeld voor de admin lifecycle-UI.
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/admin")
+    public Page<GebruikerDTO> getAlleLeerlingenInclVertrokken(
+            @RequestParam Long schoolId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size) {
+        Page<User> users = repo.findAlleLeerlingenInclVertrokken(schoolId, PageRequest.of(page, size));
+        Map<String, String[]> naamLookup = bouwNaamLookup(users.getContent());
+        return users.map(u -> {
+            String[] paar = naamLookup.getOrDefault(u.getSmartschoolId(), new String[]{null, null});
+            return GebruikerMapper.toDTO(u, paar[0], paar[1]);
+        });
+    }
+
+    /**
+     * Admin-only: voeg handmatig een leerling toe (bv. een nieuwe inschrijving
+     * die nog niet in OneRoster staat). De smartschoolId moet uniek zijn.
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping
+    public ResponseEntity<GebruikerDTO> voegLeerlingToe(@RequestBody GebruikerCreateRequest request) {
+        User aangemaakt = lifecycleService.voegHandmatigToe(
+                request.smartschoolId(), request.schoolId(), request.klas(), Rol.LEERLING);
+        return ResponseEntity.status(HttpStatus.CREATED).body(GebruikerMapper.toDTO(aangemaakt));
+    }
+
+    /**
+     * Admin-only: markeer een leerling als vertrokken. Geblokkeerd als er nog
+     * open uitleningen op zijn/haar naam staan.
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("/{id}/vertrek")
+    public ResponseEntity<GebruikerDTO> markeerLeerlingVertrokken(@PathVariable Long id) {
+        User user = lifecycleService.markeerVertrokken(id);
+        return ResponseEntity.ok(GebruikerMapper.toDTO(user));
+    }
+
     @GetMapping("/{id}/stats")
     public Map<String, Object> getLeerlingStats(@PathVariable Long id) {
         long totaal = uitleningRepo.countByUser_Id(id);
@@ -134,27 +226,30 @@ public class LeerlingController {
     }
 
     /**
-     * Bouwt een smartschoolId -> volledige-naam map door per unieke school
-     * van de gevraagde users de live OneRoster-data op te halen. Namen worden
-     * niet in de databank bewaard.
+     * Bouwt een smartschoolId -> volledige-naam map voor enkel de meegegeven users
+     * (typisch de huidige pagina). Filtert het OneRoster-resultaat zodat de map
+     * niet onnodig opgeblazen wordt met 100en namen die niemand toont.
      */
     private Map<String, String[]> bouwNaamLookup(List<User> users) {
         Map<String, String[]> result = new HashMap<>();
         if (users == null || users.isEmpty()) return result;
 
+        Set<String> gewensteIds = new HashSet<>();
         Map<Long, School> reedsGehaald = new HashMap<>();
         for (User u : users) {
+            if (u.getSmartschoolId() != null) gewensteIds.add(u.getSmartschoolId());
             School school = u.getSchool();
             if (school == null) continue;
-            if (reedsGehaald.containsKey(school.getId())) continue;
-            reedsGehaald.put(school.getId(), school);
-            vulNamenIn(school, result);
+            reedsGehaald.putIfAbsent(school.getId(), school);
+        }
+        for (School school : reedsGehaald.values()) {
+            vulNamenIn(school, result, gewensteIds);
         }
         return result;
     }
 
     @SuppressWarnings("unchecked")
-    private void vulNamenIn(School school, Map<String, String[]> doel) {
+    private void vulNamenIn(School school, Map<String, String[]> doel, Set<String> gewensteIds) {
         if (school.getSmartschoolDomein() == null
                 || school.getOauthClientId() == null
                 || school.getOauthClientSecret() == null) {
@@ -169,9 +264,10 @@ public class LeerlingController {
                 List<Map<String, Object>> lijst = (List<Map<String, Object>>) data.getOrDefault(sleutel, List.of());
                 for (Map<String, Object> u : lijst) {
                     String id = String.valueOf(u.getOrDefault("id", ""));
+                    if (id.isBlank() || !gewensteIds.contains(id)) continue;
                     String voornaam = String.valueOf(u.getOrDefault("voorNaam", ""));
                     String achternaam = String.valueOf(u.getOrDefault("achternaam", ""));
-                    if (!id.isBlank() && (!voornaam.isBlank() || !achternaam.isBlank())) {
+                    if (!voornaam.isBlank() || !achternaam.isBlank()) {
                         doel.putIfAbsent(id, new String[]{voornaam, achternaam});
                     }
                 }

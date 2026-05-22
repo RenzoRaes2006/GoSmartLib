@@ -24,6 +24,9 @@ public class GebruikerMapper {
                 volledig.isEmpty() ? null : volledig,
                 user.getKlas(),
                 user.getRol() != null ? user.getRol().toString() : null,
-                user.isBeheerder());
+                user.isBeheerder(),
+                user.isActief(),
+                user.getAangekomenOp(),
+                user.getVertrokkenOp());
     }
 }

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import ap.be.backend.dto.AdminStatistiekDTO;
 import ap.be.backend.dto.LeerkrachtStatistiekDTO;
 import ap.be.backend.dto.LeerlingStatistiekDTO;
+import ap.be.backend.entity.Rol;
 import ap.be.backend.entity.User;
 import ap.be.backend.repository.BoekRepository;
 import ap.be.backend.repository.UitleningRepository;
@@ -81,9 +82,10 @@ public class StatistiekService {
     public LeerkrachtStatistiekDTO getLeerkrachtStatistieken(String klasId) {
         String klas = (klasId == null || klasId.isBlank()) ? null : klasId;
 
+        // Tel alleen actieve leerlingen (vertrokken + andere rollen tellen niet mee).
         int aantalLeerlingen = klas == null
-                ? (int) userRepository.count()
-                : (int) userRepository.countByKlasIgnoreCase(klas);
+                ? (int) userRepository.countByRolAndActiefTrue(Rol.LEERLING)
+                : (int) userRepository.countByRolAndKlasIgnoreCaseAndActiefTrue(Rol.LEERLING, klas);
 
         int actief = (int) uitleningRepository.countActieveLeningenVoorKlas(klas, ACTIEVE_STATUSSEN);
         int teLaat = (int) uitleningRepository.countTeLaatVoorKlas(klas, ACTIEVE_STATUSSEN, LocalDate.now());
