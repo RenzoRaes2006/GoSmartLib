@@ -74,6 +74,10 @@ export class AdminDashboard implements OnInit {
   // confirm-modal voor vertrek (vervangt browser confirm())
   vertrekModalDoel = signal<{ gebruiker: AdminGebruiker; rol: 'LEERLING' | 'LEERKRACHT' } | null>(null);
 
+  // confirm-modal voor reactiveer (vertrokken → actief)
+  reactiveerModalDoel = signal<{ gebruiker: AdminGebruiker; rol: 'LEERLING' | 'LEERKRACHT' } | null>(null);
+  reactiveerBezig = signal<number | null>(null);
+
   // Auto-dismiss timer voor lifecycle-foutmelding (5s na laatste set met inhoud).
   private lifecycleFoutTimer: any = null;
   toonLifecycleFout(msg: string) {
@@ -460,6 +464,44 @@ export class AdminDashboard implements OnInit {
   annuleerVertrekModal() {
     if (this.vertrekBezig() !== null) return;
     this.vertrekModalDoel.set(null);
+  }
+
+  openReactiveerModal(gebruiker: AdminGebruiker, rol: 'LEERLING' | 'LEERKRACHT') {
+    this.toonLifecycleFout('');
+    this.reactiveerModalDoel.set({ gebruiker, rol });
+  }
+
+  annuleerReactiveerModal() {
+    if (this.reactiveerBezig() !== null) return;
+    this.reactiveerModalDoel.set(null);
+  }
+
+  bevestigReactiveer() {
+    const doel = this.reactiveerModalDoel();
+    if (!doel) return;
+    const { gebruiker, rol } = doel;
+
+    this.reactiveerBezig.set(gebruiker.id);
+    this.toonLifecycleFout('');
+    const obs = rol === 'LEERLING'
+      ? this.adminGebruikerService.reactiveerLeerling(gebruiker.id)
+      : this.adminGebruikerService.reactiveerLeerkracht(gebruiker.id);
+    obs.subscribe({
+      next: () => {
+        this.reactiveerBezig.set(null);
+        this.reactiveerModalDoel.set(null);
+        const schoolId = this.gebruikersSchoolId();
+        if (schoolId != null) {
+          if (rol === 'LEERLING') this.laadLifecycleLeerlingenPagina(schoolId);
+          else this.laadLifecycleLeerkrachtenPagina(schoolId);
+        }
+      },
+      error: (err) => {
+        this.reactiveerBezig.set(null);
+        this.reactiveerModalDoel.set(null);
+        this.toonLifecycleFout(err?.error ?? 'Reactiveren mislukt.');
+      },
+    });
   }
 
   bevestigVertrek() {

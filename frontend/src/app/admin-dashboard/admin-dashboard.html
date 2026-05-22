@@ -660,7 +660,12 @@
                               Markeer vertrokken
                             </button>
                           } @else {
-                            <span class="text-muted">—</span>
+                            <button
+                              class="btn-outline btn-sm"
+                              (click)="openReactiveerModal(l, 'LEERLING')"
+                            >
+                              Reactiveer
+                            </button>
                           }
                         </td>
                       </tr>
@@ -783,7 +788,12 @@
                               Markeer vertrokken
                             </button>
                           } @else {
-                            <span class="text-muted">—</span>
+                            <button
+                              class="btn-outline btn-sm"
+                              (click)="openReactiveerModal(lk, 'LEERKRACHT')"
+                            >
+                              Reactiveer
+                            </button>
                           }
                         </td>
                       </tr>
@@ -823,6 +833,35 @@
           </div>
         }
       </div>
+
+      <!-- Bevestig-modal voor reactiveer (vertrokken → actief) -->
+      @if (reactiveerModalDoel(); as doel) {
+        <div class="modal-overlay" (click)="annuleerReactiveerModal()">
+          <div class="modal-content" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+              <h3>Reactiveren bevestigen</h3>
+            </div>
+            <div class="modal-body">
+              <p>
+                Wil je
+                <strong>{{ doel.gebruiker.naam || doel.gebruiker.smartschoolId }}</strong>
+                ({{ doel.rol === 'LEERLING' ? 'leerling' : 'leerkracht' }}) terug op actief zetten?
+              </p>
+              <p class="text-muted" style="margin-top: 8px;">
+                De gebruiker kan opnieuw inloggen en lenen. Aankomstdatum wordt op vandaag gezet.
+              </p>
+            </div>
+            <div class="modal-footer">
+              <button class="btn-outline btn-sm" (click)="annuleerReactiveerModal()"
+                      [disabled]="reactiveerBezig() !== null">Annuleren</button>
+              <button class="btn-go btn-sm" (click)="bevestigReactiveer()"
+                      [disabled]="reactiveerBezig() !== null">
+                {{ reactiveerBezig() !== null ? 'Bezig...' : 'Reactiveer' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      }
 
       <!-- Bevestig-modal voor markeer vertrokken -->
       @if (vertrekModalDoel(); as doel) {

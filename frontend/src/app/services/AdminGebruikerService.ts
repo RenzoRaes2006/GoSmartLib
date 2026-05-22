@@ -82,11 +82,19 @@ export class AdminGebruikerService {
     return this.http.patch<AdminGebruiker>(`${this.leerlingApiUrl}/${id}/vertrek`, {});
   }
 
+  reactiveerLeerling(id: number): Observable<AdminGebruiker> {
+    return this.http.patch<AdminGebruiker>(`${this.leerlingApiUrl}/${id}/reactiveer`, {});
+  }
+
   voegLeerkrachtToe(payload: GebruikerCreatePayload): Observable<AdminGebruiker> {
     return this.http.post<AdminGebruiker>(`${this.apiUrl}/leerkrachten`, payload);
   }
 
   markeerLeerkrachtVertrokken(id: number): Observable<AdminGebruiker> {
     return this.http.patch<AdminGebruiker>(`${this.apiUrl}/leerkrachten/${id}/vertrek`, {});
+  }
+
+  reactiveerLeerkracht(id: number): Observable<AdminGebruiker> {
+    return this.http.patch<AdminGebruiker>(`${this.apiUrl}/leerkrachten/${id}/reactiveer`, {});
   }
 }

@@ -116,6 +116,25 @@ public class GebruikerLifecycleService {
         }
     }
 
+    /**
+     * Zet een vertrokken gebruiker terug op actief. Idempotent — al-actieve
+     * gebruikers blijven zoals ze zijn. Werkt zowel voor leerlingen als leerkrachten.
+     */
+    @Transactional
+    public User reactiveer(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GebruikerNotFoundException("Gebruiker met id " + userId + " niet gevonden."));
+
+        if (user.isActief()) {
+            return user;
+        }
+
+        user.setActief(true);
+        user.setVertrokkenOp(null);
+        user.setAangekomenOp(LocalDate.now());
+        return userRepository.save(user);
+    }
+
     @Transactional
     public User markeerVertrokken(Long userId) {
         User user = userRepository.findById(userId)

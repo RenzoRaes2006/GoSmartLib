@@ -214,6 +214,16 @@ public class LeerlingController {
         return ResponseEntity.ok(GebruikerMapper.toDTO(user));
     }
 
+    /**
+     * Admin-only: zet een vertrokken leerling terug op actief.
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("/{id}/reactiveer")
+    public ResponseEntity<GebruikerDTO> reactiveerLeerling(@PathVariable Long id) {
+        User user = lifecycleService.reactiveer(id);
+        return ResponseEntity.ok(GebruikerMapper.toDTO(user));
+    }
+
     @GetMapping("/{id}/stats")
     public Map<String, Object> getLeerlingStats(@PathVariable Long id) {
         long totaal = uitleningRepo.countByUser_Id(id);

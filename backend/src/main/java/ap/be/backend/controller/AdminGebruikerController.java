@@ -120,6 +120,15 @@ public class AdminGebruikerController {
     }
 
     /**
+     * Zet een vertrokken leerkracht terug op actief.
+     */
+    @PatchMapping("/leerkrachten/{id}/reactiveer")
+    public ResponseEntity<GebruikerDTO> reactiveerLeerkracht(@PathVariable Long id) {
+        User user = lifecycleService.reactiveer(id);
+        return ResponseEntity.ok(GebruikerMapper.toDTO(user));
+    }
+
+    /**
      * Bouwt enkel een lookup voor de meegegeven smartschoolIds. Verwijdert de
      * verspilling van het hele school-resultaat in een Map zetten terwijl er
      * maar enkele rijen nodig zijn (pagineerlading).
