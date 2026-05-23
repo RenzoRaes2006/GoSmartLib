@@ -29,24 +29,24 @@ public class BoekFilterControllerTest extends AbstractIntegrationTest {
 
         private BoekDTO dto(String titel, String auteur) {
                 return new BoekDTO(1L, titel, auteur, "1234567890", "Uitg", "2020", 100,
-                                List.of(), "Beschrijving", 1, "Loc", "", null, null, false);
+                                List.of(), "Beschrijving", 1, "Loc", "", null, null, false, null, null);
         }
 
         private BoekenFilters captureFilters() {
                 ArgumentCaptor<BoekenFilters> cap = ArgumentCaptor.forClass(BoekenFilters.class);
-                verify(boekService).filterBoeken(cap.capture(), any(), any());
+                verify(boekService).filterBoeken(cap.capture(), any(), any(), any());
                 return cap.getValue();
         }
 
         private BoekenSort captureSort() {
                 ArgumentCaptor<BoekenSort> cap = ArgumentCaptor.forClass(BoekenSort.class);
-                verify(boekService).filterBoeken(any(), cap.capture(), any());
+                verify(boekService).filterBoeken(any(), cap.capture(), any(), any());
                 return cap.getValue();
         }
 
         @Test
         void givenGeenParameters_whenGetAlleBoeken_thenStatus200EnLegeArray() throws Exception {
-                when(boekService.filterBoeken(any(), any(), any())).thenReturn(new PageImpl<>(List.of()));
+                when(boekService.filterBoeken(any(), any(), any(), any())).thenReturn(new PageImpl<>(List.of()));
 
                 mockMvc.perform(get("/api/boeken"))
                                 .andExpect(status().isOk())
@@ -55,7 +55,7 @@ public class BoekFilterControllerTest extends AbstractIntegrationTest {
 
         @Test
         void givenZoekterm_whenGetAlleBoeken_thenZoektermWordtDoorgegevenAanService() throws Exception {
-                when(boekService.filterBoeken(any(), any(), any()))
+                when(boekService.filterBoeken(any(), any(), any(), any()))
                                 .thenReturn(new PageImpl<>(List.of(dto("De Alchemist", "Paulo Coelho"))));
 
                 mockMvc.perform(get("/api/boeken").param("zoekterm", "alchemist"))
@@ -67,7 +67,7 @@ public class BoekFilterControllerTest extends AbstractIntegrationTest {
 
         @Test
         void givenEnkelTagIdParam_whenGetAlleBoeken_thenTagIdWordtAlsLijstDoorgegevenAanService() throws Exception {
-                when(boekService.filterBoeken(any(), any(), any()))
+                when(boekService.filterBoeken(any(), any(), any(), any()))
                                 .thenReturn(new PageImpl<>(List.of(dto("Socrates", "Plato"))));
 
                 mockMvc.perform(get("/api/boeken").param("tagIds", "42"))
@@ -79,7 +79,7 @@ public class BoekFilterControllerTest extends AbstractIntegrationTest {
 
         @Test
         void givenMeerdereTagIdParams_whenGetAlleBoeken_thenAlleTagIdsWordenVerzameldInLijst() throws Exception {
-                when(boekService.filterBoeken(any(), any(), any()))
+                when(boekService.filterBoeken(any(), any(), any(), any()))
                                 .thenReturn(new PageImpl<>(List.of(dto("Sapiens", "Harari"))));
 
                 mockMvc.perform(get("/api/boeken")
@@ -94,8 +94,8 @@ public class BoekFilterControllerTest extends AbstractIntegrationTest {
         @Test
         void givenLeesniveauParam_whenGetAlleBoeken_thenLeesniveauWordtDoorgegevenAanService() throws Exception {
                 BoekDTO boek = new BoekDTO(1L, "Eenvoudig Boek", "Auteur", "1234567890", "U", "2020", 50,
-                                List.of(), "B", 1, "L", "", null, "A (eenvoudig taalgebruik)", false);
-                when(boekService.filterBoeken(any(), any(), any()))
+                                List.of(), "B", 1, "L", "", null, "A (eenvoudig taalgebruik)", false, null, null);
+                when(boekService.filterBoeken(any(), any(), any(), any()))
                                 .thenReturn(new PageImpl<>(List.of(boek)));
 
                 mockMvc.perform(get("/api/boeken").param("leesniveau", "A (eenvoudig taalgebruik)"))
@@ -108,7 +108,7 @@ public class BoekFilterControllerTest extends AbstractIntegrationTest {
         @Test
         void givenBeschikbaarTrueParam_whenGetAlleBoeken_thenBeschikbaarheidWordtAlsBooleanDoorgegevenAanService()
                         throws Exception {
-                when(boekService.filterBoeken(any(), any(), any()))
+                when(boekService.filterBoeken(any(), any(), any(), any()))
                                 .thenReturn(new PageImpl<>(List.of(dto("Beschikbaar Boek", "Auteur"))));
 
                 mockMvc.perform(get("/api/boeken").param("beschikbaar", "true"))
@@ -119,7 +119,7 @@ public class BoekFilterControllerTest extends AbstractIntegrationTest {
 
         @Test
         void givenBeschikbaarAfwezig_whenGetAlleBoeken_thenBeschikbaarheidIsNullInService() throws Exception {
-                when(boekService.filterBoeken(any(), any(), any()))
+                when(boekService.filterBoeken(any(), any(), any(), any()))
                                 .thenReturn(new PageImpl<>(List.of()));
 
                 mockMvc.perform(get("/api/boeken"))
@@ -130,7 +130,7 @@ public class BoekFilterControllerTest extends AbstractIntegrationTest {
 
         @Test
         void givenSorteerOpEnRichting_whenGetAlleBoeken_thenSortWordtJuistMeegegeven() throws Exception {
-                when(boekService.filterBoeken(any(), any(), any())).thenReturn(new PageImpl<>(List.of()));
+                when(boekService.filterBoeken(any(), any(), any(), any())).thenReturn(new PageImpl<>(List.of()));
 
                 mockMvc.perform(get("/api/boeken")
                                 .param("sorteerOp", "titel")
@@ -146,7 +146,7 @@ public class BoekFilterControllerTest extends AbstractIntegrationTest {
 
         @Test
         void givenZoektermOpAuteur_whenGetAlleBoeken_thenGeeftMatchendeBoeken() throws Exception {
-                when(boekService.filterBoeken(any(), any(), any()))
+                when(boekService.filterBoeken(any(), any(), any(), any()))
                                 .thenReturn(new PageImpl<>(List.of(dto("De Alchemist", "Paulo Coelho"))));
 
                 mockMvc.perform(get("/api/boeken").param("zoekterm", "coelho"))
@@ -159,8 +159,8 @@ public class BoekFilterControllerTest extends AbstractIntegrationTest {
         @Test
         void givenZoektermOpIsbn_whenGetAlleBoeken_thenGeeftMatchendeBoeken() throws Exception {
                 BoekDTO boek = new BoekDTO(1L, "Clean Code", "Robert Martin", "9780132350884", "U", "2020", 100,
-                                List.of(), "B", 1, "L", "", null, null, false);
-                when(boekService.filterBoeken(any(), any(), any()))
+                                List.of(), "B", 1, "L", "", null, null, false, null, null);
+                when(boekService.filterBoeken(any(), any(), any(), any()))
                                 .thenReturn(new PageImpl<>(List.of(boek)));
 
                 mockMvc.perform(get("/api/boeken").param("zoekterm", "9780132350884"))
@@ -170,7 +170,7 @@ public class BoekFilterControllerTest extends AbstractIntegrationTest {
 
         @Test
         void givenZoektermZonderResultaat_whenGetAlleBoeken_thenGeeftLegeArray() throws Exception {
-                when(boekService.filterBoeken(any(), any(), any())).thenReturn(new PageImpl<>(List.of()));
+                when(boekService.filterBoeken(any(), any(), any(), any())).thenReturn(new PageImpl<>(List.of()));
 
                 mockMvc.perform(get("/api/boeken").param("zoekterm", "xyzbestaatnietzzzz"))
                                 .andExpect(status().isOk())
@@ -180,7 +180,7 @@ public class BoekFilterControllerTest extends AbstractIntegrationTest {
 
         @Test
         void givenZoektermMetMeerdereMatches_whenGetAlleBoeken_thenGeeftAlleMatchendeBoeken() throws Exception {
-                when(boekService.filterBoeken(any(), any(), any()))
+                when(boekService.filterBoeken(any(), any(), any(), any()))
                                 .thenReturn(new PageImpl<>(List.of(
                                                 dto("Effective Java", "Joshua Bloch"),
                                                 dto("Java Concurrency", "Brian Goetz"))));
@@ -194,7 +194,7 @@ public class BoekFilterControllerTest extends AbstractIntegrationTest {
 
         @Test
         void givenMinEnMaxPagina_whenGetAlleBoeken_thenPaginaFiltersWordenDoorgegevenAanService() throws Exception {
-                when(boekService.filterBoeken(any(), any(), any()))
+                when(boekService.filterBoeken(any(), any(), any(), any()))
                                 .thenReturn(new PageImpl<>(List.of(dto("Kort Boek", "Auteur"))));
 
                 mockMvc.perform(get("/api/boeken")
@@ -209,7 +209,7 @@ public class BoekFilterControllerTest extends AbstractIntegrationTest {
 
         @Test
         void givenDidactischMateriaalTrue_whenGetAlleBoeken_thenFiltertOpDidactischMateriaal() throws Exception {
-                when(boekService.filterBoeken(any(), any(), any()))
+                when(boekService.filterBoeken(any(), any(), any(), any()))
                                 .thenReturn(new PageImpl<>(List.of(dto("Lesmethode Wiskunde", "Auteur"))));
 
                 mockMvc.perform(get("/api/boeken").param("didactischMateriaal", "true"))

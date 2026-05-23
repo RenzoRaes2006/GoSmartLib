@@ -33,8 +33,12 @@ export class BoekService {
       filters.tagIds.forEach((id) => (params = params.append('tagIds', id.toString())));
     }
 
+    if (filters.campusIds?.length) {
+      filters.campusIds.forEach((id) => (params = params.append('campusIds', id.toString())));
+    }
+
     Object.entries(filters).forEach(([key, value]) => {
-      if (key === 'tagIds') return;
+      if (key === 'tagIds' || key === 'campusIds') return;
       if (value !== undefined && value !== null && value !== '') {
         const paramKey = key === 'beschikbaarheid' ? 'beschikbaar' : key;
         params = params.set(paramKey, value.toString());

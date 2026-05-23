@@ -15,4 +15,6 @@ export interface Boek {
   locatie: string;
   leesniveau?: string;
   didactischMateriaal?: boolean;
+  campusId?: number | null;
+  campusNaam?: string | null;
 }

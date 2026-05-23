@@ -83,6 +83,37 @@
         }
       </select>
 
+      <!-- Sterren filter -->
+      <label for="sterren-filter">Min. gemiddelde sterren</label>
+      <select
+        id="sterren-filter"
+        [ngModel]="minSterren()"
+        (ngModelChange)="onMinSterrenChange($event)"
+        class="sidebar-input"
+      >
+        <option [ngValue]="null">Alle ratings</option>
+        <option [ngValue]="1">★ 1+</option>
+        <option [ngValue]="2">★★ 2+</option>
+        <option [ngValue]="3">★★★ 3+</option>
+        <option [ngValue]="4">★★★★ 4+</option>
+        <option [ngValue]="5">★★★★★ 5</option>
+      </select>
+
+      <!-- Campus filter (multi-select) — alleen tonen bij 2+ campussen -->
+      @if (beschikbareCampussen().length > 1) {
+        <label>Campus</label>
+        <div class="checkbox-group" style="margin-bottom: 10px;">
+          @for (c of beschikbareCampussen(); track c.id) {
+            <label class="checkbox-option">
+              <input type="checkbox"
+                     [checked]="isCampusGefilterd(c.id)"
+                     (change)="toggleCampusFilter(c.id)" />
+              <span>{{ c.naam }}</span>
+            </label>
+          }
+        </div>
+      }
+
       <!-- 5. Leesniveau -->
       <label for="leesniveau-filter">Leesniveau</label>
       <select

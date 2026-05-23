@@ -12,6 +12,7 @@ import {
 import { RouterLink } from '@angular/router';
 import { BoekService } from '../services/boek.service';
 import { TagService } from '../services/tag.service';
+import { CampusService, Campus } from '../services/campus.service';
 import { NieuwBoek } from '../models/NieuwBoek';
 import { GoogleBookService } from '../services/googleBook.service';
 import { Boek } from '../models/Boek';
@@ -64,9 +65,12 @@ export class BoekBeheer implements OnInit {
 
   // Tag dropdowns — gevuld uit /api/tags door tagService.list()
   private tagService = inject(TagService);
+  private campusService = inject(CampusService);
   beschikbareGenres = signal<Tag[]>([]);
   beschikbareThematischeTags = signal<Tag[]>([]);
   beschikbareDidactischeTags = signal<Tag[]>([]);
+  beschikbareCampussen = signal<Campus[]>([]);
+  campusFilterIds = signal<number[]>([]);
 
   selectedGenreId = signal<number | null>(null);
   selectedSubGenreId = signal<number | null>(null);
@@ -94,6 +98,7 @@ export class BoekBeheer implements OnInit {
       afbeelding: [''],
       leesniveau: [''],
       didactischMateriaal: [false],
+      campusId: [null as number | null],
     });
   }
 
@@ -101,6 +106,10 @@ export class BoekBeheer implements OnInit {
     this.tagService.tree('GENRE').subscribe((t) => this.beschikbareGenres.set(t));
     this.tagService.list('THEMATISCH').subscribe((t) => this.beschikbareThematischeTags.set(t));
     this.tagService.list('DIDACTISCH').subscribe((t) => this.beschikbareDidactischeTags.set(t));
+    this.campusService.getMijnCampussen().subscribe({
+      next: (c) => this.beschikbareCampussen.set(c ?? []),
+      error: () => this.beschikbareCampussen.set([]),
+    });
 
     this.route.queryParams.subscribe((params) => {
       const urlMode = params['mode'];
@@ -210,6 +219,7 @@ export class BoekBeheer implements OnInit {
       afbeelding: boek.afbeelding,
       leesniveau: boek.leesniveau || '',
       didactischMateriaal: !!boek.didactischMateriaal,
+      campusId: boek.campusId ?? null,
     };
   }
 
@@ -462,9 +472,13 @@ export class BoekBeheer implements OnInit {
   // Laad een pagina met boeken voor het overzicht, inclusief paginering.
   laadBoekenPagina(page: number = 0) {
     this.isLoadingBoeken.set(true);
-    this.boekService.getBoekenPaged(page, this.pageSize).subscribe({
+    const filters: FilterOptions = { page, size: this.pageSize };
+    const ids = this.campusFilterIds();
+    if (ids.length > 0) {
+      filters.campusIds = ids;
+    }
+    this.boekService.getBoekenGefilterd(filters).subscribe({
       next: (response) => {
-        // We krijgen een PageResponse terug van de API, die de boeken bevat in response.content en ook informatie over het totale aantal pagina's en elementen.
         this.boeknOverzicht.set(response.content);
         this.currentPage.set(response.number);
         this.totaalPages.set(response.totalPages);
@@ -475,6 +489,26 @@ export class BoekBeheer implements OnInit {
         this.isLoadingBoeken.set(false);
       },
     });
+  }
+
+  // Toggle een campus in de filter en herlaad de lijst.
+  toggleCampusFilter(campusId: number) {
+    const huidige = this.campusFilterIds();
+    if (huidige.includes(campusId)) {
+      this.campusFilterIds.set(huidige.filter((id) => id !== campusId));
+    } else {
+      this.campusFilterIds.set([...huidige, campusId]);
+    }
+    this.laadBoekenPagina(0);
+  }
+
+  isCampusGefilterd(campusId: number): boolean {
+    return this.campusFilterIds().includes(campusId);
+  }
+
+  wisCampusFilter() {
+    this.campusFilterIds.set([]);
+    this.laadBoekenPagina(0);
   }
 
   gaNaarVolgendePagina() {
@@ -502,6 +536,10 @@ export class BoekBeheer implements OnInit {
   private laadZoekResultaten(page: number) {
     this.isLoadingBoeken.set(true);
     const filters: FilterOptions = { zoekterm: this.zoekTerm() };
+    const ids = this.campusFilterIds();
+    if (ids.length > 0) {
+      filters.campusIds = ids;
+    }
     this.boekService.getBeheerBoekenGefilterd(filters, page, this.pageSize).subscribe({
       next: (response) => {
         this.boeknOverzicht.set(response.content);
@@ -532,6 +570,10 @@ export class BoekBeheer implements OnInit {
           // Zoek en toon resultaten in de lijst
           this.isLoadingBoeken.set(true);
           const filters: FilterOptions = { zoekterm: this.zoekTerm() };
+          const ids = this.campusFilterIds();
+          if (ids.length > 0) {
+            filters.campusIds = ids;
+          }
           this.boekService.getBeheerBoekenGefilterd(filters, 0, this.pageSize).subscribe({
             next: (response) => {
               this.boeknOverzicht.set(response.content);

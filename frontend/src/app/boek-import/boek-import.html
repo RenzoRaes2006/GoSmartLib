@@ -74,6 +74,27 @@
       </div>
     } @else {
       <div class="preview-container">
+        @if (beschikbareCampussen().length > 0) {
+          <div style="display:flex; gap:12px; align-items:center; padding:10px; background:#f7f7f7; border-radius:6px; margin-bottom:10px;">
+            <strong>Campus voor alle nieuwe boeken:</strong>
+            <select
+              [ngModel]="defaultCampusId()"
+              (ngModelChange)="defaultCampusId.set($event)"
+              class="edit-input"
+              style="max-width:240px;"
+            >
+              <option [ngValue]="null">Geen campus (globaal)</option>
+              @for (c of beschikbareCampussen(); track c.id) {
+                <option [ngValue]="c.id">{{ c.naam }}</option>
+              }
+            </select>
+            <button type="button" class="btn-secondary" (click)="pasDefaultCampusToeOpAlle()">
+              Pas toe op alle nieuwe boeken
+            </button>
+            <small style="color:#666;">Tip: kies eerst de default, klik 'Pas toe op alle', wijzig daarna per rij waar nodig.</small>
+          </div>
+        }
+
         <div class="preview-header-row">
           <div class="header-cell col-status" style="flex: 1">Status</div>
           <div class="header-cell col-titel">Titel (verplicht)</div>
@@ -219,6 +240,21 @@
                     <label>Locatie (kast)</label>
                     <input type="text" [(ngModel)]="boek.locatie" class="edit-input" />
                   </div>
+                  @if (beschikbareCampussen().length > 0) {
+                    <div class="input-group">
+                      <label>Campus</label>
+                      <select
+                        [ngModel]="boek.bulkCampusId"
+                        (ngModelChange)="setBoekCampus(boek, $event)"
+                        class="edit-input"
+                      >
+                        <option [ngValue]="null">Geen campus</option>
+                        @for (c of beschikbareCampussen(); track c.id) {
+                          <option [ngValue]="c.id">{{ c.naam }}</option>
+                        }
+                      </select>
+                    </div>
+                  }
                   <div class="input-group">
                     <label>Leesniveau</label>
                     <select [(ngModel)]="boek.leesniveau" class="edit-input">

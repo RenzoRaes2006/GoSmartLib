@@ -4,6 +4,7 @@ import { Boek } from '../models/Boek';
 import { Tag } from '../models/Tag';
 import { BoekService } from '../services/boek.service';
 import { TagService } from '../services/tag.service';
+import { CampusService, Campus } from '../services/campus.service';
 import { Router, RouterLink, NavigationStart } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
@@ -49,11 +50,15 @@ export class Catalogus implements OnInit, OnDestroy {
   beschikbareGenres = signal<Tag[]>([]);
   beschikbareThematischeTags = signal<Tag[]>([]);
   beschikbareDidactischeTags = signal<Tag[]>([]);
+  beschikbareCampussen = signal<Campus[]>([]);
+  selectedCampusIds = signal<number[]>([]);
+  minSterren = signal<number | null>(null);
 
   private readonly FILTERS_KEYS = 'catalogus_filters';
 
   private boekService = inject(BoekService);
   private tagService = inject(TagService);
+  private campusService = inject(CampusService);
   private router = inject(Router);
 
   private navSub: Subscription = this.router.events
@@ -89,6 +94,10 @@ export class Catalogus implements OnInit, OnDestroy {
     this.tagService.tree('GENRE').subscribe((t) => this.beschikbareGenres.set(t));
     this.tagService.list('THEMATISCH').subscribe((t) => this.beschikbareThematischeTags.set(t));
     this.tagService.list('DIDACTISCH').subscribe((t) => this.beschikbareDidactischeTags.set(t));
+    this.campusService.getMijnCampussen().subscribe({
+      next: (c) => this.beschikbareCampussen.set(c ?? []),
+      error: () => this.beschikbareCampussen.set([]),
+    });
 
     const stored = sessionStorage.getItem(this.FILTERS_KEYS);
     if (stored) {
@@ -110,6 +119,8 @@ export class Catalogus implements OnInit, OnDestroy {
         this.leesniveau.set(f.leesniveau);
         this.toonDidactisch.set(f.toonDidactisch || false);
         this.huidigePagina.set(f.huidigePagina || 0);
+        this.selectedCampusIds.set(Array.isArray(f.selectedCampusIds) ? f.selectedCampusIds : []);
+        this.minSterren.set(f.minSterren ?? null);
 
         this.updateFilters(false);
         return;
@@ -168,6 +179,8 @@ export class Catalogus implements OnInit, OnDestroy {
       uitgaveJaarVan: this.uitgaveJaarVan(),
       uitgaveJaarTot: this.uitgaveJaarTot(),
       leesniveau: this.leesniveau(),
+      campusIds: this.selectedCampusIds().length > 0 ? this.selectedCampusIds() : undefined,
+      minSterren: this.minSterren() ?? undefined,
       page: this.huidigePagina(),
       size: this.paginaGrootte(),
     };
@@ -191,9 +204,25 @@ export class Catalogus implements OnInit, OnDestroy {
       uitgaveJaarTot: this.uitgaveJaarTot(),
       toonDidactisch: this.toonDidactisch(),
       leesniveau: this.leesniveau(),
+      selectedCampusIds: this.selectedCampusIds(),
+      minSterren: this.minSterren(),
       huidigePagina: this.huidigePagina(),
     };
     sessionStorage.setItem(this.FILTERS_KEYS, JSON.stringify(huidigeFilters));
+  }
+
+  toggleCampusFilter(id: number): void {
+    const huidige = this.selectedCampusIds();
+    if (huidige.includes(id)) {
+      this.selectedCampusIds.set(huidige.filter((c) => c !== id));
+    } else {
+      this.selectedCampusIds.set([...huidige, id]);
+    }
+    this.updateFilters();
+  }
+
+  isCampusGefilterd(id: number): boolean {
+    return this.selectedCampusIds().includes(id);
   }
 
   onMinPaginaSlider(event: Event): void {
@@ -248,7 +277,14 @@ export class Catalogus implements OnInit, OnDestroy {
     this.uitgaveJaarTot.set(undefined);
     this.leesniveau.set(undefined);
     this.toonDidactisch.set(false);
+    this.selectedCampusIds.set([]);
+    this.minSterren.set(null);
     this.huidigePagina.set(0);
+    this.updateFilters();
+  }
+
+  onMinSterrenChange(waarde: number | null): void {
+    this.minSterren.set(waarde);
     this.updateFilters();
   }
 

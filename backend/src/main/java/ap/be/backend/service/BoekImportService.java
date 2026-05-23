@@ -3,10 +3,12 @@ package ap.be.backend.service;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
@@ -19,9 +21,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import ap.be.backend.entity.Boek;
+import ap.be.backend.entity.Campus;
 import ap.be.backend.entity.Tag;
 import ap.be.backend.entity.TagType;
 import ap.be.backend.repository.BoekRepository;
+import ap.be.backend.repository.CampusRepository;
 import ap.be.backend.repository.TagRepository;
 import ap.be.backend.exception.InvalidImportDataException;
 
@@ -39,10 +43,13 @@ public class BoekImportService {
 
     private final BoekRepository boekRepository;
     private final TagRepository tagRepository;
+    private final CampusRepository campusRepository;
 
-    public BoekImportService(BoekRepository boekRepository, TagRepository tagRepository) {
+    public BoekImportService(BoekRepository boekRepository, TagRepository tagRepository,
+            CampusRepository campusRepository) {
         this.boekRepository = boekRepository;
         this.tagRepository = tagRepository;
+        this.campusRepository = campusRepository;
     }
 
     /**
@@ -104,6 +111,18 @@ public class BoekImportService {
                 boekRepository.save(bestaandBoek);
             } else {
                 nieuwBoek.setAantalExemplaren(toeTeVoegenExemplaren);
+                if (nieuwBoek.getBulkCampusId() != null) {
+                    Campus campus = campusRepository.findById(nieuwBoek.getBulkCampusId()).orElse(null);
+                    nieuwBoek.setCampus(campus);
+                }
+                Set<Tag> managedTags = new HashSet<>();
+                if (nieuwBoek.getTags() != null) {
+                    for (Tag t : nieuwBoek.getTags()) {
+                        if (t == null || t.getId() == null) continue;
+                        tagRepository.findById(t.getId()).ifPresent(managedTags::add);
+                    }
+                }
+                nieuwBoek.setTags(managedTags);
                 boekRepository.save(nieuwBoek);
             }
 

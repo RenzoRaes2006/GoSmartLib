@@ -12,7 +12,9 @@ public record BoekenFilters(
         Integer uitgaveJaarVan,
         Integer uitgaveJaarTot,
         String leesniveau,
-        Boolean didactischMateriaal) {
+        Boolean didactischMateriaal,
+        List<Long> campusIds,
+        Integer minSterren) {
 
     public Boolean beschikbaarAsBoolean() {
         return beschikbaar != null ? Boolean.parseBoolean(beschikbaar) : null;

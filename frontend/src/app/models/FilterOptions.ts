@@ -11,6 +11,8 @@ export interface FilterOptions {
   uitgaveJaarTot?: number;
   leesniveau?: string;
   didactischMateriaal?: string;
+  campusIds?: number[];
+  minSterren?: number;
   page?: number;
   size?: number;
 }

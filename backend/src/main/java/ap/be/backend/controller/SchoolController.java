@@ -11,6 +11,7 @@ import ap.be.backend.entity.Campus;
 import ap.be.backend.entity.School;
 import ap.be.backend.mappers.SchoolMapper;
 import ap.be.backend.entity.User;
+import ap.be.backend.repository.BoekRepository;
 import ap.be.backend.repository.CampusRepository;
 import ap.be.backend.repository.SchoolRepository;
 import ap.be.backend.repository.UserRepository;
@@ -36,19 +37,22 @@ public class SchoolController {
     private final OneRosterImportService importService;
     private final CampusRepository campusRepository;
     private final UserRepository userRepository;
+    private final BoekRepository boekRepository;
 
     public SchoolController(SchoolRepository schoolRepository,
                             SchoolOnboardingService onboardingService,
                             OneRosterClient oneRosterClient,
                             OneRosterImportService importService,
                             CampusRepository campusRepository,
-                            UserRepository userRepository) {
+                            UserRepository userRepository,
+                            BoekRepository boekRepository) {
         this.schoolRepository = schoolRepository;
         this.onboardingService = onboardingService;
         this.oneRosterClient = oneRosterClient;
         this.importService = importService;
         this.campusRepository = campusRepository;
         this.userRepository = userRepository;
+        this.boekRepository = boekRepository;
     }
 
     @GetMapping
@@ -174,10 +178,34 @@ public class SchoolController {
         return ResponseEntity.ok(Map.of("id", opgeslagen.getId(), "naam", opgeslagen.getNaam()));
     }
 
+    @PutMapping("/{id}/campussen/{campusId}")
+    public ResponseEntity<?> hernoemCampus(@PathVariable Long id, @PathVariable Long campusId,
+                                           @RequestBody CampusDTO dto) {
+        Optional<School> schoolOpt = schoolRepository.findById(id);
+        if (schoolOpt.isEmpty()) return ResponseEntity.notFound().build();
+        if (dto.getNaam() == null || dto.getNaam().isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Campusnaam is verplicht"));
+        }
+        Optional<Campus> campusOpt = campusRepository.findById(campusId);
+        if (campusOpt.isEmpty() || !campusOpt.get().getSchool().getId().equals(id)) {
+            return ResponseEntity.notFound().build();
+        }
+        Campus campus = campusOpt.get();
+        campus.setNaam(dto.getNaam().trim());
+        Campus opgeslagen = campusRepository.save(campus);
+        return ResponseEntity.ok(Map.of("id", opgeslagen.getId(), "naam", opgeslagen.getNaam()));
+    }
+
     @DeleteMapping("/{id}/campussen/{campusId}")
     public ResponseEntity<?> verwijderCampus(@PathVariable Long id, @PathVariable Long campusId) {
         Optional<School> schoolOpt = schoolRepository.findById(id);
         if (schoolOpt.isEmpty()) return ResponseEntity.notFound().build();
+        long aantalBoeken = boekRepository.countByCampus_Id(campusId);
+        if (aantalBoeken > 0) {
+            return ResponseEntity.status(409).body(Map.of(
+                    "error", "Campus heeft nog " + aantalBoeken + " gekoppelde boek(en) en kan niet verwijderd worden",
+                    "aantalBoeken", aantalBoeken));
+        }
         School school = schoolOpt.get();
         boolean removed = school.getCampussen().removeIf(c -> c.getId().equals(campusId));
         if (!removed) return ResponseEntity.notFound().build();

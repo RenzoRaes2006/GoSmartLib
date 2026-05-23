@@ -40,6 +40,12 @@ export class Navbar implements OnInit {
     return this.authService.currentUser()?.role === 'teacher' ? '/leerkracht-dashboard' : '/';
   }
 
+  // Leerling/leerkracht zien deze links; beheerder en admin niet.
+  get toonLeerlingLinks(): boolean {
+    const rol = this.authService.currentUser()?.role;
+    return rol !== 'beheerder' && rol !== 'admin';
+  }
+
   wisselDevRole(event: Event) {
     const nieuw = (event.target as HTMLSelectElement).value as DevRole;
     this.authService.setDevRole(nieuw);

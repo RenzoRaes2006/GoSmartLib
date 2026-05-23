@@ -14,7 +14,12 @@ import ap.be.backend.entity.Boek;
 public interface BoekRepository extends JpaRepository<Boek, Long> {
         Optional<Boek> findByIsbn(String isbn);
 
-        @Query("SELECT DISTINCT b FROM Boek b LEFT JOIN b.tags t WHERE " +
+        @Query("SELECT DISTINCT b FROM Boek b " +
+                        "LEFT JOIN b.tags t " +
+                        "LEFT JOIN b.campus c " +
+                        "LEFT JOIN c.school s WHERE " +
+                        "(:schoolId IS NULL OR c IS NULL OR s.id = :schoolId) AND " +
+                        "(:campusIds IS NULL OR c.id IN :campusIds) AND " +
                         "(:didactischMateriaal IS NULL OR b.didactischMateriaal = :didactischMateriaal) AND " +
                         "(:zoekterm IS NULL OR LOWER(b.titel) LIKE LOWER(CONCAT('%', :zoekterm, '%')) OR " +
                         "LOWER(b.auteur) LIKE LOWER(CONCAT('%', :zoekterm, '%')) OR " +
@@ -28,7 +33,9 @@ public interface BoekRepository extends JpaRepository<Boek, Long> {
                         "  (:beschikbaar = false AND b.aantalExemplaren = 0)) AND " +
                         "(:uitgaveJaarVan IS NULL OR b.uitgaveJaar >= :uitgaveJaarVan) AND " +
                         "(:uitgaveJaarTot IS NULL OR b.uitgaveJaar <= :uitgaveJaarTot) AND " +
-                        "(:leesniveau IS NULL OR b.leesniveau = :leesniveau)")
+                        "(:leesniveau IS NULL OR b.leesniveau = :leesniveau) AND " +
+                        "(:minSterren IS NULL OR " +
+                        "  (SELECT COALESCE(AVG(beo.waardering), 0) FROM Beoordeling beo WHERE beo.boek = b) >= :minSterren)")
         Page<Boek> filterBoeken(@Param("zoekterm") String zoekterm,
                         @Param("tagIds") List<Long> tagIds,
                         @Param("uitgever") String uitgever,
@@ -39,7 +46,12 @@ public interface BoekRepository extends JpaRepository<Boek, Long> {
                         @Param("uitgaveJaarTot") Integer uitgaveJaarTot,
                         @Param("leesniveau") String leesniveau,
                         @Param("didactischMateriaal") Boolean didactischMateriaal,
+                        @Param("schoolId") Long schoolId,
+                        @Param("campusIds") List<Long> campusIds,
+                        @Param("minSterren") Integer minSterren,
                         Pageable pageable);
+
+        long countByCampus_Id(Long campusId);
 
         Page<Boek> findByDidactischMateriaalTrue(Pageable pageable);
 
