@@ -57,6 +57,10 @@ export class AdminDashboard implements OnInit {
   promotieBezig = signal<number | null>(null);
   geselecteerdeRollenSchoolId = signal<number | null>(null);
 
+  // confirm-modal voor beheerder-rol togglen (vervangt browser confirm/alert)
+  beheerderModalDoel = signal<AdminGebruiker | null>(null);
+  beheerderModalFout = signal<string>('');
+
   // gebruikers-tab state (lifecycle: nieuwe leerling/leerkracht + markeer vertrokken)
   gebruikersSchoolId = signal<number | null>(null);
   lifecycleLeerlingen = signal<AdminGebruiker[]>([]);
@@ -563,24 +567,35 @@ export class AdminDashboard implements OnInit {
     });
   }
 
-  toggleBeheerder(leerkracht: AdminGebruiker) {
+  openBeheerderModal(leerkracht: AdminGebruiker) {
+    this.beheerderModalFout.set('');
+    this.beheerderModalDoel.set(leerkracht);
+  }
+
+  annuleerBeheerderModal() {
+    if (this.promotieBezig() !== null) return;
+    this.beheerderModalDoel.set(null);
+    this.beheerderModalFout.set('');
+  }
+
+  bevestigBeheerderToggle() {
+    const leerkracht = this.beheerderModalDoel();
+    if (!leerkracht) return;
     const nieuweWaarde = !leerkracht.isBeheerder;
-    const actie = nieuweWaarde ? 'beheerder maken' : 'de beheerder-rol intrekken bij';
-    const wie = leerkracht.naam || leerkracht.smartschoolId;
-    const bevestigd = confirm(`Weet je zeker dat je ${wie} wilt ${actie}?`);
-    if (!bevestigd) return;
 
     this.promotieBezig.set(leerkracht.id);
+    this.beheerderModalFout.set('');
     this.adminGebruikerService.setBeheerder(leerkracht.id, nieuweWaarde).subscribe({
       next: (geupdate) => {
         this.leerkrachten.update(lijst =>
           lijst.map(l => (l.id === geupdate.id ? geupdate : l))
         );
         this.promotieBezig.set(null);
+        this.beheerderModalDoel.set(null);
       },
       error: (err) => {
         console.error('error toggling beheerder:', err);
-        alert('Kan de status niet wijzigen. Probeer opnieuw.');
+        this.beheerderModalFout.set('Kan de status niet wijzigen. Probeer opnieuw.');
         this.promotieBezig.set(null);
       }
     });

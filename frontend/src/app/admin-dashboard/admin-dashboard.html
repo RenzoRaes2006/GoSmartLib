@@ -242,7 +242,7 @@
                           type="checkbox"
                           [checked]="leerkracht.isBeheerder"
                           [disabled]="promotieBezig() === leerkracht.id"
-                          (change)="toggleBeheerder(leerkracht)"
+                          (change)="openBeheerderModal(leerkracht)"
                         />
                         <span class="toggle-track">
                           <span class="toggle-thumb"></span>
@@ -269,6 +269,38 @@
           </div>
         }
       </div>
+
+      <!-- Bevestig-modal voor beheerder-rol togglen -->
+      @if (beheerderModalDoel(); as doel) {
+        <div class="modal-overlay" (click)="annuleerBeheerderModal()">
+          <div class="modal-content" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+              <h3>{{ doel.isBeheerder ? 'Beheerder-rol intrekken' : 'Beheerder maken' }}</h3>
+            </div>
+            <div class="modal-body">
+              <p>
+                Weet je zeker dat je
+                <strong>{{ doel.naam || doel.smartschoolId }}</strong>
+                {{ doel.isBeheerder ? 'de beheerder-rol wilt intrekken?' : 'beheerder wilt maken?' }}
+              </p>
+              @if (beheerderModalFout()) {
+                <p class="form-error" style="margin-top: 8px;">{{ beheerderModalFout() }}</p>
+              }
+            </div>
+            <div class="modal-footer">
+              <button class="btn-outline btn-sm" (click)="annuleerBeheerderModal()"
+                      [disabled]="promotieBezig() !== null">Annuleren</button>
+              <button
+                [class]="doel.isBeheerder ? 'btn-go btn-sm btn-delete' : 'btn-go btn-sm'"
+                (click)="bevestigBeheerderToggle()"
+                [disabled]="promotieBezig() !== null"
+              >
+                {{ promotieBezig() !== null ? 'Bezig...' : (doel.isBeheerder ? 'Intrekken' : 'Maak beheerder') }}
+              </button>
+            </div>
+          </div>
+        </div>
+      }
     }
 
     @if (activeTab() === 'wizard') {
