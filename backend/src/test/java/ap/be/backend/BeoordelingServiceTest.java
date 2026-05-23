@@ -35,6 +35,7 @@ import ap.be.backend.repository.UserRepository;
 import ap.be.backend.repository.GerapporteerdeBeoordelingRepository;
 import ap.be.backend.service.BeoordelingService;
 import ap.be.backend.service.FilterService;
+import ap.be.backend.service.OneRosterService;
 
 @ExtendWith(MockitoExtension.class)
 public class BeoordelingServiceTest {
@@ -53,6 +54,9 @@ public class BeoordelingServiceTest {
 
     @Mock
     private FilterService filterService;
+
+    @Mock
+    private OneRosterService oneRosterService;
 
     @InjectMocks
     private BeoordelingService beoordelingService;
@@ -124,13 +128,30 @@ public class BeoordelingServiceTest {
         when(userRepository.findBySmartschoolId(SMARTSCHOOL_ID)).thenReturn(Optional.of(testGebruiker));
         when(gerapporteerdeBeoordelingRepository.existsByBeoordelingIdAndUserMelder_Id(10L, 1L))
                 .thenReturn(true);
+        when(oneRosterService.getNaamBySourcedId(SMARTSCHOOL_ID)).thenReturn("Jan Janssens");
 
         List<BeoordelingDTO> result = beoordelingService.getBeoordelingenOpBoekId(BOEK_ID);
 
         assertEquals(1, result.size());
         assertEquals("Geweldig boek!", result.get(0).inhoud());
         assertTrue(result.get(0).gerapporteerd());
+        assertEquals("Jan Janssens", result.get(0).gebruikerNaam());
         verify(beoordelingRepository, times(1)).findByBoekId(BOEK_ID);
+        verify(oneRosterService, times(1)).getNaamBySourcedId(SMARTSCHOOL_ID);
+    }
+
+    @Test
+    void givenAnonieme_whenGetBeoordelingenOpBoekId_thenToontAnoniemEnRoeptOneRosterNiet() {
+        testBeoordeling.setAnoniem(true);
+        when(boekRepository.existsById(BOEK_ID)).thenReturn(true);
+        when(beoordelingRepository.findByBoekId(BOEK_ID)).thenReturn(List.of(testBeoordeling));
+        when(userRepository.findBySmartschoolId(SMARTSCHOOL_ID)).thenReturn(Optional.of(testGebruiker));
+
+        List<BeoordelingDTO> result = beoordelingService.getBeoordelingenOpBoekId(BOEK_ID);
+
+        assertEquals(1, result.size());
+        assertEquals("Anoniem", result.get(0).gebruikerNaam());
+        verify(oneRosterService, never()).getNaamBySourcedId(any());
     }
 
     @Test

@@ -23,15 +23,18 @@ public class BeoordelingService {
     private final GerapporteerdeBeoordelingRepository gerapporteerdeBeoordelingRepository;
     private final UserRepository userRepository;
     private final FilterService filterService;
+    private final OneRosterService oneRosterService;
 
     public BeoordelingService(BeoordelingRepository beoordelingRepository, BoekRepository boekRepository,
             GerapporteerdeBeoordelingRepository gerapporteerdeBeoordelingRepository,
-            UserRepository userRepository, FilterService filterService) {
+            UserRepository userRepository, FilterService filterService,
+            OneRosterService oneRosterService) {
         this.beoordelingRepository = beoordelingRepository;
         this.boekRepository = boekRepository;
         this.gerapporteerdeBeoordelingRepository = gerapporteerdeBeoordelingRepository;
         this.userRepository = userRepository;
         this.filterService = filterService;
+        this.oneRosterService = oneRosterService;
     }
 
     public List<BeoordelingDTO> getBeoordelingenOpBoekId(Long bookId) {
@@ -45,7 +48,11 @@ public class BeoordelingService {
         return beoordelingen.stream().map(beoordeling -> {
             boolean isGerapporteerd = gerapporteerdeBeoordelingRepository
                     .existsByBeoordelingIdAndUserMelder_Id(beoordeling.getId(), huidigeUserId);
-            return BeoordelingMapper.toDTO(beoordeling, isGerapporteerd);
+            String naam = null;
+            if (!beoordeling.isAnoniem() && beoordeling.getUser() != null) {
+                naam = oneRosterService.getNaamBySourcedId(beoordeling.getUser().getSmartschoolId());
+            }
+            return BeoordelingMapper.toDTO(beoordeling, isGerapporteerd, naam);
         }).toList();
     }
 

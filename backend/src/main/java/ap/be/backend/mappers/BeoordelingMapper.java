@@ -11,33 +11,27 @@ import ap.be.backend.entity.User;
 public class BeoordelingMapper {
 
     /**
-     * Zet een beoordeling om naar een DTO. Het gerapporteerd-veld wordt op
-     * false gezet.
-     *
-     * @param beoordeling de te converteren entiteit
-     * @return de beoordeling als DTO
-     */
-    public static BeoordelingDTO toDTO(Beoordeling beoordeling) {
-        return toDTO(beoordeling, false);
-    }
-
-    /**
      * Zet een beoordeling om naar een DTO.
      *
      * Als de beoordeling anoniem is, wordt "Anoniem" als weergavenaam gebruikt.
-     * Anders wordt de smartschoolId van de gebruiker getoond. De naam wordt
-     * niet opgeslagen in de database en is dus niet beschikbaar.
+     * Anders wordt de meegegeven naam (live opgehaald uit OneRoster) getoond;
+     * valt die weg, dan wordt teruggevallen op de smartschoolId.
      *
-     * @param beoordeling  de te converteren entiteit
+     * @param beoordeling   de te converteren entiteit
      * @param gerapporteerd geeft aan of de beoordeling als ongepast is gemeld
+     * @param naam          de volledige naam van de gebruiker uit OneRoster,
+     *                      of null als die niet beschikbaar is
      * @return de beoordeling als DTO
      */
-    public static BeoordelingDTO toDTO(Beoordeling beoordeling, boolean gerapporteerd) {
-        // Namen worden niet opgeslagen; anonieme beoordelingen tonen "Anoniem",
-        // andere beoordelingen tonen de smartschoolId als identificatie.
-        String weergaveNaam = beoordeling.isAnoniem()
-                ? "Anoniem"
-                : (beoordeling.getUser() != null ? beoordeling.getUser().getSmartschoolId() : null);
+    public static BeoordelingDTO toDTO(Beoordeling beoordeling, boolean gerapporteerd, String naam) {
+        String weergaveNaam;
+        if (beoordeling.isAnoniem()) {
+            weergaveNaam = "Anoniem";
+        } else if (naam != null && !naam.isBlank()) {
+            weergaveNaam = naam;
+        } else {
+            weergaveNaam = beoordeling.getUser() != null ? beoordeling.getUser().getSmartschoolId() : null;
+        }
 
         return new BeoordelingDTO(
                 beoordeling.getId(),
