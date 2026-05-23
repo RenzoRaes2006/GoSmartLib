@@ -255,14 +255,18 @@ public class OneRosterService {
             String accessToken = getAccessToken();
             if (accessToken == null) return null;
 
-            String url = baseUrl + "/users/" + sourcedId;
+            // /users/{sourcedId} geeft HTML terug op Smartschool's OneRoster;
+            // het filter-endpoint (zoals in getUserByUsername) werkt wel.
+            String url = baseUrl + "/users?filter=sourcedId='" + sourcedId + "'";
             ResponseEntity<Map> response = restTemplate.exchange(
                     url, HttpMethod.GET, new HttpEntity<>(buildBearerHeaders(accessToken)), Map.class);
 
             @SuppressWarnings("unchecked")
-            Map<String, Object> user = (Map<String, Object>) response.getBody().get("user");
-            if (user == null) return null;
+            List<Map<String, Object>> users =
+                    (List<Map<String, Object>>) response.getBody().get("users");
+            if (users == null || users.isEmpty()) return null;
 
+            Map<String, Object> user = users.get(0);
             String givenName = (String) user.get("givenName");
             String familyName = (String) user.get("familyName");
 
