@@ -7,10 +7,12 @@ import org.springframework.web.bind.annotation.*;
 import ap.be.backend.dto.CampusDTO;
 import ap.be.backend.dto.SchoolDTO;
 import ap.be.backend.dto.SchoolOnboardDTO;
+import ap.be.backend.entity.BeschikbareSchool;
 import ap.be.backend.entity.Campus;
 import ap.be.backend.entity.School;
 import ap.be.backend.mappers.SchoolMapper;
 import ap.be.backend.entity.User;
+import ap.be.backend.repository.BeschikbareSchoolRepository;
 import ap.be.backend.repository.BoekRepository;
 import ap.be.backend.repository.CampusRepository;
 import ap.be.backend.repository.SchoolRepository;
@@ -38,6 +40,7 @@ public class SchoolController {
     private final CampusRepository campusRepository;
     private final UserRepository userRepository;
     private final BoekRepository boekRepository;
+    private final BeschikbareSchoolRepository beschikbareSchoolRepository;
 
     public SchoolController(SchoolRepository schoolRepository,
                             SchoolOnboardingService onboardingService,
@@ -45,7 +48,8 @@ public class SchoolController {
                             OneRosterImportService importService,
                             CampusRepository campusRepository,
                             UserRepository userRepository,
-                            BoekRepository boekRepository) {
+                            BoekRepository boekRepository,
+                            BeschikbareSchoolRepository beschikbareSchoolRepository) {
         this.schoolRepository = schoolRepository;
         this.onboardingService = onboardingService;
         this.oneRosterClient = oneRosterClient;
@@ -53,11 +57,48 @@ public class SchoolController {
         this.campusRepository = campusRepository;
         this.userRepository = userRepository;
         this.boekRepository = boekRepository;
+        this.beschikbareSchoolRepository = beschikbareSchoolRepository;
     }
 
     @GetMapping
     public List<SchoolDTO> getAlleScholen() {
         return schoolRepository.findAll().stream().map(SchoolMapper::toDTO).toList();
+    }
+
+    // --- BESCHIKBARE SCHOLEN (catalogus) ---
+
+    @GetMapping("/beschikbaar")
+    public List<BeschikbareSchool> getBeschikbareScholen() {
+        List<String> geregistreerdeNamen = schoolRepository.findAll().stream()
+                .map(School::getNaam).toList();
+        return beschikbareSchoolRepository.findAll().stream()
+                .filter(bs -> !geregistreerdeNamen.contains(bs.getNaam()))
+                .toList();
+    }
+
+    @PostMapping("/beschikbaar")
+    public ResponseEntity<?> voegBeschikbareSchoolToe(@RequestBody BeschikbareSchool school) {
+        if (school.getNaam() == null || school.getNaam().isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Schoolnaam is verplicht"));
+        }
+        if (school.getAdres() == null || school.getAdres().isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Adres is verplicht"));
+        }
+        if (beschikbareSchoolRepository.existsByNaam(school.getNaam().trim())) {
+            return ResponseEntity.badRequest().body(Map.of("error", "School bestaat al in de catalogus"));
+        }
+        school.setNaam(school.getNaam().trim());
+        school.setAdres(school.getAdres().trim());
+        return ResponseEntity.ok(beschikbareSchoolRepository.save(school));
+    }
+
+    @DeleteMapping("/beschikbaar/{id}")
+    public ResponseEntity<Void> verwijderBeschikbareSchool(@PathVariable Long id) {
+        if (!beschikbareSchoolRepository.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+        beschikbareSchoolRepository.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 
     // --- WIZARD ENDPOINTS ---

@@ -1,33 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, OnInit, signal, inject } from '@angular/core';
+import { Component, OnInit, signal, inject } from '@angular/core';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { SchoolService } from '../services/School.Service';
 import { AdminTags } from '../admin-tags/admin-tags';
 import { AdminSchooljaar } from '../admin-schooljaar/admin-schooljaar';
 import { AdminGebruiker, AdminGebruikerService, GebruikerCreatePayload } from '../services/AdminGebruikerService';
-
-// static list of all official secondary schools under go! scholengroep antwerpen
-const GO_ANTWERPEN_SCHOLEN = [
-  { naam: 'AP Hogeschool Antwerpen', adres: 'Noorderplaats 2, 2000 Antwerpen' },
-  { naam: 'GO! Atheneum Antwerpen', adres: 'Franklin Rooseveltplaats 11, 2060 Antwerpen' },
-  { naam: 'GO! Koninklijk Lyceum Antwerpen', adres: 'Kasteelpleinstraat 31, 2000 Antwerpen' },
-  { naam: 'GO! Kunsthumaniora Antwerpen', adres: 'Karel Oomsstraat 24, 2018 Antwerpen' },
-  { naam: 'GO! Topsportschool Antwerpen', adres: 'Edegemsesteenweg 100, 2610 Wilrijk' },
-  { naam: 'GO! Spectrumschool (Campus Ruggeveld)', adres: 'Ruggeveldlaan 496, 2100 Deurne' },
-  { naam: 'GO! Spectrumschool (Campus Plantin)', adres: 'Plantin en Moretuslei 165, 2140 Borgerhout' },
-  { naam: 'GO! Atheneum Deurne', adres: 'Hooftvunderlei 160, 2100 Deurne' },
-  { naam: 'GO! Atheneum Hoboken', adres: 'Lage Weg 100, 2660 Hoboken' },
-  { naam: 'GO! De Scheepvaartschool - Cenflumarin', adres: 'Gloriantlaan 75, 2050 Antwerpen' },
-  { naam: 'GO! Atheneum Schoten', adres: 'Villerslei 124, 2900 Schoten' },
-  { naam: 'GO! Atheneum Brasschaat', adres: 'Augustijnslei 46, 2930 Brasschaat' },
-  { naam: 'GO! KTA Kapellen', adres: 'Pastoor Vandenhoudtstraat 8, 2950 Kapellen' },
-  { naam: 'GO! Middenschool Centrum Antwerpen', adres: 'Lange Nieuwstraat 105, 2000 Antwerpen' },
-  { naam: 'GO! KMS (Koninklijke Middenschool)', adres: 'Kasteelpleinstraat 31, 2000 Antwerpen' },
-  { naam: 'GO! De Es (Buitengewoon secundair)', adres: 'Karel Oomsstraat 24, 2018 Antwerpen' },
-  { naam: 'GO! SBSO Zonnebos (Campus Brasschaat)', adres: 'Sint-Antoniuslei 95, 2930 Brasschaat' },
-  { naam: 'GO! SBSO Zonnebos (Campus Antwerpen)', adres: 'Karel Oomsstraat 24, 2018 Antwerpen' }
-];
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -108,6 +86,12 @@ export class AdminDashboard implements OnInit {
   // state for the list of saved schools
   geregistreerdeScholen = signal<any[]>([]);
 
+  // beschikbare scholen (catalogus uit de database, gefilterd op niet-geregistreerd)
+  beschikbareScholen = signal<{ id: number; naam: string; adres: string }[]>([]);
+  nieuweBeschikbareNaam = signal<string>('');
+  nieuweBeschikbareAdres = signal<string>('');
+  beschikbareFout = signal<string>('');
+
   // wizard state
   huidigeStapWizard = signal<number>(1);
   totaleStappen = 5;
@@ -145,14 +129,9 @@ export class AdminDashboard implements OnInit {
     })
   });
 
-  beschikbareScholen = computed(() => {
-    const scholen = this.geregistreerdeScholen() || [];
-    const geregistreerdeNamen = scholen.map(s => s?.naam).filter(Boolean);
-    return GO_ANTWERPEN_SCHOLEN.filter(school => !geregistreerdeNamen.includes(school.naam));
-  });
-
   ngOnInit() {
     this.laadScholenUitDatabase();
+    this.laadBeschikbareScholen();
   }
 
   // --- campus form array helpers ---
@@ -183,6 +162,40 @@ export class AdminDashboard implements OnInit {
         adres: school.adres
       });
     }
+  }
+
+  // --- beschikbare scholen beheer ---
+  laadBeschikbareScholen() {
+    this.http.get<{ id: number; naam: string; adres: string }[]>(`${this.apiBase}/beschikbaar`).subscribe({
+      next: (scholen) => this.beschikbareScholen.set(scholen ?? []),
+      error: () => this.beschikbareScholen.set([])
+    });
+  }
+
+  voegBeschikbareSchoolToe() {
+    const naam = this.nieuweBeschikbareNaam().trim();
+    const adres = this.nieuweBeschikbareAdres().trim();
+    if (!naam || !adres) {
+      this.beschikbareFout.set('Naam en adres zijn verplicht.');
+      return;
+    }
+    this.beschikbareFout.set('');
+    this.http.post<any>(`${this.apiBase}/beschikbaar`, { naam, adres }).subscribe({
+      next: () => {
+        this.nieuweBeschikbareNaam.set('');
+        this.nieuweBeschikbareAdres.set('');
+        this.laadBeschikbareScholen();
+      },
+      error: (err) => this.beschikbareFout.set(err?.error?.error ?? 'Toevoegen mislukt.')
+    });
+  }
+
+  verwijderBeschikbareSchool(school: { id: number; naam: string }) {
+    this.beschikbareFout.set('');
+    this.http.delete(`${this.apiBase}/beschikbaar/${school.id}`).subscribe({
+      next: () => this.laadBeschikbareScholen(),
+      error: () => this.beschikbareFout.set('Verwijderen mislukt.')
+    });
   }
 
   // --- wizard navigation ---
@@ -272,6 +285,7 @@ export class AdminDashboard implements OnInit {
     this.campussen.clear();
     this.campussen.push(this.maakCampusVeld());
     this.laadScholenUitDatabase();
+    this.laadBeschikbareScholen();
     this.wisselTab('scholen');
   }
 
@@ -680,6 +694,7 @@ export class AdminDashboard implements OnInit {
       this.schoolService.verwijderSchool(school.id).subscribe({
         next: () => {
           this.geregistreerdeScholen.update(scholen => scholen.filter(s => s.id !== school.id));
+          this.laadBeschikbareScholen();
         },
         error: () => alert('Fout bij het verwijderen van de school.')
       });

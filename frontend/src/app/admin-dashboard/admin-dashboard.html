@@ -182,6 +182,74 @@
           </table>
         </div>
       </div>
+
+      <div class="admin-card" style="margin-top: 24px">
+        <div class="card-header">
+          <h2>Scholencatalogus beheren</h2>
+        </div>
+        <p class="text-muted" style="padding: 0 20px">
+          Scholen die beschikbaar zijn voor onboarding. Reeds geregistreerde scholen worden automatisch
+          uit de wizard-dropdown gefilterd.
+        </p>
+
+        <div class="table-responsive">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Naam school</th>
+                <th>Adres</th>
+                <th>Acties</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (school of beschikbareScholen(); track school.id) {
+                <tr>
+                  <td>{{ school.naam }}</td>
+                  <td>{{ school.adres }}</td>
+                  <td>
+                    <button class="btn-outline btn-sm btn-delete"
+                            (click)="verwijderBeschikbareSchool(school)">
+                      Verwijderen
+                    </button>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="3" class="text-muted text-center" style="padding: 20px">
+                    Alle scholen uit de catalogus zijn geregistreerd.
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <div style="padding: 20px; border-top: 1px solid #e5e7eb">
+          <h4 style="margin-top: 0">Nieuwe school aan catalogus toevoegen</h4>
+          <div style="display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap">
+            <div class="form-group" style="flex: 1; min-width: 200px; margin-bottom: 0">
+              <label>Schoolnaam</label>
+              <input class="form-input" placeholder="bv. GO! Atheneum Berchem"
+                     [value]="nieuweBeschikbareNaam()"
+                     (input)="nieuweBeschikbareNaam.set($any($event.target).value)" />
+            </div>
+            <div class="form-group" style="flex: 1; min-width: 200px; margin-bottom: 0">
+              <label>Adres</label>
+              <input class="form-input" placeholder="bv. Straatnaam 1, 2000 Antwerpen"
+                     [value]="nieuweBeschikbareAdres()"
+                     (input)="nieuweBeschikbareAdres.set($any($event.target).value)"
+                     (keyup.enter)="voegBeschikbareSchoolToe()" />
+            </div>
+            <button class="btn-go btn-sm" (click)="voegBeschikbareSchoolToe()"
+                    [disabled]="!nieuweBeschikbareNaam().trim() || !nieuweBeschikbareAdres().trim()">
+              + Toevoegen
+            </button>
+          </div>
+          @if (beschikbareFout()) {
+            <p style="color: #c0392b; margin-top: 10px">{{ beschikbareFout() }}</p>
+          }
+        </div>
+      </div>
     }
 
     @if (activeTab() === 'rollen') {
@@ -331,24 +399,26 @@
               <h3>1. Schoolgegevens</h3>
               <hr class="divider" />
 
-              <div class="form-group">
-                <label>Kies een GO! school</label>
-                <select class="form-input" (change)="onSchoolGeselecteerd($event)">
-                  <option value="" selected disabled>Selecteer uit de lijst...</option>
-                  @for (school of beschikbareScholen(); track school.naam) {
-                    <option [value]="school.naam">{{ school.naam }}</option>
-                  }
-                </select>
-              </div>
+              @if (beschikbareScholen().length > 0) {
+                <div class="form-group">
+                  <label>Kies een GO! school</label>
+                  <select class="form-input" (change)="onSchoolGeselecteerd($event)">
+                    <option value="" selected disabled>Selecteer uit de lijst...</option>
+                    @for (school of beschikbareScholen(); track school.id) {
+                      <option [value]="school.naam">{{ school.naam }}</option>
+                    }
+                  </select>
+                </div>
+              }
 
               <div class="form-group">
                 <label>Schoolnaam</label>
-                <input formControlName="schoolNaam" class="form-input" type="text" />
+                <input formControlName="schoolNaam" class="form-input" type="text" placeholder="bv. GO! Atheneum Antwerpen" />
               </div>
 
               <div class="form-group">
                 <label>Adres</label>
-                <input formControlName="adres" class="form-input" type="text" />
+                <input formControlName="adres" class="form-input" type="text" placeholder="bv. Franklin Rooseveltplaats 11, 2060 Antwerpen" />
               </div>
 
               <div class="form-group">
