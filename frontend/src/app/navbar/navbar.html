@@ -34,20 +34,22 @@
 
     <div class="divider"></div>
 
-    <a routerLink="/leeslijst" class="nav-link">
-      <span class="text-label">Mijn lijsten</span>
-    </a>
+    @if (toonLeerlingLinks) {
+      <a routerLink="/leeslijst" class="nav-link">
+        <span class="text-label">Mijn lijsten</span>
+      </a>
 
-    <a routerLink="/reserveren" class="nav-link cart-link">
-      <span class="icon">🛒</span>
-      @if (aantalInMandje > 0) {
-        <span class="cart-badge">{{ aantalInMandje }}</span>
-      }
-    </a>
+      <a routerLink="/reserveren" class="nav-link cart-link">
+        <span class="icon">🛒</span>
+        @if (aantalInMandje > 0) {
+          <span class="cart-badge">{{ aantalInMandje }}</span>
+        }
+      </a>
 
-    <a routerLink="/leengeschiedenis" class="nav-icon-btn" title="Mijn Profiel">
-      <span class="icon">👤</span>
-    </a>
+      <a routerLink="/leengeschiedenis" class="nav-icon-btn" title="Mijn Profiel">
+        <span class="icon">👤</span>
+      </a>
+    }
 
     <button class="nav-icon-btn logout-btn" title="Uitloggen" (click)="logout()">
       <span class="icon">➜]</span>

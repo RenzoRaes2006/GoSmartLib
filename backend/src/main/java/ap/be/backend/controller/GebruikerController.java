@@ -1,6 +1,7 @@
 package ap.be.backend.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,6 +17,7 @@ import ap.be.backend.dto.GebruikerDTO;
 import ap.be.backend.dto.LeenStatusResponse;
 import ap.be.backend.dto.LeeslijstMapDTO;
 import ap.be.backend.dto.UitleningDTO;
+import ap.be.backend.entity.School;
 import ap.be.backend.entity.User;
 import ap.be.backend.mappers.GebruikerMapper;
 
@@ -306,5 +308,23 @@ public class GebruikerController {
     public ResponseEntity<GebruikerDTO> getLeerlingBySmartschoolId(@PathVariable String smartschoolId) {
         User leerling = gebruikerService.getLeerlingBySmartschoolId(smartschoolId);
         return ResponseEntity.ok(GebruikerMapper.toDTO(leerling));
+    }
+
+    /**
+     * Geeft de campussen terug van de school waaraan de ingelogde gebruiker
+     * gekoppeld is. Wordt door de catalogus- en boek-beheer-schermen gebruikt
+     * om campus-dropdowns te vullen.
+     */
+    @GetMapping("/me/campussen")
+    public ResponseEntity<List<Map<String, Object>>> getCampussenVoorMij() {
+        User user = SecurityUtils.getCurrentUser(userRepository);
+        School school = user.getSchool();
+        if (school == null || school.getCampussen() == null) {
+            return ResponseEntity.ok(List.of());
+        }
+        List<Map<String, Object>> lijst = school.getCampussen().stream()
+                .map(c -> Map.<String, Object>of("id", c.getId(), "naam", c.getNaam()))
+                .toList();
+        return ResponseEntity.ok(lijst);
     }
 }

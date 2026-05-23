@@ -32,35 +32,35 @@ public class BoekControllerTest extends AbstractIntegrationTest {
         @Test
         public void givenSearchTerm_whenGetAlleBoekenCalled_thenCallsFilterBoekenInService() throws Exception {
                 Page<BoekDTO> page = new PageImpl<>(List.of());
-                Mockito.when(boekService.filterBoeken(any(), any(), any())).thenReturn(page);
+                Mockito.when(boekService.filterBoeken(any(), any(), any(), any())).thenReturn(page);
 
                 mockMvc.perform(get("/api/boeken").param("zoekterm", "java"))
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$.content").isArray());
 
-                Mockito.verify(boekService).filterBoeken(any(), any(), any());
+                Mockito.verify(boekService).filterBoeken(any(), any(), any(), any());
         }
 
         @Test
         public void givenNoSearchTerm_whenGetAlleBoekenCalled_thenCallsFilterBoekenInService() throws Exception {
                 Page<BoekDTO> page = new PageImpl<>(List.of());
-                Mockito.when(boekService.filterBoeken(any(), any(), any())).thenReturn(page);
+                Mockito.when(boekService.filterBoeken(any(), any(), any(), any())).thenReturn(page);
 
                 mockMvc.perform(get("/api/boeken")).andExpect(status().isOk());
 
-                Mockito.verify(boekService).filterBoeken(any(), any(), any());
+                Mockito.verify(boekService).filterBoeken(any(), any(), any(), any());
         }
 
         @Test
         public void givenDidactischFilters_whenGetAlleBoekenCalled_thenCallsFilterBoekenInService() throws Exception {
                 Page<BoekDTO> page = new PageImpl<>(List.of());
-                Mockito.when(boekService.filterBoeken(any(), any(), any())).thenReturn(page);
+                Mockito.when(boekService.filterBoeken(any(), any(), any(), any())).thenReturn(page);
 
                 mockMvc.perform(get("/api/boeken")
                                 .param("didactischMateriaal", "true"))
                                 .andExpect(status().isOk());
 
-                Mockito.verify(boekService).filterBoeken(any(), any(), any());
+                Mockito.verify(boekService).filterBoeken(any(), any(), any(), any());
         }
 
         // --- POST: BOEK TOEVOEGEN ---

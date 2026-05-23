@@ -14,12 +14,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import ap.be.backend.config.SecurityUtils;
 import ap.be.backend.dto.BoekDTO;
 import ap.be.backend.dto.BoekenFilters;
 import ap.be.backend.dto.BoekenSort;
 import ap.be.backend.dto.PageRequestParams;
 import ap.be.backend.entity.Boek;
 import ap.be.backend.mappers.BoekMapper;
+import ap.be.backend.repository.UserRepository;
 import ap.be.backend.service.BoekImportService;
 import ap.be.backend.service.BoekService;
 import jakarta.validation.Valid;
@@ -31,10 +33,13 @@ import org.springframework.web.bind.annotation.PutMapping;
 public class BoekController {
     private final BoekService boekService;
     private final BoekImportService boekImportService;
+    private final UserRepository userRepository;
 
-    public BoekController(BoekService boekService, BoekImportService boekImportService) {
+    public BoekController(BoekService boekService, BoekImportService boekImportService,
+            UserRepository userRepository) {
         this.boekService = boekService;
         this.boekImportService = boekImportService;
+        this.userRepository = userRepository;
     }
 
     @GetMapping("/api/boeken")
@@ -42,7 +47,8 @@ public class BoekController {
             @ModelAttribute BoekenFilters filters,
             @ModelAttribute BoekenSort sort,
             @ModelAttribute PageRequestParams paging) {
-        return boekService.filterBoeken(filters, sort, paging);
+        Long schoolId = SecurityUtils.getCurrentSchoolIdOrNull(userRepository);
+        return boekService.filterBoeken(filters, sort, paging, schoolId);
     }
 
     @PreAuthorize("hasRole('BEHEERDER')")

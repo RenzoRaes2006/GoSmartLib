@@ -70,6 +70,10 @@ public class Boek {
     @Column(nullable = false, columnDefinition = "boolean default false")
     private boolean didactischMateriaal;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "campus_id")
+    private Campus campus;
+
     @OneToMany(mappedBy = "boek", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Beoordeling> beoordelingen;
 
@@ -84,6 +88,9 @@ public class Boek {
 
     @Transient
     private boolean bestaatAl;
+
+    @Transient
+    private Long bulkCampusId;
 
     public Boek(String titel, String auteur) {
         this.titel = titel;

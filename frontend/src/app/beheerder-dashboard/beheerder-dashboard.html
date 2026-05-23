@@ -43,7 +43,11 @@
 
     <a routerLink="/gerapporteerde-beoordelingen" class="action-tile clickable">
       <h3>Reviews modereren</h3>
-      <span class="badge">12 nieuwe</span>
+      @if (aantalRapportages() > 0) {
+        <span class="badge">{{ aantalRapportages() }} nieuw{{ aantalRapportages() === 1 ? '' : 'e' }}</span>
+      } @else {
+        <span class="badge" style="background:#e2e8f0; color:#475569;">Geen openstaande</span>
+      }
     </a>
 
     <a routerLink="/beheerder/archief" class="action-tile clickable">

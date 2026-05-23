@@ -23,5 +23,7 @@ public record BoekDTO(
         @JsonProperty("afbeelding") String afbeelding,
         @JsonProperty("populariteit") Double populariteit,
         @JsonProperty("leesniveau") String leesniveau,
-        @JsonProperty("didactischMateriaal") Boolean didactischMateriaal) {
+        @JsonProperty("didactischMateriaal") Boolean didactischMateriaal,
+        @JsonProperty("campusId") Long campusId,
+        @JsonProperty("campusNaam") String campusNaam) {
 }
