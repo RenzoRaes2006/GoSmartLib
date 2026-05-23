@@ -1,7 +1,11 @@
 <div class="admin-layout">
   <header class="admin-header">
     <div class="header-content">
-      <img src="https://go-antwerpen.be/wp-content/uploads/2021/11/logo_go_antwerpen.svg" alt="GO! Antwerpen" class="go-logo">
+      <img
+        src="https://go-antwerpen.be/wp-content/uploads/2021/11/logo_go_antwerpen.svg"
+        alt="GO! Antwerpen"
+        class="go-logo"
+      />
       <div class="header-titles">
         <h1>Systeembeheer</h1>
         <p class="subtitle">Centraal beheer van scholen, gebruikers en instellingen</p>
@@ -26,11 +30,13 @@
       <button [class.active]="activeTab() === 'schooljaar'" (click)="wisselTab('schooljaar')">
         Schooljaar
       </button>
+      <button [class.active]="activeTab() === 'gebruikers'" (click)="wisselTab('gebruikers')">
+        Gebruikers beheren
+      </button>
     </div>
   </nav>
 
   <main class="admin-content">
-
     @if (activeTab() === 'scholen') {
       <div class="admin-card">
         <div class="card-header">
@@ -49,9 +55,22 @@
             <tbody>
               @for (school of geregistreerdeScholen(); track school.id) {
                 <tr>
-                  <td><strong>{{ school.naam }}</strong><br><small class="text-muted">{{ school.adres }}</small></td>
                   <td>
-                    <span class="badge" style="background: #e2fbd7; color: #348a45; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem; font-weight: 600;">
+                    <strong>{{ school.naam }}</strong
+                    ><br /><small class="text-muted">{{ school.adres }}</small>
+                  </td>
+                  <td>
+                    <span
+                      class="badge"
+                      style="
+                        background: #e2fbd7;
+                        color: #348a45;
+                        padding: 4px 8px;
+                        border-radius: 4px;
+                        font-size: 0.85rem;
+                        font-weight: 600;
+                      "
+                    >
                       Actief ({{ school.apiCode }})
                     </span>
                   </td>
@@ -59,64 +78,103 @@
                     <button class="btn-outline btn-sm" (click)="bewerkCampussenVoor(school)">
                       {{ bewerkSchoolId() === school.id ? 'Sluiten' : 'Bewerken' }}
                     </button>
-                    <button class="btn-outline btn-sm btn-delete" style="margin-left: 8px;" (click)="verwijderSchool(school)">Verwijderen</button>
+                    <button
+                      class="btn-outline btn-sm btn-delete"
+                      style="margin-left: 8px"
+                      (click)="verwijderSchool(school)"
+                    >
+                      Verwijderen
+                    </button>
                   </td>
                 </tr>
                 @if (bewerkSchoolId() === school.id) {
                   <tr>
-                    <td colspan="3" style="background:#f7f9fc; padding: 20px;">
-                      <h4 style="margin-top:0;">Campussen van {{ school.naam }}</h4>
+                    <td colspan="3" style="background: #f7f9fc; padding: 20px">
+                      <h4 style="margin-top: 0">Campussen van {{ school.naam }}</h4>
 
                       @if (bewerkCampussen().length === 0) {
                         <p class="text-muted">Nog geen campussen.</p>
                       } @else {
-                        <ul style="list-style:none; padding:0; margin: 0 0 15px 0;">
+                        <ul style="list-style: none; padding: 0; margin: 0 0 15px 0">
                           @for (c of bewerkCampussen(); track c.id) {
-                            <li style="display:flex; align-items:center; gap:10px; padding:6px 0; border-bottom:1px solid #e5e7eb;">
-                              <span style="flex:1;">{{ c.naam }}</span>
-                              <button type="button" class="btn-outline btn-sm btn-delete" (click)="verwijderBestaandeCampus(c)">Verwijderen</button>
+                            <li
+                              style="
+                                display: flex;
+                                align-items: center;
+                                gap: 10px;
+                                padding: 6px 0;
+                                border-bottom: 1px solid #e5e7eb;
+                              "
+                            >
+                              <span style="flex: 1">{{ c.naam }}</span>
+                              <button
+                                type="button"
+                                class="btn-outline btn-sm btn-delete"
+                                (click)="verwijderBestaandeCampus(c)"
+                              >
+                                Verwijderen
+                              </button>
                             </li>
                           }
                         </ul>
                       }
 
-                      <div style="display:flex; gap:10px; align-items:center;">
-                        <input class="form-input" style="flex:1;" placeholder="Naam nieuwe campus"
-                               [value]="nieuweCampusNaam()"
-                               (input)="nieuweCampusNaam.set($any($event.target).value)"
-                               (keyup.enter)="voegCampusToeAanBestaande()">
-                        <button type="button" class="btn-go btn-sm" (click)="voegCampusToeAanBestaande()"
-                                [disabled]="!nieuweCampusNaam().trim()">
+                      <div style="display: flex; gap: 10px; align-items: center">
+                        <input
+                          class="form-input"
+                          style="flex: 1"
+                          placeholder="Naam nieuwe campus"
+                          [value]="nieuweCampusNaam()"
+                          (input)="nieuweCampusNaam.set($any($event.target).value)"
+                          (keyup.enter)="voegCampusToeAanBestaande()"
+                        />
+                        <button
+                          type="button"
+                          class="btn-go btn-sm"
+                          (click)="voegCampusToeAanBestaande()"
+                          [disabled]="!nieuweCampusNaam().trim()"
+                        >
                           + Campus toevoegen
                         </button>
                       </div>
 
-                      <hr style="margin: 20px 0;">
+                      <hr style="margin: 20px 0" />
 
                       <div>
-                        <h4 style="margin-top:0;">Leerkrachten en leerlingen synchroniseren</h4>
-                        <p class="text-muted" style="margin-top:0;">
-                          Haalt opnieuw alle leerlingen en leerkrachten op uit OneRoster en koppelt ze aan deze school.
-                          Nodig voor scholen die geïmporteerd zijn vóór de school-koppeling bestond, of om nieuwe gebruikers binnen te halen.
+                        <h4 style="margin-top: 0">Leerkrachten en leerlingen synchroniseren</h4>
+                        <p class="text-muted" style="margin-top: 0">
+                          Haalt opnieuw alle leerlingen en leerkrachten op uit OneRoster en koppelt
+                          ze aan deze school. Nodig voor scholen die geïmporteerd zijn vóór de
+                          school-koppeling bestond, of om nieuwe gebruikers binnen te halen.
                         </p>
-                        <button type="button" class="btn-go btn-sm" (click)="syncGebruikersVanSchool()" [disabled]="syncBezig()">
-                          {{ syncBezig() ? 'Bezig met synchroniseren...' : 'Synchroniseer gebruikers' }}
+                        <button
+                          type="button"
+                          class="btn-go btn-sm"
+                          (click)="syncGebruikersVanSchool()"
+                          [disabled]="syncBezig()"
+                        >
+                          {{
+                            syncBezig() ? 'Bezig met synchroniseren...' : 'Synchroniseer gebruikers'
+                          }}
                         </button>
                         @if (syncResultaat()) {
-                          <p style="color:#348a45; margin-top:10px; font-weight:600;">{{ syncResultaat() }}</p>
+                          <p style="color: #348a45; margin-top: 10px; font-weight: 600">
+                            {{ syncResultaat() }}
+                          </p>
                         }
                       </div>
 
                       @if (bewerkFout()) {
-                        <p style="color:#c0392b; margin-top:10px;">{{ bewerkFout() }}</p>
+                        <p style="color: #c0392b; margin-top: 10px">{{ bewerkFout() }}</p>
                       }
                     </td>
                   </tr>
                 }
               } @empty {
                 <tr>
-                  <td colspan="3" class="text-muted text-center" style="padding: 30px;">
-                    Geen scholen gevonden in de database. Gebruik de wizard om een school toe te voegen.
+                  <td colspan="3" class="text-muted text-center" style="padding: 30px">
+                    Geen scholen gevonden in de database. Gebruik de wizard om een school toe te
+                    voegen.
                   </td>
                 </tr>
               }
@@ -132,7 +190,7 @@
           <h2>Leerkrachten promoveren tot beheerder</h2>
         </div>
 
-        <div class="form-group" style="max-width: 500px; margin-bottom: 20px;">
+        <div class="form-group" style="max-width: 500px; margin-bottom: 20px">
           <label>Selecteer school</label>
           <select class="form-input" (change)="onRollenSchoolGeselecteerd($event)">
             <option value="" selected>-- Kies een geregistreerde school --</option>
@@ -143,9 +201,11 @@
         </div>
 
         @if (geselecteerdeRollenSchoolId() == null) {
-          <p class="text-muted" style="padding: 20px;">Kies eerst een school om de leerkrachten te zien.</p>
+          <p class="text-muted" style="padding: 20px">
+            Kies eerst een school om de leerkrachten te zien.
+          </p>
         } @else if (leerkrachtenLaden()) {
-          <div class="text-center" style="padding: 40px; color: var(--go-bordeaux);">
+          <div class="text-center" style="padding: 40px; color: var(--go-bordeaux)">
             <strong>Leerkrachten ophalen...</strong>
           </div>
         } @else {
@@ -170,15 +230,20 @@
                     <td>{{ leerkracht.rol }}</td>
                     <td>{{ leerkracht.isBeheerder ? 'Ja' : 'Nee' }}</td>
                     <td>
-                      <label class="toggle-switch"
-                             [class.is-on]="leerkracht.isBeheerder"
-                             [class.is-busy]="promotieBezig() === leerkracht.id"
-                             [attr.title]="leerkracht.isBeheerder ? 'Beheerder-rol intrekken' : 'Maak beheerder'">
+                      <label
+                        class="toggle-switch"
+                        [class.is-on]="leerkracht.isBeheerder"
+                        [class.is-busy]="promotieBezig() === leerkracht.id"
+                        [attr.title]="
+                          leerkracht.isBeheerder ? 'Beheerder-rol intrekken' : 'Maak beheerder'
+                        "
+                      >
                         <input
                           type="checkbox"
                           [checked]="leerkracht.isBeheerder"
                           [disabled]="promotieBezig() === leerkracht.id"
-                          (change)="toggleBeheerder(leerkracht)">
+                          (change)="toggleBeheerder(leerkracht)"
+                        />
                         <span class="toggle-track">
                           <span class="toggle-thumb"></span>
                         </span>
@@ -214,7 +279,10 @@
 
         <div class="wizard-progress">
           <div class="progress-track">
-            <div class="progress-fill" [style.width.%]="(huidigeStapWizard() / totaleStappen) * 100"></div>
+            <div
+              class="progress-fill"
+              [style.width.%]="(huidigeStapWizard() / totaleStappen) * 100"
+            ></div>
           </div>
           <div class="step-labels">
             <span [class.active]="huidigeStapWizard() >= 1">1. Gegevens</span>
@@ -226,11 +294,10 @@
         </div>
 
         <form [formGroup]="wizardForm" class="wizard-body">
-
           @if (huidigeStapWizard() === 1) {
             <div formGroupName="stap1" class="wizard-step-content">
               <h3>1. Schoolgegevens</h3>
-              <hr class="divider">
+              <hr class="divider" />
 
               <div class="form-group">
                 <label>Kies een GO! school</label>
@@ -244,27 +311,32 @@
 
               <div class="form-group">
                 <label>Schoolnaam</label>
-                <input formControlName="schoolNaam" class="form-input" type="text">
+                <input formControlName="schoolNaam" class="form-input" type="text" />
               </div>
 
               <div class="form-group">
                 <label>Adres</label>
-                <input formControlName="adres" class="form-input" type="text">
+                <input formControlName="adres" class="form-input" type="text" />
               </div>
 
               <div class="form-group">
                 <label>Smartschool-domein</label>
-                <input formControlName="smartschoolDomein" class="form-input" type="text" placeholder="bv. mijnschool.smartschool.be">
+                <input
+                  formControlName="smartschoolDomein"
+                  class="form-input"
+                  type="text"
+                  placeholder="bv. mijnschool.smartschool.be"
+                />
               </div>
 
               <div class="form-group">
                 <label>OAuth Client ID</label>
-                <input formControlName="oauthClientId" class="form-input" type="text">
+                <input formControlName="oauthClientId" class="form-input" type="text" />
               </div>
 
               <div class="form-group">
                 <label>OAuth Client Secret</label>
-                <input formControlName="oauthClientSecret" class="form-input" type="password">
+                <input formControlName="oauthClientSecret" class="form-input" type="password" />
               </div>
             </div>
           }
@@ -273,19 +345,38 @@
             <div class="wizard-step-content">
               <h3>2. Verbinding testen</h3>
               <p>Test de verbinding met OneRoster aan de hand van de ingegeven credentials.</p>
-              <hr class="divider">
+              <hr class="divider" />
 
-              <button type="button" class="btn-go" (click)="testVerbinding()" [disabled]="verbindingStatus() === 'bezig'">
+              <button
+                type="button"
+                class="btn-go"
+                (click)="testVerbinding()"
+                [disabled]="verbindingStatus() === 'bezig'"
+              >
                 {{ verbindingStatus() === 'bezig' ? 'Bezig met testen...' : 'Test verbinding' }}
               </button>
 
               @if (verbindingStatus() === 'ok') {
-                <p style="color: #348a45; margin-top: 15px; font-weight: 600;">✓ Verbinding gelukt</p>
+                <p style="color: #348a45; margin-top: 15px; font-weight: 600">
+                  ✓ Verbinding gelukt
+                </p>
               }
               @if (verbindingStatus() === 'fout') {
-                <p style="color: #c0392b; margin-top: 15px; font-weight: 600;">✗ Verbinding mislukt — controleer het domein en de credentials.</p>
+                <p style="color: #c0392b; margin-top: 15px; font-weight: 600">
+                  ✗ Verbinding mislukt — controleer het domein en de credentials.
+                </p>
                 @if (verbindingDetail()) {
-                  <pre style="background:#fdecea; color:#922; padding:10px; border-radius:4px; white-space:pre-wrap; font-size:0.85rem;">{{ verbindingDetail() }}</pre>
+                  <pre
+                    style="
+                      background: #fdecea;
+                      color: #922;
+                      padding: 10px;
+                      border-radius: 4px;
+                      white-space: pre-wrap;
+                      font-size: 0.85rem;
+                    "
+                    >{{ verbindingDetail() }}</pre
+                  >
                 }
               }
             </div>
@@ -295,17 +386,38 @@
             <div formGroupName="stap3" class="wizard-step-content">
               <h3>3. Campussen toevoegen</h3>
               <p>Voeg de fysieke vestigingsplaatsen of gebouwen van deze school toe.</p>
-              <hr class="divider">
+              <hr class="divider" />
 
-              <div formArrayName="campussen" style="margin-top: 20px;">
+              <div formArrayName="campussen" style="margin-top: 20px">
                 @for (campus of campussen.controls; track $index) {
-                  <div [formGroupName]="$index" style="display: flex; gap: 10px; margin-bottom: 10px;">
-                    <input formControlName="naam" class="form-input" placeholder="Naam campus (bv. Hoofdgebouw)">
-                    <button type="button" class="btn-outline btn-delete" (click)="verwijderCampus($index)" title="Campus verwijderen">X</button>
+                  <div
+                    [formGroupName]="$index"
+                    style="display: flex; gap: 10px; margin-bottom: 10px"
+                  >
+                    <input
+                      formControlName="naam"
+                      class="form-input"
+                      placeholder="Naam campus (bv. Hoofdgebouw)"
+                    />
+                    <button
+                      type="button"
+                      class="btn-outline btn-delete"
+                      (click)="verwijderCampus($index)"
+                      title="Campus verwijderen"
+                    >
+                      X
+                    </button>
                   </div>
                 }
               </div>
-              <button type="button" class="btn-outline btn-sm" style="margin-top: 10px;" (click)="voegCampusToe()">+ Extra campus</button>
+              <button
+                type="button"
+                class="btn-outline btn-sm"
+                style="margin-top: 10px"
+                (click)="voegCampusToe()"
+              >
+                + Extra campus
+              </button>
             </div>
           }
 
@@ -313,18 +425,30 @@
             <div class="wizard-step-content">
               <h3>4. Import-preview</h3>
               <p>Bekijk welke klassen en gebruikers vanuit OneRoster zullen worden geïmporteerd.</p>
-              <hr class="divider">
+              <hr class="divider" />
 
-              <button type="button" class="btn-outline" (click)="haalPreviewOp()" [disabled]="bezig()">
-                {{ bezig() ? 'Bezig met ophalen...' : (previewData() ? 'Opnieuw ophalen' : 'Preview ophalen') }}
+              <button
+                type="button"
+                class="btn-outline"
+                (click)="haalPreviewOp()"
+                [disabled]="bezig()"
+              >
+                {{
+                  bezig()
+                    ? 'Bezig met ophalen...'
+                    : previewData()
+                      ? 'Opnieuw ophalen'
+                      : 'Preview ophalen'
+                }}
               </button>
 
               @if (previewData(); as p) {
-                <div style="margin-top: 20px;">
+                <div style="margin-top: 20px">
                   <p>
                     <strong>{{ p.aantalKlassen }}</strong> klassen,
                     <strong>{{ p.aantalLeerlingen }}</strong> leerlingen en
-                    <strong>{{ p.aantalLeerkrachten }}</strong> leerkrachten zullen worden geïmporteerd.
+                    <strong>{{ p.aantalLeerkrachten }}</strong> leerkrachten zullen worden
+                    geïmporteerd.
                   </p>
                 </div>
               }
@@ -334,54 +458,78 @@
           @if (huidigeStapWizard() === 5) {
             <div class="wizard-step-content text-center">
               <h3>5. Bevestigen en importeren</h3>
-              <hr class="divider">
+              <hr class="divider" />
 
-              <div class="upload-box-clean" style="margin-top: 20px; text-align: left;">
+              <div class="upload-box-clean" style="margin-top: 20px; text-align: left">
                 <p><strong>School:</strong> {{ wizardForm.value.stap1.schoolNaam }}</p>
                 <p><strong>Adres:</strong> {{ wizardForm.value.stap1.adres }}</p>
-                <p><strong>Smartschool-domein:</strong> {{ wizardForm.value.stap1.smartschoolDomein }}</p>
+                <p>
+                  <strong>Smartschool-domein:</strong>
+                  {{ wizardForm.value.stap1.smartschoolDomein }}
+                </p>
                 <p><strong>Campussen:</strong> {{ campussen.length }}</p>
                 @if (previewData(); as p) {
-                  <p><strong>Te importeren:</strong> {{ p.aantalKlassen }} klassen, {{ p.aantalLeerlingen }} leerlingen, {{ p.aantalLeerkrachten }} leerkrachten</p>
+                  <p>
+                    <strong>Te importeren:</strong> {{ p.aantalKlassen }} klassen,
+                    {{ p.aantalLeerlingen }} leerlingen, {{ p.aantalLeerkrachten }} leerkrachten
+                  </p>
                 }
               </div>
 
-              <p style="margin-top: 15px;">Bij bevestiging wordt alles in één transactie opgeslagen — bij een fout wordt alles teruggedraaid.</p>
+              <p style="margin-top: 15px">
+                Bij bevestiging wordt alles in één transactie opgeslagen — bij een fout wordt alles
+                teruggedraaid.
+              </p>
 
               @if (onboardSucces()) {
-                <p style="color: #348a45; margin-top: 15px; font-weight: 600;">✓ School succesvol toegevoegd — wizard wordt afgesloten...</p>
+                <p style="color: #348a45; margin-top: 15px; font-weight: 600">
+                  ✓ School succesvol toegevoegd — wizard wordt afgesloten...
+                </p>
               }
             </div>
           }
 
           @if (foutmelding()) {
-            <div style="color: red; text-align: center; margin-top: 20px; font-weight: bold;">
+            <div style="color: red; text-align: center; margin-top: 20px; font-weight: bold">
               {{ foutmelding() }}
             </div>
           }
 
           <div class="action-row split">
-            <button type="button" class="btn-outline" (click)="vorigeStapWizard()"
-                    [disabled]="huidigeStapWizard() === 1 || bezig() || onboardSucces()">
+            <button
+              type="button"
+              class="btn-outline"
+              (click)="vorigeStapWizard()"
+              [disabled]="huidigeStapWizard() === 1 || bezig() || onboardSucces()"
+            >
               Vorige
             </button>
 
             @if (huidigeStapWizard() < 5) {
-              <button type="button" class="btn-go" (click)="volgendeStapWizard()"
-                [disabled]="(huidigeStapWizard() === 1 && wizardForm.get('stap1')?.invalid) ||
-                            (huidigeStapWizard() === 2 && verbindingStatus() !== 'ok') ||
-                            (huidigeStapWizard() === 3 && wizardForm.get('stap3')?.invalid) ||
-                            (huidigeStapWizard() === 4 && !previewData())">
+              <button
+                type="button"
+                class="btn-go"
+                (click)="volgendeStapWizard()"
+                [disabled]="
+                  (huidigeStapWizard() === 1 && wizardForm.get('stap1')?.invalid) ||
+                  (huidigeStapWizard() === 2 && verbindingStatus() !== 'ok') ||
+                  (huidigeStapWizard() === 3 && wizardForm.get('stap3')?.invalid) ||
+                  (huidigeStapWizard() === 4 && !previewData())
+                "
+              >
                 Volgende stap
               </button>
             } @else {
-              <button type="button" class="btn-go success" (click)="bevestigEnImporteer()"
-                      [disabled]="bezig() || onboardSucces()">
+              <button
+                type="button"
+                class="btn-go success"
+                (click)="bevestigEnImporteer()"
+                [disabled]="bezig() || onboardSucces()"
+              >
                 {{ bezig() ? 'Bezig met opslaan...' : 'Bevestig en importeer' }}
               </button>
             }
           </div>
-
         </form>
       </div>
     }
@@ -396,5 +544,350 @@
       <app-admin-schooljaar />
     }
 
+    <!-- tab 6: gebruikers (handmatige lifecycle — toevoegen + vertrek) -->
+    @if (activeTab() === 'gebruikers') {
+      <div class="admin-card gebruikers-wide">
+        <div class="card-header">
+          <h2>Leerlingen &amp; leerkrachten</h2>
+        </div>
+
+        <div class="form-group" style="max-width: 500px; margin-bottom: 20px">
+          <label>Selecteer school</label>
+          <select class="form-input" (change)="onGebruikersSchoolGeselecteerd($event)">
+            <option value="" selected>-- Kies een geregistreerde school --</option>
+            @for (s of geregistreerdeScholen(); track s.id) {
+              <option [value]="s.id">{{ s.naam }}</option>
+            }
+          </select>
+        </div>
+
+        @if (gebruikersSchoolId() == null) {
+          <p class="text-muted" style="padding: 20px">
+            Kies eerst een school om gebruikers te beheren.
+          </p>
+        } @else {
+          @if (lifecycleFout()) {
+            <p style="color: #c0392b; margin: 0 0 15px 0">{{ lifecycleFout() }}</p>
+          }
+
+          @if (lifecycleLaden()) {
+            <p class="text-muted">Gebruikers laden...</p>
+          }
+
+          <div class="gebruikers-grid">
+            <!-- Leerlingen -->
+            <div class="gebruikers-col">
+              <div class="gebruikers-col-header">
+                <h3>Leerlingen</h3>
+                @if (!nieuweLeerlingFormOpen()) {
+                  <button class="btn-go btn-sm" (click)="openNieuweLeerlingForm()">
+                    + Nieuwe leerling
+                  </button>
+                }
+              </div>
+
+              @if (nieuweLeerlingFormOpen()) {
+                <div class="inline-form">
+                  <h4>Nieuwe leerling toevoegen</h4>
+                  <div class="form-group">
+                    <label>SmartschoolId</label>
+                    <input
+                      class="form-input"
+                      [value]="nieuweGebruikerSmartschoolId()"
+                      (input)="nieuweGebruikerSmartschoolId.set($any($event.target).value)"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label>Klas (optioneel)</label>
+                    <select
+                      class="form-input"
+                      [value]="nieuweGebruikerKlas()"
+                      (change)="nieuweGebruikerKlas.set($any($event.target).value)"
+                    >
+                      <option value="">(Geen klas)</option>
+                      @for (k of beschikbareKlassenVoorSchool(); track k) {
+                        <option [value]="k">{{ k }}</option>
+                      }
+                    </select>
+                  </div>
+                  <div class="inline-form-actions">
+                    <button
+                      class="btn-go btn-sm"
+                      (click)="bevestigNieuweGebruiker('LEERLING')"
+                      [disabled]="nieuweGebruikerBezig() || !nieuweGebruikerSmartschoolId().trim()"
+                    >
+                      {{ nieuweGebruikerBezig() ? 'Bezig...' : 'Toevoegen' }}
+                    </button>
+                    <button
+                      class="btn-outline btn-sm"
+                      (click)="sluitNieuweGebruikerForms()"
+                      [disabled]="nieuweGebruikerBezig()"
+                    >
+                      Annuleren
+                    </button>
+                  </div>
+                </div>
+              }
+
+              <div class="table-responsive">
+                <table class="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Naam / SmartschoolId</th>
+                      <th>Klas</th>
+                      <th>Status</th>
+                      <th>Acties</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (l of lifecycleLeerlingen(); track l.id) {
+                      <tr>
+                        <td>
+                          <strong>{{ l.naam || l.smartschoolId }}</strong>
+                        </td>
+                        <td>{{ l.klas || '-' }}</td>
+                        <td>
+                          <span [style.color]="l.actief ? '#348a45' : '#c0392b'">
+                            {{ l.actief ? 'Actief' : 'Vertrokken' }}
+                          </span>
+                        </td>
+                        <td>
+                          @if (l.actief) {
+                            <button
+                              class="btn-outline btn-sm btn-delete"
+                              (click)="openVertrekModal(l, 'LEERLING')"
+                            >
+                              Markeer vertrokken
+                            </button>
+                          } @else {
+                            <button
+                              class="btn-outline btn-sm"
+                              (click)="openReactiveerModal(l, 'LEERLING')"
+                            >
+                              Reactiveer
+                            </button>
+                          }
+                        </td>
+                      </tr>
+                    } @empty {
+                      <tr>
+                        <td colspan="4" class="text-muted text-center" style="padding: 20px">
+                          Geen leerlingen.
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+
+              @if (leerlingenTotaalPaginas() > 1) {
+                <div class="pagination">
+                  <button
+                    class="btn-outline btn-sm"
+                    (click)="vorigeLeerlingenPagina()"
+                    [disabled]="leerlingenPage() === 0"
+                  >
+                    Vorige
+                  </button>
+                  <span class="page-indicator">
+                    {{ leerlingenPage() + 1 }} / {{ leerlingenTotaalPaginas() }}
+                  </span>
+                  <button
+                    class="btn-outline btn-sm"
+                    (click)="volgendeLeerlingenPagina()"
+                    [disabled]="leerlingenPage() >= leerlingenTotaalPaginas() - 1"
+                  >
+                    Volgende
+                  </button>
+                </div>
+              }
+            </div>
+
+            <!-- Leerkrachten -->
+            <div class="gebruikers-col">
+              <div class="gebruikers-col-header">
+                <h3>Leerkrachten</h3>
+                @if (!nieuweLeerkrachtFormOpen()) {
+                  <button class="btn-go btn-sm" (click)="openNieuweLeerkrachtForm()">
+                    + Nieuwe leerkracht
+                  </button>
+                }
+              </div>
+
+              @if (nieuweLeerkrachtFormOpen()) {
+                <div class="inline-form">
+                  <h4>Nieuwe leerkracht toevoegen</h4>
+                  <div class="form-group">
+                    <label>SmartschoolId</label>
+                    <input
+                      class="form-input"
+                      [value]="nieuweGebruikerSmartschoolId()"
+                      (input)="nieuweGebruikerSmartschoolId.set($any($event.target).value)"
+                    />
+                  </div>
+                  <div class="inline-form-actions">
+                    <button
+                      class="btn-go btn-sm"
+                      (click)="bevestigNieuweGebruiker('LEERKRACHT')"
+                      [disabled]="nieuweGebruikerBezig() || !nieuweGebruikerSmartschoolId().trim()"
+                    >
+                      {{ nieuweGebruikerBezig() ? 'Bezig...' : 'Toevoegen' }}
+                    </button>
+                    <button
+                      class="btn-outline btn-sm"
+                      (click)="sluitNieuweGebruikerForms()"
+                      [disabled]="nieuweGebruikerBezig()"
+                    >
+                      Annuleren
+                    </button>
+                  </div>
+                </div>
+              }
+
+              <div class="table-responsive">
+                <table class="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Naam / SmartschoolId</th>
+                      <th>Klas</th>
+                      <th>Status</th>
+                      <th>Acties</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (lk of lifecycleLeerkrachten(); track lk.id) {
+                      <tr>
+                        <td>
+                          <strong>{{ lk.naam || lk.smartschoolId }}</strong>
+                        </td>
+                        <td>{{ lk.klas || '-' }}</td>
+                        <td>
+                          <span [style.color]="lk.actief ? '#348a45' : '#c0392b'">
+                            {{ lk.actief ? 'Actief' : 'Vertrokken' }}
+                          </span>
+                        </td>
+                        <td>
+                          @if (lk.actief) {
+                            <button
+                              class="btn-outline btn-sm btn-delete"
+                              (click)="openVertrekModal(lk, 'LEERKRACHT')"
+                            >
+                              Markeer vertrokken
+                            </button>
+                          } @else {
+                            <button
+                              class="btn-outline btn-sm"
+                              (click)="openReactiveerModal(lk, 'LEERKRACHT')"
+                            >
+                              Reactiveer
+                            </button>
+                          }
+                        </td>
+                      </tr>
+                    } @empty {
+                      <tr>
+                        <td colspan="4" class="text-muted text-center" style="padding: 20px">
+                          Geen leerkrachten.
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+
+              @if (leerkrachtenTotaalPaginas() > 1) {
+                <div class="pagination">
+                  <button
+                    class="btn-outline btn-sm"
+                    (click)="vorigeLeerkrachtenPagina()"
+                    [disabled]="leerkrachtenPage() === 0"
+                  >
+                    Vorige
+                  </button>
+                  <span class="page-indicator">
+                    {{ leerkrachtenPage() + 1 }} / {{ leerkrachtenTotaalPaginas() }}
+                  </span>
+                  <button
+                    class="btn-outline btn-sm"
+                    (click)="volgendeLeerkrachtenPagina()"
+                    [disabled]="leerkrachtenPage() >= leerkrachtenTotaalPaginas() - 1"
+                  >
+                    Volgende
+                  </button>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Bevestig-modal voor reactiveer (vertrokken → actief) -->
+      @if (reactiveerModalDoel(); as doel) {
+        <div class="modal-overlay" (click)="annuleerReactiveerModal()">
+          <div class="modal-content" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+              <h3>Reactiveren bevestigen</h3>
+            </div>
+            <div class="modal-body">
+              <p>
+                Wil je
+                <strong>{{ doel.gebruiker.naam || doel.gebruiker.smartschoolId }}</strong>
+                ({{ doel.rol === 'LEERLING' ? 'leerling' : 'leerkracht' }}) terug op actief zetten?
+              </p>
+              <p class="text-muted" style="margin-top: 8px;">
+                De gebruiker kan opnieuw inloggen en lenen. Aankomstdatum wordt op vandaag gezet.
+              </p>
+            </div>
+            <div class="modal-footer">
+              <button class="btn-outline btn-sm" (click)="annuleerReactiveerModal()"
+                      [disabled]="reactiveerBezig() !== null">Annuleren</button>
+              <button class="btn-go btn-sm" (click)="bevestigReactiveer()"
+                      [disabled]="reactiveerBezig() !== null">
+                {{ reactiveerBezig() !== null ? 'Bezig...' : 'Reactiveer' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Bevestig-modal voor markeer vertrokken -->
+      @if (vertrekModalDoel(); as doel) {
+        <div class="modal-overlay" (click)="annuleerVertrekModal()">
+          <div class="modal-content" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+              <h3>Vertrek bevestigen</h3>
+            </div>
+            <div class="modal-body">
+              <p>
+                Weet je zeker dat je
+                <strong>{{ doel.gebruiker.naam || doel.gebruiker.smartschoolId }}</strong>
+                ({{ doel.rol === 'LEERLING' ? 'leerling' : 'leerkracht' }}) als vertrokken wilt
+                markeren?
+              </p>
+              <p class="text-muted" style="margin-top: 8px">
+                De gebruiker blijft in de databank voor historiek, maar kan niet meer inloggen of
+                lenen. Open uitleningen blokkeren deze actie.
+              </p>
+            </div>
+            <div class="modal-footer">
+              <button
+                class="btn-outline btn-sm"
+                (click)="annuleerVertrekModal()"
+                [disabled]="vertrekBezig() !== null"
+              >
+                Annuleren
+              </button>
+              <button
+                class="btn-go btn-sm btn-delete"
+                (click)="bevestigVertrek()"
+                [disabled]="vertrekBezig() !== null"
+              >
+                {{ vertrekBezig() !== null ? 'Bezig...' : 'Markeer vertrokken' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+    }
   </main>
 </div>

@@ -558,3 +558,164 @@ button.btn-delete:hover {
   background-color: #fff5f5 !important;
   border-color: #e53e3e !important;
 }
+
+/* primary button gebruikt als delete-bevestiging in modal */
+button.btn-go.btn-delete {
+  color: #ffffff !important;
+  background-color: #c53030 !important;
+  border-color: #c53030 !important;
+  margin-left: 0;
+}
+
+button.btn-go.btn-delete:hover:not(:disabled) {
+  background-color: #9b2c2c !important;
+  border-color: #9b2c2c !important;
+}
+
+/* =========================================
+   GEBRUIKERS TAB (lifecycle leerlingen + leerkrachten)
+   ========================================= */
+
+/* Gebruikers-tab gebruikt de volledige paginabreedte (breekt uit de standaard
+   1000px admin-content container). Card én alles erin volgt diezelfde breedte —
+   geen visueel "uitsteken" van losse elementen. */
+.admin-card.gebruikers-wide {
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100vw - 40px);
+  max-width: none;
+  box-sizing: border-box;
+}
+
+.gebruikers-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  margin-top: 20px;
+}
+
+@media (max-width: 700px) {
+  .gebruikers-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+}
+
+.gebruikers-col {
+  background: #fdfdfc;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+}
+
+.gebruikers-col-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.gebruikers-col-header h3 {
+  margin: 0;
+  color: var(--go-bordeaux);
+  font-size: 1.15rem;
+}
+
+.inline-form {
+  background: var(--go-beige);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 14px;
+}
+
+.inline-form h4 {
+  margin: 0 0 12px;
+  color: var(--go-bordeaux);
+  font-size: 1rem;
+}
+
+.inline-form-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 14px;
+}
+
+.pagination .page-indicator {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  font-weight: 600;
+  min-width: 60px;
+  text-align: center;
+}
+
+/* =========================================
+   MODAL (bevestig-popup) — match admin-schooljaar look
+   ========================================= */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(45, 55, 72, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: #ffffff;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  border-top: 5px solid var(--go-bordeaux);
+  animation: modalPopIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes modalPopIn {
+  0% { transform: scale(0.85); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.modal-header {
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--go-bordeaux);
+}
+
+.modal-body {
+  padding: 20px 22px;
+  color: var(--text-dark);
+  line-height: 1.5;
+}
+
+.modal-body p {
+  margin: 0 0 8px;
+}
+
+.modal-footer {
+  padding: 16px 22px;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}

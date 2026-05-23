@@ -25,6 +25,7 @@ import ap.be.backend.repository.BoekRepository;
 import ap.be.backend.repository.CampusRepository;
 import ap.be.backend.repository.TagRepository;
 import ap.be.backend.service.BoekService;
+import ap.be.backend.service.TagService;
 
 @ExtendWith(MockitoExtension.class)
 public class BoekFilterServiceTest {
@@ -36,7 +37,7 @@ public class BoekFilterServiceTest {
     private TagRepository tagRepository;
 
     @Mock
-    private ap.be.backend.service.TagService tagService;
+    private TagService tagService;
 
     @Mock
     private CampusRepository campusRepository;
@@ -90,6 +91,7 @@ public class BoekFilterServiceTest {
     void givenTagIds_whenFilterBoeken_thenGeeftLijstAanRepository() {
         when(tagService.expandWithSubtags(any())).thenAnswer(inv -> inv.getArgument(0));
         List<Long> tagIds = List.of(1L, 2L);
+        when(tagService.expandWithSubtags(tagIds)).thenReturn(tagIds);
         mockRepo(new PageImpl<>(List.of(new Boek("Socrates", "Plato"))));
 
         boekService.filterBoeken(

@@ -160,4 +160,9 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
     }
 
+    @ExceptionHandler(GebruikerVertrekGeblokkeerdException.class)
+    public ResponseEntity<String> handleVertrekGeblokkeerd(GebruikerVertrekGeblokkeerdException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+    }
+
 }

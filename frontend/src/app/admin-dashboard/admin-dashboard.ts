@@ -5,7 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import { SchoolService } from '../services/School.Service';
 import { AdminTags } from '../admin-tags/admin-tags';
 import { AdminSchooljaar } from '../admin-schooljaar/admin-schooljaar';
-import { AdminGebruiker, AdminGebruikerService } from '../services/AdminGebruikerService';
+import { AdminGebruiker, AdminGebruikerService, GebruikerCreatePayload } from '../services/AdminGebruikerService';
 
 // static list of all official secondary schools under go! scholengroep antwerpen
 const GO_ANTWERPEN_SCHOLEN = [
@@ -49,13 +49,57 @@ export class AdminDashboard implements OnInit {
     : 'https://api-sp09.cloud-ap.be/api/scholen';
 
   // tab navigation state
-  activeTab = signal<'scholen' | 'wizard' | 'tags' | 'rollen' | 'schooljaar'>('scholen');
+  activeTab = signal<'scholen' | 'wizard' | 'tags' | 'rollen' | 'schooljaar' | 'gebruikers'>('scholen');
 
-  // rollen-tab state
+  // rollen-tab state (geen paging — toon volledige leerkrachten-lijst)
   leerkrachten = signal<AdminGebruiker[]>([]);
   leerkrachtenLaden = signal<boolean>(false);
   promotieBezig = signal<number | null>(null);
   geselecteerdeRollenSchoolId = signal<number | null>(null);
+
+  // gebruikers-tab state (lifecycle: nieuwe leerling/leerkracht + markeer vertrokken)
+  gebruikersSchoolId = signal<number | null>(null);
+  lifecycleLeerlingen = signal<AdminGebruiker[]>([]);
+  lifecycleLeerkrachten = signal<AdminGebruiker[]>([]);
+  lifecycleLaden = signal<boolean>(false);
+  lifecycleFout = signal<string>('');
+  vertrekBezig = signal<number | null>(null);
+  nieuweLeerlingFormOpen = signal<boolean>(false);
+  nieuweLeerkrachtFormOpen = signal<boolean>(false);
+  nieuweGebruikerSmartschoolId = signal<string>('');
+  nieuweGebruikerKlas = signal<string>('');
+  nieuweGebruikerBezig = signal<boolean>(false);
+  beschikbareKlassenVoorSchool = signal<string[]>([]);
+
+  // confirm-modal voor vertrek (vervangt browser confirm())
+  vertrekModalDoel = signal<{ gebruiker: AdminGebruiker; rol: 'LEERLING' | 'LEERKRACHT' } | null>(null);
+
+  // confirm-modal voor reactiveer (vertrokken → actief)
+  reactiveerModalDoel = signal<{ gebruiker: AdminGebruiker; rol: 'LEERLING' | 'LEERKRACHT' } | null>(null);
+  reactiveerBezig = signal<number | null>(null);
+
+  // Auto-dismiss timer voor lifecycle-foutmelding (5s na laatste set met inhoud).
+  private lifecycleFoutTimer: any = null;
+  toonLifecycleFout(msg: string) {
+    if (this.lifecycleFoutTimer) {
+      clearTimeout(this.lifecycleFoutTimer);
+      this.lifecycleFoutTimer = null;
+    }
+    this.lifecycleFout.set(msg);
+    if (msg) {
+      this.lifecycleFoutTimer = setTimeout(() => {
+        this.lifecycleFout.set('');
+        this.lifecycleFoutTimer = null;
+      }, 5000);
+    }
+  }
+
+  // server-side paginering voor de twee lifecycle-tabellen
+  readonly gebruikersItemsPerPagina = 5;
+  leerlingenPage = signal<number>(0);
+  leerlingenTotaalPaginas = signal<number>(1);
+  leerkrachtenPage = signal<number>(0);
+  leerkrachtenTotaalPaginas = signal<number>(1);
 
   // state for the list of saved schools
   geregistreerdeScholen = signal<any[]>([]);
@@ -235,7 +279,7 @@ export class AdminDashboard implements OnInit {
     });
   }
 
-  wisselTab(tab: 'scholen' | 'wizard' | 'tags' | 'rollen' | 'schooljaar') {
+  wisselTab(tab: 'scholen' | 'wizard' | 'tags' | 'rollen' | 'schooljaar' | 'gebruikers') {
     this.activeTab.set(tab);
     this.sluitBewerken(); // Sluit campussen editor indien open
     if (tab === 'rollen') {
@@ -245,6 +289,250 @@ export class AdminDashboard implements OnInit {
       }
       this.leerkrachten.set([]);
     }
+    if (tab === 'gebruikers') {
+      if (this.geregistreerdeScholen().length === 0) {
+        this.laadScholenUitDatabase();
+      }
+      this.lifecycleLeerlingen.set([]);
+      this.lifecycleLeerkrachten.set([]);
+      this.gebruikersSchoolId.set(null);
+      this.leerlingenPage.set(0);
+      this.leerkrachtenPage.set(0);
+      this.sluitNieuweGebruikerForms();
+    }
+  }
+
+  // --- gebruikers (lifecycle) tab ---
+  onGebruikersSchoolGeselecteerd(event: Event) {
+    const value = (event.target as HTMLSelectElement).value;
+    const schoolId = value ? Number(value) : null;
+    this.gebruikersSchoolId.set(schoolId);
+    this.sluitNieuweGebruikerForms();
+    if (schoolId != null) {
+      this.laadLifecycleGebruikers(schoolId, true);
+      this.laadKlassenVoorSchool(schoolId);
+    } else {
+      this.lifecycleLeerlingen.set([]);
+      this.lifecycleLeerkrachten.set([]);
+      this.leerlingenTotaalPaginas.set(1);
+      this.leerkrachtenTotaalPaginas.set(1);
+      this.beschikbareKlassenVoorSchool.set([]);
+    }
+  }
+
+  private laadKlassenVoorSchool(schoolId: number) {
+    this.adminGebruikerService.getKlassenVoorSchool(schoolId).subscribe({
+      next: (klassen) => this.beschikbareKlassenVoorSchool.set(klassen ?? []),
+      error: () => this.beschikbareKlassenVoorSchool.set([]),
+    });
+  }
+
+  private laadLifecycleGebruikers(schoolId: number, resetPaging = false) {
+    if (resetPaging) {
+      this.leerlingenPage.set(0);
+      this.leerkrachtenPage.set(0);
+    }
+    this.lifecycleLaden.set(true);
+    this.toonLifecycleFout('');
+    this.laadLifecycleLeerlingenPagina(schoolId);
+    this.laadLifecycleLeerkrachtenPagina(schoolId);
+  }
+
+  private laadLifecycleLeerlingenPagina(schoolId: number) {
+    this.adminGebruikerService
+      .getLeerlingenInclVertrokken(schoolId, this.leerlingenPage(), this.gebruikersItemsPerPagina)
+      .subscribe({
+        next: (page) => {
+          this.lifecycleLeerlingen.set(page.content ?? []);
+          this.leerlingenTotaalPaginas.set(Math.max(1, page.totalPages ?? 1));
+          this.lifecycleLaden.set(false);
+        },
+        error: (err) => {
+          this.toonLifecycleFout(err?.error ?? 'Kon leerlingen niet ophalen.');
+          this.lifecycleLaden.set(false);
+        },
+      });
+  }
+
+  private laadLifecycleLeerkrachtenPagina(schoolId: number) {
+    this.adminGebruikerService
+      .getAlleLeerkrachten(schoolId, true, this.leerkrachtenPage(), this.gebruikersItemsPerPagina)
+      .subscribe({
+        next: (page) => {
+          this.lifecycleLeerkrachten.set(page.content ?? []);
+          this.leerkrachtenTotaalPaginas.set(Math.max(1, page.totalPages ?? 1));
+          this.lifecycleLaden.set(false);
+        },
+        error: (err) => {
+          this.toonLifecycleFout(err?.error ?? 'Kon leerkrachten niet ophalen.');
+          this.lifecycleLaden.set(false);
+        },
+      });
+  }
+
+  vorigeLeerlingenPagina() {
+    const schoolId = this.gebruikersSchoolId();
+    if (schoolId == null || this.leerlingenPage() === 0) return;
+    this.leerlingenPage.update((p) => p - 1);
+    this.laadLifecycleLeerlingenPagina(schoolId);
+  }
+  volgendeLeerlingenPagina() {
+    const schoolId = this.gebruikersSchoolId();
+    if (schoolId == null || this.leerlingenPage() >= this.leerlingenTotaalPaginas() - 1) return;
+    this.leerlingenPage.update((p) => p + 1);
+    this.laadLifecycleLeerlingenPagina(schoolId);
+  }
+  vorigeLeerkrachtenPagina() {
+    const schoolId = this.gebruikersSchoolId();
+    if (schoolId == null || this.leerkrachtenPage() === 0) return;
+    this.leerkrachtenPage.update((p) => p - 1);
+    this.laadLifecycleLeerkrachtenPagina(schoolId);
+  }
+  volgendeLeerkrachtenPagina() {
+    const schoolId = this.gebruikersSchoolId();
+    if (schoolId == null || this.leerkrachtenPage() >= this.leerkrachtenTotaalPaginas() - 1) return;
+    this.leerkrachtenPage.update((p) => p + 1);
+    this.laadLifecycleLeerkrachtenPagina(schoolId);
+  }
+
+  openNieuweLeerlingForm() {
+    this.nieuweLeerlingFormOpen.set(true);
+    this.nieuweLeerkrachtFormOpen.set(false);
+    this.nieuweGebruikerSmartschoolId.set('');
+    this.nieuweGebruikerKlas.set('');
+  }
+
+  openNieuweLeerkrachtForm() {
+    this.nieuweLeerkrachtFormOpen.set(true);
+    this.nieuweLeerlingFormOpen.set(false);
+    this.nieuweGebruikerSmartschoolId.set('');
+    this.nieuweGebruikerKlas.set('');
+  }
+
+  sluitNieuweGebruikerForms() {
+    this.nieuweLeerlingFormOpen.set(false);
+    this.nieuweLeerkrachtFormOpen.set(false);
+    this.nieuweGebruikerSmartschoolId.set('');
+    this.nieuweGebruikerKlas.set('');
+    this.toonLifecycleFout('');
+  }
+
+  bevestigNieuweGebruiker(rol: 'LEERLING' | 'LEERKRACHT') {
+    const schoolId = this.gebruikersSchoolId();
+    const smartschoolId = this.nieuweGebruikerSmartschoolId().trim();
+    if (schoolId == null) return;
+    if (!smartschoolId) {
+      this.toonLifecycleFout('SmartschoolId is verplicht.');
+      return;
+    }
+    // Leerkrachten hebben in OneRoster geen klas; alleen leerling-form vraagt 'm.
+    const klas = rol === 'LEERLING' ? (this.nieuweGebruikerKlas().trim() || null) : null;
+    const payload: GebruikerCreatePayload = {
+      smartschoolId,
+      schoolId,
+      klas
+    };
+    this.nieuweGebruikerBezig.set(true);
+    this.toonLifecycleFout('');
+    const obs = rol === 'LEERLING'
+      ? this.adminGebruikerService.voegLeerlingToe(payload)
+      : this.adminGebruikerService.voegLeerkrachtToe(payload);
+    obs.subscribe({
+      next: () => {
+        this.nieuweGebruikerBezig.set(false);
+        this.sluitNieuweGebruikerForms();
+        // Spring naar pagina 0 zodat de nieuwe rij bovenaan zichtbaar is
+        // (sortering: actief eerst, daarna alfabetisch).
+        if (rol === 'LEERLING') {
+          this.leerlingenPage.set(0);
+          this.laadLifecycleLeerlingenPagina(schoolId);
+        } else {
+          this.leerkrachtenPage.set(0);
+          this.laadLifecycleLeerkrachtenPagina(schoolId);
+        }
+      },
+      error: (err) => {
+        this.nieuweGebruikerBezig.set(false);
+        this.toonLifecycleFout(err?.error ?? 'Toevoegen mislukt.');
+      }
+    });
+  }
+
+  openVertrekModal(gebruiker: AdminGebruiker, rol: 'LEERLING' | 'LEERKRACHT') {
+    this.toonLifecycleFout('');
+    this.vertrekModalDoel.set({ gebruiker, rol });
+  }
+
+  annuleerVertrekModal() {
+    if (this.vertrekBezig() !== null) return;
+    this.vertrekModalDoel.set(null);
+  }
+
+  openReactiveerModal(gebruiker: AdminGebruiker, rol: 'LEERLING' | 'LEERKRACHT') {
+    this.toonLifecycleFout('');
+    this.reactiveerModalDoel.set({ gebruiker, rol });
+  }
+
+  annuleerReactiveerModal() {
+    if (this.reactiveerBezig() !== null) return;
+    this.reactiveerModalDoel.set(null);
+  }
+
+  bevestigReactiveer() {
+    const doel = this.reactiveerModalDoel();
+    if (!doel) return;
+    const { gebruiker, rol } = doel;
+
+    this.reactiveerBezig.set(gebruiker.id);
+    this.toonLifecycleFout('');
+    const obs = rol === 'LEERLING'
+      ? this.adminGebruikerService.reactiveerLeerling(gebruiker.id)
+      : this.adminGebruikerService.reactiveerLeerkracht(gebruiker.id);
+    obs.subscribe({
+      next: () => {
+        this.reactiveerBezig.set(null);
+        this.reactiveerModalDoel.set(null);
+        const schoolId = this.gebruikersSchoolId();
+        if (schoolId != null) {
+          if (rol === 'LEERLING') this.laadLifecycleLeerlingenPagina(schoolId);
+          else this.laadLifecycleLeerkrachtenPagina(schoolId);
+        }
+      },
+      error: (err) => {
+        this.reactiveerBezig.set(null);
+        this.reactiveerModalDoel.set(null);
+        this.toonLifecycleFout(err?.error ?? 'Reactiveren mislukt.');
+      },
+    });
+  }
+
+  bevestigVertrek() {
+    const doel = this.vertrekModalDoel();
+    if (!doel) return;
+    const { gebruiker, rol } = doel;
+
+    this.vertrekBezig.set(gebruiker.id);
+    this.toonLifecycleFout('');
+    const obs = rol === 'LEERLING'
+      ? this.adminGebruikerService.markeerLeerlingVertrokken(gebruiker.id)
+      : this.adminGebruikerService.markeerLeerkrachtVertrokken(gebruiker.id);
+    obs.subscribe({
+      next: () => {
+        this.vertrekBezig.set(null);
+        this.vertrekModalDoel.set(null);
+        const schoolId = this.gebruikersSchoolId();
+        if (schoolId != null) {
+          // Bewust niet resetten — we blijven op dezelfde pagina.
+          if (rol === 'LEERLING') this.laadLifecycleLeerlingenPagina(schoolId);
+          else this.laadLifecycleLeerkrachtenPagina(schoolId);
+        }
+      },
+      error: (err) => {
+        this.vertrekBezig.set(null);
+        this.vertrekModalDoel.set(null);
+        this.toonLifecycleFout(err?.error ?? 'Markeren mislukt.');
+      }
+    });
   }
 
   onRollenSchoolGeselecteerd(event: Event) {
@@ -260,16 +548,18 @@ export class AdminDashboard implements OnInit {
 
   laadLeerkrachten(schoolId: number) {
     this.leerkrachtenLaden.set(true);
-    this.adminGebruikerService.getAlleLeerkrachten(schoolId).subscribe({
-      next: (lijst) => {
-        this.leerkrachten.set(lijst ?? []);
+    // Geen paginering in deze tab: vraag een ruime size zodat alle leerkrachten van de
+    // school in één call terugkomen. 10 000 is ruim boven elk realistisch aantal.
+    this.adminGebruikerService.getAlleLeerkrachten(schoolId, false, 0, 10000).subscribe({
+      next: (page) => {
+        this.leerkrachten.set(page.content ?? []);
         this.leerkrachtenLaden.set(false);
       },
       error: (err) => {
         console.error('error fetching teachers:', err);
         this.leerkrachten.set([]);
         this.leerkrachtenLaden.set(false);
-      }
+      },
     });
   }
 

@@ -94,24 +94,23 @@
           }
         </select>
 
+        @if (geselecteerdeLeerlingIds.length > 0) {
+          <p class="geselecteerd-melding">{{ geselecteerdeLeerlingIds.length }} leerling(en) geselecteerd</p>
+        }
+
         @if (leerlingKlas && leerlingResultaten.length > 0) {
-          <label class="modal-label">Kies een leerling</label>
+          <label class="modal-label">Selecteer leerlingen</label>
           <ul class="leerling-resultaten">
             @for (l of leerlingResultaten; track l.id) {
-              <li
-                (click)="kiesLeerling(l)"
-                [class.geselecteerd]="geselecteerdeLeerlingId === l.id"
-              >
-                {{ l.smartschoolId || ('Leerling ' + l.id) }}
+              <li (click)="toggleLeerling(l.id)" [class.geselecteerd]="isLeerlingGeselecteerd(l.id)">
+                <input type="checkbox" [checked]="isLeerlingGeselecteerd(l.id)" (click)="$event.stopPropagation()" (change)="toggleLeerling(l.id)" style="margin-right: 8px; accent-color: #8c1b3f;">
+                {{ l.naam || l.smartschoolId || ('Leerling ' + l.id) }}
               </li>
             }
           </ul>
         }
         @if (leerlingKlas && leerlingResultaten.length === 0) {
           <p class="info-melding">Geen leerlingen gevonden in deze klas.</p>
-        }
-        @if (geselecteerdeLeerlingId) {
-          <p class="geselecteerd-melding">Geselecteerd: <strong>{{ geselecteerdeLeerlingNaam }}</strong></p>
         }
       }
 

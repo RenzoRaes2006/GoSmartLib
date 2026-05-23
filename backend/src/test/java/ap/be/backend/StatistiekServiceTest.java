@@ -22,6 +22,7 @@ import org.springframework.data.domain.Pageable;
 import ap.be.backend.dto.AdminStatistiekDTO;
 import ap.be.backend.dto.LeerkrachtStatistiekDTO;
 import ap.be.backend.dto.LeerlingStatistiekDTO;
+import ap.be.backend.entity.Rol;
 import ap.be.backend.entity.User;
 import ap.be.backend.repository.BoekRepository;
 import ap.be.backend.repository.UserRepository;
@@ -99,7 +100,7 @@ class StatistiekServiceTest {
     void getLeerkrachtStatistieken_MetKlasGebruiktKlasFilter() {
         String klas = "5A";
 
-        when(userRepository.countByKlasIgnoreCase(klas)).thenReturn(22L);
+        when(userRepository.countByRolAndKlasIgnoreCaseAndActiefTrue(Rol.LEERLING, klas)).thenReturn(22L);
         when(uitleningRepository.countActieveLeningenVoorKlas(eq(klas), anyList())).thenReturn(8L);
         when(uitleningRepository.countTeLaatVoorKlas(eq(klas), anyList(), any(LocalDate.class))).thenReturn(2L);
         when(uitleningRepository.countLeningenSindsVoorKlas(eq(klas), anyList(), any(LocalDate.class))).thenReturn(5L);
@@ -117,7 +118,7 @@ class StatistiekServiceTest {
 
     @Test
     void getLeerkrachtStatistieken_ZonderKlasGebruiktTotaalAantalLeerlingen() {
-        when(userRepository.count()).thenReturn(150L);
+        when(userRepository.countByRolAndActiefTrue(Rol.LEERLING)).thenReturn(150L);
         when(uitleningRepository.countActieveLeningenVoorKlas(eq(null), anyList())).thenReturn(40L);
         when(uitleningRepository.countTeLaatVoorKlas(eq(null), anyList(), any(LocalDate.class))).thenReturn(6L);
         when(uitleningRepository.countLeningenSindsVoorKlas(eq(null), anyList(), any(LocalDate.class))).thenReturn(20L);
@@ -133,7 +134,7 @@ class StatistiekServiceTest {
 
     @Test
     void getLeerkrachtStatistieken_LegeStringTeltAlsGeenFilter() {
-        when(userRepository.count()).thenReturn(99L);
+        when(userRepository.countByRolAndActiefTrue(Rol.LEERLING)).thenReturn(99L);
         when(uitleningRepository.countActieveLeningenVoorKlas(eq(null), anyList())).thenReturn(0L);
         when(uitleningRepository.countTeLaatVoorKlas(eq(null), anyList(), any(LocalDate.class))).thenReturn(0L);
         when(uitleningRepository.countLeningenSindsVoorKlas(eq(null), anyList(), any(LocalDate.class))).thenReturn(0L);
