@@ -226,7 +226,7 @@
                     @for (l of koppelLeerlingen(); track l.id) {
                         <li (click)="toggleLeerling(l.id)" [class.geselecteerd]="isLeerlingGeselecteerd(l.id)">
                             <input type="checkbox" [checked]="isLeerlingGeselecteerd(l.id)" (click)="$event.stopPropagation()" (change)="toggleLeerling(l.id)" style="margin-right: 8px; accent-color: #8c1b3f;">
-                            {{ l.smartschoolId || ('Leerling ' + l.id) }}
+                            {{ l.naam || l.smartschoolId || ('Leerling ' + l.id) }}
                         </li>
                     }
                 </ul>

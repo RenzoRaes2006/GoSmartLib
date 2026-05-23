@@ -32,8 +32,7 @@ export class KlassLeeslijstenOverzichtComponent implements OnInit {
 
   leerlingKlas = '';
   leerlingResultaten: any[] = [];
-  geselecteerdeLeerlingId: number | null = null;
-  geselecteerdeLeerlingNaam = '';
+  geselecteerdeLeerlingIds: number[] = [];
 
   laadFout = signal<string>('');
 
@@ -77,13 +76,11 @@ export class KlassLeeslijstenOverzichtComponent implements OnInit {
     this.geselecteerdeKlas = '';
     this.leerlingKlas = '';
     this.leerlingResultaten = [];
-    this.geselecteerdeLeerlingId = null;
-    this.geselecteerdeLeerlingNaam = '';
+    this.geselecteerdeLeerlingIds = [];
   }
 
   onLeerlingKlasChange(): void {
-    this.geselecteerdeLeerlingId = null;
-    this.geselecteerdeLeerlingNaam = '';
+    this.geselecteerdeLeerlingIds = [];
     if (!this.leerlingKlas) {
       this.leerlingResultaten = [];
       return;
@@ -94,15 +91,22 @@ export class KlassLeeslijstenOverzichtComponent implements OnInit {
     });
   }
 
-  kiesLeerling(leerling: any): void {
-    this.geselecteerdeLeerlingId = leerling.id;
-    this.geselecteerdeLeerlingNaam = leerling.smartschoolId || leerling.naam || `Leerling ${leerling.id}`;
+  toggleLeerling(id: number): void {
+    if (this.geselecteerdeLeerlingIds.includes(id)) {
+      this.geselecteerdeLeerlingIds = this.geselecteerdeLeerlingIds.filter((i) => i !== id);
+    } else {
+      this.geselecteerdeLeerlingIds = [...this.geselecteerdeLeerlingIds, id];
+    }
+  }
+
+  isLeerlingGeselecteerd(id: number): boolean {
+    return this.geselecteerdeLeerlingIds.includes(id);
   }
 
   get kanBevestigen(): boolean {
     if (!this.nieuweLijstNaam.trim()) return false;
     if (this.koppelType === 'KLAS') return !!this.geselecteerdeKlas;
-    return this.geselecteerdeLeerlingId !== null;
+    return this.geselecteerdeLeerlingIds.length > 0;
   }
 
   bevestigNieuweLijst(): void {
@@ -111,7 +115,7 @@ export class KlassLeeslijstenOverzichtComponent implements OnInit {
     const request: LeeslijstRequest = {
       naam: this.nieuweLijstNaam.trim(),
       klas: this.koppelType === 'KLAS' ? this.geselecteerdeKlas : null,
-      leerlingId: this.koppelType === 'LEERLING' ? this.geselecteerdeLeerlingId : null,
+      leerlingIds: this.koppelType === 'LEERLING' && this.geselecteerdeLeerlingIds.length > 0 ? this.geselecteerdeLeerlingIds : null,
       beschrijving: this.nieuweLijstBeschrijving.trim() || null,
       zichtbaar: this.nieuweLijstZichtbaar,
     };
