@@ -115,7 +115,11 @@ export class KlassLeeslijstenOverzichtComponent implements OnInit {
     const request: LeeslijstRequest = {
       naam: this.nieuweLijstNaam.trim(),
       klas: this.koppelType === 'KLAS' ? this.geselecteerdeKlas : null,
+<<<<<<< HEAD
       leerlingIds: this.koppelType === 'LEERLING' && this.geselecteerdeLeerlingIds.length > 0 ? this.geselecteerdeLeerlingIds : null,
+=======
+      leerlingIds: this.koppelType === 'LEERLING' && this.geselecteerdeLeerlingId ? [this.geselecteerdeLeerlingId] : null,
+>>>>>>> 591789c991c087198d7f99016f958f3bff711831
       beschrijving: this.nieuweLijstBeschrijving.trim() || null,
       zichtbaar: this.nieuweLijstZichtbaar,
     };

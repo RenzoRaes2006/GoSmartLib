@@ -3,7 +3,7 @@
     <div class="header-badges">
       @if (lijst()!.klas) {
         <span class="badge badge-klas">Klas: {{ lijst()!.klas }}</span>
-      } @else if (lijst()!.leerlingId) {
+      } @else if (lijst()!.leerlingIds?.length) {
         <span class="badge badge-leerling">Persoonlijk toegewezen</span>
       }
     </div>

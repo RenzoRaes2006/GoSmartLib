@@ -24,6 +24,7 @@ import ap.be.backend.exception.InvalidYearRangeException;
 import ap.be.backend.repository.BoekRepository;
 import ap.be.backend.repository.TagRepository;
 import ap.be.backend.service.BoekService;
+import ap.be.backend.service.TagService;
 
 @ExtendWith(MockitoExtension.class)
 public class BoekFilterServiceTest {
@@ -33,6 +34,9 @@ public class BoekFilterServiceTest {
 
     @Mock
     private TagRepository tagRepository;
+
+    @Mock
+    private TagService tagService;
 
     @InjectMocks
     private BoekService boekService;
@@ -72,6 +76,7 @@ public class BoekFilterServiceTest {
     @Test
     void givenTagIds_whenFilterBoeken_thenGeeftLijstAanRepository() {
         List<Long> tagIds = List.of(1L, 2L);
+        when(tagService.expandWithSubtags(tagIds)).thenReturn(tagIds);
         mockRepo(new PageImpl<>(List.of(new Boek("Socrates", "Plato"))));
 
         boekService.filterBoeken(

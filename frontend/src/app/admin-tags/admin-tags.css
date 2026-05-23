@@ -367,10 +367,11 @@ button.danger:hover {
 
 .sub-blok {
   margin: 8px 0 4px 36px;
-  padding: 8px 12px;
-  background: var(--go-beige);
-  border-radius: 6px;
+  padding: 12px 14px;
+  background: #fdfdfc;
+  border: 1px solid var(--border-color);
   border-left: 3px solid var(--go-bordeaux);
+  border-radius: 8px;
 }
 
 .sub-lijst {
@@ -410,4 +411,14 @@ button.danger:hover {
   border: 1px solid var(--border-color);
   border-radius: 4px;
   background: #fff;
+}
+
+.sub-toevoegen button.primary {
+  background: var(--go-bordeaux);
+  color: #fff;
+  border-color: var(--go-bordeaux);
+}
+
+.sub-toevoegen button.primary:hover:not(:disabled) {
+  background: var(--go-bordeaux-hover);
 }

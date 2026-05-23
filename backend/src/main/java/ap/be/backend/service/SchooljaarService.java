@@ -148,7 +148,11 @@ public class SchooljaarService {
         }
 
         // --- Stap 4: Vertrokken leerlingen deactiveren ---
-        vertrokken.forEach(l -> l.setActief(false));
+        LocalDate vandaag = LocalDate.now();
+        vertrokken.forEach(l -> {
+            l.setActief(false);
+            l.setVertrokkenOp(vandaag);
+        });
         userRepository.saveAll(vertrokken);
 
         // --- Stap 5: Reviews van vertrokken leerlingen anonimiseren ---

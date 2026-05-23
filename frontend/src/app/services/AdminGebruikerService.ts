@@ -1,14 +1,26 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { PageResponse } from '../models/PageResponse';
 
 export interface AdminGebruiker {
   id: number;
   smartschoolId: string;
   naam: string | null;
+  voorNaam?: string | null;
+  achternaam?: string | null;
   klas: string;
   rol: 'LEERLING' | 'LEERKRACHT' | 'BEHEERDER' | 'ADMIN' | null;
   isBeheerder: boolean;
+  actief?: boolean;
+  aangekomenOp?: string | null;
+  vertrokkenOp?: string | null;
+}
+
+export interface GebruikerCreatePayload {
+  smartschoolId: string;
+  schoolId: number;
+  klas?: string | null;
 }
 
 @Injectable({
@@ -21,11 +33,22 @@ export class AdminGebruikerService {
     ? 'http://localhost:8081/api/admin'
     : 'https://api-sp09.cloud-ap.be/api/admin';
 
-  getAlleLeerkrachten(schoolId?: number): Observable<AdminGebruiker[]> {
-    const url = schoolId != null
-      ? `${this.apiUrl}/leerkrachten?schoolId=${schoolId}`
-      : `${this.apiUrl}/leerkrachten`;
-    return this.http.get<AdminGebruiker[]>(url);
+  private leerlingApiUrl = window.location.hostname === 'localhost'
+    ? 'http://localhost:8081/api/leerlingen'
+    : 'https://api-sp09.cloud-ap.be/api/leerlingen';
+
+  getAlleLeerkrachten(
+    schoolId?: number | null,
+    inclVertrokken = false,
+    page = 0,
+    size = 5,
+  ): Observable<PageResponse<AdminGebruiker>> {
+    let params = new HttpParams()
+      .set('inclVertrokken', inclVertrokken)
+      .set('page', page)
+      .set('size', size);
+    if (schoolId != null) params = params.set('schoolId', schoolId);
+    return this.http.get<PageResponse<AdminGebruiker>>(`${this.apiUrl}/leerkrachten`, { params });
   }
 
   setBeheerder(id: number, isBeheerder: boolean): Observable<AdminGebruiker> {
@@ -33,5 +56,45 @@ export class AdminGebruikerService {
       `${this.apiUrl}/gebruikers/${id}/beheerder`,
       { isBeheerder }
     );
+  }
+
+  getLeerlingenInclVertrokken(
+    schoolId: number,
+    page = 0,
+    size = 5,
+  ): Observable<PageResponse<AdminGebruiker>> {
+    const params = new HttpParams()
+      .set('schoolId', schoolId)
+      .set('page', page)
+      .set('size', size);
+    return this.http.get<PageResponse<AdminGebruiker>>(`${this.leerlingApiUrl}/admin`, { params });
+  }
+
+  getKlassenVoorSchool(schoolId: number): Observable<string[]> {
+    return this.http.get<string[]>(`${this.leerlingApiUrl}/admin/klassen?schoolId=${schoolId}`);
+  }
+
+  voegLeerlingToe(payload: GebruikerCreatePayload): Observable<AdminGebruiker> {
+    return this.http.post<AdminGebruiker>(this.leerlingApiUrl, payload);
+  }
+
+  markeerLeerlingVertrokken(id: number): Observable<AdminGebruiker> {
+    return this.http.patch<AdminGebruiker>(`${this.leerlingApiUrl}/${id}/vertrek`, {});
+  }
+
+  reactiveerLeerling(id: number): Observable<AdminGebruiker> {
+    return this.http.patch<AdminGebruiker>(`${this.leerlingApiUrl}/${id}/reactiveer`, {});
+  }
+
+  voegLeerkrachtToe(payload: GebruikerCreatePayload): Observable<AdminGebruiker> {
+    return this.http.post<AdminGebruiker>(`${this.apiUrl}/leerkrachten`, payload);
+  }
+
+  markeerLeerkrachtVertrokken(id: number): Observable<AdminGebruiker> {
+    return this.http.patch<AdminGebruiker>(`${this.apiUrl}/leerkrachten/${id}/vertrek`, {});
+  }
+
+  reactiveerLeerkracht(id: number): Observable<AdminGebruiker> {
+    return this.http.patch<AdminGebruiker>(`${this.apiUrl}/leerkrachten/${id}/reactiveer`, {});
   }
 }
