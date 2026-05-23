@@ -2,6 +2,7 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BoekService } from '../services/boek.service';
 import { TagService } from '../services/tag.service';
+import { CampusService, Campus } from '../services/campus.service';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import * as XLSX from 'xlsx';
@@ -16,6 +17,7 @@ import * as XLSX from 'xlsx';
 export class BoekImport implements OnInit {
   boekService = inject(BoekService);
   private tagService = inject(TagService);
+  private campusService = inject(CampusService);
 
   selectedFile: File | null = null;
   isUploading = signal(false);
@@ -32,6 +34,9 @@ export class BoekImport implements OnInit {
   private subGenresMap = signal<Record<string, string[]>>({});
   beschikbareTags = signal<string[]>([]);
 
+  beschikbareCampussen = signal<Campus[]>([]);
+  defaultCampusId = signal<number | null>(null);
+
   ngOnInit(): void {
     this.tagService.tree('GENRE').subscribe((tree) => {
       this.hoofdGenres.set(tree.map((t) => t.naam));
@@ -44,6 +49,23 @@ export class BoekImport implements OnInit {
     this.tagService.list('THEMATISCH').subscribe((tags) => {
       this.beschikbareTags.set(tags.map((t) => t.naam));
     });
+    this.campusService.getMijnCampussen().subscribe({
+      next: (c) => this.beschikbareCampussen.set(c ?? []),
+      error: () => this.beschikbareCampussen.set([]),
+    });
+  }
+
+  // Past de bovenaan-gekozen default campus toe op ALLE nieuwe rijen (niet op
+  // boeken die al in de DB staan — die behouden hun bestaande campus).
+  pasDefaultCampusToeOpAlle(): void {
+    const def = this.defaultCampusId();
+    this.previewLijst.update((lijst) =>
+      lijst.map((b) => (b.bestaatAl ? b : { ...b, bulkCampusId: def })),
+    );
+  }
+
+  setBoekCampus(boek: any, campusId: number | null): void {
+    boek.bulkCampusId = campusId;
   }
 
   // --- TIJDELIJKE STAAT PER RIJ ---
@@ -83,10 +105,12 @@ export class BoekImport implements OnInit {
       next: (boekenLijst) => {
         // Tag-beheer gebeurt via de admin/tags-pagina + boek-beheer, niet hier.
         // We houden lokale lijsten enkel om de preview-tabel UI te laten werken.
+        const def = this.defaultCampusId();
         const veiligeLijst = boekenLijst.map((b: any) => ({
           ...b,
           genre: (b.tags ?? []).filter((t: any) => t.type === 'GENRE').map((t: any) => t.naam),
           thematischeTag: (b.tags ?? []).filter((t: any) => t.type === 'THEMATISCH').map((t: any) => t.naam),
+          bulkCampusId: b.bestaatAl ? null : def,
         }));
 
         this.previewLijst.set(veiligeLijst);

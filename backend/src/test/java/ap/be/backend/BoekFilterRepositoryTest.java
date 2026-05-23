@@ -43,7 +43,7 @@ public class BoekFilterRepositoryTest {
         boekRepository.save(filosofieBoek);
 
         Page<Boek> resultaat = boekRepository.filterBoeken(null, List.of(filosofie.getId()), null, null,
-                null, null, null, null, null, null, defaultPageable);
+                null, null, null, null, null, null, null, null, null, defaultPageable);
 
         List<String> titels = resultaat.getContent().stream().map(Boek::getTitel).toList();
         assertThat(titels).contains(filosofieBoek.getTitel());
@@ -62,7 +62,7 @@ public class BoekFilterRepositoryTest {
         boekRepository.save(normaal);
 
         Page<Boek> resultaat = boekRepository.filterBoeken(null, null, null, null, null,
-                null, null, null, null, true, defaultPageable);
+                null, null, null, null, true, null, null, null, defaultPageable);
 
         List<String> titels = resultaat.getContent().stream().map(Boek::getTitel).toList();
         assertThat(titels).contains(didactisch.getTitel());
@@ -87,7 +87,7 @@ public class BoekFilterRepositoryTest {
         boekRepository.save(naslagwerk);
 
         Page<Boek> resultaat = boekRepository.filterBoeken(null, List.of(lesmethodesTag.getId()), null, null,
-                null, null, null, null, null, null, defaultPageable);
+                null, null, null, null, null, null, null, null, null, defaultPageable);
 
         List<String> titels = resultaat.getContent().stream().map(Boek::getTitel).toList();
         assertThat(titels).contains(lesmethode.getTitel());
@@ -102,7 +102,7 @@ public class BoekFilterRepositoryTest {
         boekRepository.save(eenvoudigBoek);
 
         Page<Boek> resultaat = boekRepository.filterBoeken(null, null, null, null, null,
-                null, null, null, "A (eenvoudig taalgebruik)", null, defaultPageable);
+                null, null, null, "A (eenvoudig taalgebruik)", null, null, null, null, defaultPageable);
 
         assertThat(resultaat.getContent().stream().map(Boek::getTitel)).contains(eenvoudigBoek.getTitel());
     }
@@ -120,7 +120,7 @@ public class BoekFilterRepositoryTest {
         boekRepository.save(uitgeleend);
 
         Page<Boek> resultaat = boekRepository.filterBoeken(null, null, null, null, null,
-                true, null, null, null, null, defaultPageable);
+                true, null, null, null, null, null, null, null, defaultPageable);
 
         List<String> titels = resultaat.getContent().stream().map(Boek::getTitel).toList();
         assertThat(titels).contains(beschikbaar.getTitel());
@@ -135,7 +135,7 @@ public class BoekFilterRepositoryTest {
         boekRepository.save(boek);
 
         Page<Boek> resultaat = boekRepository.filterBoeken(uniekwoord, null, null, null, null,
-                null, null, null, null, null, defaultPageable);
+                null, null, null, null, null, null, null, null, defaultPageable);
 
         assertThat(resultaat.getContent()).isNotEmpty();
         assertThat(resultaat.getContent().get(0).getTitel()).contains(uniekwoord);
@@ -151,7 +151,7 @@ public class BoekFilterRepositoryTest {
         boekRepository.save(boek);
 
         Page<Boek> resultaat = boekRepository.filterBoeken(uniekIsbn, null, null, null, null,
-                null, null, null, null, null, defaultPageable);
+                null, null, null, null, null, null, null, null, defaultPageable);
 
         assertThat(resultaat.getContent()).isNotEmpty();
         assertThat(resultaat.getContent().get(0).getIsbn()).isEqualTo(uniekIsbn);
@@ -165,7 +165,7 @@ public class BoekFilterRepositoryTest {
         boekRepository.save(boek);
 
         Page<Boek> resultaat = boekRepository.filterBoeken(uniekwoord.toLowerCase(), null, null, null, null,
-                null, null, null, null, null, defaultPageable);
+                null, null, null, null, null, null, null, null, defaultPageable);
 
         assertThat(resultaat.getContent()).isNotEmpty();
         assertThat(resultaat.getContent().get(0).getTitel()).contains(uniekwoord);
@@ -185,7 +185,7 @@ public class BoekFilterRepositoryTest {
         boekRepository.save(geenMatch);
 
         Page<Boek> resultaat = boekRepository.filterBoeken(term, null, null, null, null,
-                null, null, null, null, true, defaultPageable);
+                null, null, null, null, true, null, null, null, defaultPageable);
 
         List<String> titels = resultaat.getContent().stream().map(Boek::getTitel).toList();
         assertThat(titels).contains(match.getTitel());

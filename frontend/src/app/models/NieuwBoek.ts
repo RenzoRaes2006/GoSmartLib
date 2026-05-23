@@ -14,4 +14,5 @@ export interface NieuwBoek {
   afbeelding: string;
   leesniveau?: string;
   didactischMateriaal?: boolean;
+  campusId?: number | null;
 }

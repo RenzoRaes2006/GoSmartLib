@@ -80,7 +80,7 @@ class BoekRepositoryTest {
         Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Direction.ASC, "locatie"));
 
         Page<Boek> result = boekRepository.filterBoeken("java", null, null, null, null, null, null, null, null, null,
-                pageable);
+                null, null, null, pageable);
 
         assertThat(result.getContent()).isNotEmpty();
         assertThat(result.getContent().stream().map(Boek::getTitel).toList()).contains("Java for Beginners");
@@ -96,7 +96,7 @@ class BoekRepositoryTest {
         Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Direction.ASC, "locatie"));
 
         Page<Boek> result = boekRepository.filterBoeken("Bloch", null, null, null, null, null, null, null, null, null,
-                pageable);
+                null, null, null, pageable);
 
         assertThat(result.getContent()).isNotEmpty();
         assertThat(result.getContent().get(0).getAuteur()).isEqualTo("Joshua Bloch");
@@ -113,7 +113,7 @@ class BoekRepositoryTest {
         boekRepository.saveAll(List.of(d1, n1));
         Pageable pageable = PageRequest.of(0, 100);
 
-        Page<Boek> result = boekRepository.filterBoeken(null, null, null, null, null, null, null, null, null, true, pageable);
+        Page<Boek> result = boekRepository.filterBoeken(null, null, null, null, null, null, null, null, null, true, null, null, null, pageable);
 
         assertThat(result.getContent().stream().map(Boek::getTitel)).contains("Didactisch Materiaal 1");
         assertThat(result.getContent().stream().map(Boek::getTitel)).doesNotContain("Normaal Boek 1");

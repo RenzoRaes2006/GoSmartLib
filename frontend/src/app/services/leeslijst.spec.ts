@@ -22,28 +22,28 @@ describe('LeeslijstService', () => {
     expect(service).toBeTruthy();
   });
 
-  it('getMappenVanGebruiker stuurt GET met gebruiker-id', () => {
-    service.getMappenVanGebruiker(1).subscribe();
+  it('getMijnMappen stuurt GET naar /me/mappen', () => {
+    service.getMijnMappen().subscribe();
 
-    const req = httpMock.expectOne((r) => r.url.endsWith('/api/gebruiker/1/mappen'));
+    const req = httpMock.expectOne((r) => r.url.endsWith('/api/gebruiker/me/mappen'));
     expect(req.request.method).toBe('GET');
     req.flush([]);
   });
 
-  it('voegBoekToeAanMap stuurt POST met emoji query parameter', () => {
-    service.voegBoekToeAanMap(2, 'Favorieten', 5, '⭐').subscribe();
+  it('voegBoekToeAanMijnMap stuurt POST met emoji query parameter', () => {
+    service.voegBoekToeAanMijnMap('Favorieten', 5, '⭐').subscribe();
 
     const req = httpMock.expectOne(
-      (r) => r.url.includes('/api/gebruiker/2/mappen/Favorieten/boeken/5') && r.url.includes('emoji='),
+      (r) => r.url.includes('/api/gebruiker/me/mappen/Favorieten/boeken/5') && r.url.includes('emoji='),
     );
     expect(req.request.method).toBe('POST');
     req.flush('OK');
   });
 
-  it('verwijderBoekUitMap stuurt DELETE op de juiste route', () => {
-    service.verwijderBoekUitMap(1, 'School', 9).subscribe();
+  it('verwijderBoekUitMijnMap stuurt DELETE op de juiste route', () => {
+    service.verwijderBoekUitMijnMap('School', 9).subscribe();
 
-    const req = httpMock.expectOne((r) => r.url.endsWith('/api/gebruiker/1/mappen/School/boeken/9'));
+    const req = httpMock.expectOne((r) => r.url.endsWith('/api/gebruiker/me/mappen/School/boeken/9'));
     expect(req.request.method).toBe('DELETE');
     req.flush('OK');
   });

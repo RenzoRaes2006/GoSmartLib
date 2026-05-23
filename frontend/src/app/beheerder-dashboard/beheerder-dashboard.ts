@@ -5,6 +5,7 @@ import { BoekService } from '../services/boek.service';
 import { InstellingService } from '../services/instelling-service';
 import { StatistiekService } from '../services/statistiek.service';
 import { AuthService } from '../services/AuthService';
+import { RapportageService } from '../services/rapportage-service';
 
 @Component({
   selector: 'app-beheerder-dashboard',
@@ -19,6 +20,8 @@ export class BeheerderDashboard implements OnInit {
   instellingService = inject(InstellingService);
   statistiekService = inject(StatistiekService);
   private authService = inject(AuthService);
+  private rapportageService = inject(RapportageService);
+  aantalRapportages = signal<number>(0);
 
   isOokLeerkracht = computed(() => {
     const user = this.authService.currentUser();
@@ -49,6 +52,7 @@ export class BeheerderDashboard implements OnInit {
     this.laadLimiet();
     this.laadTermijn();
     this.laadStatistieken();
+    this.laadAantalRapportages();
     this.boekService.getAlleActieveLeningenSysteem().subscribe({
       next: (response) => {
         const gesorteerdeLeningen = response.sort((a, b) => {
@@ -65,6 +69,13 @@ export class BeheerderDashboard implements OnInit {
       },
     });
   }
+  laadAantalRapportages() {
+    this.rapportageService.getRapportages().subscribe({
+      next: (lijst) => this.aantalRapportages.set((lijst ?? []).length),
+      error: () => this.aantalRapportages.set(0),
+    });
+  }
+
   laadStatistieken() {
     this.statistiekService.getAdminStatistieken().subscribe({
       next: (stats) => {

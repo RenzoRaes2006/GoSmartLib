@@ -17,11 +17,13 @@ import ap.be.backend.dto.BoekenSort;
 import ap.be.backend.dto.PageRequestParams;
 import ap.be.backend.dto.TagDTO;
 import ap.be.backend.entity.Boek;
+import ap.be.backend.entity.Campus;
 import ap.be.backend.entity.Tag;
 import ap.be.backend.exception.InvalidYearRangeException;
 import ap.be.backend.exception.IsbnAlreadyExistsException;
 import ap.be.backend.mappers.BoekMapper;
 import ap.be.backend.repository.BoekRepository;
+import ap.be.backend.repository.CampusRepository;
 import ap.be.backend.repository.TagRepository;
 
 @Service
@@ -29,11 +31,14 @@ public class BoekService {
     private final BoekRepository boekRepository;
     private final TagRepository tagRepository;
     private final TagService tagService;
+    private final CampusRepository campusRepository;
 
-    public BoekService(BoekRepository boekRepository, TagRepository tagRepository, TagService tagService) {
+    public BoekService(BoekRepository boekRepository, TagRepository tagRepository, TagService tagService,
+            CampusRepository campusRepository) {
         this.boekRepository = boekRepository;
         this.tagRepository = tagRepository;
         this.tagService = tagService;
+        this.campusRepository = campusRepository;
     }
 
     public Boek addBoek(BoekDTO boekDTO) {
@@ -57,6 +62,7 @@ public class BoekService {
         boek.setAfbeelding(isNotBlank(boekDTO.afbeelding()) ? boekDTO.afbeelding() : "");
         boek.setLeesniveau(isNotBlank(boekDTO.leesniveau()) ? boekDTO.leesniveau() : "Geen leesniveau");
         boek.setDidactischMateriaal(Boolean.TRUE.equals(boekDTO.didactischMateriaal()));
+        boek.setCampus(resolveCampus(boekDTO.campusId()));
         return boekRepository.save(boek);
     }
 
@@ -82,6 +88,7 @@ public class BoekService {
         boek.setAfbeelding(isNotBlank(boekDTO.afbeelding()) ? boekDTO.afbeelding() : "");
         boek.setLeesniveau(isNotBlank(boekDTO.leesniveau()) ? boekDTO.leesniveau() : "Geen leesniveau");
         boek.setDidactischMateriaal(Boolean.TRUE.equals(boekDTO.didactischMateriaal()));
+        boek.setCampus(resolveCampus(boekDTO.campusId()));
         return boekRepository.save(boek);
     }
 
@@ -99,6 +106,10 @@ public class BoekService {
     }
 
     public Page<BoekDTO> filterBoeken(BoekenFilters filters, BoekenSort sort, PageRequestParams paging) {
+        return filterBoeken(filters, sort, paging, null);
+    }
+
+    public Page<BoekDTO> filterBoeken(BoekenFilters filters, BoekenSort sort, PageRequestParams paging, Long schoolId) {
         validateYearRange(filters.uitgaveJaarVan(), filters.uitgaveJaarTot());
         List<Long> tagIdsParam = (filters.tagIds() == null || filters.tagIds().isEmpty())
                 ? null
@@ -114,8 +125,16 @@ public class BoekService {
                 filters.uitgaveJaarTot(),
                 filters.leesniveau(),
                 filters.didactischMateriaal(),
+                schoolId,
+                (filters.campusIds() == null || filters.campusIds().isEmpty()) ? null : filters.campusIds(),
+                filters.minSterren(),
                 paging.toPageable(sort.toSort()));
         return page.map(BoekMapper::toDTO);
+    }
+
+    private Campus resolveCampus(Long campusId) {
+        if (campusId == null) return null;
+        return campusRepository.findById(campusId).orElse(null);
     }
 
     private Set<Tag> resolveTags(List<TagDTO> tagDtos) {
