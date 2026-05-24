@@ -392,3 +392,67 @@
 .modal-knoppen .primair:hover {
   background: #6e1431;
 }
+
+/* =========================================
+   SCHADE-STAP
+   ========================================= */
+.schade-boek-preview {
+  margin-bottom: 20px;
+}
+
+.schade-keuze {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.schade-radio {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  background: white;
+  border: 1px solid #e2dfd5;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  color: #2d3748;
+  transition: border-color 0.15s, background 0.15s, transform 0.1s;
+}
+
+.schade-radio:hover {
+  border-color: #8c1b3f;
+  transform: translateY(-1px);
+}
+
+.schade-radio.actief {
+  border-color: #8c1b3f;
+  background: #fff7f9;
+  color: #8c1b3f;
+}
+
+.schade-radio input[type='radio'] {
+  width: auto;
+  margin: 0;
+  accent-color: #8c1b3f;
+}
+
+.schade-opmerking {
+  width: 100%;
+  padding: 12px 15px;
+  font-size: 1rem;
+  font-family: inherit;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #f8fafc;
+  resize: vertical;
+  outline: none;
+  color: #2d3748;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.schade-opmerking:focus {
+  border-color: #8c1b3f;
+  background: white;
+}

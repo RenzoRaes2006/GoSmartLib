@@ -158,38 +158,37 @@
     @if (huidigSchadeItem(); as item) {
       <div class="stap">
         <h2>Boek {{ schadeIndex() + 1 }} van {{ schadeItems().length }}</h2>
-        <div class="lijst-item actie-retour" style="margin-bottom: 16px">
+        <div class="lijst-item actie-retour schade-boek-preview">
           <span class="titel">{{ item.titel }}</span>
           <span class="isbn">{{ item.isbn }}</span>
         </div>
 
-        <div class="form-group" style="display: flex; gap: 16px; margin: 12px 0">
-          <label style="display: flex; align-items: center; gap: 6px">
+        <p class="lijst-titel">Toestand van het boek</p>
+        <div class="schade-keuze">
+          <label class="schade-radio" [class.actief]="!item.beschadigd">
             <input type="radio" name="beschadigd" [checked]="!item.beschadigd"
                    (change)="zetSchadeBeschadigd(false)" />
-            Niet beschadigd
+            <span>Niet beschadigd</span>
           </label>
-          <label style="display: flex; align-items: center; gap: 6px">
+          <label class="schade-radio" [class.actief]="item.beschadigd">
             <input type="radio" name="beschadigd" [checked]="item.beschadigd"
                    (change)="zetSchadeBeschadigd(true)" />
-            Beschadigd
+            <span>Beschadigd</span>
           </label>
         </div>
 
         @if (item.beschadigd) {
-          <div class="form-group">
-            <label>Opmerking (optioneel)</label>
-            <textarea
-              rows="3"
-              placeholder="Bv. pagina 14 gescheurd, kaft beschadigd, ..."
-              [ngModel]="item.opmerking"
-              (ngModelChange)="zetSchadeOpmerking($event)"
-              style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px"
-            ></textarea>
-          </div>
+          <p class="lijst-titel">Opmerking (optioneel)</p>
+          <textarea
+            class="schade-opmerking"
+            rows="3"
+            placeholder="Bv. pagina 14 gescheurd, kaft beschadigd, ..."
+            [ngModel]="item.opmerking"
+            (ngModelChange)="zetSchadeOpmerking($event)"
+          ></textarea>
         }
 
-        <div class="scan-acties" style="margin-top: 16px">
+        <div class="scan-acties">
           @if (schadeIndex() === 0) {
             <button class="terug-knop" (click)="terugNaarMandjeVanuitSchade()">
               ← Terug naar mandje

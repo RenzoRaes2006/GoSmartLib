@@ -1,83 +1,190 @@
+:host {
+  display: block;
+  background-color: #f0efe4;
+  min-height: 100vh;
+  width: 100%;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
 .schade-container {
-  max-width: 1100px;
-  margin: 24px auto;
-  padding: 0 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  color: #2d3748;
 }
 
 .back-link {
   display: inline-block;
   margin-bottom: 12px;
-  color: #4b5563;
+  color: #8c1b3f;
   text-decoration: none;
+  font-weight: 600;
+  transition: transform 0.2s;
 }
-.back-link:hover { text-decoration: underline; }
+
+.back-link:hover {
+  transform: translateX(-5px);
+}
 
 h1 {
-  margin: 0 0 16px 0;
+  margin: 0 0 24px 0;
+  font-size: 2.2rem;
+  color: #8c1b3f;
+  font-weight: 800;
+  letter-spacing: -0.5px;
 }
 
-.fout { color: #c0392b; }
-.leeg { color: #6b7280; padding: 30px 0; text-align: center; }
+.fout {
+  color: #9b2c2c;
+  background: #fed7d7;
+  padding: 12px 18px;
+  border-radius: 8px;
+  margin: 16px 0;
+}
+
+.leeg {
+  color: #718096;
+  font-style: italic;
+  text-align: center;
+  padding: 40px 0;
+  background: white;
+  border: 1px solid #e2dfd5;
+  border-radius: 12px;
+}
 
 .table-wrapper {
+  background: white;
+  border: 1px solid #e2dfd5;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+  overflow: hidden;
   overflow-x: auto;
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
 }
 
 .schade-tabel {
   width: 100%;
   border-collapse: collapse;
 }
-.schade-tabel th, .schade-tabel td {
-  padding: 10px 12px;
+
+.schade-tabel th,
+.schade-tabel td {
+  padding: 14px 16px;
   text-align: left;
-  border-bottom: 1px solid #e5e7eb;
   vertical-align: top;
+  border-bottom: 1px solid #edebe1;
 }
+
 .schade-tabel th {
-  background: #f7f9fc;
+  background: #f8f6f0;
+  color: #4a5568;
   font-weight: 600;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  border-bottom: 2px solid #c4bead;
 }
+
 .schade-tabel tbody tr:last-child td {
   border-bottom: 0;
 }
 
-.verwijder-btn {
-  background: #fee2e2;
-  color: #c0392b;
-  border: 1px solid #fca5a5;
-  padding: 4px 10px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.85rem;
+.schade-tabel tbody tr:hover {
+  background: #fcfdfd;
 }
-.verwijder-btn:hover { background: #fecaca; }
 
-.modal-overlay {
-  position: fixed; inset: 0;
-  background: rgba(0, 0, 0, 0.4);
-  display: flex; align-items: center; justify-content: center;
-  z-index: 1000;
+.schade-tabel td:first-child {
+  font-weight: 600;
+  color: #2d3748;
 }
-.modal {
-  background: #fff;
+
+.verwijder-btn {
+  padding: 8px 14px;
+  background: white;
+  color: #8c1b3f;
+  border: 1px solid #8c1b3f;
   border-radius: 8px;
-  padding: 24px;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: background 0.15s, color 0.15s;
+}
+
+.verwijder-btn:hover {
+  background: #8c1b3f;
+  color: white;
+}
+
+/* ============================
+   MODAL — zelfde stijl als scan-modus
+   ============================ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.modal {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
   max-width: 480px;
   width: 90%;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
 }
-.modal h2 { margin: 0 0 12px 0; }
-.modal-knoppen { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; }
+
+.modal h2 {
+  margin: 0 0 15px 0;
+  color: #8c1b3f;
+}
+
+.modal p {
+  color: #4a5568;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.modal-knoppen {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 25px;
+}
+
 .modal-knoppen button {
-  padding: 8px 14px;
-  border-radius: 4px;
+  padding: 10px 20px;
+  font-size: 0.95rem;
+  border-radius: 8px;
+  border: none;
   cursor: pointer;
-  border: 1px solid transparent;
-  font-weight: 500;
+  font-family: inherit;
+  font-weight: 600;
+  transition: background 0.15s;
 }
-.modal-knoppen .secundair { background: #fff; border-color: #d1d5db; color: #374151; }
-.modal-knoppen .primair { background: #c0392b; color: #fff; }
-.modal-knoppen button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.modal-knoppen .secundair {
+  background: #edf2f7;
+  color: #2d3748;
+}
+
+.modal-knoppen .secundair:hover:not(:disabled) {
+  background: #e2e8f0;
+}
+
+.modal-knoppen .primair {
+  background: #8c1b3f;
+  color: white;
+}
+
+.modal-knoppen .primair:hover:not(:disabled) {
+  background: #6e1431;
+}
+
+.modal-knoppen button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
