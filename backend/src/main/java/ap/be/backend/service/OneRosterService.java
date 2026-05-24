@@ -45,7 +45,12 @@ public class OneRosterService {
     private String cachedAccessToken = null;
     private long tokenExpiresAt = 0;
 
-    private final ConcurrentHashMap<String, String> naamCache = new ConcurrentHashMap<>();
+    // In-memory cache van smartschoolId -> volledige naam met TTL van 30 minuten.
+    // Niets wordt naar de database geschreven; deze map leeft enkel in het RAM van
+    // de Spring-applicatie en is leeg na een herstart.
+    private static final long NAAM_CACHE_TTL_MS = 30L * 60L * 1000L;
+    private record GecachedeNaam(String naam, long opgeslagenOp) {}
+    private final ConcurrentHashMap<String, GecachedeNaam> naamCache = new ConcurrentHashMap<>();
 
     /**
      * Geeft een geldig access token terug.
@@ -246,9 +251,9 @@ public class OneRosterService {
         if (sourcedId == null || sourcedId.isBlank()) {
             return null;
         }
-        String cached = naamCache.get(sourcedId);
-        if (cached != null) {
-            return cached;
+        GecachedeNaam cached = naamCache.get(sourcedId);
+        if (cached != null && System.currentTimeMillis() - cached.opgeslagenOp() < NAAM_CACHE_TTL_MS) {
+            return cached.naam();
         }
 
         try {
@@ -272,7 +277,7 @@ public class OneRosterService {
 
             String volledigeNaam = bouwVolledigeNaam(givenName, familyName);
             if (volledigeNaam != null) {
-                naamCache.put(sourcedId, volledigeNaam);
+                naamCache.put(sourcedId, new GecachedeNaam(volledigeNaam, System.currentTimeMillis()));
             }
             return volledigeNaam;
 

@@ -18,7 +18,14 @@ const IDLE_MS = 60_000;
 const PAGE_SIZE = 4;
 const ZOEK_DEBOUNCE_MS = 250;
 
-type Stap = 'LEERLING' | 'MODUS' | 'SCAN' | 'RESULTAAT';
+type Stap = 'LEERLING' | 'MODUS' | 'SCAN' | 'SCHADE' | 'RESULTAAT';
+
+interface SchadeItem {
+  isbn: string;
+  titel: string;
+  beschadigd: boolean;
+  opmerking: string;
+}
 
 @Component({
   selector: 'app-scan-modus',
@@ -47,6 +54,33 @@ export class ScanModus implements OnDestroy {
   isbnInput = signal('');
   mandje = signal<MandjeItem[]>([]);
   scanFout = signal('');
+
+  // RETOUR-modus: actieve uitleningen van de gekozen leerling om uit te kunnen kiezen.
+  retourLeningen = signal<{ id: number; isbn: string; titel: string; afbeelding?: string }[]>([]);
+  retourLaden = signal(false);
+  retourFout = signal('');
+  retourFilter = signal('');
+
+  // SCHADE-stap: per geselecteerd boek aanduiden of het beschadigd is + opmerking.
+  schadeItems = signal<SchadeItem[]>([]);
+  schadeIndex = signal(0);
+  toonSchadeBevestiging = signal(false);
+
+  huidigSchadeItem = computed(() => {
+    const items = this.schadeItems();
+    const idx = this.schadeIndex();
+    return idx >= 0 && idx < items.length ? items[idx] : null;
+  });
+
+  aantalBeschadigd = computed(() => this.schadeItems().filter((s) => s.beschadigd).length);
+
+  retourLeningenGefilterd = computed(() => {
+    const filter = this.retourFilter().trim().toLowerCase();
+    const mandjeIsbns = new Set(this.mandje().map((m) => m.isbn));
+    return this.retourLeningen()
+      .filter((l) => !mandjeIsbns.has(l.isbn))
+      .filter((l) => !filter || l.isbn.toLowerCase().includes(filter) || l.titel.toLowerCase().includes(filter));
+  });
 
   resultaten = signal<ScanBatchItemResult[]>([]);
   bezig = signal(false);
@@ -124,7 +158,46 @@ export class ScanModus implements OnDestroy {
     this.modus.set(m);
     this.stap.set('SCAN');
     this.resetIdleTimer();
+    if (m === 'RETOUR') {
+      this.laadRetourLeningen();
+    } else {
+      this.retourLeningen.set([]);
+    }
     setTimeout(() => this.isbnVeld()?.nativeElement.focus(), 0);
+  }
+
+  private laadRetourLeningen(): void {
+    const leerling = this.geselecteerdeLeerling();
+    if (!leerling?.gebruikerID) return;
+    this.retourLaden.set(true);
+    this.retourFout.set('');
+    this.retourFilter.set('');
+    this.scanService.getActieveLeningenVoorLeerling(leerling.gebruikerID).subscribe({
+      next: (leningen) => {
+        const mapped = (leningen ?? [])
+          .filter((u) => !u.isIngeleverd && u.boek)
+          .map((u) => ({
+            id: u.id,
+            isbn: u.boek.isbn,
+            titel: u.boek.titel,
+            afbeelding: u.boek.afbeelding,
+          }));
+        this.retourLeningen.set(mapped);
+        this.retourLaden.set(false);
+      },
+      error: () => {
+        this.retourLeningen.set([]);
+        this.retourLaden.set(false);
+        this.retourFout.set('Kon de uitleningen van deze leerling niet ophalen.');
+      },
+    });
+  }
+
+  selecteerUitLijst(lening: { isbn: string; titel: string }): void {
+    if (this.mandje().some((i) => i.isbn === lening.isbn)) return;
+    this.mandje.update((m) => [{ isbn: lening.isbn, titel: lening.titel }, ...m]);
+    this.scanFout.set('');
+    this.resetIdleTimer();
   }
 
   terugNaarLeerling(): void {
@@ -136,6 +209,9 @@ export class ScanModus implements OnDestroy {
     this.mandje.set([]);
     this.isbnInput.set('');
     this.scanFout.set('');
+    this.retourLeningen.set([]);
+    this.retourFilter.set('');
+    this.retourFout.set('');
     this.stap.set('MODUS');
     this.resetIdleTimer();
   }
@@ -191,7 +267,102 @@ export class ScanModus implements OnDestroy {
 
   bevestigKlaar(): void {
     this.toonKlaarBevestiging.set(false);
-    this.commitMandje();
+    // Voor RETOUR gaan we naar de per-boek schade-stap; voor UITLENING blijft de oude flow.
+    if (this.modus() === 'RETOUR') {
+      this.startSchadeStap();
+    } else {
+      this.commitMandje();
+    }
+  }
+
+  private startSchadeStap(): void {
+    const items = this.mandje().map((m) => ({
+      isbn: m.isbn,
+      titel: m.titel,
+      beschadigd: false,
+      opmerking: '',
+    }));
+    this.schadeItems.set(items);
+    this.schadeIndex.set(0);
+    this.stap.set('SCHADE');
+    this.resetIdleTimer();
+  }
+
+  zetSchadeBeschadigd(beschadigd: boolean): void {
+    const idx = this.schadeIndex();
+    this.schadeItems.update((items) => {
+      const kopie = [...items];
+      kopie[idx] = { ...kopie[idx], beschadigd };
+      if (!beschadigd) kopie[idx].opmerking = '';
+      return kopie;
+    });
+    this.resetIdleTimer();
+  }
+
+  zetSchadeOpmerking(opmerking: string): void {
+    const idx = this.schadeIndex();
+    this.schadeItems.update((items) => {
+      const kopie = [...items];
+      kopie[idx] = { ...kopie[idx], opmerking };
+      return kopie;
+    });
+    this.resetIdleTimer();
+  }
+
+  volgendBoekSchade(): void {
+    if (this.schadeIndex() < this.schadeItems().length - 1) {
+      this.schadeIndex.update((i) => i + 1);
+    } else {
+      this.toonSchadeBevestiging.set(true);
+    }
+    this.resetIdleTimer();
+  }
+
+  vorigBoekSchade(): void {
+    if (this.schadeIndex() > 0) {
+      this.schadeIndex.update((i) => i - 1);
+    }
+    this.resetIdleTimer();
+  }
+
+  terugNaarMandjeVanuitSchade(): void {
+    this.schadeItems.set([]);
+    this.schadeIndex.set(0);
+    this.stap.set('SCAN');
+    this.resetIdleTimer();
+  }
+
+  annuleerSchadeBevestiging(): void {
+    this.toonSchadeBevestiging.set(false);
+    this.resetIdleTimer();
+  }
+
+  bevestigSchadeEnVerwerk(): void {
+    this.toonSchadeBevestiging.set(false);
+    const leerling = this.geselecteerdeLeerling();
+    if (!leerling?.gebruikerID) {
+      this.sessieReset();
+      return;
+    }
+    const items = this.schadeItems().map((s) => ({
+      isbn: s.isbn,
+      beschadigd: s.beschadigd,
+      opmerking: s.beschadigd ? s.opmerking.trim() || null : null,
+    }));
+    this.bezig.set(true);
+    this.scanService.verwerkRetourMetSchade(leerling.gebruikerID, items).subscribe({
+      next: (resp) => {
+        this.resultaten.set(resp.resultaten);
+        this.stap.set('RESULTAAT');
+        this.bezig.set(false);
+        this.schadeItems.set([]);
+        this.clearIdleTimer();
+      },
+      error: () => {
+        this.scanFout.set('Er ging iets mis bij het verwerken. Probeer opnieuw.');
+        this.bezig.set(false);
+      },
+    });
   }
 
   private commitMandje(): void {
@@ -244,6 +415,12 @@ export class ScanModus implements OnDestroy {
     this.scanFout.set('');
     this.resultaten.set([]);
     this.toonKlaarBevestiging.set(false);
+    this.retourLeningen.set([]);
+    this.retourFilter.set('');
+    this.retourFout.set('');
+    this.schadeItems.set([]);
+    this.schadeIndex.set(0);
+    this.toonSchadeBevestiging.set(false);
     this.clearIdleTimer();
     this.laadLeerlingen();
   }

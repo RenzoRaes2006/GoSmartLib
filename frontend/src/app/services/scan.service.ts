@@ -39,7 +39,21 @@ export class ScanService {
     return this.http.get<Boek>(`${this.apiBase}/boeken/isbn/${isbn}`);
   }
 
+  getActieveLeningenVoorLeerling(gebruikerId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiBase}/gebruiker/${gebruikerId}/leningen`);
+  }
+
   verwerkBatch(request: ScanBatchRequest): Observable<ScanBatchResponse> {
     return this.http.post<ScanBatchResponse>(`${this.apiBase}/scan/batch`, request);
+  }
+
+  verwerkRetourMetSchade(
+    gebruikerId: number,
+    items: { isbn: string; beschadigd: boolean; opmerking: string | null }[],
+  ): Observable<ScanBatchResponse> {
+    return this.http.post<ScanBatchResponse>(`${this.apiBase}/scan/retour-met-schade`, {
+      gebruikerId,
+      items,
+    });
   }
 }

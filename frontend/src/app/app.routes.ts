@@ -29,6 +29,7 @@ import { BulkOntlenenComponent } from './bulk-ontlenen-component/bulk-ontlenen-c
 import { KlassenleeslijstenLeerlingComponent } from './klassenleeslijsten-leerling/klassenleeslijsten-leerling';
 import { KlassenleeslijstDetailLeerlingComponent } from './klassenleeslijst-detail-leerling/klassenleeslijst-detail-leerling';
 import { AdminLogin } from './admin-login/admin-login';
+import { BeschadigdeBoeken } from './beschadigde-boeken/beschadigde-boeken';
 
 export const routes: Routes = [
   // Geen guard
@@ -67,6 +68,7 @@ export const routes: Routes = [
   { path: 'boek-beheer', component: BoekBeheer, canActivate: [beheerderGuard] },
   { path: 'boek-import', component: BoekImport, canActivate: [beheerderGuard] },
   { path: 'gerapporteerde-beoordelingen', component: GerapporteerdeReviews, canActivate: [beheerderGuard] },
+  { path: 'beheer/beschadigd', component: BeschadigdeBoeken, canActivate: [beheerderGuard] },
 
   { path: '**', redirectTo: 'not-found' },
 ];

@@ -1,0 +1,39 @@
+<div class="schade-container">
+  <a routerLink="/beheerder" class="back-link">← Terug naar dashboard</a>
+  <h1>Beschadigde boeken</h1>
+
+  @if (laden()) {
+    <p>Bezig met laden...</p>
+  } @else if (fout()) {
+    <p class="fout">{{ fout() }}</p>
+  } @else if (schades().length === 0) {
+    <p class="leeg">Geen beschadigde boeken gerapporteerd.</p>
+  } @else {
+    <div class="table-wrapper">
+      <table class="schade-tabel">
+        <thead>
+          <tr>
+            <th>Boek</th>
+            <th>ISBN</th>
+            <th>Leerling</th>
+            <th>Klas</th>
+            <th>Opmerking</th>
+            <th>Gemeld op</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (s of schades(); track s.id) {
+            <tr>
+              <td>{{ s.boekTitel }}</td>
+              <td>{{ s.boekIsbn }}</td>
+              <td>{{ s.leerlingNaam || s.leerlingSmartschoolId }}</td>
+              <td>{{ s.leerlingKlas || '-' }}</td>
+              <td>{{ s.opmerking || '-' }}</td>
+              <td>{{ s.gemeldOp | date: 'dd/MM/yyyy HH:mm' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
