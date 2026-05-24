@@ -43,3 +43,41 @@ h1 {
 .schade-tabel tbody tr:last-child td {
   border-bottom: 0;
 }
+
+.verwijder-btn {
+  background: #fee2e2;
+  color: #c0392b;
+  border: 1px solid #fca5a5;
+  padding: 4px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+.verwijder-btn:hover { background: #fecaca; }
+
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1000;
+}
+.modal {
+  background: #fff;
+  border-radius: 8px;
+  padding: 24px;
+  max-width: 480px;
+  width: 90%;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+.modal h2 { margin: 0 0 12px 0; }
+.modal-knoppen { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; }
+.modal-knoppen button {
+  padding: 8px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  font-weight: 500;
+}
+.modal-knoppen .secundair { background: #fff; border-color: #d1d5db; color: #374151; }
+.modal-knoppen .primair { background: #c0392b; color: #fff; }
+.modal-knoppen button:disabled { opacity: 0.6; cursor: not-allowed; }

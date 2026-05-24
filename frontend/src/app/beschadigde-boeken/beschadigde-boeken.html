@@ -19,6 +19,7 @@
             <th>Klas</th>
             <th>Opmerking</th>
             <th>Gemeld op</th>
+            <th>Acties</th>
           </tr>
         </thead>
         <tbody>
@@ -30,10 +31,33 @@
               <td>{{ s.leerlingKlas || '-' }}</td>
               <td>{{ s.opmerking || '-' }}</td>
               <td>{{ s.gemeldOp | date: 'dd/MM/yyyy HH:mm' }}</td>
+              <td>
+                <button class="verwijder-btn" (click)="openVerwijderModal(s)">Verwijderen</button>
+              </td>
             </tr>
           }
         </tbody>
       </table>
+    </div>
+  }
+
+  @if (verwijderDoel(); as doel) {
+    <div class="modal-overlay" (click)="annuleerVerwijderen()">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <h2>Schaderapport verwijderen?</h2>
+        <p>
+          Wil je het schaderapport voor <strong>{{ doel.boekTitel }}</strong> verwijderen?
+          Doe dit pas als het probleem effectief is opgelost.
+        </p>
+        <div class="modal-knoppen">
+          <button class="secundair" (click)="annuleerVerwijderen()" [disabled]="verwijderBezig()">
+            Annuleren
+          </button>
+          <button class="primair" (click)="bevestigVerwijderen()" [disabled]="verwijderBezig()">
+            {{ verwijderBezig() ? 'Bezig...' : 'Verwijderen' }}
+          </button>
+        </div>
+      </div>
     </div>
   }
 </div>
