@@ -10,7 +10,6 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Haalt via de OneRoster API de rol en klas op van een ingelogde gebruiker.
@@ -45,12 +44,15 @@ public class OneRosterService {
     private String cachedAccessToken = null;
     private long tokenExpiresAt = 0;
 
-    // In-memory cache van smartschoolId -> volledige naam met TTL van 30 minuten.
-    // Niets wordt naar de database geschreven; deze map leeft enkel in het RAM van
-    // de Spring-applicatie en is leeg na een herstart.
+    // In-memory cache van de volledige sourcedId -> naam map met TTL van 30 minuten.
+    // We cachen één grote map (i.p.v. per sourcedId) omdat Smartschool's OneRoster
+    // het filter=sourcedId='...' filter niet correct ondersteunt: we moeten dus alle
+    // /students + /teachers één keer paginerend ophalen en lokaal mappen.
+    // Niets wordt naar de database geschreven; deze map leeft enkel in het RAM en is
+    // leeg na een herstart.
     private static final long NAAM_CACHE_TTL_MS = 30L * 60L * 1000L;
-    private record GecachedeNaam(String naam, long opgeslagenOp) {}
-    private final ConcurrentHashMap<String, GecachedeNaam> naamCache = new ConcurrentHashMap<>();
+    private volatile Map<String, String> alleNamenCache = null;
+    private volatile long alleNamenCacheTijd = 0L;
 
     /**
      * Geeft een geldig access token terug.
@@ -251,45 +253,58 @@ public class OneRosterService {
         if (sourcedId == null || sourcedId.isBlank()) {
             return null;
         }
-        GecachedeNaam cached = naamCache.get(sourcedId);
-        if (cached != null && System.currentTimeMillis() - cached.opgeslagenOp() < NAAM_CACHE_TTL_MS) {
-            return cached.naam();
-        }
-
-        // Bevraag eerst /students en daarna /teachers in plaats van /users.
-        // Reden: in Smartschool's OneRoster bevatten /users-records voor sommige
-        // accounts een afwijkende givenName/familyName (bv. team-/serviceaccount
-        // "Team01 ITSOF"), terwijl /students en /teachers de echte leerling- en
-        // leerkrachtnamen leveren — dezelfde bron als OneRosterImportService.
-        String naam = haalNaamOpViaEndpoint("/students", sourcedId);
-        if (naam == null) {
-            naam = haalNaamOpViaEndpoint("/teachers", sourcedId);
-        }
-        if (naam != null) {
-            naamCache.put(sourcedId, new GecachedeNaam(naam, System.currentTimeMillis()));
-        }
-        return naam;
+        return haalAlleNamenOp().get(sourcedId);
     }
 
-    private String haalNaamOpViaEndpoint(String pad, String sourcedId) {
+    /**
+     * Bouwt (of haalt uit cache) de sourcedId -> "Voornaam Achternaam" map voor
+     * alle leerlingen en leerkrachten. Pagineert via limit/offset omdat
+     * Smartschool's OneRoster geen werkend sourcedId-filter heeft. Cache TTL:
+     * 30 minuten, gedeeld door alle aanroepers.
+     */
+    private synchronized Map<String, String> haalAlleNamenOp() {
+        if (alleNamenCache != null
+                && System.currentTimeMillis() - alleNamenCacheTijd < NAAM_CACHE_TTL_MS) {
+            return alleNamenCache;
+        }
+        Map<String, String> resultaat = new java.util.HashMap<>();
+        laadNamenViaEndpoint("/students", resultaat);
+        laadNamenViaEndpoint("/teachers", resultaat);
+        alleNamenCache = resultaat;
+        alleNamenCacheTijd = System.currentTimeMillis();
+        return resultaat;
+    }
+
+    private void laadNamenViaEndpoint(String pad, Map<String, String> doel) {
         try {
             String accessToken = getAccessToken();
-            if (accessToken == null) return null;
+            if (accessToken == null) return;
 
-            String url = baseUrl + pad + "?filter=sourcedId='" + sourcedId + "'";
-            ResponseEntity<Map> response = restTemplate.exchange(
-                    url, HttpMethod.GET, new HttpEntity<>(buildBearerHeaders(accessToken)), Map.class);
+            int offset = 0;
+            int limit = 100;
+            while (true) {
+                String url = baseUrl + pad + "?limit=" + limit + "&offset=" + offset;
+                ResponseEntity<Map> response = restTemplate.exchange(
+                        url, HttpMethod.GET, new HttpEntity<>(buildBearerHeaders(accessToken)), Map.class);
 
-            @SuppressWarnings("unchecked")
-            List<Map<String, Object>> users =
-                    (List<Map<String, Object>>) response.getBody().get("users");
-            if (users == null || users.isEmpty()) return null;
+                @SuppressWarnings("unchecked")
+                List<Map<String, Object>> users =
+                        (List<Map<String, Object>>) response.getBody().get("users");
+                if (users == null || users.isEmpty()) break;
 
-            Map<String, Object> user = users.get(0);
-            return bouwVolledigeNaam((String) user.get("givenName"), (String) user.get("familyName"));
+                for (Map<String, Object> u : users) {
+                    String id = (String) u.get("sourcedId");
+                    String naam = bouwVolledigeNaam(
+                            (String) u.get("givenName"), (String) u.get("familyName"));
+                    if (id != null && naam != null) {
+                        doel.put(id, naam);
+                    }
+                }
+                if (users.size() < limit) break;
+                offset += limit;
+            }
         } catch (Exception e) {
-            System.err.println("[OneRoster] Fout bij ophalen naam via " + pad + " voor '" + sourcedId + "': " + e.getMessage());
-            return null;
+            System.err.println("[OneRoster] Fout bij laden " + pad + ": " + e.getMessage());
         }
     }
 
