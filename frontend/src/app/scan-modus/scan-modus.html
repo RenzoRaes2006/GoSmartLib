@@ -21,8 +21,8 @@
       } @else {
         @for (l of leerlingen(); track l.gebruikerID) {
           <button class="leerling-item" (click)="kiesLeerling(l)">
-            <span class="naam">{{ l.voorNaam }} {{ l.achterNaam }}</span>
-            <span class="schoolid">#{{ l.schoolId }}</span>
+            <span class="naam">{{ l.voorNaam }} {{ l.achternaam }}</span>
+            <span class="schoolid">#{{ l.smartschoolId }}</span>
           </button>
         } @empty {
           <p class="leeg">Geen leerlingen gevonden.</p>

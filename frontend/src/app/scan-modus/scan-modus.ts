@@ -90,8 +90,10 @@ export class ScanModus implements OnDestroy {
   naamOpScherm = computed(() => {
     const l = this.geselecteerdeLeerling();
     if (!l) return '';
-    const achter = l.achterNaam ?? '';
-    return `${l.voorNaam} ${achter.charAt(0)}.`;
+    const voor = l.voorNaam ?? '';
+    const achter = (l as any).achternaam ?? l.achterNaam ?? '';
+    const volledig = `${voor} ${achter}`.trim();
+    return volledig || l.smartschoolId || '';
   });
 
   succesvolCount = computed(() => this.resultaten().filter((r) => r.status === 'OK').length);
@@ -168,11 +170,14 @@ export class ScanModus implements OnDestroy {
 
   private laadRetourLeningen(): void {
     const leerling = this.geselecteerdeLeerling();
-    if (!leerling?.gebruikerID) return;
+    if (!leerling?.id) {
+      this.retourFout.set('Kon de leerling-ID niet bepalen.');
+      return;
+    }
     this.retourLaden.set(true);
     this.retourFout.set('');
     this.retourFilter.set('');
-    this.scanService.getActieveLeningenVoorLeerling(leerling.gebruikerID).subscribe({
+    this.scanService.getActieveLeningenVoorLeerling(leerling.id).subscribe({
       next: (leningen) => {
         const mapped = (leningen ?? [])
           .filter((u) => !u.isIngeleverd && u.boek)
@@ -340,7 +345,7 @@ export class ScanModus implements OnDestroy {
   bevestigSchadeEnVerwerk(): void {
     this.toonSchadeBevestiging.set(false);
     const leerling = this.geselecteerdeLeerling();
-    if (!leerling?.gebruikerID) {
+    if (!leerling?.id) {
       this.sessieReset();
       return;
     }
@@ -350,7 +355,7 @@ export class ScanModus implements OnDestroy {
       opmerking: s.beschadigd ? s.opmerking.trim() || null : null,
     }));
     this.bezig.set(true);
-    this.scanService.verwerkRetourMetSchade(leerling.gebruikerID, items).subscribe({
+    this.scanService.verwerkRetourMetSchade(leerling.id, items).subscribe({
       next: (resp) => {
         this.resultaten.set(resp.resultaten);
         this.stap.set('RESULTAAT');
@@ -375,7 +380,7 @@ export class ScanModus implements OnDestroy {
     }
 
     this.bezig.set(true);
-    this.scanService.verwerkBatch({ gebruikerId: leerling.gebruikerID!, actie, isbns }).subscribe({
+    this.scanService.verwerkBatch({ gebruikerId: leerling.id!, actie, isbns }).subscribe({
       next: (resp) => {
         this.resultaten.set(resp.resultaten);
         this.stap.set('RESULTAAT');
