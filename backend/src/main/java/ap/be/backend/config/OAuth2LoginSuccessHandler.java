@@ -85,14 +85,21 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         // overal (reviews, leeslijst, ...) consistent worden opgehaald.
         // Val pas terug op /users als die geen match vinden.
         OneRosterUser orUser = oneRosterService.getUserByUsernameViaGetypeerdeEndpoint(username);
+        System.out.println("[DEBUG] OAuth username = " + username);
+        System.out.println("[DEBUG] /students+/teachers lookup gaf: "
+                + (orUser != null ? orUser.getSourcedId() + " (rol=" + orUser.getRole() + ")" : "null"));
         if (orUser == null) {
             orUser = oneRosterService.getUserByUsername(username);
+            System.out.println("[DEBUG] fallback /users lookup gaf: "
+                    + (orUser != null ? orUser.getSourcedId() + " (rol=" + orUser.getRole() + ")" : "null"));
         }
 
         if (orUser != null) {
             rol = orUser.getRole();
             klas = oneRosterService.getKlasBySourcedId(orUser.getSourcedId());
             smartschoolId = orUser.getSourcedId();
+            String naamCheck = oneRosterService.getNaamBySourcedId(smartschoolId);
+            System.out.println("[DEBUG] getNaamBySourcedId(" + smartschoolId + ") = " + naamCheck);
         }
 
         if (smartschoolId == null) {
