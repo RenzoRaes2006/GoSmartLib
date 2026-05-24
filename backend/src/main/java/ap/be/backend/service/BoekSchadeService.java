@@ -40,6 +40,13 @@ public class BoekSchadeService {
         return boekSchadeRepository.save(schade);
     }
 
+    @Transactional
+    public boolean verwijder(Long id) {
+        if (!boekSchadeRepository.existsById(id)) return false;
+        boekSchadeRepository.deleteById(id);
+        return true;
+    }
+
     @Transactional(readOnly = true)
     public List<BoekSchadeDTO> getAlle() {
         return boekSchadeRepository.findAll().stream()

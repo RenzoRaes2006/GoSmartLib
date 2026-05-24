@@ -29,8 +29,15 @@ export class BeschadigdeBoeken implements OnInit {
   schades = signal<BoekSchade[]>([]);
   laden = signal(true);
   fout = signal('');
+  verwijderDoel = signal<BoekSchade | null>(null);
+  verwijderBezig = signal(false);
 
   ngOnInit(): void {
+    this.laad();
+  }
+
+  private laad(): void {
+    this.laden.set(true);
     this.http.get<BoekSchade[]>(`${this.apiBase}/schade`).subscribe({
       next: (data) => {
         this.schades.set(data ?? []);
@@ -39,6 +46,34 @@ export class BeschadigdeBoeken implements OnInit {
       error: () => {
         this.fout.set('Kon de lijst van beschadigde boeken niet ophalen.');
         this.laden.set(false);
+      },
+    });
+  }
+
+  openVerwijderModal(schade: BoekSchade): void {
+    this.fout.set('');
+    this.verwijderDoel.set(schade);
+  }
+
+  annuleerVerwijderen(): void {
+    if (this.verwijderBezig()) return;
+    this.verwijderDoel.set(null);
+  }
+
+  bevestigVerwijderen(): void {
+    const doel = this.verwijderDoel();
+    if (!doel) return;
+    this.verwijderBezig.set(true);
+    this.http.delete(`${this.apiBase}/schade/${doel.id}`).subscribe({
+      next: () => {
+        this.schades.update((lijst) => lijst.filter((s) => s.id !== doel.id));
+        this.verwijderBezig.set(false);
+        this.verwijderDoel.set(null);
+      },
+      error: () => {
+        this.verwijderBezig.set(false);
+        this.verwijderDoel.set(null);
+        this.fout.set('Verwijderen mislukt. Probeer opnieuw.');
       },
     });
   }
