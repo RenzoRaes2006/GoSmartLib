@@ -277,19 +277,35 @@ public class SchoolController {
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping("/{id}/sync-preview")
+    public ResponseEntity<?> previewSync(@PathVariable Long id) {
+        try {
+            return ResponseEntity.ok(importService.previewSync(id));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(502).body(Map.of("error", "OneRoster onbereikbaar: " + e.getMessage()));
+        }
+    }
+
     @PostMapping("/{id}/sync-gebruikers")
     public ResponseEntity<?> syncGebruikers(@PathVariable Long id) {
         try {
-            OneRosterImportService.ImportResultaat r = importService.importSchool(id);
+            OneRosterImportService.ManualSyncResultaat r = importService.synchronizeManually(id);
+            OneRosterImportService.ImportResultaat imp = r.importResultaat();
             return ResponseEntity.ok(Map.of(
                     "message", "Sync voltooid",
-                    "leerlingenNieuw", r.leerlingenNieuw(),
-                    "leerlingenGeupdatet", r.leerlingenGeupdatet(),
-                    "leerlingenOngewijzigd", r.leerlingenOngewijzigd(),
-                    "leerkrachtenNieuw", r.leerkrachtenNieuw(),
-                    "leerkrachtenGeupdatet", r.leerkrachtenGeupdatet(),
-                    "leerkrachtenOngewijzigd", r.leerkrachtenOngewijzigd(),
-                    "aantalKlassen", r.aantalKlassen()
+                    "leerlingenNieuw", imp.leerlingenNieuw(),
+                    "leerlingenGeupdatet", imp.leerlingenGeupdatet(),
+                    "leerlingenOngewijzigd", imp.leerlingenOngewijzigd(),
+                    "leerkrachtenNieuw", imp.leerkrachtenNieuw(),
+                    "leerkrachtenGeupdatet", imp.leerkrachtenGeupdatet(),
+                    "leerkrachtenOngewijzigd", imp.leerkrachtenOngewijzigd(),
+                    "aantalKlassen", imp.aantalKlassen(),
+                    "vertrokkenGemarkeerd", r.vertrokkenGemarkeerd(),
+                    "vertrokkenGeblokkeerd", r.vertrokkenGeblokkeerd()
             ));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();

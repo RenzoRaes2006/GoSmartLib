@@ -121,6 +121,25 @@ export class AdminDashboard implements OnInit {
   syncBezig = signal<boolean>(false);
   syncResultaat = signal<string>('');
 
+  // sync-preview modal state
+  syncPreviewBezig = signal<boolean>(false);
+  syncPreview = signal<{
+    leerlingen: {
+      nieuw: { smartschoolId: string; klas: string }[];
+      verplaatst: { smartschoolId: string; vorigeKlas: string; nieuweKlas: string }[];
+      vertrokken: { smartschoolId: string; klas: string; aantalOpenUitleningen: number }[];
+      aantalOngewijzigd: number;
+    };
+    leerkrachten: {
+      nieuw: { smartschoolId: string; klas: string }[];
+      verplaatst: { smartschoolId: string; vorigeKlas: string; nieuweKlas: string }[];
+      aantalOngewijzigd: number;
+    };
+    aantalKlassen: number;
+    aantalVertrokkenMetOpenLeningen: number;
+  } | null>(null);
+  syncPreviewFout = signal<string>('');
+
   wizardForm: FormGroup = this.fb.group({
     stap1: this.fb.group({
       schoolNaam: ['', Validators.required],
@@ -699,22 +718,53 @@ export class AdminDashboard implements OnInit {
     });
   }
 
-  syncGebruikersVanSchool() {
+  openSyncPreview() {
+    const schoolId = this.bewerkSchoolId();
+    if (schoolId == null) return;
+    this.syncPreviewBezig.set(true);
+    this.syncPreviewFout.set('');
+    this.syncResultaat.set('');
+    this.bewerkFout.set('');
+    this.http.post<any>(`${this.apiBase}/${schoolId}/sync-preview`, {}).subscribe({
+      next: (res) => {
+        this.syncPreview.set(res);
+        this.syncPreviewBezig.set(false);
+      },
+      error: (err) => {
+        this.syncPreviewFout.set(err?.error?.error ?? 'Preview ophalen mislukt.');
+        this.syncPreviewBezig.set(false);
+      }
+    });
+  }
+
+  sluitSyncPreview() {
+    if (this.syncBezig()) return;
+    this.syncPreview.set(null);
+    this.syncPreviewFout.set('');
+  }
+
+  bevestigSync() {
     const schoolId = this.bewerkSchoolId();
     if (schoolId == null) return;
     this.syncBezig.set(true);
-    this.syncResultaat.set('');
-    this.bewerkFout.set('');
+    this.syncPreviewFout.set('');
     this.http.post<any>(`${this.apiBase}/${schoolId}/sync-gebruikers`, {}).subscribe({
       next: (res) => {
         const nieuw = (res.leerlingenNieuw ?? 0) + (res.leerkrachtenNieuw ?? 0);
         const geupdatet = (res.leerlingenGeupdatet ?? 0) + (res.leerkrachtenGeupdatet ?? 0);
         const ongewijzigd = (res.leerlingenOngewijzigd ?? 0) + (res.leerkrachtenOngewijzigd ?? 0);
-        this.syncResultaat.set(`✓ ${nieuw} nieuw, ${geupdatet} bijgewerkt, ${ongewijzigd} ongewijzigd.`);
+        const vertrokken = res.vertrokkenGemarkeerd ?? 0;
+        const geblokkeerd = res.vertrokkenGeblokkeerd ?? 0;
+        let melding = `✓ ${nieuw} nieuw, ${geupdatet} bijgewerkt, ${ongewijzigd} ongewijzigd, ${vertrokken} vertrokken.`;
+        if (geblokkeerd > 0) {
+          melding += ` ${geblokkeerd} leerling(en) konden niet als vertrokken gemarkeerd worden door open uitleningen.`;
+        }
+        this.syncResultaat.set(melding);
         this.syncBezig.set(false);
+        this.syncPreview.set(null);
       },
       error: (err) => {
-        this.bewerkFout.set(err?.error?.error ?? 'Sync mislukt.');
+        this.syncPreviewFout.set(err?.error?.error ?? 'Sync mislukt.');
         this.syncBezig.set(false);
       }
     });

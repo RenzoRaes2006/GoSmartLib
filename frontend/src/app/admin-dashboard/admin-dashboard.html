@@ -150,13 +150,16 @@
                         <button
                           type="button"
                           class="btn-go btn-sm"
-                          (click)="syncGebruikersVanSchool()"
-                          [disabled]="syncBezig()"
+                          (click)="openSyncPreview()"
+                          [disabled]="syncPreviewBezig() || syncBezig()"
                         >
                           {{
-                            syncBezig() ? 'Bezig met synchroniseren...' : 'Synchroniseer gebruikers'
+                            syncPreviewBezig() ? 'Preview ophalen...' : 'Synchroniseer gebruikers'
                           }}
                         </button>
+                        @if (syncPreviewFout()) {
+                          <p style="color: #c0392b; margin-top: 10px">{{ syncPreviewFout() }}</p>
+                        }
                         @if (syncResultaat()) {
                           <p style="color: #348a45; margin-top: 10px; font-weight: 600">
                             {{ syncResultaat() }}
@@ -289,6 +292,121 @@
           }
         </div>
       </div>
+
+      <!-- Sync preview modal -->
+      @if (syncPreview(); as p) {
+        <div class="modal-overlay" (click)="sluitSyncPreview()">
+          <div class="modal-content" style="max-width: 720px; max-height: 80vh; overflow-y: auto"
+               (click)="$event.stopPropagation()">
+            <div class="modal-header">
+              <h3>Sync-preview</h3>
+            </div>
+            <div class="modal-body">
+              <p>
+                De volgende wijzigingen zullen worden doorgevoerd op basis van de huidige
+                OneRoster-gegevens. Bevestig om de sync uit te voeren.
+              </p>
+
+              <h4 style="margin-top: 16px">Leerlingen</h4>
+              <p style="margin: 4px 0">
+                <strong>{{ p.leerlingen.nieuw.length }}</strong> nieuw,
+                <strong>{{ p.leerlingen.verplaatst.length }}</strong> verplaatst,
+                <strong>{{ p.leerlingen.vertrokken.length }}</strong> vertrokken,
+                <strong>{{ p.leerlingen.aantalOngewijzigd }}</strong> ongewijzigd.
+              </p>
+
+              @if (p.leerlingen.nieuw.length > 0) {
+                <details>
+                  <summary><strong>Nieuwe leerlingen ({{ p.leerlingen.nieuw.length }})</strong></summary>
+                  <ul style="margin: 6px 0; padding-left: 20px">
+                    @for (l of p.leerlingen.nieuw; track l.smartschoolId) {
+                      <li>{{ l.smartschoolId }} — klas {{ l.klas || '(geen)' }}</li>
+                    }
+                  </ul>
+                </details>
+              }
+              @if (p.leerlingen.verplaatst.length > 0) {
+                <details>
+                  <summary><strong>Verplaatst ({{ p.leerlingen.verplaatst.length }})</strong></summary>
+                  <ul style="margin: 6px 0; padding-left: 20px">
+                    @for (l of p.leerlingen.verplaatst; track l.smartschoolId) {
+                      <li>{{ l.smartschoolId }}: {{ l.vorigeKlas || '(geen)' }} → {{ l.nieuweKlas || '(geen)' }}</li>
+                    }
+                  </ul>
+                </details>
+              }
+              @if (p.leerlingen.vertrokken.length > 0) {
+                <details>
+                  <summary><strong>Vertrokken ({{ p.leerlingen.vertrokken.length }})</strong></summary>
+                  <ul style="margin: 6px 0; padding-left: 20px">
+                    @for (l of p.leerlingen.vertrokken; track l.smartschoolId) {
+                      <li>
+                        {{ l.smartschoolId }} — klas {{ l.klas || '(geen)' }}
+                        @if (l.aantalOpenUitleningen > 0) {
+                          <span style="color: #c0392b">
+                            ({{ l.aantalOpenUitleningen }} open uitlening(en) — wordt overgeslagen)
+                          </span>
+                        }
+                      </li>
+                    }
+                  </ul>
+                </details>
+              }
+              @if (p.aantalVertrokkenMetOpenLeningen > 0) {
+                <p style="color: #c0392b; margin-top: 8px">
+                  ⚠ {{ p.aantalVertrokkenMetOpenLeningen }} leerling(en) zullen niet automatisch
+                  als vertrokken worden gemarkeerd omdat ze nog open uitleningen hebben. Handel
+                  die eerst af via de Gebruikers-tab.
+                </p>
+              }
+
+              <h4 style="margin-top: 16px">Leerkrachten</h4>
+              <p style="margin: 4px 0">
+                <strong>{{ p.leerkrachten.nieuw.length }}</strong> nieuw,
+                <strong>{{ p.leerkrachten.verplaatst.length }}</strong> verplaatst,
+                <strong>{{ p.leerkrachten.aantalOngewijzigd }}</strong> ongewijzigd.
+              </p>
+              @if (p.leerkrachten.nieuw.length > 0) {
+                <details>
+                  <summary><strong>Nieuwe leerkrachten ({{ p.leerkrachten.nieuw.length }})</strong></summary>
+                  <ul style="margin: 6px 0; padding-left: 20px">
+                    @for (l of p.leerkrachten.nieuw; track l.smartschoolId) {
+                      <li>{{ l.smartschoolId }}</li>
+                    }
+                  </ul>
+                </details>
+              }
+              @if (p.leerkrachten.verplaatst.length > 0) {
+                <details>
+                  <summary><strong>Verplaatst ({{ p.leerkrachten.verplaatst.length }})</strong></summary>
+                  <ul style="margin: 6px 0; padding-left: 20px">
+                    @for (l of p.leerkrachten.verplaatst; track l.smartschoolId) {
+                      <li>{{ l.smartschoolId }}: {{ l.vorigeKlas || '(geen)' }} → {{ l.nieuweKlas || '(geen)' }}</li>
+                    }
+                  </ul>
+                </details>
+              }
+
+              <p style="margin-top: 12px" class="text-muted">
+                {{ p.aantalKlassen }} klassen in OneRoster.
+              </p>
+
+              @if (syncPreviewFout()) {
+                <p style="color: #c0392b; margin-top: 10px">{{ syncPreviewFout() }}</p>
+              }
+            </div>
+            <div class="modal-footer">
+              <button class="btn-outline btn-sm" (click)="sluitSyncPreview()"
+                      [disabled]="syncBezig()">
+                Annuleren
+              </button>
+              <button class="btn-go btn-sm" (click)="bevestigSync()" [disabled]="syncBezig()">
+                {{ syncBezig() ? 'Bezig met synchroniseren...' : 'Bevestig sync' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      }
     }
 
     @if (activeTab() === 'rollen') {
