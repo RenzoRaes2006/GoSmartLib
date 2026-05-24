@@ -328,7 +328,17 @@ public class OneRosterService {
                     (List<Map<String, Object>>) response.getBody().get("users");
             if (users == null || users.isEmpty()) return null;
 
-            return new OneRosterUser((String) users.get(0).get("sourcedId"), rol);
+            System.out.println("[DEBUG] " + pad + "?filter=username='" + username + "' gaf "
+                    + users.size() + " resultaten. Eerste username = " + users.get(0).get("username")
+                    + ", sourcedId = " + users.get(0).get("sourcedId"));
+
+            // Filter werkt mogelijk niet aan OneRoster-zijde — filter in code voor de zekerheid.
+            for (Map<String, Object> u : users) {
+                if (username.equalsIgnoreCase(String.valueOf(u.get("username")))) {
+                    return new OneRosterUser((String) u.get("sourcedId"), rol);
+                }
+            }
+            return null;
         } catch (Exception e) {
             System.err.println("[OneRoster] Fout bij ophalen via " + pad + " voor '" + username + "': " + e.getMessage());
             return null;
