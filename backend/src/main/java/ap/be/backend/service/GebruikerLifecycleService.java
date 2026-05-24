@@ -7,12 +7,15 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import ap.be.backend.config.SecurityUtils;
+import ap.be.backend.entity.KlasWijziging;
 import ap.be.backend.entity.Rol;
 import ap.be.backend.entity.School;
 import ap.be.backend.entity.User;
 import ap.be.backend.exception.GebruikerNotFoundException;
 import ap.be.backend.exception.GebruikerVertrekGeblokkeerdException;
 import ap.be.backend.exception.SchoolNotFoundException;
+import ap.be.backend.repository.KlasWijzigingRepository;
 import ap.be.backend.repository.SchoolRepository;
 import ap.be.backend.repository.UitleningRepository;
 import ap.be.backend.repository.UserRepository;
@@ -33,15 +36,82 @@ public class GebruikerLifecycleService {
     private final SchoolRepository schoolRepository;
     private final UitleningRepository uitleningRepository;
     private final OneRosterClient oneRosterClient;
+    private final KlasWijzigingRepository klasWijzigingRepository;
 
     public GebruikerLifecycleService(UserRepository userRepository,
                                      SchoolRepository schoolRepository,
                                      UitleningRepository uitleningRepository,
-                                     OneRosterClient oneRosterClient) {
+                                     OneRosterClient oneRosterClient,
+                                     KlasWijzigingRepository klasWijzigingRepository) {
         this.userRepository = userRepository;
         this.schoolRepository = schoolRepository;
         this.uitleningRepository = uitleningRepository;
         this.oneRosterClient = oneRosterClient;
+        this.klasWijzigingRepository = klasWijzigingRepository;
+    }
+
+    /**
+     * Wijzigt de klas van een leerling en schrijft een historiek-rij.
+     * Geen-op als de nieuwe klas gelijk is aan de huidige (case-sensitive zoals
+     * elders in het project). De nieuwe klas moet bestaan voor de school —
+     * dezelfde validatie als bij handmatig toevoegen.
+     */
+    @Transactional
+    public User wijzigKlas(Long leerlingId, String nieuweKlas) {
+        if (nieuweKlas == null || nieuweKlas.isBlank()) {
+            throw new IllegalArgumentException("Nieuwe klas is verplicht.");
+        }
+
+        User leerling = userRepository.findById(leerlingId)
+                .orElseThrow(() -> new GebruikerNotFoundException("Gebruiker met id " + leerlingId + " niet gevonden."));
+
+        if (leerling.getRol() != Rol.LEERLING) {
+            throw new IllegalArgumentException("Klas-wijziging is enkel voor leerlingen.");
+        }
+
+        String nieuw = nieuweKlas.trim();
+        String oud = leerling.getKlas();
+        if (java.util.Objects.equals(oud, nieuw)) {
+            return leerling;
+        }
+
+        School school = leerling.getSchool();
+        if (school != null) {
+            List<String> geldigeKlassen = bepaalGeldigeKlassen(school);
+            if (!geldigeKlassen.contains(nieuw)) {
+                throw new IllegalArgumentException(
+                        "Klas '" + nieuw + "' bestaat niet voor deze school. "
+                        + "Synchroniseer eerst met OneRoster of kies een bestaande klas.");
+            }
+        }
+
+        leerling.setKlas(nieuw);
+        userRepository.save(leerling);
+
+        User doorWie = SecurityUtils.getCurrentUserOptional(userRepository).orElse(null);
+        schrijfHistoriek(leerling, oud, nieuw, doorWie, "HANDMATIG");
+        return leerling;
+    }
+
+    /**
+     * Schrijft een KlasWijziging-rij. Wordt zowel intern gebruikt als door
+     * OneRosterImportService aangeroepen voor sync-events.
+     */
+    @Transactional
+    public void schrijfHistoriek(User leerling, String vanKlas, String naarKlas, User doorWie, String bron) {
+        KlasWijziging rij = new KlasWijziging();
+        rij.setLeerling(leerling);
+        rij.setVanKlas(vanKlas);
+        rij.setNaarKlas(naarKlas);
+        rij.setDoorWie(doorWie);
+        rij.setBron(bron);
+        klasWijzigingRepository.save(rij);
+    }
+
+    @Transactional(readOnly = true)
+    public org.springframework.data.domain.Page<KlasWijziging> getHistoriek(
+            Long leerlingId, org.springframework.data.domain.Pageable pageable) {
+        return klasWijzigingRepository.findByLeerling_IdOrderByGewijzigdOpDesc(leerlingId, pageable);
     }
 
     @Transactional

@@ -23,6 +23,15 @@ export interface GebruikerCreatePayload {
   klas?: string | null;
 }
 
+export interface KlasWijziging {
+  id: number;
+  vanKlas: string | null;
+  naarKlas: string | null;
+  gewijzigdOp: string;
+  doorWieSmartschoolId: string | null;
+  bron: 'HANDMATIG' | 'ONEROSTER_SYNC' | string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -84,6 +93,16 @@ export class AdminGebruikerService {
 
   reactiveerLeerling(id: number): Observable<AdminGebruiker> {
     return this.http.patch<AdminGebruiker>(`${this.leerlingApiUrl}/${id}/reactiveer`, {});
+  }
+
+  wijzigKlas(id: number, nieuweKlas: string): Observable<AdminGebruiker> {
+    return this.http.patch<AdminGebruiker>(`${this.leerlingApiUrl}/${id}/klas`, { nieuweKlas });
+  }
+
+  getKlasHistoriek(id: number, page = 0, size = 10): Observable<PageResponse<KlasWijziging>> {
+    const params = new HttpParams().set('page', page).set('size', size);
+    return this.http.get<PageResponse<KlasWijziging>>(
+      `${this.leerlingApiUrl}/${id}/klas-historiek`, { params });
   }
 
   voegLeerkrachtToe(payload: GebruikerCreatePayload): Observable<AdminGebruiker> {

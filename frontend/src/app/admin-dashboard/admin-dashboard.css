@@ -155,6 +155,7 @@
   font-size: 0.9rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  white-space: nowrap;
 }
 
 .admin-table td {
@@ -408,6 +409,22 @@ button.btn-outline:hover {
 .btn-sm {
   padding: 6px 12px !important;
   font-size: 0.85rem !important;
+}
+
+/* Acties-cel in lifecycle-tabel: knoppen op één rij, compact zodat ze
+   ook in de smalle helft-kolom (twee tabellen naast elkaar) passen. */
+.rij-acties {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 4px;
+  align-items: center;
+}
+
+.rij-acties .btn-outline {
+  white-space: nowrap;
+  padding: 4px 8px !important;
+  font-size: 0.72rem !important;
+  margin: 0 !important;
 }
 
 /* =========================================
