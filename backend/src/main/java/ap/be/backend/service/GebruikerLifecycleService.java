@@ -16,6 +16,7 @@ import ap.be.backend.exception.GebruikerNotFoundException;
 import ap.be.backend.exception.GebruikerVertrekGeblokkeerdException;
 import ap.be.backend.exception.SchoolNotFoundException;
 import ap.be.backend.repository.KlasWijzigingRepository;
+import ap.be.backend.repository.KlassLeeslijstRepository;
 import ap.be.backend.repository.SchoolRepository;
 import ap.be.backend.repository.UitleningRepository;
 import ap.be.backend.repository.UserRepository;
@@ -37,17 +38,20 @@ public class GebruikerLifecycleService {
     private final UitleningRepository uitleningRepository;
     private final OneRosterClient oneRosterClient;
     private final KlasWijzigingRepository klasWijzigingRepository;
+    private final KlassLeeslijstRepository leeslijstRepository;
 
     public GebruikerLifecycleService(UserRepository userRepository,
                                      SchoolRepository schoolRepository,
                                      UitleningRepository uitleningRepository,
                                      OneRosterClient oneRosterClient,
-                                     KlasWijzigingRepository klasWijzigingRepository) {
+                                     KlasWijzigingRepository klasWijzigingRepository,
+                                     KlassLeeslijstRepository leeslijstRepository) {
         this.userRepository = userRepository;
         this.schoolRepository = schoolRepository;
         this.uitleningRepository = uitleningRepository;
         this.oneRosterClient = oneRosterClient;
         this.klasWijzigingRepository = klasWijzigingRepository;
+        this.leeslijstRepository = leeslijstRepository;
     }
 
     /**
@@ -222,6 +226,14 @@ public class GebruikerLifecycleService {
 
         user.setActief(false);
         user.setVertrokkenOp(LocalDate.now());
-        return userRepository.save(user);
+        userRepository.save(user);
+
+        if (user.getRol() == Rol.LEERKRACHT) {
+            var leeslijsten = leeslijstRepository.findByLeerkrachtIdAndGearchiveerdFalseOrderByAangemaaktOpDesc(userId);
+            leeslijsten.forEach(l -> l.setGearchiveerd(true));
+            leeslijstRepository.saveAll(leeslijsten);
+        }
+
+        return user;
     }
 }
