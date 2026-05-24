@@ -5,6 +5,7 @@ import ap.be.backend.entity.School;
 import ap.be.backend.entity.User;
 import ap.be.backend.repository.SchoolRepository;
 import ap.be.backend.repository.UserRepository;
+import ap.be.backend.service.GebruikerLifecycleService;
 import ap.be.backend.service.OneRosterClient;
 import ap.be.backend.service.OneRosterImportService;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,6 +24,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -40,6 +43,9 @@ public class OneRosterImportServiceTest {
 
     @Mock
     private OneRosterClient oneRosterClient;
+
+    @Mock
+    private GebruikerLifecycleService lifecycleService;
 
     @InjectMocks
     private OneRosterImportService service;
@@ -127,6 +133,24 @@ public class OneRosterImportServiceTest {
         assertEquals(1, r.leerkrachtenOngewijzigd());
         assertEquals("1B", ll2.getKlas());
         verify(userRepository, times(1)).save(ll2);
+        // Klaswijziging via OneRoster-sync schrijft een historiek-rij met bron ONEROSTER_SYNC.
+        verify(lifecycleService, times(1))
+                .schrijfHistoriek(eq(ll2), eq("OUDE-KLAS"), eq("1B"), isNull(), eq("ONEROSTER_SYNC"));
+    }
+
+    @Test
+    void ongewijzigdeKlas_schrijftGeenHistoriek() {
+        User ll1 = bestaande("ll-100", "1A", Rol.LEERLING);
+        User ll2 = bestaande("ll-101", "1B", Rol.LEERLING);
+        User lk = bestaande("lk-200", "", Rol.LEERKRACHT);
+        when(userRepository.findBySmartschoolId("ll-100")).thenReturn(Optional.of(ll1));
+        when(userRepository.findBySmartschoolId("ll-101")).thenReturn(Optional.of(ll2));
+        when(userRepository.findBySmartschoolId("lk-200")).thenReturn(Optional.of(lk));
+
+        service.importSchool(1L);
+
+        verify(lifecycleService, never())
+                .schrijfHistoriek(any(), any(), any(), any(), any());
     }
 
     @Test

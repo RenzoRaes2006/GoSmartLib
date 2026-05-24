@@ -5,7 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import { SchoolService } from '../services/School.Service';
 import { AdminTags } from '../admin-tags/admin-tags';
 import { AdminSchooljaar } from '../admin-schooljaar/admin-schooljaar';
-import { AdminGebruiker, AdminGebruikerService, GebruikerCreatePayload } from '../services/AdminGebruikerService';
+import { AdminGebruiker, AdminGebruikerService, GebruikerCreatePayload, KlasWijziging } from '../services/AdminGebruikerService';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -59,6 +59,19 @@ export class AdminDashboard implements OnInit {
   // confirm-modal voor reactiveer (vertrokken → actief)
   reactiveerModalDoel = signal<{ gebruiker: AdminGebruiker; rol: 'LEERLING' | 'LEERKRACHT' } | null>(null);
   reactiveerBezig = signal<number | null>(null);
+
+  // modal voor klas wijzigen
+  klasWijzigModalDoel = signal<AdminGebruiker | null>(null);
+  klasWijzigNieuweKlas = signal<string>('');
+  klasWijzigBezig = signal<boolean>(false);
+
+  // modal voor klas-historiek bekijken
+  historiekModalDoel = signal<AdminGebruiker | null>(null);
+  historiekRijen = signal<KlasWijziging[]>([]);
+  historiekLaden = signal<boolean>(false);
+  readonly historiekItemsPerPagina = 10;
+  historiekPage = signal<number>(0);
+  historiekTotaalPaginas = signal<number>(1);
 
   // Auto-dismiss timer voor lifecycle-foutmelding (5s na laatste set met inhoud).
   private lifecycleFoutTimer: any = null;
@@ -583,6 +596,93 @@ export class AdminDashboard implements OnInit {
         this.toonLifecycleFout(err?.error ?? 'Reactiveren mislukt.');
       },
     });
+  }
+
+  // --- klas-wijzigen ---
+  openKlasWijzigModal(leerling: AdminGebruiker) {
+    this.toonLifecycleFout('');
+    this.klasWijzigNieuweKlas.set(leerling.klas ?? '');
+    this.klasWijzigModalDoel.set(leerling);
+  }
+
+  annuleerKlasWijzigModal() {
+    if (this.klasWijzigBezig()) return;
+    this.klasWijzigModalDoel.set(null);
+    this.klasWijzigNieuweKlas.set('');
+  }
+
+  bevestigKlasWijzig() {
+    const leerling = this.klasWijzigModalDoel();
+    if (!leerling) return;
+    const nieuweKlas = this.klasWijzigNieuweKlas().trim();
+    if (!nieuweKlas) {
+      this.toonLifecycleFout('Kies een klas.');
+      return;
+    }
+    if (nieuweKlas === (leerling.klas ?? '')) {
+      this.klasWijzigModalDoel.set(null);
+      return;
+    }
+    this.klasWijzigBezig.set(true);
+    this.adminGebruikerService.wijzigKlas(leerling.id, nieuweKlas).subscribe({
+      next: () => {
+        this.klasWijzigBezig.set(false);
+        this.klasWijzigModalDoel.set(null);
+        this.klasWijzigNieuweKlas.set('');
+        const schoolId = this.gebruikersSchoolId();
+        if (schoolId != null) this.laadLifecycleLeerlingenPagina(schoolId);
+      },
+      error: (err) => {
+        this.klasWijzigBezig.set(false);
+        this.toonLifecycleFout(err?.error ?? 'Klas wijzigen mislukt.');
+      }
+    });
+  }
+
+  // --- klas-historiek ---
+  openHistoriekModal(leerling: AdminGebruiker) {
+    this.historiekModalDoel.set(leerling);
+    this.historiekPage.set(0);
+    this.laadHistoriekPagina(leerling.id);
+  }
+
+  private laadHistoriekPagina(leerlingId: number) {
+    this.historiekLaden.set(true);
+    this.adminGebruikerService
+      .getKlasHistoriek(leerlingId, this.historiekPage(), this.historiekItemsPerPagina)
+      .subscribe({
+        next: (page) => {
+          this.historiekRijen.set(page.content ?? []);
+          this.historiekTotaalPaginas.set(Math.max(1, page.totalPages ?? 1));
+          this.historiekLaden.set(false);
+        },
+        error: () => {
+          this.historiekLaden.set(false);
+          this.toonLifecycleFout('Historiek niet beschikbaar.');
+          this.historiekModalDoel.set(null);
+        }
+      });
+  }
+
+  vorigeHistoriekPagina() {
+    const doel = this.historiekModalDoel();
+    if (!doel || this.historiekPage() === 0) return;
+    this.historiekPage.update((p) => p - 1);
+    this.laadHistoriekPagina(doel.id);
+  }
+
+  volgendeHistoriekPagina() {
+    const doel = this.historiekModalDoel();
+    if (!doel || this.historiekPage() >= this.historiekTotaalPaginas() - 1) return;
+    this.historiekPage.update((p) => p + 1);
+    this.laadHistoriekPagina(doel.id);
+  }
+
+  sluitHistoriekModal() {
+    this.historiekModalDoel.set(null);
+    this.historiekRijen.set([]);
+    this.historiekPage.set(0);
+    this.historiekTotaalPaginas.set(1);
   }
 
   bevestigVertrek() {

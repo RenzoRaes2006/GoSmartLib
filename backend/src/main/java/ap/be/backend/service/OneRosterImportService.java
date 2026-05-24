@@ -32,15 +32,18 @@ public class OneRosterImportService {
     private final UserRepository userRepository;
     private final OneRosterClient oneRosterClient;
     private final UitleningRepository uitleningRepository;
+    private final GebruikerLifecycleService lifecycleService;
 
     public OneRosterImportService(SchoolRepository schoolRepository,
                                   UserRepository userRepository,
                                   OneRosterClient oneRosterClient,
-                                  UitleningRepository uitleningRepository) {
+                                  UitleningRepository uitleningRepository,
+                                  GebruikerLifecycleService lifecycleService) {
         this.schoolRepository = schoolRepository;
         this.userRepository = userRepository;
         this.oneRosterClient = oneRosterClient;
         this.uitleningRepository = uitleningRepository;
+        this.lifecycleService = lifecycleService;
     }
 
     public List<Map<String, Object>> fetchKlassen(Long schoolId) {
@@ -114,8 +117,12 @@ public class OneRosterImportService {
                 User u = bestaand.get();
                 boolean gewijzigd = false;
                 if (!Objects.equals(u.getKlas(), klas)) {
+                    String oudeKlas = u.getKlas();
                     u.setKlas(klas);
                     gewijzigd = true;
+                    if (rol == Rol.LEERLING) {
+                        lifecycleService.schrijfHistoriek(u, oudeKlas, klas, null, "ONEROSTER_SYNC");
+                    }
                 }
                 if (u.getRol() != rol) {
                     u.setRol(rol);

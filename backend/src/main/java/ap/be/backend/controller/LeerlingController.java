@@ -3,6 +3,8 @@ package ap.be.backend.controller;
 import ap.be.backend.config.SecurityUtils;
 import ap.be.backend.dto.GebruikerCreateRequest;
 import ap.be.backend.dto.GebruikerDTO;
+import ap.be.backend.dto.KlasWijzigenRequest;
+import ap.be.backend.dto.KlasWijzigingDTO;
 import ap.be.backend.entity.Rol;
 import ap.be.backend.entity.School;
 import ap.be.backend.entity.User;
@@ -222,6 +224,37 @@ public class LeerlingController {
     public ResponseEntity<GebruikerDTO> reactiveerLeerling(@PathVariable Long id) {
         User user = lifecycleService.reactiveer(id);
         return ResponseEntity.ok(GebruikerMapper.toDTO(user));
+    }
+
+    /**
+     * Admin-only: wijzig de klas van een leerling. Schrijft automatisch een
+     * historiek-rij. No-op als de nieuwe klas gelijk is aan de huidige.
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("/{id}/klas")
+    public ResponseEntity<GebruikerDTO> wijzigKlas(@PathVariable Long id,
+                                                   @RequestBody KlasWijzigenRequest request) {
+        User user = lifecycleService.wijzigKlas(id, request.nieuweKlas());
+        return ResponseEntity.ok(GebruikerMapper.toDTO(user));
+    }
+
+    /**
+     * Admin-only: geef de klas-historiek van een leerling, paged, nieuwste eerst.
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/{id}/klas-historiek")
+    public Page<KlasWijzigingDTO> getKlasHistoriek(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return lifecycleService.getHistoriek(id, PageRequest.of(page, size))
+                .map(w -> new KlasWijzigingDTO(
+                        w.getId(),
+                        w.getVanKlas(),
+                        w.getNaarKlas(),
+                        w.getGewijzigdOp(),
+                        w.getDoorWie() == null ? null : w.getDoorWie().getSmartschoolId(),
+                        w.getBron()));
     }
 
     @GetMapping("/{id}/stats")

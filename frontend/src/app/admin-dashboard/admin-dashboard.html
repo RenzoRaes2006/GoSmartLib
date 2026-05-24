@@ -911,21 +911,31 @@
                           </span>
                         </td>
                         <td>
-                          @if (l.actief) {
-                            <button
-                              class="btn-outline btn-sm btn-delete"
-                              (click)="openVertrekModal(l, 'LEERLING')"
-                            >
-                              Markeer vertrokken
+                          <div class="rij-acties">
+                            @if (l.actief) {
+                              <button class="btn-outline btn-sm" (click)="openKlasWijzigModal(l)">
+                                Wijzig klas
+                              </button>
+                            }
+                            <button class="btn-outline btn-sm" (click)="openHistoriekModal(l)">
+                              Historiek
                             </button>
-                          } @else {
-                            <button
-                              class="btn-outline btn-sm"
-                              (click)="openReactiveerModal(l, 'LEERLING')"
-                            >
-                              Reactiveer
-                            </button>
-                          }
+                            @if (l.actief) {
+                              <button
+                                class="btn-outline btn-sm btn-delete"
+                                (click)="openVertrekModal(l, 'LEERLING')"
+                              >
+                                Markeer vertrokken
+                              </button>
+                            } @else {
+                              <button
+                                class="btn-outline btn-sm"
+                                (click)="openReactiveerModal(l, 'LEERLING')"
+                              >
+                                Reactiveer
+                              </button>
+                            }
+                          </div>
                         </td>
                       </tr>
                     } @empty {
@@ -1026,21 +1036,23 @@
                           </span>
                         </td>
                         <td>
-                          @if (lk.actief) {
-                            <button
-                              class="btn-outline btn-sm btn-delete"
-                              (click)="openVertrekModal(lk, 'LEERKRACHT')"
-                            >
-                              Markeer vertrokken
-                            </button>
-                          } @else {
-                            <button
-                              class="btn-outline btn-sm"
-                              (click)="openReactiveerModal(lk, 'LEERKRACHT')"
-                            >
-                              Reactiveer
-                            </button>
-                          }
+                          <div class="rij-acties">
+                            @if (lk.actief) {
+                              <button
+                                class="btn-outline btn-sm btn-delete"
+                                (click)="openVertrekModal(lk, 'LEERKRACHT')"
+                              >
+                                Markeer vertrokken
+                              </button>
+                            } @else {
+                              <button
+                                class="btn-outline btn-sm"
+                                (click)="openReactiveerModal(lk, 'LEERKRACHT')"
+                              >
+                                Reactiveer
+                              </button>
+                            }
+                          </div>
                         </td>
                       </tr>
                     } @empty {
@@ -1104,6 +1116,117 @@
                       [disabled]="reactiveerBezig() !== null">
                 {{ reactiveerBezig() !== null ? 'Bezig...' : 'Reactiveer' }}
               </button>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Modal: klas wijzigen -->
+      @if (klasWijzigModalDoel(); as l) {
+        <div class="modal-overlay" (click)="annuleerKlasWijzigModal()">
+          <div class="modal-content" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+              <h3>Klas wijzigen</h3>
+            </div>
+            <div class="modal-body">
+              <p>
+                Klas wijzigen voor
+                <strong>{{ l.naam || l.smartschoolId }}</strong>
+                (huidige klas: {{ l.klas || '-' }}).
+              </p>
+              <label style="display:block; margin-top:10px; font-weight:600">Nieuwe klas</label>
+              <select
+                [ngModel]="klasWijzigNieuweKlas()"
+                (ngModelChange)="klasWijzigNieuweKlas.set($event)"
+                style="width:100%; padding:6px; margin-top:4px"
+                [disabled]="klasWijzigBezig()"
+              >
+                <option value="">-- Kies klas --</option>
+                @for (k of beschikbareKlassenVoorSchool(); track k) {
+                  <option [value]="k">{{ k }}</option>
+                }
+              </select>
+              <p class="text-muted" style="margin-top:8px">
+                De wijziging wordt automatisch bijgehouden in de historiek.
+              </p>
+            </div>
+            <div class="modal-footer">
+              <button class="btn-outline btn-sm" (click)="annuleerKlasWijzigModal()"
+                      [disabled]="klasWijzigBezig()">Annuleren</button>
+              <button class="btn-go btn-sm" (click)="bevestigKlasWijzig()"
+                      [disabled]="klasWijzigBezig()">
+                {{ klasWijzigBezig() ? 'Bezig...' : 'Wijzig klas' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Modal: klas-historiek -->
+      @if (historiekModalDoel(); as l) {
+        <div class="modal-overlay" (click)="sluitHistoriekModal()">
+          <div class="modal-content" (click)="$event.stopPropagation()" style="max-width:600px">
+            <div class="modal-header">
+              <h3>Klas-historiek</h3>
+            </div>
+            <div class="modal-body">
+              <p><strong>{{ l.naam || l.smartschoolId }}</strong></p>
+              @if (historiekLaden()) {
+                <p class="text-muted">Bezig met laden...</p>
+              } @else if (historiekRijen().length === 0) {
+                <p class="text-muted">Geen klas-wijzigingen gevonden.</p>
+              } @else {
+                <table class="admin-table" style="margin-top:8px">
+                  <thead>
+                    <tr>
+                      <th>Datum</th>
+                      <th>Van</th>
+                      <th>Naar</th>
+                      <th>Door</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (rij of historiekRijen(); track rij.id) {
+                      <tr>
+                        <td>{{ rij.gewijzigdOp | date: 'dd/MM/yyyy HH:mm' }}</td>
+                        <td>{{ rij.vanKlas || '-' }}</td>
+                        <td>{{ rij.naarKlas || '-' }}</td>
+                        <td>
+                          @if (rij.bron === 'ONEROSTER_SYNC') {
+                            <em>OneRoster-sync</em>
+                          } @else {
+                            {{ rij.doorWieSmartschoolId || '-' }}
+                          }
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+                @if (historiekTotaalPaginas() > 1) {
+                  <div class="pagination" style="margin-top:12px">
+                    <button
+                      class="btn-outline btn-sm"
+                      (click)="vorigeHistoriekPagina()"
+                      [disabled]="historiekPage() === 0 || historiekLaden()"
+                    >
+                      Vorige
+                    </button>
+                    <span class="page-indicator">
+                      {{ historiekPage() + 1 }} / {{ historiekTotaalPaginas() }}
+                    </span>
+                    <button
+                      class="btn-outline btn-sm"
+                      (click)="volgendeHistoriekPagina()"
+                      [disabled]="historiekPage() >= historiekTotaalPaginas() - 1 || historiekLaden()"
+                    >
+                      Volgende
+                    </button>
+                  </div>
+                }
+              }
+            </div>
+            <div class="modal-footer">
+              <button class="btn-outline btn-sm" (click)="sluitHistoriekModal()">Sluiten</button>
             </div>
           </div>
         </div>
