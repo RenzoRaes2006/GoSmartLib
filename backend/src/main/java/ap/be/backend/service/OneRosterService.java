@@ -287,6 +287,48 @@ public class OneRosterService {
         }
     }
 
+    /**
+     * Zoekt een gebruiker op via username, maar bevraagt de getypeerde
+     * endpoints /students en /teachers in plaats van /users.
+     *
+     * Reden: /users?filter=username='...' geeft op Smartschool's OneRoster
+     * soms een andere sourcedId terug dan /students of /teachers (bv. die van
+     * een team-/serviceaccount), waardoor getNaamBySourcedId later een verkeerde
+     * naam ophaalt. /students en /teachers leveren exact dezelfde sourcedId als
+     * de bulk-import in OneRosterImportService, zodat OAuth-login en import op
+     * hetzelfde User-record uitkomen en namen overal consistent zijn.
+     *
+     * @param username de Smartschool-gebruikersnaam
+     * @return een OneRosterUser, of null als noch /students noch /teachers een
+     *         match teruggeven
+     */
+    public OneRosterUser getUserByUsernameViaGetypeerdeEndpoint(String username) {
+        OneRosterUser student = zoekViaGetypeerdEndpoint("/students", username, "student");
+        if (student != null) return student;
+        return zoekViaGetypeerdEndpoint("/teachers", username, "teacher");
+    }
+
+    private OneRosterUser zoekViaGetypeerdEndpoint(String pad, String username, String rol) {
+        try {
+            String accessToken = getAccessToken();
+            if (accessToken == null) return null;
+
+            String url = baseUrl + pad + "?filter=username='" + username + "'";
+            ResponseEntity<Map> response = restTemplate.exchange(
+                    url, HttpMethod.GET, new HttpEntity<>(buildBearerHeaders(accessToken)), Map.class);
+
+            @SuppressWarnings("unchecked")
+            List<Map<String, Object>> users =
+                    (List<Map<String, Object>>) response.getBody().get("users");
+            if (users == null || users.isEmpty()) return null;
+
+            return new OneRosterUser((String) users.get(0).get("sourcedId"), rol);
+        } catch (Exception e) {
+            System.err.println("[OneRoster] Fout bij ophalen via " + pad + " voor '" + username + "': " + e.getMessage());
+            return null;
+        }
+    }
+
     private String bouwVolledigeNaam(String givenName, String familyName) {
         boolean heeftGiven = givenName != null && !givenName.isBlank();
         boolean heeftFamily = familyName != null && !familyName.isBlank();

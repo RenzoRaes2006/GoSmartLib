@@ -80,7 +80,14 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         String klas = "onbekend";
         String smartschoolId = null;
 
-        OneRosterUser orUser = oneRosterService.getUserByUsername(username);
+        // Probeer eerst de getypeerde endpoints (/students, /teachers): die geven
+        // dezelfde sourcedId terug als OneRosterImportService, waardoor namen
+        // overal (reviews, leeslijst, ...) consistent worden opgehaald.
+        // Val pas terug op /users als die geen match vinden.
+        OneRosterUser orUser = oneRosterService.getUserByUsernameViaGetypeerdeEndpoint(username);
+        if (orUser == null) {
+            orUser = oneRosterService.getUserByUsername(username);
+        }
 
         if (orUser != null) {
             rol = orUser.getRole();
@@ -102,10 +109,19 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         final String klasFinal = klas;
         final Rol rolEnum = mapRol(rol);
 
-        // Bestaande user bijwerken of nieuw aanmaken. Geen persoonsdata opslaan.
-        // De isBeheerder-flag leeft naast de rol en wordt hier niet aangeraakt.
+        Object fallbackIdAttr = oAuth2User.getAttribute("userID");
+        final String fallbackId = fallbackIdAttr == null ? null : fallbackIdAttr.toString();
+
+        // Self-healing: bestaande gebruikers die ooit met een verkeerde sourcedId
+        // (bv. die van /users of de Smartschool userID) in de DB belandden, worden
+        // bij deze herlogin gecorrigeerd naar de juiste sourcedId uit /students of
+        // /teachers. Vermijdt duplicate User-records.
         User user = userRepository.findBySmartschoolId(smartschoolIdFinal)
+                .or(() -> fallbackId != null && !fallbackId.equals(smartschoolIdFinal)
+                        ? userRepository.findBySmartschoolId(fallbackId)
+                        : java.util.Optional.empty())
                 .map(existing -> {
+                    existing.setSmartschoolId(smartschoolIdFinal);
                     existing.setKlas(klasFinal);
                     existing.setRol(rolEnum);
                     return userRepository.save(existing);
