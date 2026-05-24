@@ -102,10 +102,18 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         final String klasFinal = klas;
         final Rol rolEnum = mapRol(rol);
 
-        // Bestaande user bijwerken of nieuw aanmaken. Geen persoonsdata opslaan.
-        // De isBeheerder-flag leeft naast de rol en wordt hier niet aangeraakt.
+        Object fallbackIdAttr = oAuth2User.getAttribute("userID");
+        final String fallbackId = fallbackIdAttr == null ? null : fallbackIdAttr.toString();
+
+        // Zoek eerst op de OneRoster sourcedId; als die niet gevonden wordt maar de
+        // Smartschool userID wel (gebruiker ingelogd toen OneRoster nog faalde),
+        // corrigeer dan de opgeslagen smartschoolId naar de OneRoster sourcedId.
         User user = userRepository.findBySmartschoolId(smartschoolIdFinal)
+                .or(() -> fallbackId != null && !fallbackId.equals(smartschoolIdFinal)
+                        ? userRepository.findBySmartschoolId(fallbackId)
+                        : java.util.Optional.empty())
                 .map(existing -> {
+                    existing.setSmartschoolId(smartschoolIdFinal);
                     existing.setKlas(klasFinal);
                     existing.setRol(rolEnum);
                     return userRepository.save(existing);
