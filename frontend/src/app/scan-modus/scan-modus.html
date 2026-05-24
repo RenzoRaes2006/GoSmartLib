@@ -79,6 +79,40 @@
         <p class="fout">{{ scanFout() }}</p>
       }
 
+      @if (modus() === 'RETOUR') {
+        <h3 class="lijst-titel">Geleende boeken — selecteer om terug te brengen</h3>
+        @if (retourLaden()) {
+          <p class="leeg">Uitleningen laden...</p>
+        } @else if (retourFout()) {
+          <p class="fout">{{ retourFout() }}</p>
+        } @else {
+          <input
+            type="text"
+            placeholder="Filter op ISBN of titel..."
+            [ngModel]="retourFilter()"
+            (ngModelChange)="retourFilter.set($event)"
+            style="margin-top: 8px"
+          />
+          <div class="retour-lijst" style="max-height: 280px; overflow-y: auto; margin-top: 8px">
+            @for (l of retourLeningenGefilterd(); track l.id) {
+              <button type="button" class="lijst-item" (click)="selecteerUitLijst(l)"
+                      style="width: 100%; text-align: left; cursor: pointer; background: #f7f9fc;
+                             border: 1px solid #e5e7eb; padding: 8px 10px; margin-bottom: 6px;
+                             border-radius: 4px; display: flex; justify-content: space-between; gap: 10px">
+                <span class="titel">{{ l.titel }}</span>
+                <span class="isbn" style="color: #6b7280">{{ l.isbn }}</span>
+              </button>
+            } @empty {
+              <p class="leeg">
+                @if (retourFilter().trim()) { Geen geleende boeken matchen dit filter. }
+                @else if (retourLeningen().length === 0) { Deze leerling heeft geen openstaande uitleningen. }
+                @else { Alle geleende boeken staan al in het mandje. }
+              </p>
+            }
+          </div>
+        }
+      }
+
       <h3 class="lijst-titel">
         Geselecteerde boeken ({{ mandje().length }}
         {{ modus() === 'UITLENING' ? 'te lenen' : 'terug te brengen' }})
@@ -114,6 +148,79 @@
           <div class="modal-knoppen">
             <button class="secundair" (click)="annuleerKlaar()">Annuleren</button>
             <button class="primair" (click)="bevestigKlaar()">Ja, bevestigen</button>
+          </div>
+        </div>
+      </div>
+    }
+  }
+
+  @if (stap() === 'SCHADE') {
+    @if (huidigSchadeItem(); as item) {
+      <div class="stap">
+        <h2>Boek {{ schadeIndex() + 1 }} van {{ schadeItems().length }}</h2>
+        <div class="lijst-item actie-retour" style="margin-bottom: 16px">
+          <span class="titel">{{ item.titel }}</span>
+          <span class="isbn">{{ item.isbn }}</span>
+        </div>
+
+        <div class="form-group" style="display: flex; gap: 16px; margin: 12px 0">
+          <label style="display: flex; align-items: center; gap: 6px">
+            <input type="radio" name="beschadigd" [checked]="!item.beschadigd"
+                   (change)="zetSchadeBeschadigd(false)" />
+            Niet beschadigd
+          </label>
+          <label style="display: flex; align-items: center; gap: 6px">
+            <input type="radio" name="beschadigd" [checked]="item.beschadigd"
+                   (change)="zetSchadeBeschadigd(true)" />
+            Beschadigd
+          </label>
+        </div>
+
+        @if (item.beschadigd) {
+          <div class="form-group">
+            <label>Opmerking (optioneel)</label>
+            <textarea
+              rows="3"
+              placeholder="Bv. pagina 14 gescheurd, kaft beschadigd, ..."
+              [ngModel]="item.opmerking"
+              (ngModelChange)="zetSchadeOpmerking($event)"
+              style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px"
+            ></textarea>
+          </div>
+        }
+
+        <div class="scan-acties" style="margin-top: 16px">
+          @if (schadeIndex() === 0) {
+            <button class="terug-knop" (click)="terugNaarMandjeVanuitSchade()">
+              ← Terug naar mandje
+            </button>
+          } @else {
+            <button class="terug-knop" (click)="vorigBoekSchade()">← Vorig boek</button>
+          }
+          <button class="klaar-knop" (click)="volgendBoekSchade()">
+            {{ schadeIndex() === schadeItems().length - 1 ? 'Klaar' : 'Volgend boek →' }}
+          </button>
+        </div>
+      </div>
+    }
+
+    @if (toonSchadeBevestiging()) {
+      <div class="modal-overlay" (click)="annuleerSchadeBevestiging()">
+        <div class="modal" (click)="$event.stopPropagation()">
+          <h2>Weet je zeker?</h2>
+          <p>
+            Je gaat {{ schadeItems().length }} boek(en) terugbrengen.
+            @if (aantalBeschadigd() > 0) {
+              {{ aantalBeschadigd() }} hiervan {{ aantalBeschadigd() === 1 ? 'is' : 'zijn' }} gemarkeerd als beschadigd.
+            }
+          </p>
+          <div class="modal-knoppen">
+            <button class="secundair" (click)="annuleerSchadeBevestiging()">
+              ← Wijzigen
+            </button>
+            <button class="primair" (click)="bevestigSchadeEnVerwerk()" [disabled]="bezig()">
+              {{ bezig() ? 'Bezig...' : 'Bevestigen' }}
+            </button>
           </div>
         </div>
       </div>
