@@ -22,7 +22,7 @@ export class HomePage implements OnInit {
 
   // Gebruikersinfo & Gamification
   naam = computed(() => this.authService.currentUser()?.name ?? '');
-  schoolId = '12345'; // Tijdelijk hardcoded — komt later uit AuthService/Smartschool
+  schoolId = computed(() => this.authService.currentUser()?.id ?? '');
 
   gelezenBoeken = signal<number>(0);
   leesDoel = signal<number>(10);
@@ -72,7 +72,7 @@ export class HomePage implements OnInit {
     // 3. Haal de actieve leningen op
     this.haalLeningenOp();
 
-    this.statistiekService.getLeerlingStatistieken(this.schoolId).subscribe({
+    this.statistiekService.getLeerlingStatistieken(this.schoolId()).subscribe({
       next: (stats) => {
         this.gelezenBoeken.set(stats.gelezenBoeken ?? 0);
         this.leesDoel.set(stats.leesDoel ?? 10);

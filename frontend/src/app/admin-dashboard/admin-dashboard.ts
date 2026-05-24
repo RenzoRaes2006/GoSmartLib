@@ -105,6 +105,11 @@ export class AdminDashboard implements OnInit {
   nieuweBeschikbareAdres = signal<string>('');
   beschikbareFout = signal<string>('');
 
+  // bewerk-state voor een beschikbare school
+  bewerkBeschikbareId = signal<number | null>(null);
+  bewerkBeschikbareNaam = signal<string>('');
+  bewerkBeschikbareAdres = signal<string>('');
+
   // wizard state
   huidigeStapWizard = signal<number>(1);
   totaleStappen = 5;
@@ -200,6 +205,43 @@ export class AdminDashboard implements OnInit {
         this.laadBeschikbareScholen();
       },
       error: (err) => this.beschikbareFout.set(err?.error?.error ?? 'Toevoegen mislukt.')
+    });
+  }
+
+  startBewerkBeschikbareSchool(school: { id: number; naam: string; adres: string }) {
+    if (this.bewerkBeschikbareId() === school.id) {
+      this.annuleerBewerkBeschikbareSchool();
+      return;
+    }
+    this.beschikbareFout.set('');
+    this.bewerkBeschikbareId.set(school.id);
+    this.bewerkBeschikbareNaam.set(school.naam);
+    this.bewerkBeschikbareAdres.set(school.adres);
+  }
+
+  annuleerBewerkBeschikbareSchool() {
+    this.bewerkBeschikbareId.set(null);
+    this.bewerkBeschikbareNaam.set('');
+    this.bewerkBeschikbareAdres.set('');
+    this.beschikbareFout.set('');
+  }
+
+  bewaarBewerkBeschikbareSchool() {
+    const id = this.bewerkBeschikbareId();
+    if (id == null) return;
+    const naam = this.bewerkBeschikbareNaam().trim();
+    const adres = this.bewerkBeschikbareAdres().trim();
+    if (!naam || !adres) {
+      this.beschikbareFout.set('Naam en adres zijn verplicht.');
+      return;
+    }
+    this.beschikbareFout.set('');
+    this.http.put<any>(`${this.apiBase}/beschikbaar/${id}`, { naam, adres }).subscribe({
+      next: () => {
+        this.annuleerBewerkBeschikbareSchool();
+        this.laadBeschikbareScholen();
+      },
+      error: (err) => this.beschikbareFout.set(err?.error?.error ?? 'Bewerken mislukt.')
     });
   }
 

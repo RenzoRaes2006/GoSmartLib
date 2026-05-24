@@ -56,7 +56,7 @@ describe('HomePage', () => {
   it('laadt populaire boeken, leeslijsten en statistieken bij init', () => {
     expect(boekSpy.getPopulaireBoeken).toHaveBeenCalled();
     expect(leeslijstSpy.getMappenVanGebruiker).toHaveBeenCalledWith(1);
-    expect(statSpy.getLeerlingStatistieken).toHaveBeenCalledWith('12345');
+    expect(statSpy.getLeerlingStatistieken).toHaveBeenCalledWith('1');
     expect(component.gelezenBoeken()).toBe(5);
   });
 

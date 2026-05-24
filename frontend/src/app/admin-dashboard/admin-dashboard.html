@@ -207,12 +207,51 @@
                   <td>{{ school.naam }}</td>
                   <td>{{ school.adres }}</td>
                   <td>
+                    <button class="btn-outline btn-sm"
+                            (click)="startBewerkBeschikbareSchool(school)">
+                      {{ bewerkBeschikbareId() === school.id ? 'Sluiten' : 'Bewerken' }}
+                    </button>
                     <button class="btn-outline btn-sm btn-delete"
+                            style="margin-left: 8px"
                             (click)="verwijderBeschikbareSchool(school)">
                       Verwijderen
                     </button>
                   </td>
                 </tr>
+                @if (bewerkBeschikbareId() === school.id) {
+                  <tr>
+                    <td colspan="3" style="background: #f7f9fc; padding: 20px">
+                      <h4 style="margin-top: 0">School bewerken</h4>
+                      <div style="display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap">
+                        <div class="form-group" style="flex: 1; min-width: 200px; margin-bottom: 0">
+                          <label>Schoolnaam</label>
+                          <input class="form-input"
+                                 [value]="bewerkBeschikbareNaam()"
+                                 (input)="bewerkBeschikbareNaam.set($any($event.target).value)" />
+                        </div>
+                        <div class="form-group" style="flex: 1; min-width: 200px; margin-bottom: 0">
+                          <label>Adres</label>
+                          <input class="form-input"
+                                 [value]="bewerkBeschikbareAdres()"
+                                 (input)="bewerkBeschikbareAdres.set($any($event.target).value)"
+                                 (keyup.enter)="bewaarBewerkBeschikbareSchool()" />
+                        </div>
+                        <button class="btn-go btn-sm"
+                                (click)="bewaarBewerkBeschikbareSchool()"
+                                [disabled]="!bewerkBeschikbareNaam().trim() || !bewerkBeschikbareAdres().trim()">
+                          Opslaan
+                        </button>
+                        <button class="btn-outline btn-sm"
+                                (click)="annuleerBewerkBeschikbareSchool()">
+                          Annuleren
+                        </button>
+                      </div>
+                      @if (beschikbareFout()) {
+                        <p style="color: #c0392b; margin-top: 10px">{{ beschikbareFout() }}</p>
+                      }
+                    </td>
+                  </tr>
+                }
               } @empty {
                 <tr>
                   <td colspan="3" class="text-muted text-center" style="padding: 20px">

@@ -115,7 +115,7 @@ public class StatistiekService {
         }
         Long userId = userOpt.get().getId();
 
-        int gelezen = (int) uitleningRepository.countLeengeschiedenisVoorUser(userId, "GEWEIGERD");
+        int gelezen = (int) uitleningRepository.countOnTime(userId);
         int actief = (int) uitleningRepository.countActieveLeningenVoorUser(userId, ACTIEVE_STATUSSEN);
         int teLaat = (int) uitleningRepository.countTeLaatVoorUser(userId, ACTIEVE_STATUSSEN, LocalDate.now());
 

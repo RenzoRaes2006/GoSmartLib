@@ -92,6 +92,29 @@ public class SchoolController {
         return ResponseEntity.ok(beschikbareSchoolRepository.save(school));
     }
 
+    @PutMapping("/beschikbaar/{id}")
+    public ResponseEntity<?> bewerkBeschikbareSchool(@PathVariable Long id, @RequestBody BeschikbareSchool update) {
+        Optional<BeschikbareSchool> bestaandOpt = beschikbareSchoolRepository.findById(id);
+        if (bestaandOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        if (update.getNaam() == null || update.getNaam().isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Schoolnaam is verplicht"));
+        }
+        if (update.getAdres() == null || update.getAdres().isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Adres is verplicht"));
+        }
+        String nieuweNaam = update.getNaam().trim();
+        BeschikbareSchool bestaand = bestaandOpt.get();
+        if (!bestaand.getNaam().equals(nieuweNaam)
+                && beschikbareSchoolRepository.existsByNaam(nieuweNaam)) {
+            return ResponseEntity.badRequest().body(Map.of("error", "School bestaat al in de catalogus"));
+        }
+        bestaand.setNaam(nieuweNaam);
+        bestaand.setAdres(update.getAdres().trim());
+        return ResponseEntity.ok(beschikbareSchoolRepository.save(bestaand));
+    }
+
     @DeleteMapping("/beschikbaar/{id}")
     public ResponseEntity<Void> verwijderBeschikbareSchool(@PathVariable Long id) {
         if (!beschikbareSchoolRepository.existsById(id)) {
