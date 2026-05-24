@@ -256,13 +256,27 @@ public class OneRosterService {
             return cached.naam();
         }
 
+        // Bevraag eerst /students en daarna /teachers in plaats van /users.
+        // Reden: in Smartschool's OneRoster bevatten /users-records voor sommige
+        // accounts een afwijkende givenName/familyName (bv. team-/serviceaccount
+        // "Team01 ITSOF"), terwijl /students en /teachers de echte leerling- en
+        // leerkrachtnamen leveren — dezelfde bron als OneRosterImportService.
+        String naam = haalNaamOpViaEndpoint("/students", sourcedId);
+        if (naam == null) {
+            naam = haalNaamOpViaEndpoint("/teachers", sourcedId);
+        }
+        if (naam != null) {
+            naamCache.put(sourcedId, new GecachedeNaam(naam, System.currentTimeMillis()));
+        }
+        return naam;
+    }
+
+    private String haalNaamOpViaEndpoint(String pad, String sourcedId) {
         try {
             String accessToken = getAccessToken();
             if (accessToken == null) return null;
 
-            // /users/{sourcedId} geeft HTML terug op Smartschool's OneRoster;
-            // het filter-endpoint (zoals in getUserByUsername) werkt wel.
-            String url = baseUrl + "/users?filter=sourcedId='" + sourcedId + "'";
+            String url = baseUrl + pad + "?filter=sourcedId='" + sourcedId + "'";
             ResponseEntity<Map> response = restTemplate.exchange(
                     url, HttpMethod.GET, new HttpEntity<>(buildBearerHeaders(accessToken)), Map.class);
 
@@ -272,17 +286,9 @@ public class OneRosterService {
             if (users == null || users.isEmpty()) return null;
 
             Map<String, Object> user = users.get(0);
-            String givenName = (String) user.get("givenName");
-            String familyName = (String) user.get("familyName");
-
-            String volledigeNaam = bouwVolledigeNaam(givenName, familyName);
-            if (volledigeNaam != null) {
-                naamCache.put(sourcedId, new GecachedeNaam(volledigeNaam, System.currentTimeMillis()));
-            }
-            return volledigeNaam;
-
+            return bouwVolledigeNaam((String) user.get("givenName"), (String) user.get("familyName"));
         } catch (Exception e) {
-            System.err.println("[OneRoster] Fout bij ophalen naam voor '" + sourcedId + "': " + e.getMessage());
+            System.err.println("[OneRoster] Fout bij ophalen naam via " + pad + " voor '" + sourcedId + "': " + e.getMessage());
             return null;
         }
     }
