@@ -6,6 +6,8 @@ public record KlassLeeslijstResponseDTO(
         Long id,
         String naam,
         String klas,
+        Long leerkrachtId,
+        String leerkrachtNaam,
         List<Long> leerlingIds,
         List<String> leerlingNamen,
         String beschrijving,
