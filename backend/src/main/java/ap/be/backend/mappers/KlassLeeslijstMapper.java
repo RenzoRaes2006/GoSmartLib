@@ -54,10 +54,24 @@ public class KlassLeeslijstMapper {
                 })
                 .toList();
 
+        User leerkracht = entity.getLeerkracht();
+        Long leerkrachtId = leerkracht != null ? leerkracht.getId() : null;
+        String leerkrachtNaam = null;
+        if (leerkracht != null) {
+            String leerkrachtSmartschoolId = leerkracht.getSmartschoolId();
+            String naamUitOneRoster = null;
+            if (oneRosterServiceStatic != null && leerkrachtSmartschoolId != null) {
+                naamUitOneRoster = oneRosterServiceStatic.getNaamBySourcedId(leerkrachtSmartschoolId);
+            }
+            leerkrachtNaam = naamUitOneRoster != null ? naamUitOneRoster : leerkrachtSmartschoolId;
+        }
+
         return new KlassLeeslijstResponseDTO(
                 entity.getId(),
                 entity.getNaam(),
                 entity.getKlas(),
+                leerkrachtId,
+                leerkrachtNaam,
                 leerlingIds,
                 leerlingNamen,
                 entity.getBeschrijving(),

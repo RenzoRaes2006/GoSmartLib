@@ -2,11 +2,13 @@ package ap.be.backend;
 
 import ap.be.backend.entity.AuditActie;
 import ap.be.backend.entity.KlasWijziging;
+import ap.be.backend.entity.KlassLeeslijst;
 import ap.be.backend.entity.Rol;
 import ap.be.backend.entity.School;
 import ap.be.backend.entity.User;
 import ap.be.backend.exception.GebruikerNotFoundException;
 import ap.be.backend.repository.KlasWijzigingRepository;
+import ap.be.backend.repository.KlassLeeslijstRepository;
 import ap.be.backend.repository.SchoolRepository;
 import ap.be.backend.repository.UitleningRepository;
 import ap.be.backend.repository.UserRepository;
@@ -42,6 +44,7 @@ class GebruikerLifecycleServiceTest {
     @Mock private OneRosterClient oneRosterClient;
     @Mock private KlasWijzigingRepository klasWijzigingRepository;
     @Mock private ap.be.backend.service.AuditService auditService;
+    @Mock private KlassLeeslijstRepository leeslijstRepository;
 
     @InjectMocks private GebruikerLifecycleService service;
 
@@ -172,4 +175,54 @@ class GebruikerLifecycleServiceTest {
                 org.mockito.ArgumentMatchers.any(),
                 org.mockito.ArgumentMatchers.anyMap());
     }
+    void markeerVertrokken_leerkracht_archiveertActieveLeeslijsten() {
+        User lk = new User("lk-1", null, Rol.LEERKRACHT);
+        lk.setId(77L);
+        lk.setActief(true);
+        when(userRepository.findById(77L)).thenReturn(Optional.of(lk));
+        when(uitleningRepository.findByUser_IdAndIsIngeleverdFalse(77L)).thenReturn(List.of());
+
+        KlassLeeslijst l1 = new KlassLeeslijst();
+        l1.setGearchiveerd(false);
+        KlassLeeslijst l2 = new KlassLeeslijst();
+        l2.setGearchiveerd(false);
+        when(leeslijstRepository.findByLeerkrachtIdAndGearchiveerdFalseOrderByAangemaaktOpDesc(77L))
+                .thenReturn(List.of(l1, l2));
+
+        service.markeerVertrokken(77L);
+
+        verify(userRepository).save(lk);
+        org.junit.jupiter.api.Assertions.assertFalse(lk.isActief());
+        org.junit.jupiter.api.Assertions.assertTrue(l1.isGearchiveerd());
+        org.junit.jupiter.api.Assertions.assertTrue(l2.isGearchiveerd());
+        verify(leeslijstRepository).saveAll(List.of(l1, l2));
+    }
+
+    @Test
+    void markeerVertrokken_leerling_doetNietsMetLeeslijsten() {
+        leerling.setId(42L);
+        leerling.setActief(true);
+        when(uitleningRepository.findByUser_IdAndIsIngeleverdFalse(42L)).thenReturn(List.of());
+
+        service.markeerVertrokken(42L);
+
+        org.junit.jupiter.api.Assertions.assertFalse(leerling.isActief());
+        verify(leeslijstRepository, never())
+                .findByLeerkrachtIdAndGearchiveerdFalseOrderByAangemaaktOpDesc(any());
+        verify(leeslijstRepository, never()).saveAll(any());
+    }
+
+    @Test
+    void markeerVertrokken_alVertrokken_doetNiets() {
+        User lk = new User("lk-1", null, Rol.LEERKRACHT);
+        lk.setId(77L);
+        lk.setActief(false);
+        when(userRepository.findById(77L)).thenReturn(Optional.of(lk));
+
+        service.markeerVertrokken(77L);
+
+        verify(userRepository, never()).save(any(User.class));
+        verify(leeslijstRepository, never()).saveAll(any());
+    }
+
 }

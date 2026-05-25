@@ -30,7 +30,7 @@ class KlassLeeslijstControllerTest extends AbstractIntegrationTest {
     private KlassLeeslijstService leeslijstService;
 
     private KlassLeeslijstResponseDTO basicResponse(Long id, String naam) {
-        return new KlassLeeslijstResponseDTO(id, naam, null, null, null, null, false, false, List.of());
+        return new KlassLeeslijstResponseDTO(id, naam, null, null, null, null, null, null, false, false, List.of());
     }
 
     @Test
@@ -51,7 +51,7 @@ class KlassLeeslijstControllerTest extends AbstractIntegrationTest {
         KlassLeeslijstRequestDTO request = new KlassLeeslijstRequestDTO(
                 "Lessen Wiskunde", "5INF1", null, "Boeken voor het rekenenkundig hoofdstuk", true);
         KlassLeeslijstResponseDTO expected = new KlassLeeslijstResponseDTO(
-                2L, "Lessen Wiskunde", "5INF1", null, null,
+                2L, "Lessen Wiskunde", "5INF1", null, null, null, null,
                 "Boeken voor het rekenenkundig hoofdstuk", true, false, List.of());
         when(leeslijstService.createLeeslijst(any(KlassLeeslijstRequestDTO.class), eq(7L))).thenReturn(expected);
 
@@ -78,8 +78,8 @@ class KlassLeeslijstControllerTest extends AbstractIntegrationTest {
     @WithMockUser(roles = "STUDENT")
     void getLeeslijstenVoorHuidigeLeerling_ReturnsList() throws Exception {
         when(leeslijstService.getLeeslijstenVoorHuidigeLeerling()).thenReturn(List.of(
-                new KlassLeeslijstResponseDTO(1L, "Klas-lijst", "5INF1", null, null, null, true, false, List.of()),
-                new KlassLeeslijstResponseDTO(2L, "Persoonlijke lijst", null, List.of(42L), List.of("leerling42"), null, true, false, List.of())));
+                new KlassLeeslijstResponseDTO(1L, "Klas-lijst", "5INF1", null, null, null, null, null, true, false, List.of()),
+                new KlassLeeslijstResponseDTO(2L, "Persoonlijke lijst", null, null, null, List.of(42L), List.of("leerling42"), null, true, false, List.of())));
 
         mockMvc.perform(get("/api/leeslijsten/mijn-leerling-lijsten"))
                 .andExpect(status().isOk())
@@ -145,7 +145,7 @@ class KlassLeeslijstControllerTest extends AbstractIntegrationTest {
         String nieuweTekst = "Korte uitleg over de opdracht.";
         when(leeslijstService.updateBeschrijving(eq(lijstId), eq(nieuweTekst)))
                 .thenReturn(new KlassLeeslijstResponseDTO(
-                        lijstId, "Lijst", null, null, null, nieuweTekst, false, false, List.of()));
+                        lijstId, "Lijst", null, null, null, null, null, nieuweTekst, false, false, List.of()));
 
         mockMvc.perform(put("/api/leeslijsten/{id}/beschrijving", lijstId)
                 .contentType(MediaType.TEXT_PLAIN)
@@ -159,7 +159,7 @@ class KlassLeeslijstControllerTest extends AbstractIntegrationTest {
         Long lijstId = 10L;
         when(leeslijstService.updateZichtbaar(eq(lijstId), eq(true)))
                 .thenReturn(new KlassLeeslijstResponseDTO(
-                        lijstId, "Lijst", null, null, null, null, true, false, List.of()));
+                        lijstId, "Lijst", null, null, null, null, null, null, true, false, List.of()));
 
         mockMvc.perform(put("/api/leeslijsten/{id}/zichtbaar", lijstId)
                 .contentType(MediaType.APPLICATION_JSON)

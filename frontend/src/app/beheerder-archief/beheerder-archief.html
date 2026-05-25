@@ -12,7 +12,7 @@
   <div class="zoek-rij">
     <input
       type="text"
-      placeholder="Zoek op naam, klas of leerling…"
+      placeholder="Zoek op naam, klas, leerkracht of leerling…"
       [ngModel]="zoekterm()"
       (ngModelChange)="zoekterm.set($event)">
     <span class="aantal">{{ gefilterd().length }} resultaten</span>
@@ -38,6 +38,7 @@
         <thead>
           <tr>
             <th>Naam</th>
+            <th>Leerkracht</th>
             <th>Koppeling</th>
             <th>Aantal boeken</th>
           </tr>
@@ -51,6 +52,7 @@
                   <div class="beschrijving">{{ lijst.beschrijving }}</div>
                 }
               </td>
+              <td>{{ lijst.leerkrachtNaam ?? '—' }}</td>
               <td>
                 @if (lijst.klas) {
                   <span class="badge badge-klas">Klas: {{ lijst.klas }}</span>
