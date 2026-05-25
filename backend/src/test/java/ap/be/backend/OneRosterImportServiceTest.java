@@ -5,6 +5,7 @@ import ap.be.backend.entity.School;
 import ap.be.backend.entity.User;
 import ap.be.backend.repository.SchoolRepository;
 import ap.be.backend.repository.UserRepository;
+import ap.be.backend.service.AuditService;
 import ap.be.backend.service.GebruikerLifecycleService;
 import ap.be.backend.service.OneRosterClient;
 import ap.be.backend.service.OneRosterImportService;
@@ -46,6 +47,9 @@ public class OneRosterImportServiceTest {
 
     @Mock
     private GebruikerLifecycleService lifecycleService;
+
+    @Mock
+    private AuditService auditService;
 
     @InjectMocks
     private OneRosterImportService service;

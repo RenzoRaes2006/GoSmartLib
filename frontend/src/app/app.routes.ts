@@ -29,6 +29,7 @@ import { BulkOntlenenComponent } from './bulk-ontlenen-component/bulk-ontlenen-c
 import { KlassenleeslijstenLeerlingComponent } from './klassenleeslijsten-leerling/klassenleeslijsten-leerling';
 import { KlassenleeslijstDetailLeerlingComponent } from './klassenleeslijst-detail-leerling/klassenleeslijst-detail-leerling';
 import { AdminLogin } from './admin-login/admin-login';
+import { AdminAuditLog } from './admin-audit-log/admin-audit-log';
 import { BeschadigdeBoeken } from './beschadigde-boeken/beschadigde-boeken';
 
 export const routes: Routes = [
@@ -58,6 +59,7 @@ export const routes: Routes = [
 
   // adminGuard — enkel de applicatiebeheerder ('admin')
   { path: 'admin', component: AdminDashboard, canActivate: [adminGuard] },
+  { path: 'admin/audit-log', component: AdminAuditLog, canActivate: [adminGuard] },
 
   // beheerderGuard — enkel de bibliotheekbeheerder ('beheerder')
   { path: 'beheerder', component: BeheerderDashboard, canActivate: [beheerderGuard] },

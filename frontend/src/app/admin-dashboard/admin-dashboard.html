@@ -33,6 +33,9 @@
       <button [class.active]="activeTab() === 'gebruikers'" (click)="wisselTab('gebruikers')">
         Gebruikers beheren
       </button>
+      <button [class.active]="activeTab() === 'audit-log'" (click)="wisselTab('audit-log')">
+        Audit-log
+      </button>
     </div>
   </nav>
 
@@ -801,6 +804,11 @@
     <!-- tab 5: schooljaar rollover -->
     @if (activeTab() === 'schooljaar') {
       <app-admin-schooljaar />
+    }
+
+    <!-- tab 7: audit-log -->
+    @if (activeTab() === 'audit-log') {
+      <app-admin-audit-log />
     }
 
     <!-- tab 6: gebruikers (handmatige lifecycle — toevoegen + vertrek) -->

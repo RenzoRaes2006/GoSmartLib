@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import ap.be.backend.config.SecurityUtils;
+import ap.be.backend.entity.AuditActie;
 import ap.be.backend.entity.KlasWijziging;
 import ap.be.backend.entity.Rol;
 import ap.be.backend.entity.School;
@@ -37,17 +38,20 @@ public class GebruikerLifecycleService {
     private final UitleningRepository uitleningRepository;
     private final OneRosterClient oneRosterClient;
     private final KlasWijzigingRepository klasWijzigingRepository;
+    private final AuditService auditService;
 
     public GebruikerLifecycleService(UserRepository userRepository,
                                      SchoolRepository schoolRepository,
                                      UitleningRepository uitleningRepository,
                                      OneRosterClient oneRosterClient,
-                                     KlasWijzigingRepository klasWijzigingRepository) {
+                                     KlasWijzigingRepository klasWijzigingRepository,
+                                     AuditService auditService) {
         this.userRepository = userRepository;
         this.schoolRepository = schoolRepository;
         this.uitleningRepository = uitleningRepository;
         this.oneRosterClient = oneRosterClient;
         this.klasWijzigingRepository = klasWijzigingRepository;
+        this.auditService = auditService;
     }
 
     /**
@@ -90,6 +94,9 @@ public class GebruikerLifecycleService {
 
         User doorWie = SecurityUtils.getCurrentUserOptional(userRepository).orElse(null);
         schrijfHistoriek(leerling, oud, nieuw, doorWie, "HANDMATIG");
+        auditService.log(AuditActie.KLAS_GEWIJZIGD, "Gebruiker", leerling.getId(),
+                AuditService.details("smartschoolId", leerling.getSmartschoolId(),
+                        "van", oud, "naar", nieuw));
         return leerling;
     }
 
@@ -154,7 +161,11 @@ public class GebruikerLifecycleService {
         user.setActief(true);
         user.setAangekomenOp(LocalDate.now());
         user.setVertrokkenOp(null);
-        return userRepository.save(user);
+        userRepository.save(user);
+        auditService.log(AuditActie.GEBRUIKER_TOEGEVOEGD, "Gebruiker", user.getId(),
+                AuditService.details("smartschoolId", trimmed, "rol", rol.name(),
+                        "klas", klasGetrimd, "schoolId", schoolId, "bron", "HANDMATIG"));
+        return user;
     }
 
     /**
@@ -202,7 +213,11 @@ public class GebruikerLifecycleService {
         user.setActief(true);
         user.setVertrokkenOp(null);
         user.setAangekomenOp(LocalDate.now());
-        return userRepository.save(user);
+        userRepository.save(user);
+        auditService.log(AuditActie.GEBRUIKER_GEREACTIVEERD, "Gebruiker", user.getId(),
+                AuditService.details("smartschoolId", user.getSmartschoolId(),
+                        "rol", user.getRol() == null ? null : user.getRol().name()));
+        return user;
     }
 
     @Transactional
@@ -222,6 +237,11 @@ public class GebruikerLifecycleService {
 
         user.setActief(false);
         user.setVertrokkenOp(LocalDate.now());
-        return userRepository.save(user);
+        userRepository.save(user);
+        auditService.log(AuditActie.GEBRUIKER_VERTROKKEN, "Gebruiker", user.getId(),
+                AuditService.details("smartschoolId", user.getSmartschoolId(),
+                        "rol", user.getRol() == null ? null : user.getRol().name(),
+                        "klas", user.getKlas()));
+        return user;
     }
 }

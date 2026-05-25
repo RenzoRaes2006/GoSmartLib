@@ -45,6 +45,7 @@ public class SchooljaarService {
     private final KlassLeeslijstRepository leeslijstRepository;
     private final UitleningRepository uitleningRepository;
     private final OneRosterImportService oneRosterImportService;
+    private final AuditService auditService;
 
     /**
      * Geeft een preview van wat er gaat veranderen bij een rollover,
@@ -152,6 +153,10 @@ public class SchooljaarService {
         vertrokken.forEach(l -> {
             l.setActief(false);
             l.setVertrokkenOp(vandaag);
+            auditService.logSysteem(AuditActie.GEBRUIKER_VERTROKKEN_SYNC, "Gebruiker", l.getId(),
+                    AuditService.details("smartschoolId", l.getSmartschoolId(),
+                            "rol", l.getRol() == null ? null : l.getRol().name(),
+                            "klas", l.getKlas(), "bron", "ROLLOVER"));
         });
         userRepository.saveAll(vertrokken);
 
@@ -196,6 +201,13 @@ public class SchooljaarService {
 
         Schooljaar nieuwSchooljaar = new Schooljaar(nieuwNaam, nieuwStartDatum, nieuwEindDatum, true);
         schooljaarRepository.save(nieuwSchooljaar);
+
+        auditService.log(AuditActie.ROLLOVER_UITGEVOERD, "School", schoolId,
+                AuditService.details("nieuwSchooljaar", nieuwNaam,
+                        "vertrokken", vertrokken.size(),
+                        "verlorenUitleningen", aantalVerloren,
+                        "geanonimiseerdeReviews", aantalGeanonimiseerd,
+                        "gearchiveerdeLeeslijsten", aantalGearchiveerd));
 
         log.info("Rollover school {} voltooid. Nieuw schooljaar: {}", schoolId, nieuwNaam);
 

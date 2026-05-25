@@ -5,12 +5,13 @@ import { HttpClient } from '@angular/common/http';
 import { SchoolService } from '../services/School.Service';
 import { AdminTags } from '../admin-tags/admin-tags';
 import { AdminSchooljaar } from '../admin-schooljaar/admin-schooljaar';
+import { AdminAuditLog } from '../admin-audit-log/admin-audit-log';
 import { AdminGebruiker, AdminGebruikerService, GebruikerCreatePayload, KlasWijziging } from '../services/AdminGebruikerService';
 
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, AdminTags, AdminSchooljaar],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, AdminTags, AdminSchooljaar, AdminAuditLog],
   templateUrl: './admin-dashboard.html',
   styleUrl: './admin-dashboard.css'
 })
@@ -27,7 +28,7 @@ export class AdminDashboard implements OnInit {
     : 'https://api-sp09.cloud-ap.be/api/scholen';
 
   // tab navigation state
-  activeTab = signal<'scholen' | 'wizard' | 'tags' | 'rollen' | 'schooljaar' | 'gebruikers'>('scholen');
+  activeTab = signal<'scholen' | 'wizard' | 'tags' | 'rollen' | 'schooljaar' | 'gebruikers' | 'audit-log'>('scholen');
 
   // rollen-tab state (geen paging — toon volledige leerkrachten-lijst)
   leerkrachten = signal<AdminGebruiker[]>([]);
@@ -371,7 +372,7 @@ export class AdminDashboard implements OnInit {
     });
   }
 
-  wisselTab(tab: 'scholen' | 'wizard' | 'tags' | 'rollen' | 'schooljaar' | 'gebruikers') {
+  wisselTab(tab: 'scholen' | 'wizard' | 'tags' | 'rollen' | 'schooljaar' | 'gebruikers' | 'audit-log') {
     this.activeTab.set(tab);
     this.sluitBewerken(); // Sluit campussen editor indien open
     if (tab === 'rollen') {

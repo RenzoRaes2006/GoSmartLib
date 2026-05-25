@@ -1,5 +1,6 @@
 package ap.be.backend;
 
+import ap.be.backend.entity.AuditActie;
 import ap.be.backend.entity.KlasWijziging;
 import ap.be.backend.entity.Rol;
 import ap.be.backend.entity.School;
@@ -40,6 +41,7 @@ class GebruikerLifecycleServiceTest {
     @Mock private UitleningRepository uitleningRepository;
     @Mock private OneRosterClient oneRosterClient;
     @Mock private KlasWijzigingRepository klasWijzigingRepository;
+    @Mock private ap.be.backend.service.AuditService auditService;
 
     @InjectMocks private GebruikerLifecycleService service;
 
@@ -106,5 +108,68 @@ class GebruikerLifecycleServiceTest {
     void wijzigKlas_onbekendeLeerling_gooitNotFound() {
         when(userRepository.findById(123L)).thenReturn(Optional.empty());
         assertThrows(GebruikerNotFoundException.class, () -> service.wijzigKlas(123L, "1B"));
+    }
+
+    @Test
+    void wijzigKlas_schrijftAuditRij() {
+        service.wijzigKlas(42L, "1B");
+        verify(auditService).log(
+                org.mockito.ArgumentMatchers.eq(AuditActie.KLAS_GEWIJZIGD),
+                org.mockito.ArgumentMatchers.eq("Gebruiker"),
+                org.mockito.ArgumentMatchers.any(),
+                org.mockito.ArgumentMatchers.anyMap());
+    }
+
+    @Test
+    void wijzigKlas_ongewijzigd_geenAudit() {
+        service.wijzigKlas(42L, "1A");
+        verify(auditService, never()).log(
+                org.mockito.ArgumentMatchers.any(AuditActie.class),
+                org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.any(),
+                org.mockito.ArgumentMatchers.anyMap());
+    }
+
+    @Test
+    void markeerVertrokken_schrijftAuditRij() {
+        when(uitleningRepository.findByUser_IdAndIsIngeleverdFalse(42L)).thenReturn(List.of());
+        when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        service.markeerVertrokken(42L);
+
+        verify(auditService).log(
+                org.mockito.ArgumentMatchers.eq(AuditActie.GEBRUIKER_VERTROKKEN),
+                org.mockito.ArgumentMatchers.eq("Gebruiker"),
+                org.mockito.ArgumentMatchers.any(),
+                org.mockito.ArgumentMatchers.anyMap());
+    }
+
+    @Test
+    void reactiveer_schrijftAuditRij() {
+        leerling.setActief(false);
+        when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        service.reactiveer(42L);
+
+        verify(auditService).log(
+                org.mockito.ArgumentMatchers.eq(AuditActie.GEBRUIKER_GEREACTIVEERD),
+                org.mockito.ArgumentMatchers.eq("Gebruiker"),
+                org.mockito.ArgumentMatchers.any(),
+                org.mockito.ArgumentMatchers.anyMap());
+    }
+
+    @Test
+    void voegHandmatigToe_schrijftAuditRij() {
+        when(schoolRepository.findById(1L)).thenReturn(Optional.of(school));
+        when(userRepository.findBySmartschoolId("nieuw-1")).thenReturn(Optional.empty());
+        when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        service.voegHandmatigToe("nieuw-1", 1L, "1A", Rol.LEERLING);
+
+        verify(auditService).log(
+                org.mockito.ArgumentMatchers.eq(AuditActie.GEBRUIKER_TOEGEVOEGD),
+                org.mockito.ArgumentMatchers.eq("Gebruiker"),
+                org.mockito.ArgumentMatchers.any(),
+                org.mockito.ArgumentMatchers.anyMap());
     }
 }
