@@ -1,0 +1,78 @@
+<section class="audit-log">
+  <h2>Audit-log lifecycle-acties</h2>
+  <p class="subtitel">Wie heeft wat gedaan, en wanneer.</p>
+
+  <div class="filters">
+    <label>
+      Actie
+      <select [(ngModel)]="actie">
+        <option value="">Alle acties</option>
+        <option *ngFor="let a of alleActies" [value]="a">{{ actieLabel(a) }}</option>
+      </select>
+    </label>
+    <label>
+      Onderwerp
+      <select [(ngModel)]="entiteitType">
+        <option value="">Alles</option>
+        <option value="Gebruiker">Gebruiker</option>
+        <option value="School">School</option>
+      </select>
+    </label>
+    <label>
+      Vanaf
+      <input type="date" [(ngModel)]="vanaf" />
+    </label>
+    <label>
+      Tot
+      <input type="date" [(ngModel)]="tot" />
+    </label>
+    <div class="filter-knoppen">
+      <button type="button" (click)="toepassen()">Toepassen</button>
+      <button type="button" class="link" (click)="wis()">Wis filters</button>
+    </div>
+  </div>
+
+  <p *ngIf="fout()" class="fout">{{ fout() }}</p>
+  <p *ngIf="laden()" class="status">Laden…</p>
+
+  <table *ngIf="!laden() && rijen().length > 0" class="tabel">
+    <thead>
+      <tr>
+        <th>Tijdstip</th>
+        <th>Actie</th>
+        <th>Door wie</th>
+        <th>Onderwerp</th>
+        <th>Details</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let r of rijen()">
+        <td class="tijd">{{ r.tijdstip | date: 'dd/MM/yyyy HH:mm:ss' }}</td>
+        <td>{{ actieLabel(r.actie) }}</td>
+        <td>
+          <ng-container *ngIf="r.actorSmartschoolId; else systeem">
+            {{ r.actorSmartschoolId }}
+          </ng-container>
+          <ng-template #systeem><em>systeem</em></ng-template>
+        </td>
+        <td>{{ r.onderwerpLabel }}</td>
+        <td class="details">
+          <ul *ngIf="parseDetails(r.detailsJson).length > 0; else geenDetails">
+            <li *ngFor="let kv of parseDetails(r.detailsJson)">
+              <strong>{{ kv.k }}:</strong> {{ kv.v }}
+            </li>
+          </ul>
+          <ng-template #geenDetails>—</ng-template>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p *ngIf="!laden() && rijen().length === 0" class="status">Geen audit-rijen voor deze filter.</p>
+
+  <div class="paginatie" *ngIf="totalPages() > 1">
+    <button type="button" (click)="vorige()" [disabled]="pagina() === 0">Vorige</button>
+    <span>Pagina {{ pagina() + 1 }} van {{ totalPages() }} ({{ totalElements() }} rijen)</span>
+    <button type="button" (click)="volgende()" [disabled]="pagina() >= totalPages() - 1">Volgende</button>
+  </div>
+</section>

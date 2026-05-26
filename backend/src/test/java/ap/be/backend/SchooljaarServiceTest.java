@@ -37,6 +37,7 @@ class SchooljaarServiceTest {
     @Mock private KlassLeeslijstRepository leeslijstRepository;
     @Mock private UitleningRepository uitleningRepository;
     @Mock private OneRosterImportService oneRosterImportService;
+    @Mock private ap.be.backend.service.AuditService auditService;
 
     @InjectMocks
     private SchooljaarService schooljaarService;

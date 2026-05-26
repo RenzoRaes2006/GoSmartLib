@@ -1,6 +1,7 @@
 package ap.be.backend.service;
 
 import ap.be.backend.dto.SyncPreviewDTO;
+import ap.be.backend.entity.AuditActie;
 import ap.be.backend.entity.Rol;
 import ap.be.backend.entity.School;
 import ap.be.backend.entity.User;
@@ -33,17 +34,20 @@ public class OneRosterImportService {
     private final OneRosterClient oneRosterClient;
     private final UitleningRepository uitleningRepository;
     private final GebruikerLifecycleService lifecycleService;
+    private final AuditService auditService;
 
     public OneRosterImportService(SchoolRepository schoolRepository,
                                   UserRepository userRepository,
                                   OneRosterClient oneRosterClient,
                                   UitleningRepository uitleningRepository,
-                                  GebruikerLifecycleService lifecycleService) {
+                                  GebruikerLifecycleService lifecycleService,
+                                  AuditService auditService) {
         this.schoolRepository = schoolRepository;
         this.userRepository = userRepository;
         this.oneRosterClient = oneRosterClient;
         this.uitleningRepository = uitleningRepository;
         this.lifecycleService = lifecycleService;
+        this.auditService = auditService;
     }
 
     public List<Map<String, Object>> fetchKlassen(Long schoolId) {
@@ -112,6 +116,9 @@ public class OneRosterImportService {
                 nieuw.setAangekomenOp(java.time.LocalDate.now());
                 userRepository.save(nieuw);
                 t.nieuw++;
+                auditService.logSysteem(AuditActie.GEBRUIKER_TOEGEVOEGD_SYNC, "Gebruiker", nieuw.getId(),
+                        AuditService.details("smartschoolId", smartschoolId, "rol", rol.name(),
+                                "klas", klas, "schoolId", school.getId()));
                 log.debug("OneRoster {} nieuw: {} (klas={})", rol, smartschoolId, klas);
             } else {
                 User u = bestaand.get();
@@ -122,6 +129,9 @@ public class OneRosterImportService {
                     gewijzigd = true;
                     if (rol == Rol.LEERLING) {
                         lifecycleService.schrijfHistoriek(u, oudeKlas, klas, null, "ONEROSTER_SYNC");
+                        auditService.logSysteem(AuditActie.KLAS_GEWIJZIGD_SYNC, "Gebruiker", u.getId(),
+                                AuditService.details("smartschoolId", smartschoolId,
+                                        "van", oudeKlas, "naar", klas));
                     }
                 }
                 if (u.getRol() != rol) {
@@ -233,6 +243,9 @@ public class OneRosterImportService {
             u.setActief(false);
             u.setVertrokkenOp(vandaag);
             teMarkeren.add(u);
+            auditService.logSysteem(AuditActie.GEBRUIKER_VERTROKKEN_SYNC, "Gebruiker", u.getId(),
+                    AuditService.details("smartschoolId", u.getSmartschoolId(),
+                            "rol", u.getRol().name(), "klas", u.getKlas()));
         }
         if (!teMarkeren.isEmpty()) {
             userRepository.saveAll(teMarkeren);

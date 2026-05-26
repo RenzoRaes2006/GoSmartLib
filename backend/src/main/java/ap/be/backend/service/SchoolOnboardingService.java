@@ -3,6 +3,7 @@ package ap.be.backend.service;
 import ap.be.backend.dto.CampusDTO;
 import ap.be.backend.dto.SchoolOnboardDTO;
 import ap.be.backend.entity.AdminGebruiker;
+import ap.be.backend.entity.AuditActie;
 import ap.be.backend.entity.Campus;
 import ap.be.backend.entity.School;
 import ap.be.backend.repository.AdminGebruikerRepository;
@@ -18,15 +19,18 @@ public class SchoolOnboardingService {
     private final AdminGebruikerRepository adminGebruikerRepository;
     private final OneRosterImportService oneRosterImportService;
     private final PasswordEncoder passwordEncoder;
+    private final AuditService auditService;
 
     public SchoolOnboardingService(SchoolRepository schoolRepository,
                                    AdminGebruikerRepository adminGebruikerRepository,
                                    OneRosterImportService oneRosterImportService,
-                                   PasswordEncoder passwordEncoder) {
+                                   PasswordEncoder passwordEncoder,
+                                   AuditService auditService) {
         this.schoolRepository = schoolRepository;
         this.adminGebruikerRepository = adminGebruikerRepository;
         this.oneRosterImportService = oneRosterImportService;
         this.passwordEncoder = passwordEncoder;
+        this.auditService = auditService;
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -60,6 +64,11 @@ public class SchoolOnboardingService {
                 && !dto.getBeheerder().getGebruikersnaam().isBlank()) {
             maakBeheerderAan(dto);
         }
+
+        auditService.log(AuditActie.SCHOOL_ONBOARDED, "School", opgeslagen.getId(),
+                AuditService.details("naam", opgeslagen.getNaam(),
+                        "smartschoolDomein", opgeslagen.getSmartschoolDomein(),
+                        "aantalCampussen", opgeslagen.getCampussen().size()));
 
         return opgeslagen;
     }
