@@ -6,11 +6,12 @@ import { SchoolService } from '../services/School.Service';
 import { AdminTags } from '../admin-tags/admin-tags';
 import { AdminSchooljaar } from '../admin-schooljaar/admin-schooljaar';
 import { AdminGebruiker, AdminGebruikerService, GebruikerCreatePayload, KlasWijziging } from '../services/AdminGebruikerService';
+import { LeerkrachtVertrekWizard } from '../leerkracht-vertrek-wizard/leerkracht-vertrek-wizard';
 
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, AdminTags, AdminSchooljaar],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, AdminTags, AdminSchooljaar, LeerkrachtVertrekWizard],
   templateUrl: './admin-dashboard.html',
   styleUrl: './admin-dashboard.css'
 })
@@ -53,8 +54,12 @@ export class AdminDashboard implements OnInit {
   nieuweGebruikerBezig = signal<boolean>(false);
   beschikbareKlassenVoorSchool = signal<string[]>([]);
 
-  // confirm-modal voor vertrek (vervangt browser confirm())
+  // confirm-modal voor vertrek (vervangt browser confirm()) — alleen voor leerlingen
   vertrekModalDoel = signal<{ gebruiker: AdminGebruiker; rol: 'LEERLING' | 'LEERKRACHT' } | null>(null);
+
+  // Leerkracht-vertrek heeft een eigen multi-stap wizard met overdraagkeuze
+  // per leeslijst. Aparte signal omdat de wizard zijn eigen modale lifecycle heeft.
+  vertrekWizardDoel = signal<AdminGebruiker | null>(null);
 
   // confirm-modal voor reactiveer (vertrokken → actief)
   reactiveerModalDoel = signal<{ gebruiker: AdminGebruiker; rol: 'LEERLING' | 'LEERKRACHT' } | null>(null);
@@ -552,7 +557,25 @@ export class AdminDashboard implements OnInit {
 
   openVertrekModal(gebruiker: AdminGebruiker, rol: 'LEERLING' | 'LEERKRACHT') {
     this.toonLifecycleFout('');
-    this.vertrekModalDoel.set({ gebruiker, rol });
+    if (rol === 'LEERKRACHT') {
+      // Leerkracht-vertrek loopt via de wizard zodat de admin per leeslijst
+      // kan kiezen tussen archiveren en overdragen.
+      this.vertrekWizardDoel.set(gebruiker);
+    } else {
+      this.vertrekModalDoel.set({ gebruiker, rol });
+    }
+  }
+
+  onVertrekWizardVoltooid() {
+    const gebruiker = this.vertrekWizardDoel();
+    this.vertrekWizardDoel.set(null);
+    if (gebruiker == null) return;
+    const schoolId = this.gebruikersSchoolId();
+    if (schoolId != null) this.laadLifecycleLeerkrachtenPagina(schoolId);
+  }
+
+  onVertrekWizardGeannuleerd() {
+    this.vertrekWizardDoel.set(null);
   }
 
   annuleerVertrekModal() {
@@ -692,9 +715,12 @@ export class AdminDashboard implements OnInit {
 
     this.vertrekBezig.set(gebruiker.id);
     this.toonLifecycleFout('');
+    // Leerkracht-vertrek loopt via de wizard; deze knop hoort enkel nog
+    // leerling-vertrek te triggeren. Voor leerkracht roepen we de no-overdracht
+    // overload aan voor backwards-compat met testpaden die de modal direct openen.
     const obs = rol === 'LEERLING'
       ? this.adminGebruikerService.markeerLeerlingVertrokken(gebruiker.id)
-      : this.adminGebruikerService.markeerLeerkrachtVertrokken(gebruiker.id);
+      : this.adminGebruikerService.markeerLeerkrachtVertrokken(gebruiker.id, {});
     obs.subscribe({
       next: () => {
         this.vertrekBezig.set(null);

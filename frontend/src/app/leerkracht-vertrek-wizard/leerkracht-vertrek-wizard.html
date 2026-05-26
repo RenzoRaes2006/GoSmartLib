@@ -1,0 +1,210 @@
+<div class="modal-overlay" (click)="annuleer()">
+  <div class="modal-content wizard" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Leerkracht laten vertrekken</h3>
+      <p class="leerkracht-naam">
+        {{ leerkracht.naam || leerkracht.smartschoolId }}
+      </p>
+    </div>
+
+    @if (laden()) {
+      <div class="modal-body">
+        <p class="muted">Preview laden…</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-outline btn-sm" (click)="annuleer()">Sluiten</button>
+      </div>
+    } @else if (fout() && !preview()) {
+      <div class="modal-body">
+        <p class="foutmelding">{{ fout() }}</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-outline btn-sm" (click)="annuleer()">Sluiten</button>
+      </div>
+    } @else if (preview(); as p) {
+
+      <!-- STAP 1: bevestiging -->
+      @if (stap() === 1) {
+        <div class="modal-body">
+          <p>
+            Wil je <strong>{{ leerkracht.naam || leerkracht.smartschoolId }}</strong>
+            als vertrokken markeren?
+          </p>
+          <p class="muted">
+            De leerkracht blijft in de databank voor historiek, maar kan niet meer inloggen.
+            In de volgende stap kan je zijn leeslijsten doorgeven aan een collega
+            (of automatisch laten archiveren).
+          </p>
+
+          @if (geblokkeerd()) {
+            <p class="foutmelding">
+              Vertrek geblokkeerd: er
+              {{ p.aantalOpenLeningen === 1 ? 'is 1 open uitlening' : 'zijn ' + p.aantalOpenLeningen + ' open uitleningen' }}
+              op naam van deze leerkracht. Lever ze eerst in of markeer ze als verloren.
+            </p>
+          } @else {
+            <div class="info-rij">
+              <span class="label">Actieve leeslijsten</span>
+              <span class="value">{{ p.leeslijsten.length }}</span>
+            </div>
+          }
+        </div>
+        <div class="modal-footer">
+          <button class="btn-outline btn-sm" (click)="annuleer()">Annuleren</button>
+          <button
+            class="btn-go btn-sm"
+            (click)="naarStap2()"
+            [disabled]="geblokkeerd()"
+          >
+            Doorgaan
+          </button>
+        </div>
+      }
+
+      <!-- STAP 2: leeslijsten -->
+      @if (stap() === 2) {
+        <div class="modal-body">
+          <p class="muted">
+            Standaard worden alle leeslijsten van deze leerkracht
+            <strong>gearchiveerd</strong>. Wil je een lijst behouden, kies dan
+            een collega om hem over te dragen. Niet-toegewezen lijsten worden
+            automatisch gearchiveerd wanneer je op <em>Doorgaan</em> klikt.
+          </p>
+
+          @if (p.kandidaten.length > 0) {
+            <div class="bulk-rij">
+              <label>
+                Alles overdragen aan
+                <select
+                  [ngModel]="bulkLeerkrachtId()"
+                  (ngModelChange)="bulkLeerkrachtId.set($event)"
+                >
+                  <option value="">— kies leerkracht —</option>
+                  @for (k of p.kandidaten; track trackKandidaat($index, k)) {
+                    <option [ngValue]="k.id">{{ kandidaatLabel(k) }}</option>
+                  }
+                </select>
+              </label>
+              <button
+                class="btn-outline btn-sm"
+                (click)="pasBulkToe()"
+                [disabled]="!bulkLeerkrachtId()"
+              >
+                Toepassen op alle lijsten
+              </button>
+            </div>
+          } @else {
+            <p class="muted">
+              Geen actieve collega's van dezelfde school gevonden — alle lijsten
+              worden gearchiveerd.
+            </p>
+          }
+
+          <table class="leeslijsten-tabel">
+            <thead>
+              <tr>
+                <th>Leeslijst</th>
+                <th>Klas / leerlingen</th>
+                <th>Actie</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (lijst of p.leeslijsten; track trackLijst($index, lijst)) {
+                <tr>
+                  <td class="lijst-naam">{{ lijst.naam }}</td>
+                  <td class="lijst-koppeling">
+                    @if (lijst.klas) {
+                      <span class="badge">Klas {{ lijst.klas }}</span>
+                    } @else if (lijst.leerlingIds.length > 0) {
+                      <span class="badge">{{ lijst.leerlingIds.length }} leerling(en)</span>
+                    } @else {
+                      <span class="muted">—</span>
+                    }
+                  </td>
+                  <td>
+                    <select
+                      [ngModel]="keuzeVoorLijst(lijst.id)"
+                      (ngModelChange)="zetKeuzeVoorLijst(lijst.id, $event)"
+                      [disabled]="p.kandidaten.length === 0"
+                    >
+                      <option value="">Archiveren</option>
+                      @for (k of p.kandidaten; track trackKandidaat($index, k)) {
+                        <option [ngValue]="k.id">Overdragen aan {{ kandidaatLabel(k) }}</option>
+                      }
+                    </select>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+
+          @if (fout()) {
+            <p class="foutmelding">{{ fout() }}</p>
+          }
+        </div>
+        <div class="modal-footer">
+          <button class="btn-outline btn-sm" (click)="terug()">Terug</button>
+          <button class="btn-go btn-sm" (click)="naarStap3()">Doorgaan</button>
+        </div>
+      }
+
+      <!-- STAP 3: samenvatting -->
+      @if (stap() === 3) {
+        <div class="modal-body">
+          <p>Klaar om door te gaan?</p>
+          <ul class="samenvatting">
+            <li>
+              <strong>{{ aantalOvergedragen() }}</strong>
+              {{ aantalOvergedragen() === 1 ? 'leeslijst wordt overgedragen' : 'leeslijsten worden overgedragen' }}
+            </li>
+            <li>
+              <strong>{{ aantalGearchiveerd() }}</strong>
+              {{ aantalGearchiveerd() === 1 ? 'leeslijst wordt gearchiveerd' : 'leeslijsten worden gearchiveerd' }}
+            </li>
+            <li>
+              <strong>{{ leerkracht.naam || leerkracht.smartschoolId }}</strong>
+              wordt op vertrokken gezet
+            </li>
+          </ul>
+
+          @if (fout()) {
+            <p class="foutmelding">{{ fout() }}</p>
+          }
+        </div>
+        <div class="modal-footer">
+          <button
+            class="btn-outline btn-sm"
+            (click)="terug()"
+            [disabled]="bezig()"
+          >
+            Terug
+          </button>
+          <button
+            class="btn-go btn-sm btn-delete"
+            (click)="bevestig()"
+            [disabled]="bezig()"
+          >
+            {{ bezig() ? 'Bezig…' : 'Bevestigen' }}
+          </button>
+        </div>
+      }
+
+      <!-- KLAAR: succesmelding -->
+      @if (stap() === 'klaar') {
+        <div class="modal-body">
+          <p>
+            <strong>{{ leerkracht.naam || leerkracht.smartschoolId }}</strong>
+            is gemarkeerd als vertrokken.
+          </p>
+          <ul class="samenvatting">
+            <li>{{ aantalOvergedragen() }} leeslijst(en) overgedragen</li>
+            <li>{{ aantalGearchiveerd() }} leeslijst(en) gearchiveerd</li>
+          </ul>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-go btn-sm" (click)="sluitNaSucces()">Sluiten</button>
+        </div>
+      }
+    }
+  </div>
+</div>

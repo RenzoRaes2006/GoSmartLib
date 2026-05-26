@@ -1232,6 +1232,15 @@
         </div>
       }
 
+      <!-- Wizard-modal voor leerkracht-vertrek (met overdracht-keuze) -->
+      @if (vertrekWizardDoel(); as lk) {
+        <app-leerkracht-vertrek-wizard
+          [leerkracht]="lk"
+          (voltooid)="onVertrekWizardVoltooid()"
+          (geannuleerd)="onVertrekWizardGeannuleerd()"
+        ></app-leerkracht-vertrek-wizard>
+      }
+
       <!-- Bevestig-modal voor markeer vertrokken -->
       @if (vertrekModalDoel(); as doel) {
         <div class="modal-overlay" (click)="annuleerVertrekModal()">
