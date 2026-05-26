@@ -1,20 +1,29 @@
 package ap.be.backend.service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import ap.be.backend.config.SecurityUtils;
+import ap.be.backend.dto.KandidaatLeerkrachtDTO;
+import ap.be.backend.dto.KlassLeeslijstResponseDTO;
+import ap.be.backend.dto.LeerkrachtVertrekPreviewDTO;
 import ap.be.backend.entity.KlasWijziging;
+import ap.be.backend.entity.KlassLeeslijst;
 import ap.be.backend.entity.Rol;
 import ap.be.backend.entity.School;
 import ap.be.backend.entity.User;
 import ap.be.backend.exception.GebruikerNotFoundException;
 import ap.be.backend.exception.GebruikerVertrekGeblokkeerdException;
 import ap.be.backend.exception.SchoolNotFoundException;
+import ap.be.backend.mappers.KlassLeeslijstMapper;
 import ap.be.backend.repository.KlasWijzigingRepository;
 import ap.be.backend.repository.KlassLeeslijstRepository;
 import ap.be.backend.repository.SchoolRepository;
@@ -39,19 +48,22 @@ public class GebruikerLifecycleService {
     private final OneRosterClient oneRosterClient;
     private final KlasWijzigingRepository klasWijzigingRepository;
     private final KlassLeeslijstRepository leeslijstRepository;
+    private final KlassLeeslijstService leeslijstService;
 
     public GebruikerLifecycleService(UserRepository userRepository,
                                      SchoolRepository schoolRepository,
                                      UitleningRepository uitleningRepository,
                                      OneRosterClient oneRosterClient,
                                      KlasWijzigingRepository klasWijzigingRepository,
-                                     KlassLeeslijstRepository leeslijstRepository) {
+                                     KlassLeeslijstRepository leeslijstRepository,
+                                     KlassLeeslijstService leeslijstService) {
         this.userRepository = userRepository;
         this.schoolRepository = schoolRepository;
         this.uitleningRepository = uitleningRepository;
         this.oneRosterClient = oneRosterClient;
         this.klasWijzigingRepository = klasWijzigingRepository;
         this.leeslijstRepository = leeslijstRepository;
+        this.leeslijstService = leeslijstService;
     }
 
     /**
@@ -209,8 +221,32 @@ public class GebruikerLifecycleService {
         return userRepository.save(user);
     }
 
+    /**
+     * Markeert een gebruiker als vertrokken. Voor leerkrachten worden alle
+     * actieve leeslijsten gearchiveerd. Geen overdracht — gebruik de overload
+     * met {@code overdrachten} om lijsten naar een andere leerkracht te schuiven.
+     */
     @Transactional
     public User markeerVertrokken(Long userId) {
+        return markeerVertrokken(userId, null);
+    }
+
+    /**
+     * Markeert een gebruiker als vertrokken, met optionele overdracht van
+     * leeslijsten naar andere leerkrachten. {@code overdrachten} mapt
+     * leeslijst-id → nieuwe leerkracht-id. Lijsten die niet in de map staan,
+     * worden gearchiveerd (default-gedrag).
+     *
+     * <p>Atomair in één transactie: ofwel slaagt alles (vertrek + overdrachten
+     * + archiveringen), ofwel niets — zo blijft de admin-UI niet hangen met een
+     * half uitgevoerd vertrek.
+     *
+     * <p>Validatie van de doel-leerkrachten gebeurt in
+     * {@link KlassLeeslijstService#overdragen} en gooit {@code IllegalArgumentException}
+     * bij ongeldige doelen (niet-actief, andere school, …).
+     */
+    @Transactional
+    public User markeerVertrokken(Long userId, Map<Long, Long> overdrachten) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new GebruikerNotFoundException("Gebruiker met id " + userId + " niet gevonden."));
 
@@ -224,16 +260,87 @@ public class GebruikerLifecycleService {
             throw new GebruikerVertrekGeblokkeerdException(openLeningen.size());
         }
 
+        if (user.getRol() == Rol.LEERKRACHT) {
+            List<KlassLeeslijst> leeslijsten =
+                    leeslijstRepository.findByLeerkrachtIdAndGearchiveerdFalseOrderByAangemaaktOpDesc(userId);
+
+            Set<Long> overgedragen = new HashSet<>();
+            if (overdrachten != null && !overdrachten.isEmpty()) {
+                Set<Long> eigenLijstIds = new HashSet<>();
+                for (KlassLeeslijst l : leeslijsten) eigenLijstIds.add(l.getId());
+
+                for (Map.Entry<Long, Long> entry : overdrachten.entrySet()) {
+                    Long lijstId = entry.getKey();
+                    Long nieuweLeerkrachtId = entry.getValue();
+                    if (lijstId == null || nieuweLeerkrachtId == null) continue;
+                    if (!eigenLijstIds.contains(lijstId)) {
+                        throw new IllegalArgumentException(
+                                "Leeslijst " + lijstId + " hoort niet bij deze leerkracht (of is al gearchiveerd).");
+                    }
+                    leeslijstService.overdragen(lijstId, nieuweLeerkrachtId);
+                    overgedragen.add(lijstId);
+                }
+            }
+
+            // Lijsten die niet zijn overgedragen → archiveren.
+            List<KlassLeeslijst> teArchiveren = new ArrayList<>();
+            for (KlassLeeslijst l : leeslijsten) {
+                if (!overgedragen.contains(l.getId())) {
+                    l.setGearchiveerd(true);
+                    teArchiveren.add(l);
+                }
+            }
+            if (!teArchiveren.isEmpty()) {
+                leeslijstRepository.saveAll(teArchiveren);
+            }
+        } else if (overdrachten != null && !overdrachten.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Overdracht van leeslijsten is enkel mogelijk voor leerkrachten.");
+        }
+
         user.setActief(false);
         user.setVertrokkenOp(LocalDate.now());
         userRepository.save(user);
 
-        if (user.getRol() == Rol.LEERKRACHT) {
-            var leeslijsten = leeslijstRepository.findByLeerkrachtIdAndGearchiveerdFalseOrderByAangemaaktOpDesc(userId);
-            leeslijsten.forEach(l -> l.setGearchiveerd(true));
-            leeslijstRepository.saveAll(leeslijsten);
+        return user;
+    }
+
+    /**
+     * Bouwt een preview voor de vertrek-flow van een leerkracht: zijn actieve
+     * leeslijsten, de kandidaten waarnaar overgedragen kan worden (actieve
+     * collega's van dezelfde school), en het aantal open uitleningen
+     * (blokkeert vertrek als > 0).
+     */
+    @Transactional(readOnly = true)
+    public LeerkrachtVertrekPreviewDTO getLeerkrachtVertrekPreview(Long userId) {
+        User leerkracht = userRepository.findById(userId)
+                .orElseThrow(() -> new GebruikerNotFoundException("Gebruiker met id " + userId + " niet gevonden."));
+
+        if (leerkracht.getRol() != Rol.LEERKRACHT) {
+            throw new IllegalArgumentException("Vertrek-preview is enkel voor leerkrachten.");
         }
 
-        return user;
+        List<KlassLeeslijstResponseDTO> leeslijsten =
+                leeslijstRepository.findByLeerkrachtIdAndGearchiveerdFalseOrderByAangemaaktOpDesc(userId).stream()
+                        .map(KlassLeeslijstMapper::toDTO)
+                        .toList();
+
+        List<KandidaatLeerkrachtDTO> kandidaten;
+        if (leerkracht.getSchool() == null) {
+            kandidaten = List.of();
+        } else {
+            Long schoolId = leerkracht.getSchool().getId();
+            kandidaten = userRepository.findBySchool_IdAndRol(schoolId, Rol.LEERKRACHT).stream()
+                    .filter(User::isActief)
+                    .filter(u -> !u.getId().equals(userId))
+                    .sorted(Comparator.comparing(User::getSmartschoolId,
+                            Comparator.nullsLast(String::compareToIgnoreCase)))
+                    .map(u -> new KandidaatLeerkrachtDTO(u.getId(), u.getSmartschoolId(), null, null))
+                    .toList();
+        }
+
+        int aantalOpenLeningen = uitleningRepository.findByUser_IdAndIsIngeleverdFalse(userId).size();
+
+        return new LeerkrachtVertrekPreviewDTO(leeslijsten, kandidaten, aantalOpenLeningen);
     }
 }

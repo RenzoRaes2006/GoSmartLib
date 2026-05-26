@@ -5,6 +5,7 @@ import ap.be.backend.dto.KlassLeeslijstRequestDTO;
 import ap.be.backend.dto.KlassLeeslijstResponseDTO;
 import ap.be.backend.entity.Boek;
 import ap.be.backend.entity.KlassLeeslijst;
+import ap.be.backend.entity.Rol;
 import ap.be.backend.entity.User;
 import ap.be.backend.exception.BoekNotFoundException;
 import ap.be.backend.exception.GebruikerNotFoundException;
@@ -266,6 +267,48 @@ public class KlassLeeslijstService {
         return leeslijstRepository.findByLeerkrachtIdAndGearchiveerdTrueOrderByAangemaaktOpDesc(huidigeGebruiker.getId()).stream()
                 .map(KlassLeeslijstMapper::toDTO)
                 .toList();
+    }
+
+    /**
+     * Draagt een leeslijst over naar een andere leerkracht. Gebruikt vanuit de
+     * vertrek-flow (in batch via {@code GebruikerLifecycleService}) en als
+     * losstaande actie via {@code PATCH /api/leeslijsten/{id}/overdragen}.
+     *
+     * Validatie: doel-leerkracht bestaat, heeft rol LEERKRACHT, is actief, hoort
+     * bij dezelfde school als de huidige eigenaar, en is niet de huidige eigenaar.
+     */
+    @Transactional
+    public KlassLeeslijstResponseDTO overdragen(Long leeslijstId, Long nieuweLeerkrachtId) {
+        if (nieuweLeerkrachtId == null) {
+            throw new IllegalArgumentException("nieuweLeerkrachtId is verplicht.");
+        }
+
+        KlassLeeslijst lijst = leeslijstRepository.findById(leeslijstId)
+                .orElseThrow(() -> new KlassLeeslijstNotFoundException("Leeslijst niet gevonden"));
+
+        User nieuw = userRepository.findById(nieuweLeerkrachtId)
+                .orElseThrow(() -> new GebruikerNotFoundException(
+                        "Leerkracht niet gevonden: " + nieuweLeerkrachtId));
+
+        User huidig = lijst.getLeerkracht();
+        if (huidig != null && huidig.getId().equals(nieuw.getId())) {
+            throw new IllegalArgumentException(
+                    "Doel-leerkracht is gelijk aan de huidige eigenaar van de leeslijst.");
+        }
+        if (nieuw.getRol() != Rol.LEERKRACHT) {
+            throw new IllegalArgumentException("Doel-gebruiker is geen leerkracht.");
+        }
+        if (!nieuw.isActief()) {
+            throw new IllegalArgumentException("Doel-leerkracht is niet actief.");
+        }
+        if (huidig != null && huidig.getSchool() != null && nieuw.getSchool() != null
+                && !huidig.getSchool().getId().equals(nieuw.getSchool().getId())) {
+            throw new IllegalArgumentException(
+                    "Doel-leerkracht hoort niet bij dezelfde school als de huidige eigenaar.");
+        }
+
+        lijst.setLeerkracht(nieuw);
+        return KlassLeeslijstMapper.toDTO(leeslijstRepository.save(lijst));
     }
 
     /**
