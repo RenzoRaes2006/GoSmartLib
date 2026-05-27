@@ -74,12 +74,11 @@ public class TagSeed implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        if (tagRepository.count() > 0) {
-            return;
+        if (tagRepository.count() == 0) {
+            seedGenresMetHierarchie();
+            seedFlatTags(TagType.THEMATISCH, THEMATISCHE);
         }
-        seedGenresMetHierarchie();
-        seedFlatTags(TagType.THEMATISCH, THEMATISCHE);
-        seedFlatTags(TagType.DIDACTISCH, DIDACTISCHE);
+        seedMissingTags(TagType.DIDACTISCH, DIDACTISCHE);
     }
 
     private void seedGenresMetHierarchie() {
@@ -94,6 +93,14 @@ public class TagSeed implements CommandLineRunner {
     private void seedFlatTags(TagType type, String[] namen) {
         for (String naam : namen) {
             tagRepository.save(new Tag(naam, type));
+        }
+    }
+
+    private void seedMissingTags(TagType type, String[] namen) {
+        for (String naam : namen) {
+            if (!tagRepository.existsByTypeAndNaamIgnoreCase(type, naam)) {
+                tagRepository.save(new Tag(naam, type));
+            }
         }
     }
 }

@@ -6,7 +6,10 @@ import static org.mockito.Mockito.*;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -14,16 +17,21 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import ap.be.backend.dto.BoekDTO;
 import ap.be.backend.dto.BoekenFilters;
 import ap.be.backend.dto.BoekenSort;
 import ap.be.backend.dto.PageRequestParams;
 import ap.be.backend.entity.Boek;
+import ap.be.backend.entity.Rol;
+import ap.be.backend.entity.User;
 import ap.be.backend.exception.InvalidYearRangeException;
 import ap.be.backend.repository.BoekRepository;
 import ap.be.backend.repository.CampusRepository;
 import ap.be.backend.repository.TagRepository;
+import ap.be.backend.repository.UserRepository;
 import ap.be.backend.service.BoekService;
 import ap.be.backend.service.TagService;
 
@@ -42,8 +50,26 @@ public class BoekFilterServiceTest {
     @Mock
     private CampusRepository campusRepository;
 
+    @Mock
+    private UserRepository userRepository;
+
     @InjectMocks
     private BoekService boekService;
+
+    @BeforeEach
+    void setUp() {
+        User leerkracht = new User();
+        leerkracht.setRol(Rol.LEERKRACHT);
+        lenient().when(userRepository.findBySmartschoolId("test-user"))
+                .thenReturn(Optional.of(leerkracht));
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken("test-user", null, List.of()));
+    }
+
+    @AfterEach
+    void tearDown() {
+        SecurityContextHolder.clearContext();
+    }
 
     private final BoekenSort defaultSort = new BoekenSort(null, null);
     private final PageRequestParams defaultPaging = new PageRequestParams(0, 10);

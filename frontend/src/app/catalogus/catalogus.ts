@@ -11,6 +11,7 @@ import { filter } from 'rxjs/operators';
 import { FilterOptions } from '../models/FilterOptions';
 import { FormsModule } from '@angular/forms';
 import { TagsByTypePipe } from '../models/tags-by-type.pipe';
+import { AuthService } from '../services/AuthService';
 
 @Component({
   selector: 'app-catalogus',
@@ -59,7 +60,10 @@ export class Catalogus implements OnInit, OnDestroy {
   private boekService = inject(BoekService);
   private tagService = inject(TagService);
   private campusService = inject(CampusService);
+  private authService = inject(AuthService);
   private router = inject(Router);
+
+  isLeerling = () => this.authService.currentUser()?.role === 'student';
 
   private navSub: Subscription = this.router.events
     .pipe(filter((e) => e instanceof NavigationStart))
