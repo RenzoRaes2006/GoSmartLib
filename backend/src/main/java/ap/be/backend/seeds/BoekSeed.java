@@ -40,7 +40,7 @@ public class BoekSeed implements CommandLineRunner {
             "Familie", "School & prestatiedruk", "Sociale media", "Migratie & afkomst",
             "Armoede & ongelijkheid", "Macht & onrecht", "Avontuur & ontdekking", "Overleven",
             "Toekomst & technologie" };
-    String[] didactischeTags = { "LESMETHODES", "DIDACTISCHE_HANDBOEKEN", "EVALUATIEMATERIAAL", "NASLAGWERKEN" };
+    String[] didactischeTags = { "Lesmethodes", "Didactische handboeken", "Evaluatiemateriaal", "Naslagwerken" };
     Random random = new Random();
 
     public BoekSeed(BoekRepository boekRepository, TagRepository tagRepository, RestTemplate restTemplate) {

@@ -129,32 +129,33 @@
         <option value="D (literair niveau)">D (literair niveau)</option>
       </select>
 
-      <!-- Toegevoegd: Filters voor didactisch materiaal (alleen filter, geen security nog) -->
-      <label>Didactische weergave</label>
-      <div class="checkbox-group" style="margin-bottom: 10px;">
-        <label class="checkbox-option">
-          <input
-            type="checkbox"
-            [(ngModel)]="toonDidactisch"
-            (change)="selectedDidactischeId.set(null); updateFilters()"
-          />
-          <span>Toon alléén didactisch materiaal</span>
-        </label>
-      </div>
+      @if (!isLeerling()) {
+        <label>Didactische weergave</label>
+        <div class="checkbox-group" style="margin-bottom: 10px;">
+          <label class="checkbox-option">
+            <input
+              type="checkbox"
+              [(ngModel)]="toonDidactisch"
+              (change)="selectedDidactischeId.set(null); updateFilters()"
+            />
+            <span>Toon alléén didactisch materiaal</span>
+          </label>
+        </div>
 
-      @if (toonDidactisch()) {
-        <label for="didactische-tag-filter">Subcategorie</label>
-        <select
-          id="didactische-tag-filter"
-          [ngModel]="selectedDidactischeId()"
-          (ngModelChange)="selectedDidactischeId.set($event); updateFilters()"
-          class="sidebar-input"
-        >
-          <option [ngValue]="null">Alle didactische categorieën</option>
-          @for (d of beschikbareDidactischeTags(); track d.id) {
-            <option [ngValue]="d.id">{{ d.naam }}</option>
-          }
-        </select>
+        @if (toonDidactisch()) {
+          <label for="didactische-tag-filter">Subcategorie</label>
+          <select
+            id="didactische-tag-filter"
+            [ngModel]="selectedDidactischeId()"
+            (ngModelChange)="selectedDidactischeId.set($event); updateFilters()"
+            class="sidebar-input"
+          >
+            <option [ngValue]="null">Alle didactische categorieën</option>
+            @for (d of beschikbareDidactischeTags(); track d.id) {
+              <option [ngValue]="d.id">{{ d.naam }}</option>
+            }
+          </select>
+        }
       }
 
       <!-- 6. Pagina's -->
@@ -230,8 +231,7 @@
     <div class="boeken-grid">
       @for (boek of boekenlijst(); track boek.id) {
         <div class="boek-card" [routerLink]="['/details', boek.id]">
-          <!-- Toegevoegd: Didactische badge -->
-          @if (boek.didactischMateriaal) {
+          @if (!isLeerling() && boek.didactischMateriaal) {
             <span style="position: absolute; top: 10px; right: 10px; background-color: #8c1b3f; color: white; padding: 4px 8px; font-size: 0.75rem; font-weight: 600; border-radius: 4px; z-index: 10;">Didactisch</span>
           }
           <div class="image-container">

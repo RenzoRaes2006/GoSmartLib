@@ -71,8 +71,8 @@ public class BoekFilterRepositoryTest {
 
     @Test
     void givenBoekMetDidactischeTag_whenFilterOpDidactischeTagId_thenAlleenDatBoekGetoond() {
-        Tag lesmethodesTag = tagRepository.save(new Tag("LESMETHODES " + System.currentTimeMillis(), TagType.DIDACTISCH));
-        Tag naslagTag = tagRepository.save(new Tag("NASLAGWERKEN " + System.currentTimeMillis(), TagType.DIDACTISCH));
+        Tag lesmethodesTag = tagRepository.save(new Tag("Lesmethodes " + System.currentTimeMillis(), TagType.DIDACTISCH));
+        Tag naslagTag = tagRepository.save(new Tag("Naslagwerken " + System.currentTimeMillis(), TagType.DIDACTISCH));
 
         Boek lesmethode = new Boek();
         lesmethode.setTitel("Wiskunde Methode " + System.currentTimeMillis());
