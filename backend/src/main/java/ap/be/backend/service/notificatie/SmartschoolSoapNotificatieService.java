@@ -28,7 +28,10 @@ import java.time.format.DateTimeFormatter;
 @ConditionalOnProperty(name = "gosmartlib.notificatie.mode", havingValue = "soap")
 public class SmartschoolSoapNotificatieService implements NotificatieService {
 
-    private static final String AFZENDER = "GoSmartLib";
+    // Leeg = bericht komt vanaf "Smartschool" (platformafzender). Een vrije string
+    // wordt geweigerd met foutcode 12; senderIdentifier moet een geldig intern
+    // Smartschool-userID zijn óf leeg blijven.
+    private static final String AFZENDER = "";
     private static final DateTimeFormatter DATUM = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     private final RestTemplate restTemplate = new RestTemplate();

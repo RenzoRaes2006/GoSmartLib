@@ -24,7 +24,11 @@ import java.util.regex.Pattern;
 @Service
 public class NotificatieTestService {
 
-    private static final String AFZENDER = "GoSmartLib";
+    // Leeg = bericht komt vanaf "Smartschool" (platformafzender). Een vrije string
+    // zoals "GoSmartLib" wordt door Smartschool verworpen met foutcode 12
+    // ("afzender niet gevonden") — senderIdentifier moet een geldig intern
+    // Smartschool-userID zijn óf leeg.
+    private static final String AFZENDER = "";
     private static final DateTimeFormatter DATUM = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     private static final Pattern RETURN_PATTERN =
             Pattern.compile("<return[^>]*>([^<]*)</return>", Pattern.CASE_INSENSITIVE);
@@ -99,6 +103,7 @@ public class NotificatieTestService {
             case "8" -> "Foutieve afzender";
             case "9" -> "Foutieve coc";
             case "10" -> "Foutieve copyToLVS";
+            case "12" -> "Afzender (senderIdentifier) niet gevonden in Smartschool — moet een geldig intern userID zijn of leeg blijven";
             default -> "Smartschool gaf foutcode " + code + " terug";
         };
         return hint + " (code " + code + ")";
