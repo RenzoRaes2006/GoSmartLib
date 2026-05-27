@@ -18,8 +18,9 @@ import java.util.regex.Pattern;
  * Smartschool-inbox van een leerling en geeft een leesbare success/error
  * boodschap terug — i.t.t. de scheduler die fouten enkel naar stderr logt.
  *
- * Altijd beschikbaar, los van {@code gosmartlib.notificatie.mode}, omdat dit
- * een diagnostische tool is.
+ * De sourcedIds die wij opslaan (UUIDs uit OneRoster) worden via
+ * {@link SmartschoolIdResolver} live vertaald naar de Smartschool
+ * gebruikersnaam, want sendMsg accepteert geen UUIDs als identifier.
  */
 @Service
 public class NotificatieTestService {
@@ -31,22 +32,37 @@ public class NotificatieTestService {
             Pattern.compile("<faultstring[^>]*>([^<]*)</faultstring>", Pattern.CASE_INSENSITIVE);
 
     private final RestTemplate restTemplate = new RestTemplate();
+    private final SmartschoolIdResolver idResolver;
 
-    public TestResultaat stuurTestHerinnering(School school, String ontvangerSmartschoolId, String boekTitel) {
+    public NotificatieTestService(SmartschoolIdResolver idResolver) {
+        this.idResolver = idResolver;
+    }
+
+    public TestResultaat stuurTestHerinnering(School school, String ontvangerSourcedId, String boekTitel) {
         String apiKey = school.getSmartschoolApiKey();
         String domein = school.getSmartschoolDomein();
-        String afzender = school.getSmartschoolAfzenderId();
+        String afzenderSourcedId = school.getSmartschoolAfzenderId();
         if (apiKey == null || apiKey.isBlank()) {
             return TestResultaat.fout("School heeft geen Smartschool API-key ingesteld.");
         }
         if (domein == null || domein.isBlank()) {
             return TestResultaat.fout("School heeft geen Smartschool domein ingesteld.");
         }
-        if (afzender == null || afzender.isBlank()) {
-            return TestResultaat.fout("School heeft geen Smartschool afzender-userID ingesteld. Voeg toe via 'Bewerken' op de school in het Scholen-overzicht.");
+        if (afzenderSourcedId == null || afzenderSourcedId.isBlank()) {
+            return TestResultaat.fout("School heeft geen afzender ingesteld. Stel in via 'Bewerken' op de school.");
         }
-        if (ontvangerSmartschoolId == null || ontvangerSmartschoolId.isBlank()) {
-            return TestResultaat.fout("OntvangerSmartschoolId is verplicht.");
+        if (ontvangerSourcedId == null || ontvangerSourcedId.isBlank()) {
+            return TestResultaat.fout("Geen leerling gekozen.");
+        }
+
+        // Vertaal sourcedIds → Smartschool gebruikersnaam (want sendMsg weigert UUIDs).
+        String afzenderGn = idResolver.resolveGebruikersnaam(school, afzenderSourcedId);
+        if (afzenderGn == null) {
+            return TestResultaat.fout("Smartschool-gebruikersnaam van de afzender niet gevonden in OneRoster. Kies een andere leerkracht of synchroniseer eerst.");
+        }
+        String ontvangerGn = idResolver.resolveGebruikersnaam(school, ontvangerSourcedId);
+        if (ontvangerGn == null) {
+            return TestResultaat.fout("Smartschool-gebruikersnaam van de ontvanger niet gevonden in OneRoster.");
         }
 
         String titel = "Herinnering: te laat inleveren";
@@ -57,7 +73,7 @@ public class NotificatieTestService {
                 boek, deadline.format(DATUM));
 
         String endpoint = "https://" + domein + "/Webservices/V3";
-        String envelope = soapEnvelope(apiKey, ontvangerSmartschoolId, titel, bericht, afzender);
+        String envelope = soapEnvelope(apiKey, ontvangerGn, titel, bericht, afzenderGn);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.TEXT_XML);
@@ -72,37 +88,33 @@ public class NotificatieTestService {
 
         String body = response.getBody() == null ? "" : response.getBody();
 
-        // SOAP fault?
         Matcher fault = FAULT_PATTERN.matcher(body);
         if (fault.find()) {
             return TestResultaat.fout("Smartschool SOAP-fault: " + fault.group(1));
         }
 
-        // Smartschool sendMsg geeft een return-code terug. "0" = succes, anders error code.
         Matcher ret = RETURN_PATTERN.matcher(body);
         if (ret.find()) {
             String code = ret.group(1).trim();
             if ("0".equals(code)) {
-                return TestResultaat.ok("Bericht succesvol verstuurd naar Smartschool-inbox van " + ontvangerSmartschoolId + ".");
+                return TestResultaat.ok("Bericht succesvol verstuurd naar Smartschool-inbox.");
             }
-            return TestResultaat.fout(beschrijfErrorCode(code));
+            return TestResultaat.fout(beschrijfErrorCode(code) + " — afzender='" + afzenderGn + "', ontvanger='" + ontvangerGn + "'");
         }
-        // Onverwachte response — geef HTTP-status + ruw stukje body terug
         return TestResultaat.fout("Onverwachte Smartschool-response (HTTP " + response.getStatusCode().value() + "): "
                 + (body.length() > 300 ? body.substring(0, 300) + "..." : body));
     }
 
     private static String beschrijfErrorCode(String code) {
-        // Bekende Smartschool sendMsg error codes (officiële documentatie)
         String hint = switch (code) {
-            case "1" -> "Ongeldige accesscode (API-key klopt niet of is niet geactiveerd voor deze webservice)";
+            case "1" -> "Ongeldige accesscode (API-key)";
             case "2" -> "Ongeldige parameters";
-            case "3" -> "Ontvanger niet gevonden (userIdentifier bestaat niet in deze Smartschool-omgeving)";
+            case "3" -> "Ontvanger niet gevonden in deze Smartschool-omgeving";
             case "7" -> "Geen toegang tot deze webservice";
-            case "8" -> "Foutieve afzender";
+            case "8" -> "Foutieve afzender-parameter";
             case "9" -> "Foutieve coc";
             case "10" -> "Foutieve copyToLVS";
-            case "12" -> "Afzender (senderIdentifier) niet gevonden in Smartschool — moet een geldig intern userID zijn of leeg blijven";
+            case "12" -> "Afzender niet gevonden in Smartschool";
             default -> "Smartschool gaf foutcode " + code + " terug";
         };
         return hint + " (code " + code + ")";

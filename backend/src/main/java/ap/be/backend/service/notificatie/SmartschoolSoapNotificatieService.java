@@ -31,6 +31,11 @@ public class SmartschoolSoapNotificatieService implements NotificatieService {
     private static final DateTimeFormatter DATUM = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     private final RestTemplate restTemplate = new RestTemplate();
+    private final SmartschoolIdResolver idResolver;
+
+    public SmartschoolSoapNotificatieService(SmartschoolIdResolver idResolver) {
+        this.idResolver = idResolver;
+    }
 
     @Override
     public void stuurTeLaatBericht(School school, String ontvangerSmartschoolId,
@@ -50,18 +55,27 @@ public class SmartschoolSoapNotificatieService implements NotificatieService {
         verzend(school, ontvangerSmartschoolId, "Herinnering: te laat inleveren", body);
     }
 
-    private void verzend(School school, String ontvangerSmartschoolId, String titel, String bericht) {
+    private void verzend(School school, String ontvangerSourcedId, String titel, String bericht) {
         String apiKey = school.getSmartschoolApiKey();
         String domein = school.getSmartschoolDomein();
-        String afzender = school.getSmartschoolAfzenderId();
+        String afzenderSourcedId = school.getSmartschoolAfzenderId();
         if (apiKey == null || apiKey.isBlank() || domein == null || domein.isBlank()
-                || afzender == null || afzender.isBlank()) {
-            System.err.printf("[Notificatie/SOAP] overgeslagen: school %s mist API-key, domein of afzender-userID%n", school.getNaam());
+                || afzenderSourcedId == null || afzenderSourcedId.isBlank()) {
+            System.err.printf("[Notificatie/SOAP] overgeslagen: school %s mist API-key, domein of afzender%n", school.getNaam());
             return;
         }
-        String endpoint = "https://" + domein + "/Webservices/V3";
 
-        String envelope = soapEnvelope(apiKey, ontvangerSmartschoolId, titel, bericht, afzender);
+        // sourcedId (UUID) → Smartschool gebruikersnaam (sendMsg weigert UUIDs)
+        String afzenderGn = idResolver.resolveGebruikersnaam(school, afzenderSourcedId);
+        String ontvangerGn = idResolver.resolveGebruikersnaam(school, ontvangerSourcedId);
+        if (afzenderGn == null || ontvangerGn == null) {
+            System.err.printf("[Notificatie/SOAP] overgeslagen voor %s: kon afzender/ontvanger niet resolven naar Smartschool-gebruikersnaam%n",
+                    ontvangerSourcedId);
+            return;
+        }
+
+        String endpoint = "https://" + domein + "/Webservices/V3";
+        String envelope = soapEnvelope(apiKey, ontvangerGn, titel, bericht, afzenderGn);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.TEXT_XML);
@@ -72,7 +86,7 @@ public class SmartschoolSoapNotificatieService implements NotificatieService {
         } catch (Exception e) {
             // Niet hard falen: een mislukte notificatie mag de scheduled job niet stuk maken.
             System.err.printf("[Notificatie/SOAP] versturen mislukt voor %s op %s: %s%n",
-                    ontvangerSmartschoolId, school.getNaam(), e.getMessage());
+                    ontvangerSourcedId, school.getNaam(), e.getMessage());
         }
     }
 
