@@ -866,7 +866,7 @@
                 <option value="">— Kies een leerling —</option>
                 @for (l of berichtenLeerlingen(); track l.id) {
                   <option [value]="l.smartschoolId">
-                    {{ l.smartschoolId }}{{ l.klas ? ' — ' + l.klas : '' }}
+                    {{ l.naam || l.smartschoolId }}{{ l.klas ? ' — ' + l.klas : '' }}
                   </option>
                 }
               </select>
