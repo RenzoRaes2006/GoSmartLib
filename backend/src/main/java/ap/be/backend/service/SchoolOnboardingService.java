@@ -43,6 +43,7 @@ public class SchoolOnboardingService {
         nieuweSchool.setSmartschoolDomein(dto.getSmartschoolDomein());
         nieuweSchool.setOauthClientId(dto.getOauthClientId());
         nieuweSchool.setOauthClientSecret(dto.getOauthClientSecret());
+        nieuweSchool.setSmartschoolApiKey(dto.getSmartschoolApiKey());
         nieuweSchool.setApiCode("go-" + System.currentTimeMillis());
 
         if (dto.getCampussen() != null) {
@@ -76,6 +77,9 @@ public class SchoolOnboardingService {
     private void valideer(SchoolOnboardDTO dto) {
         if (dto.getSchoolNaam() == null || dto.getSchoolNaam().isBlank()) {
             throw new IllegalArgumentException("Schoolnaam is verplicht");
+        }
+        if (dto.getSmartschoolApiKey() == null || dto.getSmartschoolApiKey().isBlank()) {
+            throw new IllegalArgumentException("Smartschool webservice API-key is verplicht (vraag aan de Smartschool-beheerder: Algemene configuratie > Webservices)");
         }
         if (dto.getBeheerder() != null
                 && dto.getBeheerder().getGebruikersnaam() != null

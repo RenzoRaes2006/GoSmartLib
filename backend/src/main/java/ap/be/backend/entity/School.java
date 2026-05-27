@@ -34,6 +34,11 @@ public class School {
     private String oauthClientId;
     private String oauthClientSecret;
 
+    // Smartschool SOAP webservice (voor sendMsg naar inbox van leerlingen).
+    // TODO: encrypteren at-rest (gevoelige credential, zelfde probleem als oauthClientSecret).
+    @Column(length = 512)
+    private String smartschoolApiKey;
+
     // cascade ensures that campuses are saved automatically when a school is saved
     @OneToMany(mappedBy = "school", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Campus> campussen = new HashSet<>();

@@ -33,6 +33,9 @@
       <button [class.active]="activeTab() === 'gebruikers'" (click)="wisselTab('gebruikers')">
         Gebruikers beheren
       </button>
+      <button [class.active]="activeTab() === 'berichten'" (click)="wisselTab('berichten')">
+        Berichten
+      </button>
       <button [class.active]="activeTab() === 'audit-log'" (click)="wisselTab('audit-log')">
         Audit-log
       </button>
@@ -600,6 +603,16 @@
                 <label>OAuth Client Secret</label>
                 <input formControlName="oauthClientSecret" class="form-input" type="password" />
               </div>
+
+              <div class="form-group">
+                <label>Smartschool Webservice API-key</label>
+                <input formControlName="smartschoolApiKey" class="form-input" type="password" />
+                <small class="hint">
+                  Vraag aan de Smartschool-beheerder via
+                  <em>Algemene configuratie &rarr; Webservices</em>. Nodig om
+                  berichten in de Smartschool-inbox van leerlingen te plaatsen.
+                </small>
+              </div>
             </div>
           }
 
@@ -809,6 +822,92 @@
     <!-- tab 7: audit-log -->
     @if (activeTab() === 'audit-log') {
       <app-admin-audit-log />
+    }
+
+    <!-- tab 8: berichten — stuur test-herinnering naar Smartschool-inbox van een leerling -->
+    @if (activeTab() === 'berichten') {
+      <div class="admin-card">
+        <div class="card-header">
+          <h2>Berichten — test Smartschool-inbox</h2>
+        </div>
+
+        <p class="text-muted" style="margin-bottom: 20px">
+          Stuur een test-herinnering naar de Smartschool-inbox van een leerling.
+          Vereist dat de school een geldige Smartschool webservice API-key heeft.
+        </p>
+
+        <div class="form-group" style="max-width: 500px">
+          <label>School</label>
+          <select
+            class="form-input"
+            [value]="berichtenSchoolId() ?? ''"
+            (change)="onBerichtenSchoolGeselecteerd($event)"
+          >
+            <option value="">— Selecteer een school —</option>
+            @for (s of geregistreerdeScholen(); track s.id) {
+              <option [value]="s.id">{{ s.naam }}</option>
+            }
+          </select>
+        </div>
+
+        @if (berichtenSchoolId() != null) {
+          @if (berichtenLeerlingenLaden()) {
+            <p class="text-muted">Leerlingen laden...</p>
+          } @else if (berichtenLeerlingen().length === 0) {
+            <p class="text-muted">Geen actieve leerlingen gevonden voor deze school.</p>
+          } @else {
+            <div class="form-group" style="max-width: 500px">
+              <label>Leerling ({{ berichtenLeerlingen().length }} actief)</label>
+              <select
+                class="form-input"
+                [value]="berichtenGeselecteerdeLeerlingId()"
+                (change)="berichtenGeselecteerdeLeerlingId.set($any($event.target).value)"
+              >
+                <option value="">— Kies een leerling —</option>
+                @for (l of berichtenLeerlingen(); track l.id) {
+                  <option [value]="l.smartschoolId">
+                    {{ l.smartschoolId }}{{ l.klas ? ' — ' + l.klas : '' }}
+                  </option>
+                }
+              </select>
+            </div>
+
+            <div class="form-group" style="max-width: 500px">
+              <label>Boek-titel (optioneel)</label>
+              <input
+                type="text"
+                class="form-input"
+                [value]="berichtenBoekTitel()"
+                (input)="berichtenBoekTitel.set($any($event.target).value)"
+                placeholder="Testboek"
+              />
+            </div>
+
+            <button
+              class="btn-go"
+              (click)="stuurTestHerinnering()"
+              [disabled]="berichtenBezig() || !berichtenGeselecteerdeLeerlingId()"
+            >
+              {{ berichtenBezig() ? 'Bezig met versturen...' : 'Stuur herinnering' }}
+            </button>
+
+            @if (berichtenResultaatType() === 'ok') {
+              <div
+                style="margin-top: 16px; padding: 12px; background: #e2fbd7; color: #348a45; border-radius: 4px"
+              >
+                ✓ {{ berichtenResultaatBoodschap() }}
+              </div>
+            }
+            @if (berichtenResultaatType() === 'fout') {
+              <div
+                style="margin-top: 16px; padding: 12px; background: #fde2e2; color: #c0392b; border-radius: 4px"
+              >
+                ✗ {{ berichtenResultaatBoodschap() }}
+              </div>
+            }
+          }
+        }
+      </div>
     }
 
     <!-- tab 6: gebruikers (handmatige lifecycle — toevoegen + vertrek) -->

@@ -97,4 +97,15 @@ public interface UitleningRepository extends JpaRepository<Uitlening, Long> {
     // Geeft alle open uitleningen voor een lijst van gebruikers — gebruikt bij rollover preview
     // om te controleren of vertrekkende leerlingen nog boeken hebben uitstaan.
     List<Uitlening> findByUser_IdInAndIsIngeleverdFalse(Collection<Long> userIds);
+
+    // Te-laat-notificaties: nog niet ingeleverd, deadline verstreken, eerste mail nog niet verstuurd.
+    @Query("SELECT u FROM Uitlening u WHERE u.isIngeleverd = false " +
+            "AND u.inleverDatum < :vandaag AND u.eersteTeLaatMailOp IS NULL")
+    List<Uitlening> findTeLaatZonderEersteMail(@Param("vandaag") LocalDate vandaag);
+
+    // Herinneringen: eerste mail verstuurd >= 7 dagen geleden, nog niet ingeleverd, reminder nog niet verstuurd.
+    @Query("SELECT u FROM Uitlening u WHERE u.isIngeleverd = false " +
+            "AND u.eersteTeLaatMailOp IS NOT NULL AND u.eersteTeLaatMailOp <= :drempel " +
+            "AND u.herinneringMailOp IS NULL")
+    List<Uitlening> findKlaarVoorHerinnering(@Param("drempel") LocalDate drempel);
 }

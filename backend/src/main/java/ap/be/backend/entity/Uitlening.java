@@ -40,6 +40,13 @@ public class Uitlening {
     private String status;
     private boolean isVerlengd;
 
+    // Datum waarop de eerste "te laat"-notificatie naar de Smartschool-inbox is verstuurd.
+    // Null = nog niet verstuurd. Gebruikt om dubbele verzending te vermijden door de daily scheduler.
+    private LocalDate eersteTeLaatMailOp;
+
+    // Datum waarop de herinnering (7 dagen na de eerste mail) is verstuurd. Null = nog niet.
+    private LocalDate herinneringMailOp;
+
     public Uitlening(User user, Boek boek, LocalDate uitleenDatum, LocalDate inleverDatum) {
         this.user = user;
         this.boek = boek;
