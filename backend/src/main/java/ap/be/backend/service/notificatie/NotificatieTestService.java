@@ -24,11 +24,6 @@ import java.util.regex.Pattern;
 @Service
 public class NotificatieTestService {
 
-    // Leeg = bericht komt vanaf "Smartschool" (platformafzender). Een vrije string
-    // zoals "GoSmartLib" wordt door Smartschool verworpen met foutcode 12
-    // ("afzender niet gevonden") — senderIdentifier moet een geldig intern
-    // Smartschool-userID zijn óf leeg.
-    private static final String AFZENDER = "";
     private static final DateTimeFormatter DATUM = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     private static final Pattern RETURN_PATTERN =
             Pattern.compile("<return[^>]*>([^<]*)</return>", Pattern.CASE_INSENSITIVE);
@@ -40,11 +35,15 @@ public class NotificatieTestService {
     public TestResultaat stuurTestHerinnering(School school, String ontvangerSmartschoolId, String boekTitel) {
         String apiKey = school.getSmartschoolApiKey();
         String domein = school.getSmartschoolDomein();
+        String afzender = school.getSmartschoolAfzenderId();
         if (apiKey == null || apiKey.isBlank()) {
             return TestResultaat.fout("School heeft geen Smartschool API-key ingesteld.");
         }
         if (domein == null || domein.isBlank()) {
             return TestResultaat.fout("School heeft geen Smartschool domein ingesteld.");
+        }
+        if (afzender == null || afzender.isBlank()) {
+            return TestResultaat.fout("School heeft geen Smartschool afzender-userID ingesteld. Voeg toe via 'Bewerken' op de school in het Scholen-overzicht.");
         }
         if (ontvangerSmartschoolId == null || ontvangerSmartschoolId.isBlank()) {
             return TestResultaat.fout("OntvangerSmartschoolId is verplicht.");
@@ -58,7 +57,7 @@ public class NotificatieTestService {
                 boek, deadline.format(DATUM));
 
         String endpoint = "https://" + domein + "/Webservices/V3";
-        String envelope = soapEnvelope(apiKey, ontvangerSmartschoolId, titel, bericht);
+        String envelope = soapEnvelope(apiKey, ontvangerSmartschoolId, titel, bericht, afzender);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.TEXT_XML);
@@ -109,7 +108,7 @@ public class NotificatieTestService {
         return hint + " (code " + code + ")";
     }
 
-    private String soapEnvelope(String apiKey, String ontvanger, String titel, String bericht) {
+    private String soapEnvelope(String apiKey, String ontvanger, String titel, String bericht, String afzender) {
         return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
                 + "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:ss=\"https://oauth.smartschool.be/Webservices/V3\">"
                 + "<soap:Body>"
@@ -118,7 +117,7 @@ public class NotificatieTestService {
                 + "<userIdentifier>" + xml(ontvanger) + "</userIdentifier>"
                 + "<title>" + xml(titel) + "</title>"
                 + "<body>" + xml(bericht) + "</body>"
-                + "<senderIdentifier>" + xml(AFZENDER) + "</senderIdentifier>"
+                + "<senderIdentifier>" + xml(afzender) + "</senderIdentifier>"
                 + "<attachments></attachments>"
                 + "<coc>0</coc>"
                 + "<copyToLVS>false</copyToLVS>"

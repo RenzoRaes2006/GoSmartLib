@@ -39,6 +39,11 @@ public class School {
     @Column(length = 512)
     private String smartschoolApiKey;
 
+    // Intern Smartschool userID dat als afzender van automatische berichten
+    // verschijnt (bv. een bibliotheek- of administratieaccount). sendMsg
+    // weigert vrije strings of een lege afzender (foutcode 12).
+    private String smartschoolAfzenderId;
+
     // cascade ensures that campuses are saved automatically when a school is saved
     @OneToMany(mappedBy = "school", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Campus> campussen = new HashSet<>();

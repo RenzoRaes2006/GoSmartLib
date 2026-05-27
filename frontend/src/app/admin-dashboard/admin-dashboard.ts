@@ -145,6 +145,14 @@ export class AdminDashboard implements OnInit {
   syncBezig = signal<boolean>(false);
   syncResultaat = signal<string>('');
 
+  // smartschool config update voor bestaande school (in bewerk-paneel)
+  bewerkApiKey = signal<string>('');
+  bewerkAfzenderId = signal<string>('');
+  smartschoolConfigBezig = signal<boolean>(false);
+  smartschoolConfigBoodschap = signal<string>('');
+  bewerkLeerkrachten = signal<AdminGebruiker[]>([]);
+  bewerkLeerkrachtenLaden = signal<boolean>(false);
+
   // sync-preview modal state
   syncPreviewBezig = signal<boolean>(false);
   syncPreview = signal<{
@@ -171,7 +179,8 @@ export class AdminDashboard implements OnInit {
       smartschoolDomein: ['', Validators.required],
       oauthClientId: ['', Validators.required],
       oauthClientSecret: ['', Validators.required],
-      smartschoolApiKey: ['', Validators.required]
+      smartschoolApiKey: ['', Validators.required],
+      smartschoolAfzenderId: ['', Validators.required]
     }),
     stap3: this.fb.group({
       campussen: this.fb.array([this.maakCampusVeld()])
@@ -347,6 +356,7 @@ export class AdminDashboard implements OnInit {
       oauthClientId: v.stap1.oauthClientId,
       oauthClientSecret: v.stap1.oauthClientSecret,
       smartschoolApiKey: v.stap1.smartschoolApiKey,
+      smartschoolAfzenderId: v.stap1.smartschoolAfzenderId,
       campussen: v.stap3.campussen
     };
     this.http.post<any>(`${this.apiBase}/onboard`, payload).subscribe({
@@ -809,6 +819,21 @@ export class AdminDashboard implements OnInit {
     this.bewerkFout.set('');
     this.nieuweCampusNaam.set('');
     this.laadCampussen(school.id);
+    this.laadLeerkrachtenVoorBewerken(school.id);
+  }
+
+  private laadLeerkrachtenVoorBewerken(schoolId: number) {
+    this.bewerkLeerkrachtenLaden.set(true);
+    this.adminGebruikerService.getAlleLeerkrachten(schoolId, false, 0, 10000).subscribe({
+      next: (page) => {
+        this.bewerkLeerkrachten.set(page.content ?? []);
+        this.bewerkLeerkrachtenLaden.set(false);
+      },
+      error: () => {
+        this.bewerkLeerkrachten.set([]);
+        this.bewerkLeerkrachtenLaden.set(false);
+      }
+    });
   }
 
   sluitBewerken() {
@@ -817,6 +842,38 @@ export class AdminDashboard implements OnInit {
     this.nieuweCampusNaam.set('');
     this.bewerkFout.set('');
     this.syncResultaat.set('');
+    this.bewerkApiKey.set('');
+    this.bewerkAfzenderId.set('');
+    this.smartschoolConfigBoodschap.set('');
+    this.bewerkLeerkrachten.set([]);
+  }
+
+  bewaarSmartschoolConfig() {
+    const schoolId = this.bewerkSchoolId();
+    if (schoolId == null) return;
+    const apiKey = this.bewerkApiKey().trim();
+    const afzenderId = this.bewerkAfzenderId().trim();
+    if (!apiKey && !afzenderId) {
+      this.smartschoolConfigBoodschap.set('Vul minstens één veld in om bij te werken.');
+      return;
+    }
+    this.smartschoolConfigBezig.set(true);
+    this.smartschoolConfigBoodschap.set('');
+    const body: any = {};
+    if (apiKey) body.smartschoolApiKey = apiKey;
+    if (afzenderId) body.smartschoolAfzenderId = afzenderId;
+    this.http.patch<any>(`${this.apiBase}/${schoolId}/smartschool-config`, body).subscribe({
+      next: () => {
+        this.smartschoolConfigBezig.set(false);
+        this.smartschoolConfigBoodschap.set('✓ Smartschool-config bijgewerkt.');
+        this.bewerkApiKey.set('');
+        this.bewerkAfzenderId.set('');
+      },
+      error: (err) => {
+        this.smartschoolConfigBezig.set(false);
+        this.smartschoolConfigBoodschap.set(err?.error?.error ?? 'Bijwerken mislukt.');
+      }
+    });
   }
 
   private laadCampussen(schoolId: number) {

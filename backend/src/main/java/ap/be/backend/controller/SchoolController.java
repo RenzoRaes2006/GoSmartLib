@@ -316,6 +316,26 @@ public class SchoolController {
         }
     }
 
+    @PatchMapping("/{id}/smartschool-config")
+    public ResponseEntity<?> updateSmartschoolConfig(@PathVariable Long id, @RequestBody Map<String, String> body) {
+        Optional<School> schoolOpt = schoolRepository.findById(id);
+        if (schoolOpt.isEmpty()) return ResponseEntity.notFound().build();
+        School school = schoolOpt.get();
+        if (body.containsKey("smartschoolApiKey")) {
+            String v = body.get("smartschoolApiKey");
+            if (v != null && !v.isBlank()) school.setSmartschoolApiKey(v.trim());
+        }
+        if (body.containsKey("smartschoolAfzenderId")) {
+            String v = body.get("smartschoolAfzenderId");
+            if (v != null && !v.isBlank()) school.setSmartschoolAfzenderId(v.trim());
+        }
+        schoolRepository.save(school);
+        return ResponseEntity.ok(Map.of(
+                "smartschoolApiKeyAanwezig", school.getSmartschoolApiKey() != null && !school.getSmartschoolApiKey().isBlank(),
+                "smartschoolAfzenderId", school.getSmartschoolAfzenderId() == null ? "" : school.getSmartschoolAfzenderId()
+        ));
+    }
+
     @DeleteMapping("/{id}")
     @org.springframework.transaction.annotation.Transactional
     public ResponseEntity<Void> verwijderSchool(@PathVariable Long id) {

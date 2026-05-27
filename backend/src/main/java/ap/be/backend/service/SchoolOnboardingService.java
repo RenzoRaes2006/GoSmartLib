@@ -44,6 +44,7 @@ public class SchoolOnboardingService {
         nieuweSchool.setOauthClientId(dto.getOauthClientId());
         nieuweSchool.setOauthClientSecret(dto.getOauthClientSecret());
         nieuweSchool.setSmartschoolApiKey(dto.getSmartschoolApiKey());
+        nieuweSchool.setSmartschoolAfzenderId(dto.getSmartschoolAfzenderId());
         nieuweSchool.setApiCode("go-" + System.currentTimeMillis());
 
         if (dto.getCampussen() != null) {
@@ -80,6 +81,9 @@ public class SchoolOnboardingService {
         }
         if (dto.getSmartschoolApiKey() == null || dto.getSmartschoolApiKey().isBlank()) {
             throw new IllegalArgumentException("Smartschool webservice API-key is verplicht (vraag aan de Smartschool-beheerder: Algemene configuratie > Webservices)");
+        }
+        if (dto.getSmartschoolAfzenderId() == null || dto.getSmartschoolAfzenderId().isBlank()) {
+            throw new IllegalArgumentException("Smartschool afzender-userID is verplicht (intern userID van een bestaande Smartschool-gebruiker die als afzender van automatische berichten zal verschijnen)");
         }
         if (dto.getBeheerder() != null
                 && dto.getBeheerder().getGebruikersnaam() != null
