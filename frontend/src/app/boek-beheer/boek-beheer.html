@@ -79,29 +79,29 @@
   }
 </div>
 
+@if (mode() === 'wijzigen' && !boekGevonden() && beschikbareCampussen().length > 1) {
+  <div class="campus-filter" style="margin-bottom: 12px; display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
+    <strong>Campus:</strong>
+    @for (c of beschikbareCampussen(); track c.id) {
+      <label style="display:inline-flex; align-items:center; gap:4px; padding:4px 8px; border:1px solid #ccc; border-radius:4px; cursor:pointer;"
+             [style.background]="isCampusGefilterd(c.id) ? '#e6f0ff' : 'transparent'">
+        <input type="checkbox"
+               [checked]="isCampusGefilterd(c.id)"
+               (change)="toggleCampusFilter(c.id)" />
+        {{ c.naam }}
+      </label>
+    }
+    @if (campusFilterIds().length > 0) {
+      <button type="button" class="btn-outline btn-sm" (click)="wisCampusFilter()">Wis filter</button>
+    }
+  </div>
+}
+
 @if (
   mode() === 'wijzigen' && !boekGevonden() && (boeknOverzicht().length > 0 || isLoadingBoeken())
 ) {
   <div class="boeken-overzicht">
     <h3>Beschikbare boeken</h3>
-
-    @if (beschikbareCampussen().length > 1) {
-      <div class="campus-filter" style="margin-bottom: 12px; display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
-        <strong>Campus:</strong>
-        @for (c of beschikbareCampussen(); track c.id) {
-          <label style="display:inline-flex; align-items:center; gap:4px; padding:4px 8px; border:1px solid #ccc; border-radius:4px; cursor:pointer;"
-                 [style.background]="isCampusGefilterd(c.id) ? '#e6f0ff' : 'transparent'">
-            <input type="checkbox"
-                   [checked]="isCampusGefilterd(c.id)"
-                   (change)="toggleCampusFilter(c.id)" />
-            {{ c.naam }}
-          </label>
-        }
-        @if (campusFilterIds().length > 0) {
-          <button type="button" class="btn-outline btn-sm" (click)="wisCampusFilter()">Wis filter</button>
-        }
-      </div>
-    }
 
     @if (isLoadingBoeken()) {
       <div class="loading-spinner">Boeken laden...</div>
