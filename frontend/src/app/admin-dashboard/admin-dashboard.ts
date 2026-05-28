@@ -29,7 +29,17 @@ export class AdminDashboard implements OnInit {
     : 'https://api-sp09.cloud-ap.be/api/scholen';
 
   // tab navigation state
-  activeTab = signal<'scholen' | 'wizard' | 'tags' | 'rollen' | 'schooljaar' | 'gebruikers' | 'audit-log'>('scholen');
+  activeTab = signal<'scholen' | 'wizard' | 'tags' | 'rollen' | 'schooljaar' | 'gebruikers' | 'berichten' | 'audit-log'>('scholen');
+
+  // berichten-tab state
+  berichtenSchoolId = signal<number | null>(null);
+  berichtenLeerlingen = signal<AdminGebruiker[]>([]);
+  berichtenLeerlingenLaden = signal<boolean>(false);
+  berichtenGeselecteerdeLeerlingId = signal<string>('');
+  berichtenBoekTitel = signal<string>('Testboek');
+  berichtenBezig = signal<boolean>(false);
+  berichtenResultaatType = signal<'idle' | 'ok' | 'fout'>('idle');
+  berichtenResultaatBoodschap = signal<string>('');
 
   // rollen-tab state (geen paging — toon volledige leerkrachten-lijst)
   leerkrachten = signal<AdminGebruiker[]>([]);
@@ -140,6 +150,14 @@ export class AdminDashboard implements OnInit {
   syncBezig = signal<boolean>(false);
   syncResultaat = signal<string>('');
 
+  // smartschool config update voor bestaande school (in bewerk-paneel)
+  bewerkApiKey = signal<string>('');
+  bewerkAfzenderId = signal<string>('');
+  smartschoolConfigBezig = signal<boolean>(false);
+  smartschoolConfigBoodschap = signal<string>('');
+  bewerkLeerkrachten = signal<AdminGebruiker[]>([]);
+  bewerkLeerkrachtenLaden = signal<boolean>(false);
+
   // sync-preview modal state
   syncPreviewBezig = signal<boolean>(false);
   syncPreview = signal<{
@@ -165,7 +183,9 @@ export class AdminDashboard implements OnInit {
       adres: ['', Validators.required],
       smartschoolDomein: ['', Validators.required],
       oauthClientId: ['', Validators.required],
-      oauthClientSecret: ['', Validators.required]
+      oauthClientSecret: ['', Validators.required],
+      smartschoolApiKey: ['', Validators.required],
+      smartschoolAfzenderId: ['', Validators.required]
     }),
     stap3: this.fb.group({
       campussen: this.fb.array([this.maakCampusVeld()])
@@ -340,6 +360,8 @@ export class AdminDashboard implements OnInit {
       smartschoolDomein: v.stap1.smartschoolDomein,
       oauthClientId: v.stap1.oauthClientId,
       oauthClientSecret: v.stap1.oauthClientSecret,
+      smartschoolApiKey: v.stap1.smartschoolApiKey,
+      smartschoolAfzenderId: v.stap1.smartschoolAfzenderId,
       campussen: v.stap3.campussen
     };
     this.http.post<any>(`${this.apiBase}/onboard`, payload).subscribe({
@@ -377,7 +399,7 @@ export class AdminDashboard implements OnInit {
     });
   }
 
-  wisselTab(tab: 'scholen' | 'wizard' | 'tags' | 'rollen' | 'schooljaar' | 'gebruikers' | 'audit-log') {
+  wisselTab(tab: 'scholen' | 'wizard' | 'tags' | 'rollen' | 'schooljaar' | 'gebruikers' | 'berichten' | 'audit-log') {
     this.activeTab.set(tab);
     this.sluitBewerken(); // Sluit campussen editor indien open
     if (tab === 'rollen') {
@@ -386,6 +408,16 @@ export class AdminDashboard implements OnInit {
         this.laadScholenUitDatabase();
       }
       this.leerkrachten.set([]);
+    }
+    if (tab === 'berichten') {
+      if (this.geregistreerdeScholen().length === 0) {
+        this.laadScholenUitDatabase();
+      }
+      this.berichtenSchoolId.set(null);
+      this.berichtenLeerlingen.set([]);
+      this.berichtenGeselecteerdeLeerlingId.set('');
+      this.berichtenResultaatType.set('idle');
+      this.berichtenResultaatBoodschap.set('');
     }
     if (tab === 'gebruikers') {
       if (this.geregistreerdeScholen().length === 0) {
@@ -813,6 +845,21 @@ export class AdminDashboard implements OnInit {
     this.bewerkFout.set('');
     this.nieuweCampusNaam.set('');
     this.laadCampussen(school.id);
+    this.laadLeerkrachtenVoorBewerken(school.id);
+  }
+
+  private laadLeerkrachtenVoorBewerken(schoolId: number) {
+    this.bewerkLeerkrachtenLaden.set(true);
+    this.adminGebruikerService.getAlleLeerkrachten(schoolId, false, 0, 10000).subscribe({
+      next: (page) => {
+        this.bewerkLeerkrachten.set(page.content ?? []);
+        this.bewerkLeerkrachtenLaden.set(false);
+      },
+      error: () => {
+        this.bewerkLeerkrachten.set([]);
+        this.bewerkLeerkrachtenLaden.set(false);
+      }
+    });
   }
 
   sluitBewerken() {
@@ -821,6 +868,38 @@ export class AdminDashboard implements OnInit {
     this.nieuweCampusNaam.set('');
     this.bewerkFout.set('');
     this.syncResultaat.set('');
+    this.bewerkApiKey.set('');
+    this.bewerkAfzenderId.set('');
+    this.smartschoolConfigBoodschap.set('');
+    this.bewerkLeerkrachten.set([]);
+  }
+
+  bewaarSmartschoolConfig() {
+    const schoolId = this.bewerkSchoolId();
+    if (schoolId == null) return;
+    const apiKey = this.bewerkApiKey().trim();
+    const afzenderId = this.bewerkAfzenderId().trim();
+    if (!apiKey && !afzenderId) {
+      this.smartschoolConfigBoodschap.set('Vul minstens één veld in om bij te werken.');
+      return;
+    }
+    this.smartschoolConfigBezig.set(true);
+    this.smartschoolConfigBoodschap.set('');
+    const body: any = {};
+    if (apiKey) body.smartschoolApiKey = apiKey;
+    if (afzenderId) body.smartschoolAfzenderId = afzenderId;
+    this.http.patch<any>(`${this.apiBase}/${schoolId}/smartschool-config`, body).subscribe({
+      next: () => {
+        this.smartschoolConfigBezig.set(false);
+        this.smartschoolConfigBoodschap.set('✓ Smartschool-config bijgewerkt.');
+        this.bewerkApiKey.set('');
+        this.bewerkAfzenderId.set('');
+      },
+      error: (err) => {
+        this.smartschoolConfigBezig.set(false);
+        this.smartschoolConfigBoodschap.set(err?.error?.error ?? 'Bijwerken mislukt.');
+      }
+    });
   }
 
   private laadCampussen(schoolId: number) {
@@ -905,6 +984,66 @@ export class AdminDashboard implements OnInit {
     this.http.delete(`${this.apiBase}/${schoolId}/campussen/${campus.id}`).subscribe({
       next: () => this.bewerkCampussen.update(lijst => lijst.filter(c => c.id !== campus.id)),
       error: (err) => this.bewerkFout.set(err?.error?.error ?? 'Verwijderen mislukt.')
+    });
+  }
+
+  // --- berichten-tab ---
+  onBerichtenSchoolGeselecteerd(event: Event) {
+    const value = (event.target as HTMLSelectElement).value;
+    const schoolId = value ? Number(value) : null;
+    this.berichtenSchoolId.set(schoolId);
+    this.berichtenGeselecteerdeLeerlingId.set('');
+    this.berichtenResultaatType.set('idle');
+    this.berichtenResultaatBoodschap.set('');
+    if (schoolId == null) {
+      this.berichtenLeerlingen.set([]);
+      return;
+    }
+    this.berichtenLeerlingenLaden.set(true);
+    // Grote size zodat alle leerlingen in één call binnenkomen voor de dropdown.
+    this.adminGebruikerService.getLeerlingenInclVertrokken(schoolId, 0, 10000).subscribe({
+      next: (page) => {
+        const actief = (page.content ?? []).filter(l => l.actief !== false);
+        this.berichtenLeerlingen.set(actief);
+        this.berichtenLeerlingenLaden.set(false);
+      },
+      error: () => {
+        this.berichtenLeerlingen.set([]);
+        this.berichtenLeerlingenLaden.set(false);
+        this.berichtenResultaatType.set('fout');
+        this.berichtenResultaatBoodschap.set('Kon leerlingen niet ophalen.');
+      }
+    });
+  }
+
+  stuurTestHerinnering() {
+    const schoolId = this.berichtenSchoolId();
+    const ontvanger = this.berichtenGeselecteerdeLeerlingId().trim();
+    if (schoolId == null || !ontvanger) return;
+
+    this.berichtenBezig.set(true);
+    this.berichtenResultaatType.set('idle');
+    this.berichtenResultaatBoodschap.set('');
+
+    const apiBase = window.location.hostname === 'localhost'
+      ? 'http://localhost:8081/api/admin/notificatie'
+      : 'https://api-sp09.cloud-ap.be/api/admin/notificatie';
+
+    this.http.post<{ success: boolean; boodschap: string }>(`${apiBase}/test-herinnering`, {
+      schoolId,
+      ontvangerSmartschoolId: ontvanger,
+      boekTitel: this.berichtenBoekTitel().trim() || 'Testboek'
+    }).subscribe({
+      next: (res) => {
+        this.berichtenBezig.set(false);
+        this.berichtenResultaatType.set(res?.success ? 'ok' : 'fout');
+        this.berichtenResultaatBoodschap.set(res?.boodschap ?? '');
+      },
+      error: (err) => {
+        this.berichtenBezig.set(false);
+        this.berichtenResultaatType.set('fout');
+        this.berichtenResultaatBoodschap.set(err?.error?.boodschap ?? err?.message ?? 'Versturen mislukt.');
+      }
     });
   }
 

@@ -63,8 +63,15 @@ public class TagSeed implements CommandLineRunner {
     };
 
     private static final String[] DIDACTISCHE = {
-            "LESMETHODES", "DIDACTISCHE_HANDBOEKEN", "EVALUATIEMATERIAAL", "NASLAGWERKEN"
+            "Lesmethodes", "Didactische handboeken", "Evaluatiemateriaal", "Naslagwerken"
     };
+
+    private static final java.util.Map<String, String> HERNOEM_DIDACTISCH = java.util.Map.of(
+            "LESMETHODES", "Lesmethodes",
+            "DIDACTISCHE_HANDBOEKEN", "Didactische handboeken",
+            "EVALUATIEMATERIAAL", "Evaluatiemateriaal",
+            "NASLAGWERKEN", "Naslagwerken"
+    );
 
     private final TagRepository tagRepository;
 
@@ -74,12 +81,12 @@ public class TagSeed implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        if (tagRepository.count() > 0) {
-            return;
+        if (tagRepository.count() == 0) {
+            seedGenresMetHierarchie();
+            seedFlatTags(TagType.THEMATISCH, THEMATISCHE);
         }
-        seedGenresMetHierarchie();
-        seedFlatTags(TagType.THEMATISCH, THEMATISCHE);
-        seedFlatTags(TagType.DIDACTISCH, DIDACTISCHE);
+        hernoemTags(TagType.DIDACTISCH, HERNOEM_DIDACTISCH);
+        seedMissingTags(TagType.DIDACTISCH, DIDACTISCHE);
     }
 
     private void seedGenresMetHierarchie() {
@@ -94,6 +101,29 @@ public class TagSeed implements CommandLineRunner {
     private void seedFlatTags(TagType type, String[] namen) {
         for (String naam : namen) {
             tagRepository.save(new Tag(naam, type));
+        }
+    }
+
+    private void hernoemTags(TagType type, java.util.Map<String, String> mapping) {
+        for (var entry : mapping.entrySet()) {
+            boolean nieuwBestaat = tagRepository.existsByTypeAndNaamIgnoreCase(type, entry.getValue());
+            tagRepository.findByTypeAndNaamIgnoreCase(type, entry.getKey())
+                    .ifPresent(oudeTag -> {
+                        if (nieuwBestaat) {
+                            tagRepository.delete(oudeTag);
+                        } else {
+                            oudeTag.setNaam(entry.getValue());
+                            tagRepository.save(oudeTag);
+                        }
+                    });
+        }
+    }
+
+    private void seedMissingTags(TagType type, String[] namen) {
+        for (String naam : namen) {
+            if (!tagRepository.existsByTypeAndNaamIgnoreCase(type, naam)) {
+                tagRepository.save(new Tag(naam, type));
+            }
         }
     }
 }

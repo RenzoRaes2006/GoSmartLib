@@ -16,8 +16,10 @@ import ap.be.backend.dto.BoekenFilters;
 import ap.be.backend.dto.BoekenSort;
 import ap.be.backend.dto.PageRequestParams;
 import ap.be.backend.dto.TagDTO;
+import ap.be.backend.config.SecurityUtils;
 import ap.be.backend.entity.Boek;
 import ap.be.backend.entity.Campus;
+import ap.be.backend.entity.Rol;
 import ap.be.backend.entity.Tag;
 import ap.be.backend.exception.InvalidYearRangeException;
 import ap.be.backend.exception.IsbnAlreadyExistsException;
@@ -25,6 +27,7 @@ import ap.be.backend.mappers.BoekMapper;
 import ap.be.backend.repository.BoekRepository;
 import ap.be.backend.repository.CampusRepository;
 import ap.be.backend.repository.TagRepository;
+import ap.be.backend.repository.UserRepository;
 
 @Service
 public class BoekService {
@@ -32,13 +35,15 @@ public class BoekService {
     private final TagRepository tagRepository;
     private final TagService tagService;
     private final CampusRepository campusRepository;
+    private final UserRepository userRepository;
 
     public BoekService(BoekRepository boekRepository, TagRepository tagRepository, TagService tagService,
-            CampusRepository campusRepository) {
+            CampusRepository campusRepository, UserRepository userRepository) {
         this.boekRepository = boekRepository;
         this.tagRepository = tagRepository;
         this.tagService = tagService;
         this.campusRepository = campusRepository;
+        this.userRepository = userRepository;
     }
 
     public Boek addBoek(BoekDTO boekDTO) {
@@ -114,6 +119,15 @@ public class BoekService {
         List<Long> tagIdsParam = (filters.tagIds() == null || filters.tagIds().isEmpty())
                 ? null
                 : tagService.expandWithSubtags(filters.tagIds());
+
+        Boolean didactischFilter = filters.didactischMateriaal();
+        boolean isLeerling = SecurityUtils.getCurrentUserOptional(userRepository)
+                .map(u -> u.getRol() == Rol.LEERLING)
+                .orElse(true);
+        if (isLeerling) {
+            didactischFilter = false;
+        }
+
         Page<Boek> page = boekRepository.filterBoeken(
                 filters.zoekterm(),
                 tagIdsParam,
@@ -124,7 +138,7 @@ public class BoekService {
                 filters.uitgaveJaarVan(),
                 filters.uitgaveJaarTot(),
                 filters.leesniveau(),
-                filters.didactischMateriaal(),
+                didactischFilter,
                 schoolId,
                 (filters.campusIds() == null || filters.campusIds().isEmpty()) ? null : filters.campusIds(),
                 filters.minSterren(),

@@ -587,6 +587,90 @@ form > div > div button[type='button']:hover {
 }
 
 /* =====================
+   CAMPUS FILTER
+   ===================== */
+
+.campus-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-top: 14px;
+  padding: 12px 16px;
+  background: #ffffff;
+  border: 1px solid #e2dfd5;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.campus-filter-bar > strong {
+  font-size: 12px;
+  color: #8c1b3f;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.campus-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid #e2dfd5;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  color: #2d3748;
+  background: #faf9f5;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+  white-space: nowrap;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.campus-chip input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  min-width: 14px;
+  margin: 0;
+  accent-color: #8c1b3f;
+  cursor: pointer;
+}
+
+.campus-chip:hover {
+  border-color: #8c1b3f;
+  background: #f0efe4;
+}
+
+.campus-chip.active {
+  background: #f0efe4;
+  border-color: #8c1b3f;
+  color: #8c1b3f;
+  font-weight: 600;
+}
+
+.campus-wis-btn {
+  padding: 6px 12px;
+  background: #fff;
+  border: 1px solid #e2dfd5;
+  border-radius: 20px;
+  color: #718096;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.campus-wis-btn:hover {
+  background: #f0efe4;
+  color: #8c1b3f;
+  border-color: #8c1b3f;
+}
+
+/* =====================
    BOEKEN OVERZICHT
    ===================== */
 

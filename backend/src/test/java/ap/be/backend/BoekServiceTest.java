@@ -31,6 +31,7 @@ import ap.be.backend.exception.IsbnAlreadyExistsException;
 import ap.be.backend.repository.BoekRepository;
 import ap.be.backend.repository.CampusRepository;
 import ap.be.backend.repository.TagRepository;
+import ap.be.backend.repository.UserRepository;
 import ap.be.backend.service.BoekService;
 import ap.be.backend.service.TagService;
 
@@ -48,6 +49,9 @@ public class BoekServiceTest {
 
     @Mock
     private CampusRepository campusRepository;
+
+    @Mock
+    private UserRepository userRepository;
 
     @InjectMocks
     private BoekService boekService;

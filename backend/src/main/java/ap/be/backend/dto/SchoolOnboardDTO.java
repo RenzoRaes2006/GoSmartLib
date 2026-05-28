@@ -11,6 +11,8 @@ public class SchoolOnboardDTO {
     private String smartschoolDomein;
     private String oauthClientId;
     private String oauthClientSecret;
+    private String smartschoolApiKey;
+    private String smartschoolAfzenderId;
 
     private List<CampusDTO> campussen;
 
