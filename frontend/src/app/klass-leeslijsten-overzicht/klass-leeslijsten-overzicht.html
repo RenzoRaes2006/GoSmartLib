@@ -52,72 +52,74 @@
     <div class="modal-box modal-box-wide">
       <h3>Nieuwe leeslijst maken</h3>
 
-      <label class="modal-label">Naam van de lijst</label>
-      <input
-        type="text"
-        [(ngModel)]="nieuweLijstNaam"
-        class="form-input"
-        placeholder="Bv. Literatuurlijst 5A..."
-        autofocus
-      />
+      <div class="modal-body">
+        <label class="modal-label">Naam van de lijst</label>
+        <input
+          type="text"
+          [(ngModel)]="nieuweLijstNaam"
+          class="form-input"
+          placeholder="Bv. Literatuurlijst 5A..."
+          autofocus
+        />
 
-      <label class="modal-label">Korte beschrijving (optioneel)</label>
-      <textarea
-        [(ngModel)]="nieuweLijstBeschrijving"
-        class="form-input"
-        rows="3"
-        placeholder="Reden, opdracht of context voor deze lijst..."
-      ></textarea>
+        <label class="modal-label">Korte beschrijving (optioneel)</label>
+        <textarea
+          [(ngModel)]="nieuweLijstBeschrijving"
+          class="form-input"
+          rows="3"
+          placeholder="Reden, opdracht of context voor deze lijst..."
+        ></textarea>
 
-      <label class="modal-label">Koppelen aan</label>
-      <div class="radio-row">
-        <label><input type="radio" name="koppel" [(ngModel)]="koppelType" value="KLAS"> Klas</label>
-        <label><input type="radio" name="koppel" [(ngModel)]="koppelType" value="LEERLING"> Specifieke leerling</label>
-      </div>
+        <label class="modal-label">Koppelen aan</label>
+        <div class="radio-row">
+          <label><input type="radio" name="koppel" [(ngModel)]="koppelType" value="KLAS"> Klas</label>
+          <label><input type="radio" name="koppel" [(ngModel)]="koppelType" value="LEERLING"> Specifieke leerling</label>
+        </div>
 
-      @if (koppelType === 'KLAS') {
-        <label class="modal-label">Kies een klas</label>
-        <select [(ngModel)]="geselecteerdeKlas" class="form-input">
-          <option value="" disabled>-- Selecteer een klas --</option>
-          @for (k of klassen; track k) {
-            <option [value]="k">{{ k }}</option>
-          }
-        </select>
-      }
-
-      @if (koppelType === 'LEERLING') {
-        <label class="modal-label">Kies eerst een klas</label>
-        <select [(ngModel)]="leerlingKlas" (ngModelChange)="onLeerlingKlasChange()" class="form-input">
-          <option value="" disabled>-- Selecteer een klas --</option>
-          @for (k of klassen; track k) {
-            <option [value]="k">{{ k }}</option>
-          }
-        </select>
-
-        @if (geselecteerdeLeerlingIds.length > 0) {
-          <p class="geselecteerd-melding">{{ geselecteerdeLeerlingIds.length }} leerling(en) geselecteerd</p>
-        }
-
-        @if (leerlingKlas && leerlingResultaten.length > 0) {
-          <label class="modal-label">Selecteer leerlingen</label>
-          <ul class="leerling-resultaten">
-            @for (l of leerlingResultaten; track l.id) {
-              <li (click)="toggleLeerling(l.id)" [class.geselecteerd]="isLeerlingGeselecteerd(l.id)">
-                <input type="checkbox" [checked]="isLeerlingGeselecteerd(l.id)" (click)="$event.stopPropagation()" (change)="toggleLeerling(l.id)" style="margin-right: 8px; accent-color: #8c1b3f;">
-                {{ l.naam || l.smartschoolId || ('Leerling ' + l.id) }}
-              </li>
+        @if (koppelType === 'KLAS') {
+          <label class="modal-label">Kies een klas</label>
+          <select [(ngModel)]="geselecteerdeKlas" class="form-input">
+            <option value="" disabled>-- Selecteer een klas --</option>
+            @for (k of klassen; track k) {
+              <option [value]="k">{{ k }}</option>
             }
-          </ul>
+          </select>
         }
-        @if (leerlingKlas && leerlingResultaten.length === 0) {
-          <p class="info-melding">Geen leerlingen gevonden in deze klas.</p>
-        }
-      }
 
-      <label class="checkbox-row">
-        <input type="checkbox" [(ngModel)]="nieuweLijstZichtbaar">
-        <span class="checkbox-text">Direct zichtbaar voor leerlingen <small>(anders blijft de lijst een concept)</small></span>
-      </label>
+        @if (koppelType === 'LEERLING') {
+          <label class="modal-label">Kies eerst een klas</label>
+          <select [(ngModel)]="leerlingKlas" (ngModelChange)="onLeerlingKlasChange()" class="form-input">
+            <option value="" disabled>-- Selecteer een klas --</option>
+            @for (k of klassen; track k) {
+              <option [value]="k">{{ k }}</option>
+            }
+          </select>
+
+          @if (geselecteerdeLeerlingIds.length > 0) {
+            <p class="geselecteerd-melding">{{ geselecteerdeLeerlingIds.length }} leerling(en) geselecteerd</p>
+          }
+
+          @if (leerlingKlas && leerlingResultaten.length > 0) {
+            <label class="modal-label">Selecteer leerlingen</label>
+            <ul class="leerling-resultaten">
+              @for (l of leerlingResultaten; track l.id) {
+                <li (click)="toggleLeerling(l.id)" [class.geselecteerd]="isLeerlingGeselecteerd(l.id)">
+                  <input type="checkbox" [checked]="isLeerlingGeselecteerd(l.id)" (click)="$event.stopPropagation()" (change)="toggleLeerling(l.id)" style="margin-right: 8px; accent-color: #8c1b3f;">
+                  {{ l.naam || l.smartschoolId || ('Leerling ' + l.id) }}
+                </li>
+              }
+            </ul>
+          }
+          @if (leerlingKlas && leerlingResultaten.length === 0) {
+            <p class="info-melding">Geen leerlingen gevonden in deze klas.</p>
+          }
+        }
+
+        <label class="checkbox-row">
+          <input type="checkbox" [(ngModel)]="nieuweLijstZichtbaar">
+          <span class="checkbox-text">Direct zichtbaar voor leerlingen <small>(anders blijft de lijst een concept)</small></span>
+        </label>
+      </div>
 
       <div class="modal-actions">
         <button class="cancel-btn" (click)="sluitModal()">Annuleren</button>

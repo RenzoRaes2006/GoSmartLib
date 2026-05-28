@@ -127,7 +127,8 @@ public class OneRosterLiveClient implements OneRosterClient {
                             "id", sourcedId,
                             "voorNaam", u.getOrDefault("givenName", ""),
                             "achternaam", u.getOrDefault("familyName", ""),
-                            "klas", klas);
+                            "klas", klas,
+                            "gebruikersnaam", u.getOrDefault("username", ""));
                 })
                 .toList();
 
@@ -137,7 +138,8 @@ public class OneRosterLiveClient implements OneRosterClient {
                         "id", u.getOrDefault("sourcedId", ""),
                         "voorNaam", u.getOrDefault("givenName", ""),
                         "achternaam", u.getOrDefault("familyName", ""),
-                        "klas", ""))
+                        "klas", "",
+                        "gebruikersnaam", u.getOrDefault("username", "")))
                 .toList();
 
         log.info("OneRoster live data voor {}: {} klassen, {} leerlingen, {} leerkrachten",

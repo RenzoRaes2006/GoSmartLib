@@ -32,6 +32,39 @@ export interface KlasWijziging {
   bron: 'HANDMATIG' | 'ONEROSTER_SYNC' | string;
 }
 
+export interface VertrekKlassLeeslijst {
+  id: number;
+  naam: string;
+  klas: string | null;
+  leerkrachtId: number;
+  leerkrachtNaam: string | null;
+  leerlingIds: number[];
+  leerlingNamen: string[];
+  beschrijving: string | null;
+  zichtbaar: boolean;
+  gearchiveerd: boolean;
+  boeken: unknown[];
+}
+
+export interface KandidaatLeerkracht {
+  id: number;
+  smartschoolId: string;
+  voorNaam: string | null;
+  achternaam: string | null;
+}
+
+export interface LeerkrachtVertrekPreview {
+  leeslijsten: VertrekKlassLeeslijst[];
+  kandidaten: KandidaatLeerkracht[];
+  aantalOpenLeningen: number;
+}
+
+export interface LeerkrachtVertrekRequest {
+  // map leeslijstId → nieuweLeerkrachtId; lijsten die hier niet in zitten,
+  // worden automatisch gearchiveerd door de backend.
+  overdrachten: Record<number, number>;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -109,8 +142,25 @@ export class AdminGebruikerService {
     return this.http.post<AdminGebruiker>(`${this.apiUrl}/leerkrachten`, payload);
   }
 
-  markeerLeerkrachtVertrokken(id: number): Observable<AdminGebruiker> {
-    return this.http.patch<AdminGebruiker>(`${this.apiUrl}/leerkrachten/${id}/vertrek`, {});
+  getLeerkrachtVertrekPreview(id: number): Observable<LeerkrachtVertrekPreview> {
+    return this.http.get<LeerkrachtVertrekPreview>(
+      `${this.apiUrl}/leerkrachten/${id}/vertrek-preview`
+    );
+  }
+
+  /**
+   * Markeert een leerkracht als vertrokken. Optionele body met overdrachten
+   * (leeslijstId → nieuweLeerkrachtId). Lijsten die niet in de map staan,
+   * worden automatisch gearchiveerd.
+   */
+  markeerLeerkrachtVertrokken(
+    id: number,
+    overdrachten: Record<number, number> = {}
+  ): Observable<AdminGebruiker> {
+    return this.http.patch<AdminGebruiker>(
+      `${this.apiUrl}/leerkrachten/${id}/vertrek`,
+      { overdrachten }
+    );
   }
 
   reactiveerLeerkracht(id: number): Observable<AdminGebruiker> {

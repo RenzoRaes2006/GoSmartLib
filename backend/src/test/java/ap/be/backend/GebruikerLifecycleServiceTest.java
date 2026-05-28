@@ -1,5 +1,6 @@
 package ap.be.backend;
 
+import ap.be.backend.dto.LeerkrachtVertrekPreviewDTO;
 import ap.be.backend.entity.AuditActie;
 import ap.be.backend.entity.KlasWijziging;
 import ap.be.backend.entity.KlassLeeslijst;
@@ -13,6 +14,7 @@ import ap.be.backend.repository.SchoolRepository;
 import ap.be.backend.repository.UitleningRepository;
 import ap.be.backend.repository.UserRepository;
 import ap.be.backend.service.GebruikerLifecycleService;
+import ap.be.backend.service.KlassLeeslijstService;
 import ap.be.backend.service.OneRosterClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,16 +25,20 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -45,6 +51,7 @@ class GebruikerLifecycleServiceTest {
     @Mock private KlasWijzigingRepository klasWijzigingRepository;
     @Mock private ap.be.backend.service.AuditService auditService;
     @Mock private KlassLeeslijstRepository leeslijstRepository;
+    @Mock private KlassLeeslijstService leeslijstService;
 
     @InjectMocks private GebruikerLifecycleService service;
 
@@ -175,6 +182,8 @@ class GebruikerLifecycleServiceTest {
                 org.mockito.ArgumentMatchers.any(),
                 org.mockito.ArgumentMatchers.anyMap());
     }
+
+    @Test
     void markeerVertrokken_leerkracht_archiveertActieveLeeslijsten() {
         User lk = new User("lk-1", null, Rol.LEERKRACHT);
         lk.setId(77L);
@@ -223,6 +232,119 @@ class GebruikerLifecycleServiceTest {
 
         verify(userRepository, never()).save(any(User.class));
         verify(leeslijstRepository, never()).saveAll(any());
+    }
+
+    @Test
+    void markeerVertrokken_metOverdrachten_draagtGeselecteerdeLijstenOverEnArchiveertRest() {
+        User lk = new User("lk-1", null, Rol.LEERKRACHT);
+        lk.setId(77L);
+        lk.setActief(true);
+        when(userRepository.findById(77L)).thenReturn(Optional.of(lk));
+        when(uitleningRepository.findByUser_IdAndIsIngeleverdFalse(77L)).thenReturn(List.of());
+
+        KlassLeeslijst l1 = new KlassLeeslijst();
+        l1.setId(101L);
+        l1.setGearchiveerd(false);
+        KlassLeeslijst l2 = new KlassLeeslijst();
+        l2.setId(102L);
+        l2.setGearchiveerd(false);
+        KlassLeeslijst l3 = new KlassLeeslijst();
+        l3.setId(103L);
+        l3.setGearchiveerd(false);
+        when(leeslijstRepository.findByLeerkrachtIdAndGearchiveerdFalseOrderByAangemaaktOpDesc(77L))
+                .thenReturn(List.of(l1, l2, l3));
+
+        // l1 + l3 overdragen aan lk 88, l2 → archiveren
+        service.markeerVertrokken(77L, Map.of(101L, 88L, 103L, 88L));
+
+        verify(leeslijstService).overdragen(eq(101L), eq(88L));
+        verify(leeslijstService).overdragen(eq(103L), eq(88L));
+        verify(leeslijstService, never()).overdragen(eq(102L), any());
+
+        // Enkel niet-overgedragen lijsten worden gearchiveerd
+        assertTrue(l2.isGearchiveerd());
+        org.junit.jupiter.api.Assertions.assertFalse(l1.isGearchiveerd());
+        org.junit.jupiter.api.Assertions.assertFalse(l3.isGearchiveerd());
+        verify(leeslijstRepository).saveAll(List.of(l2));
+
+        // Leerkracht zelf wordt op vertrokken gezet
+        org.junit.jupiter.api.Assertions.assertFalse(lk.isActief());
+        verify(userRepository).save(lk);
+    }
+
+    @Test
+    void markeerVertrokken_overdrachtVoorVreemdeLijst_gooitException() {
+        User lk = new User("lk-1", null, Rol.LEERKRACHT);
+        lk.setId(77L);
+        lk.setActief(true);
+        when(userRepository.findById(77L)).thenReturn(Optional.of(lk));
+        when(uitleningRepository.findByUser_IdAndIsIngeleverdFalse(77L)).thenReturn(List.of());
+
+        KlassLeeslijst eigen = new KlassLeeslijst();
+        eigen.setId(101L);
+        when(leeslijstRepository.findByLeerkrachtIdAndGearchiveerdFalseOrderByAangemaaktOpDesc(77L))
+                .thenReturn(List.of(eigen));
+
+        // Lijst-id 999 hoort niet bij deze leerkracht → moet falen
+        assertThrows(IllegalArgumentException.class,
+                () -> service.markeerVertrokken(77L, Map.of(999L, 88L)));
+
+        // Bij fout: leerkracht blijft actief — transactie rolt terug.
+        // (Dat doet Spring zelf; we verifiëren hier dat we niet hebben gesaved vóór de fout.)
+        verify(userRepository, never()).save(any(User.class));
+    }
+
+    @Test
+    void markeerVertrokken_leerlingMetOverdrachten_gooitException() {
+        leerling.setId(42L);
+        leerling.setActief(true);
+        when(uitleningRepository.findByUser_IdAndIsIngeleverdFalse(42L)).thenReturn(List.of());
+
+        assertThrows(IllegalArgumentException.class,
+                () -> service.markeerVertrokken(42L, Map.of(1L, 2L)));
+
+        verifyNoInteractions(leeslijstService);
+    }
+
+    @Test
+    void getLeerkrachtVertrekPreview_geeftLeeslijstenEnActieveCollegasTerug() {
+        // Mapper toDTO heeft een statische OneRoster-afhankelijkheid; om hem
+        // zonder Spring-context te kunnen aanroepen geven we een lege lijst van
+        // leeslijsten terug. De preview-call zelf doet zo geen mapping.
+        User lk = new User("lk-1", null, Rol.LEERKRACHT);
+        lk.setId(77L);
+        lk.setSchool(school);
+        lk.setActief(true);
+        when(userRepository.findById(77L)).thenReturn(Optional.of(lk));
+        when(leeslijstRepository.findByLeerkrachtIdAndGearchiveerdFalseOrderByAangemaaktOpDesc(77L))
+                .thenReturn(List.of());
+
+        User collega = new User("lk-2", null, Rol.LEERKRACHT);
+        collega.setId(88L);
+        collega.setSchool(school);
+        collega.setActief(true);
+        User vertrokkenCollega = new User("lk-3", null, Rol.LEERKRACHT);
+        vertrokkenCollega.setId(89L);
+        vertrokkenCollega.setSchool(school);
+        vertrokkenCollega.setActief(false);
+        // De vertrekkende leerkracht zelf zit ook in de school-lijst en moet eruit gefilterd worden
+        when(userRepository.findBySchool_IdAndRol(school.getId(), Rol.LEERKRACHT))
+                .thenReturn(List.of(lk, collega, vertrokkenCollega));
+        when(uitleningRepository.findByUser_IdAndIsIngeleverdFalse(77L)).thenReturn(List.of());
+
+        LeerkrachtVertrekPreviewDTO preview = service.getLeerkrachtVertrekPreview(77L);
+
+        assertEquals(0, preview.aantalOpenLeningen());
+        // Alleen actieve collega's behalve zichzelf
+        assertEquals(1, preview.kandidaten().size());
+        assertEquals(88L, preview.kandidaten().get(0).id());
+    }
+
+    @Test
+    void getLeerkrachtVertrekPreview_voorLeerling_gooitException() {
+        leerling.setId(42L);
+        assertThrows(IllegalArgumentException.class,
+                () -> service.getLeerkrachtVertrekPreview(42L));
     }
 
 }

@@ -23,6 +23,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import ap.be.backend.dto.GebruikerCreateRequest;
 import ap.be.backend.dto.GebruikerDTO;
+import ap.be.backend.dto.LeerkrachtVertrekPreviewDTO;
+import ap.be.backend.dto.LeerkrachtVertrekRequest;
 import ap.be.backend.entity.Rol;
 import ap.be.backend.entity.School;
 import ap.be.backend.entity.User;
@@ -110,12 +112,30 @@ public class AdminGebruikerController {
     }
 
     /**
+     * Geeft een preview van wat er gebeurt bij vertrek van een leerkracht:
+     * zijn actieve leeslijsten + kandidaat-leerkrachten die ze kunnen overnemen.
+     * Wordt door de wizard-modal gebruikt voor de admin op 'doorgaan' klikt.
+     */
+    @GetMapping("/leerkrachten/{id}/vertrek-preview")
+    public ResponseEntity<LeerkrachtVertrekPreviewDTO> vertrekPreviewLeerkracht(@PathVariable Long id) {
+        return ResponseEntity.ok(lifecycleService.getLeerkrachtVertrekPreview(id));
+    }
+
+    /**
      * Markeer een leerkracht als vertrokken. Geblokkeerd als er nog open
      * uitleningen op zijn/haar naam staan (typisch klassikale bulk-uitleningen).
+     *
+     * <p>Body is optioneel. Met {@code overdrachten} (map leeslijstId →
+     * nieuweLeerkrachtId) worden geselecteerde lijsten overgedragen aan een
+     * andere leerkracht; alle resterende actieve lijsten van de vertrekkende
+     * leerkracht worden gearchiveerd. Zonder body wordt alles gearchiveerd.
      */
     @PatchMapping("/leerkrachten/{id}/vertrek")
-    public ResponseEntity<GebruikerDTO> markeerLeerkrachtVertrokken(@PathVariable Long id) {
-        User user = lifecycleService.markeerVertrokken(id);
+    public ResponseEntity<GebruikerDTO> markeerLeerkrachtVertrokken(
+            @PathVariable Long id,
+            @RequestBody(required = false) LeerkrachtVertrekRequest request) {
+        Map<Long, Long> overdrachten = request == null ? null : request.overdrachten();
+        User user = lifecycleService.markeerVertrokken(id, overdrachten);
         return ResponseEntity.ok(GebruikerMapper.toDTO(user));
     }
 

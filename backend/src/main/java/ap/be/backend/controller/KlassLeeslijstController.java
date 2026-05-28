@@ -3,6 +3,7 @@ package ap.be.backend.controller;
 import ap.be.backend.dto.KlassLeeslijstRequestDTO;
 import ap.be.backend.dto.KlassLeeslijstResponseDTO;
 import ap.be.backend.dto.KoppelingRequestDTO;
+import ap.be.backend.dto.OverdragenRequest;
 import ap.be.backend.service.KlassLeeslijstService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -194,5 +195,19 @@ public class KlassLeeslijstController {
     @PatchMapping("/{id}/dearchiveer")
     public ResponseEntity<KlassLeeslijstResponseDTO> dearchiveer(@PathVariable Long id) {
         return ResponseEntity.ok(leeslijstService.dearchiveer(id));
+    }
+
+    /**
+     * Draagt een leeslijst over naar een andere leerkracht. Beheerder-actie,
+     * los te gebruiken (buiten de vertrek-flow) wanneer een lijst handmatig
+     * naar een andere collega moet worden verplaatst.
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("/{id}/overdragen")
+    public ResponseEntity<KlassLeeslijstResponseDTO> overdragen(
+            @PathVariable Long id,
+            @RequestBody OverdragenRequest request) {
+        Long nieuweLeerkrachtId = request == null ? null : request.nieuweLeerkrachtId();
+        return ResponseEntity.ok(leeslijstService.overdragen(id, nieuweLeerkrachtId));
     }
 }

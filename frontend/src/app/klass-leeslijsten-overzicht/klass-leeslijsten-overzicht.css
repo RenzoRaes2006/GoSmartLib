@@ -294,7 +294,17 @@ hr {
 .modal-box-wide {
     width: 520px;
     max-width: 95vw;
+    max-height: 90vh;
     text-align: left;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.modal-body {
+    overflow-y: auto;
+    flex: 1;
+    padding-right: 4px;
 }
 
 .modal-box-wide .modal-label {
