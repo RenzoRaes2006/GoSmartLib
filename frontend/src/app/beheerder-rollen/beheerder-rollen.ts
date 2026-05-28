@@ -1,8 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { AdminGebruiker } from '../services/AdminGebruikerService';
-import { HttpClient } from '@angular/common/http';
+import { AdminGebruiker, AdminGebruikerService } from '../services/AdminGebruikerService';
 
 @Component({
   selector: 'app-beheerder-rollen',
@@ -11,18 +10,14 @@ import { HttpClient } from '@angular/common/http';
   styleUrl: './beheerder-rollen.css',
 })
 export class BeheerderRollenComponent implements OnInit {
-  private http = inject(HttpClient);
-
-  private apiUrl = window.location.hostname === 'localhost'
-    ? 'http://localhost:8081/api/beheer'
-    : 'https://api-sp09.cloud-ap.be/api/beheer';
+  private adminGebruikerService = inject(AdminGebruikerService);
 
   leerkrachten = signal<AdminGebruiker[]>([]);
-  laden = signal<boolean>(true);
+  leerkrachtenLaden = signal<boolean>(false);
+  promotieBezig = signal<number | null>(null);
 
   beheerderModalDoel = signal<AdminGebruiker | null>(null);
   beheerderModalFout = signal<string>('');
-  promotieBezig = signal<number | null>(null);
 
   toastActief = signal<boolean>(false);
   toastBericht = signal<string>('');
@@ -33,15 +28,15 @@ export class BeheerderRollenComponent implements OnInit {
   }
 
   laadLeerkrachten(): void {
-    this.laden.set(true);
-    this.http.get<AdminGebruiker[]>(`${this.apiUrl}/leerkrachten`).subscribe({
-      next: (lijst) => {
-        this.leerkrachten.set(lijst ?? []);
-        this.laden.set(false);
+    this.leerkrachtenLaden.set(true);
+    this.adminGebruikerService.getLeerkrachtenVanMijnSchool(0, 10000).subscribe({
+      next: (page) => {
+        this.leerkrachten.set(page.content ?? []);
+        this.leerkrachtenLaden.set(false);
       },
       error: () => {
         this.leerkrachten.set([]);
-        this.laden.set(false);
+        this.leerkrachtenLaden.set(false);
       },
     });
   }
@@ -64,11 +59,7 @@ export class BeheerderRollenComponent implements OnInit {
 
     this.promotieBezig.set(leerkracht.id);
     this.beheerderModalFout.set('');
-
-    this.http.patch<AdminGebruiker>(
-      `${this.apiUrl}/gebruikers/${leerkracht.id}/beheerder`,
-      { isBeheerder: nieuweWaarde }
-    ).subscribe({
+    this.adminGebruikerService.setBeheerderVanMijnSchool(leerkracht.id, nieuweWaarde).subscribe({
       next: (geupdate) => {
         this.leerkrachten.update(lijst =>
           lijst.map(l => (l.id === geupdate.id ? geupdate : l))

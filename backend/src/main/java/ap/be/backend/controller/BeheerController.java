@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import ap.be.backend.config.SecurityUtils;
@@ -69,26 +72,26 @@ public class BeheerController {
     }
 
     @GetMapping("/leerkrachten")
-    public ResponseEntity<List<GebruikerDTO>> getLeerkrachtenVanMijnSchool() {
+    public ResponseEntity<Page<GebruikerDTO>> getLeerkrachtenVanMijnSchool(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10000") int size) {
         User beheerder = SecurityUtils.getCurrentUser(userRepository);
         School school = beheerder.getSchool();
         if (school == null) {
-            return ResponseEntity.ok(List.of());
+            return ResponseEntity.ok(Page.empty());
         }
-        List<User> leerkrachten = userRepository.findByRolAndSchool_Id(Rol.LEERKRACHT, school.getId())
-                .stream()
-                .filter(User::isActief)
-                .toList();
+        PageRequest pageable = PageRequest.of(page, size);
+        Page<User> users = userRepository.findLeerkrachtenVanSchool(school.getId(), true, pageable);
 
-        Set<String> ids = leerkrachten.stream().map(User::getSmartschoolId).collect(Collectors.toSet());
-        Map<String, String[]> namenLookup = haalNamenOp(school, ids);
+        Set<String> idsOpPagina = users.getContent().stream()
+                .map(User::getSmartschoolId)
+                .collect(Collectors.toSet());
+        Map<String, String[]> naamPerSmartschoolId = haalNamenOp(school, idsOpPagina);
 
-        List<GebruikerDTO> result = leerkrachten.stream()
-                .map(u -> {
-                    String[] paar = namenLookup.getOrDefault(u.getSmartschoolId(), new String[]{null, null});
-                    return GebruikerMapper.toDTO(u, paar[0], paar[1]);
-                })
-                .toList();
+        Page<GebruikerDTO> result = users.map(u -> {
+            String[] paar = naamPerSmartschoolId.getOrDefault(u.getSmartschoolId(), new String[]{null, null});
+            return GebruikerMapper.toDTO(u, paar[0], paar[1]);
+        });
         return ResponseEntity.ok(result);
     }
 
