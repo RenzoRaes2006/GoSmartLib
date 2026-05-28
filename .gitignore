@@ -12,3 +12,8 @@ pnpm-debug.log*
 
 # Lokale context- en planningsbestanden (niet voor productie)
 **/*_CONTEXT.md
+
+# Secrets — credentials nooit naar git
+.env
+.env.local
+**/.env
