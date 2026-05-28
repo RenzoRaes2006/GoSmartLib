@@ -33,7 +33,7 @@
     @if (laden()) {
       <p>Laden…</p>
     } @else if (tags().length === 0) {
-      <p class="leeg">Nog geen tags in deze categorie.</p>
+      <p class="leeg">Nog geen tags in deze categorie</p>
     } @else {
       <ul class="tag-lijst">
         @for (tag of zichtbareTags(); track tag.id) {

@@ -99,7 +99,7 @@
                       <h4 style="margin-top: 0">Campussen van {{ school.naam }}</h4>
 
                       @if (bewerkCampussen().length === 0) {
-                        <p class="text-muted">Nog geen campussen.</p>
+                        <p class="text-muted">Nog geen campussen</p>
                       } @else {
                         <ul style="list-style: none; padding: 0; margin: 0 0 15px 0">
                           @for (c of bewerkCampussen(); track c.id) {
@@ -556,7 +556,7 @@
                   </tr>
                 } @empty {
                   <tr>
-                    <td colspan="5" class="text-muted text-center">Geen leerkrachten gevonden.</td>
+                    <td colspan="5" class="text-muted text-center">Geen leerkrachten gevonden</td>
                   </tr>
                 }
               </tbody>
@@ -930,7 +930,7 @@
           @if (berichtenLeerlingenLaden()) {
             <p class="text-muted">Leerlingen laden...</p>
           } @else if (berichtenLeerlingen().length === 0) {
-            <p class="text-muted">Geen actieve leerlingen gevonden voor deze school.</p>
+            <p class="text-muted">Geen actieve leerlingen gevonden voor deze school</p>
           } @else {
             <div class="form-group" style="max-width: 500px">
               <label>Leerling ({{ berichtenLeerlingen().length }} actief)</label>
@@ -990,7 +990,7 @@
     @if (activeTab() === 'gebruikers') {
       <div class="admin-card gebruikers-wide">
         <div class="card-header">
-          <h2>Leerlingen &amp; leerkrachten</h2>
+          <h2>Leerlingen en leerkrachten</h2>
         </div>
 
         <div class="form-group" style="max-width: 500px; margin-bottom: 20px">
@@ -1357,7 +1357,7 @@
               @if (historiekLaden()) {
                 <p class="text-muted">Bezig met laden...</p>
               } @else if (historiekRijen().length === 0) {
-                <p class="text-muted">Geen klas-wijzigingen gevonden.</p>
+                <p class="text-muted">Geen klas-wijzigingen gevonden</p>
               } @else {
                 <table class="admin-table" style="margin-top:8px">
                   <thead>

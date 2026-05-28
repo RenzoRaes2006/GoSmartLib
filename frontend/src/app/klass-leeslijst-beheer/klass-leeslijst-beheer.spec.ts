@@ -130,7 +130,7 @@ describe('KlassLeeslijstBeheerComponent', () => {
 
     component.updateFilters();
 
-    expect(component.paginaError()).toContain('Minimum');
+    expect(component.paginaError()).toContain('Min.');
   });
 
   it('updateFilters zet paginaError bij negatieve maxPagina', () => {
@@ -139,7 +139,7 @@ describe('KlassLeeslijstBeheerComponent', () => {
 
     component.updateFilters();
 
-    expect(component.paginaError()).toContain('Maximum');
+    expect(component.paginaError()).toContain('Max.');
   });
 
   it('updateFilters zet paginaError als min > max', () => {

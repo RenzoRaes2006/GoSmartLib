@@ -83,7 +83,7 @@
             </div>
             <div class="info-item">
               <span class="info-label">Leesniveau</span
-              ><span class="info-value">{{ boek?.leesniveau }}</span>
+              ><span class="info-value">{{ boek?.leesniveau?.split(' ')[0] }}</span>
             </div>
           </div>
 
@@ -95,7 +95,7 @@
               [class.disabled-btn]="!magLenen"
               (click)="voegToeAanReservering()"
             >
-              Voeg toe aan leningen
+              Voeg toe aan ontleningen
             </button>
 
             @if (!magLenen) {

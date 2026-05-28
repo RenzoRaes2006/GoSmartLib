@@ -68,7 +68,7 @@
     </tbody>
   </table>
 
-  <p *ngIf="!laden() && rijen().length === 0" class="status">Geen audit-rijen voor deze filter.</p>
+  <p *ngIf="!laden() && rijen().length === 0" class="status">Geen audit-rijen voor deze filter</p>
 
   <div class="paginatie" *ngIf="totalPages() > 1">
     <button type="button" (click)="vorige()" [disabled]="pagina() === 0">Vorige</button>

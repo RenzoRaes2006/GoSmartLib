@@ -73,15 +73,15 @@ export class KlassLeeslijstBeheerComponent {
     this.paginaError.set('');
 
     if (min !== undefined && min < 0) {
-      this.paginaError.set("Minimum pagina's mag niet negatief zijn");
+      this.paginaError.set("Min. pagina's mag niet negatief zijn");
       return;
     }
     if (max !== undefined && max < 0) {
-      this.paginaError.set("Maximum pagina's mag niet negatief zijn");
+      this.paginaError.set("Max. pagina's mag niet negatief zijn");
       return;
     }
     if (min !== undefined && max !== undefined && min > max) {
-      this.paginaError.set('"Min" mag niet groter zijn dan "Max"');
+      this.paginaError.set('"Min." mag niet groter zijn dan "Max."');
       return;
     }
 

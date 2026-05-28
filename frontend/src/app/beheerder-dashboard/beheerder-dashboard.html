@@ -89,14 +89,14 @@
 
   <div class="card recent-loans-card">
     <div class="recent-loans-header">
-      <h3 class="section-title">Recente actieve leningen</h3>
+      <h3 class="section-title">Recente actieve ontleningen</h3>
       <a routerLink="/beheer/actieve-leningen" class="btn-primary btn-small">
-        Bekijk alle actieve leningen
+        Bekijk alle actieve ontleningen
       </a>
     </div>
 
     <div *ngIf="recenteLeningen.length === 0" class="empty-state">
-      Er zijn momenteel geen actieve leningen.
+      Er zijn momenteel geen actieve ontleningen.
     </div>
 
     <div class="loan-item" *ngFor="let lening of recenteLeningen">
@@ -136,7 +136,7 @@
         for="leenlimiet"
         style="display: block; margin-bottom: 10px; font-weight: 600; color: #4a5568"
       >
-        Maximum te lenen boeken
+        Max. te lenen boeken
         <span style="font-weight: 400; color: #718096">(0 = Geen limiet)</span>:
       </label>
 

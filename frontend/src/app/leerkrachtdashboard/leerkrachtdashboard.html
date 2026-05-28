@@ -53,7 +53,7 @@
             </div>
           </div>
         } @empty {
-          <p class="tile-intro">Geen leerlingen gevonden.</p>
+          <p class="tile-intro">Geen leerlingen gevonden</p>
         }
 
         @if (totaalAantalPaginas() > 1) {
@@ -159,7 +159,7 @@
           @for (titel of topBoeken(); track titel) {
             <li>{{ titel }}</li>
           } @empty {
-            <li class="stat-note">Nog geen uitleningen.</li>
+            <li class="stat-note">Nog geen uitleningen</li>
           }
         </ol>
         <p class="stat-note">

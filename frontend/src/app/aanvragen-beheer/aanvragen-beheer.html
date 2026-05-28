@@ -2,7 +2,7 @@
   <div class="inner-container">
     <div class="header-sectie">
       <h1 class="page-title">Aanvragen beheren</h1>
-      <p class="subtitle">Keur nieuwe leningen en verlengingen goed of wijs ze af.</p>
+      <p class="subtitle">Keur nieuwe ontleningen en verlengingen goed of wijs ze af.</p>
     </div>
 
     @if (aanvragen().length === 0 && verlengAanvragen().length === 0) {
@@ -17,7 +17,7 @@
       >
         @if (aanvragen().length > 0) {
           <div class="kolom">
-            <h2 class="page-title" style="font-size: 1.5rem; margin-top: 20px">Nieuwe leningen</h2>
+            <h2 class="page-title" style="font-size: 1.5rem; margin-top: 20px">Nieuwe ontleningen</h2>
             <div class="aanvragen-lijst">
               @for (aanvraag of gepagineerdeNieuweAanvragen(); track aanvraag.id) {
                 <div class="aanvraag-card">
