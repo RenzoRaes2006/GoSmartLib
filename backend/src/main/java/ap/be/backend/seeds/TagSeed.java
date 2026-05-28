@@ -9,9 +9,12 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
+import ap.be.backend.entity.Boek;
 import ap.be.backend.entity.Tag;
 import ap.be.backend.entity.TagType;
+import ap.be.backend.repository.BoekRepository;
 import ap.be.backend.repository.TagRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Bootstrapt de standaardlijst van genres / thematische / didactische tags
@@ -74,12 +77,15 @@ public class TagSeed implements CommandLineRunner {
     );
 
     private final TagRepository tagRepository;
+    private final BoekRepository boekRepository;
 
-    public TagSeed(TagRepository tagRepository) {
+    public TagSeed(TagRepository tagRepository, BoekRepository boekRepository) {
         this.tagRepository = tagRepository;
+        this.boekRepository = boekRepository;
     }
 
     @Override
+    @Transactional
     public void run(String... args) {
         if (tagRepository.count() == 0) {
             seedGenresMetHierarchie();
@@ -106,16 +112,27 @@ public class TagSeed implements CommandLineRunner {
 
     private void hernoemTags(TagType type, java.util.Map<String, String> mapping) {
         for (var entry : mapping.entrySet()) {
-            boolean nieuwBestaat = tagRepository.existsByTypeAndNaamIgnoreCase(type, entry.getValue());
-            tagRepository.findByTypeAndNaamIgnoreCase(type, entry.getKey())
-                    .ifPresent(oudeTag -> {
-                        if (nieuwBestaat) {
-                            tagRepository.delete(oudeTag);
-                        } else {
-                            oudeTag.setNaam(entry.getValue());
-                            tagRepository.save(oudeTag);
-                        }
-                    });
+            var oudeOpt = tagRepository.findByTypeAndNaamIgnoreCase(type, entry.getKey());
+            if (oudeOpt.isEmpty()) continue;
+            Tag oudeTag = oudeOpt.get();
+
+            var nieuweOpt = tagRepository.findByTypeAndNaamIgnoreCase(type, entry.getValue());
+            if (nieuweOpt.isPresent()) {
+                // Beide tags bestaan — hang eerst alle boeken van de oude tag op de
+                // nieuwe tag (Set voorkomt duplicaten), pas dan kan de oude weg
+                // zonder FK-conflict op boek_tags.
+                Tag nieuweTag = nieuweOpt.get();
+                List<Boek> boekenMetOude = boekRepository.findAllMetTag(oudeTag.getId());
+                for (Boek b : boekenMetOude) {
+                    b.getTags().remove(oudeTag);
+                    b.getTags().add(nieuweTag);
+                }
+                boekRepository.saveAll(boekenMetOude);
+                tagRepository.delete(oudeTag);
+            } else {
+                oudeTag.setNaam(entry.getValue());
+                tagRepository.save(oudeTag);
+            }
         }
     }
 

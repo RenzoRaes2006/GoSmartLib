@@ -63,4 +63,7 @@ public interface BoekRepository extends JpaRepository<Boek, Long> {
         @Query("SELECT COALESCE(SUM(b.aantalExemplaren), 0) FROM Boek b")
         long sumTotaalAantalExemplaren();
 
+        @Query("SELECT b FROM Boek b JOIN b.tags t WHERE t.id = :tagId")
+        List<Boek> findAllMetTag(@Param("tagId") Long tagId);
+
 }
