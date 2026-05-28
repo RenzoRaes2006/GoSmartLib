@@ -64,7 +64,7 @@ public class BoekController {
         if (boek == null) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(BoekMapper.toDTO(boek));
+        return ResponseEntity.ok(BoekMapper.toDTO(boek, boekService.heeftSchade(boek.getId())));
     }
 
     @GetMapping("/api/boeken/isbn/{isbn}")
@@ -73,7 +73,7 @@ public class BoekController {
         if (boek == null) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(BoekMapper.toDTO(boek));
+        return ResponseEntity.ok(BoekMapper.toDTO(boek, boekService.heeftSchade(boek.getId())));
     }
 
     @PreAuthorize("hasRole('BEHEERDER')")

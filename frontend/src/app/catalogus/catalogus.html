@@ -235,6 +235,9 @@
             @if (!isLeerling() && boek.didactischMateriaal) {
               <span class="didactisch-badge">Didactisch</span>
             }
+            @if (boek.heeftSchade) {
+              <span class="schade-badge">Beschadigd</span>
+            }
             <span
               class="status-badge"
               [class.beschikbaar]="boek.aantalExemplaren !== 0"
