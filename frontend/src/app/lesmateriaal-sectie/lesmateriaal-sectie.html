@@ -1,0 +1,170 @@
+<section class="lesmateriaal-sectie">
+  <header class="lm-header">
+    <div>
+      <h2 class="lm-title">Lesmateriaal</h2>
+    </div>
+  </header>
+
+  <div
+    class="lm-dropzone"
+    [class.drag-over]="dragOver()"
+    [class.bezig]="bezig()"
+    (dragover)="onDragOver($event)"
+    (dragleave)="onDragLeave($event)"
+    (drop)="onDrop($event)"
+  >
+    <div class="lm-dz-icon">📁</div>
+    <p class="lm-dz-text">
+      <strong>Sleep bestanden hier</strong> of
+      <label class="lm-dz-link">
+        kies bestanden
+        <input type="file" multiple (change)="onFileSelect($event)" hidden />
+      </label>
+    </p>
+    <p class="lm-dz-hint">PDF, Word, PowerPoint, afbeeldingen — max 50MB per bestand</p>
+    <input
+      class="lm-dz-omschrijving"
+      type="text"
+      placeholder="Korte omschrijving (optioneel)"
+      [(ngModel)]="beschrijvingNieuw"
+    />
+    @if (bezig()) {
+      <p class="lm-status">Uploaden…</p>
+    }
+  </div>
+
+  @if (fout()) {
+    <div class="lm-melding lm-fout">{{ fout() }}</div>
+  }
+  @if (succes()) {
+    <div class="lm-melding lm-succes">{{ succes() }}</div>
+  }
+
+  @if (laden()) {
+    <p class="lm-loading">Laden…</p>
+  } @else {
+    <div class="lm-groep">
+      <h3 class="lm-groep-titel">Mijn materiaal ({{ eigenMateriaal.length }})</h3>
+      @if (eigenMateriaal.length === 0) {
+        <p class="lm-leeg">Je hebt nog geen lesmateriaal toegevoegd voor dit boek.</p>
+      } @else {
+        <ul class="lm-lijst">
+          @for (l of eigenMateriaal; track l.id) {
+            <li class="lm-item lm-item-eigen">
+              <span class="lm-icoon">{{ bestandsicoon(l.contentType) }}</span>
+              <div class="lm-info">
+                <div class="lm-naam">{{ l.origineleBestandsnaam }}</div>
+                @if (bewerkenId === l.id) {
+                  <div class="lm-bewerken">
+                    <input
+                      type="text"
+                      [(ngModel)]="bewerkenBeschrijving"
+                      placeholder="Omschrijving"
+                    />
+                    <button type="button" class="lm-knop-prim" (click)="opslaanBewerken(l)">
+                      Opslaan
+                    </button>
+                    <button type="button" class="lm-knop-sec" (click)="annuleerBewerken()">
+                      Annuleren
+                    </button>
+                  </div>
+                } @else {
+                  <div class="lm-meta">
+                    {{ formatGrootte(l.grootte) }} · {{ formatDatum(l.uploadedAt) }}
+                    @if (l.beschrijving) {
+                      · <span class="lm-beschrijving">{{ l.beschrijving }}</span>
+                    }
+                  </div>
+                }
+              </div>
+              @if (bewerkenId !== l.id) {
+                <div class="lm-acties">
+                  <button
+                    type="button"
+                    class="lm-icon-knop"
+                    title="Downloaden"
+                    (click)="downloaden(l)"
+                  >
+                    ⬇
+                  </button>
+                  <button
+                    type="button"
+                    class="lm-icon-knop"
+                    title="Bewerken"
+                    (click)="startBewerken(l)"
+                  >
+                    ✎
+                  </button>
+                  <button
+                    type="button"
+                    class="lm-icon-knop lm-knop-rood"
+                    title="Verwijderen"
+                    (click)="verwijderen(l)"
+                  >
+                    🗑
+                  </button>
+                </div>
+              }
+            </li>
+          }
+        </ul>
+      }
+    </div>
+
+    <div class="lm-groep">
+      <h3 class="lm-groep-titel">Van collega's ({{ materiaalVanCollegas.length }})</h3>
+      @if (materiaalVanCollegas.length === 0) {
+        <p class="lm-leeg">Nog geen lesmateriaal van collega's voor dit boek.</p>
+      } @else {
+        <ul class="lm-lijst">
+          @for (l of materiaalVanCollegas; track l.id) {
+            <li class="lm-item">
+              <span class="lm-icoon">{{ bestandsicoon(l.contentType) }}</span>
+              <div class="lm-info">
+                <div class="lm-naam">{{ l.origineleBestandsnaam }}</div>
+                <div class="lm-meta">
+                  {{ l.uploaderNaam }} · {{ formatGrootte(l.grootte) }} ·
+                  {{ formatDatum(l.uploadedAt) }}
+                  @if (l.beschrijving) {
+                    · <span class="lm-beschrijving">{{ l.beschrijving }}</span>
+                  }
+                </div>
+              </div>
+              <div class="lm-acties">
+                <button
+                  type="button"
+                  class="lm-icon-knop"
+                  title="Downloaden"
+                  (click)="downloaden(l)"
+                >
+                  ⬇
+                </button>
+              </div>
+            </li>
+          }
+        </ul>
+      }
+    </div>
+  }
+
+  @if (teVerwijderen(); as lm) {
+    <div class="lm-modal-backdrop" (click)="annuleerVerwijderen()">
+      <div class="lm-modal" (click)="$event.stopPropagation()">
+        <div class="lm-modal-icoon">🗑</div>
+        <h3 class="lm-modal-titel">Lesmateriaal verwijderen?</h3>
+        <p class="lm-modal-tekst">
+          Weet je zeker dat je <strong>{{ lm.origineleBestandsnaam }}</strong> wilt verwijderen?
+          Deze actie kan niet ongedaan worden gemaakt.
+        </p>
+        <div class="lm-modal-acties">
+          <button type="button" class="lm-knop-sec" (click)="annuleerVerwijderen()">
+            Annuleren
+          </button>
+          <button type="button" class="lm-knop-gevaar" (click)="bevestigVerwijderen()">
+            Verwijderen
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</section>

@@ -19,10 +19,12 @@ import { Beoordeling } from '../models/review.model';
 import { LeeslijstService } from '../services/leeslijstService';
 import { LeenMandjeService } from '../services/leen-mandje.service';
 import { TagsByTypePipe } from '../models/tags-by-type.pipe';
+import { AuthService } from '../services/AuthService';
+import { LesmateriaalSectie } from '../lesmateriaal-sectie/lesmateriaal-sectie';
 
 @Component({
   selector: 'app-detail',
-  imports: [ReactiveFormsModule, RouterLink, FormsModule, TagsByTypePipe],
+  imports: [ReactiveFormsModule, RouterLink, FormsModule, TagsByTypePipe, LesmateriaalSectie],
   templateUrl: './detail.html',
   styleUrl: './detail.css',
 })
@@ -35,6 +37,9 @@ export class Detail implements OnInit {
   leeslijstService = inject(LeeslijstService);
   leenMandjeService = inject(LeenMandjeService);
   location = inject(Location);
+  private authService = inject(AuthService);
+
+  isLeerling = () => this.authService.currentUser()?.role === 'student';
 
   boek: Boek | null = null;
   gelijkaardigeBoeken: Boek[] = [];

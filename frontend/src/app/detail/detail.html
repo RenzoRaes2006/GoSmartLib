@@ -123,6 +123,10 @@
         <p>{{ boek?.beschrijving }}</p>
       </div>
 
+      @if (!isLeerling() && boek?.id) {
+        <app-lesmateriaal-sectie [boekId]="boek!.id!"></app-lesmateriaal-sectie>
+      }
+
       @if (gelijkaardigeBoeken.length > 0) {
         <section class="gelijkaardige-section">
           <h2 class="gelijkaardige-title">Gelijkaardige boeken</h2>
