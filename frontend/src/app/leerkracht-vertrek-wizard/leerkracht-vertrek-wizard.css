@@ -1,33 +1,37 @@
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.45);
+  background: rgba(0, 0, 0, 0.6);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
+  z-index: 9999;
 }
 
 .modal-content.wizard {
-  background: #fff;
-  border-radius: 8px;
+  background: #f7efe6;
+  border-radius: 16px;
+  border-top: 4px solid #8c1b3f;
   padding: 0;
   width: min(720px, 92vw);
   max-height: 90vh;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
 .modal-header {
-  padding: 18px 24px 8px;
-  border-bottom: 1px solid #eee;
+  padding: 20px 28px 12px;
+  border-bottom: 1px solid #dccfb8;
 }
 
 .modal-header h3 {
   margin: 0;
-  font-size: 1.15rem;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #8c1b3f;
 }
 
 .leerkracht-naam {
@@ -37,45 +41,49 @@
 }
 
 .modal-body {
-  padding: 18px 24px;
+  padding: 20px 28px;
   overflow-y: auto;
   flex: 1;
+  color: #2d3748;
 }
 
 .modal-body p {
   margin: 0 0 10px;
-  line-height: 1.45;
+  line-height: 1.5;
 }
 
 .muted {
-  color: #666;
+  color: #6b7280;
   font-size: 0.9rem;
 }
 
 .foutmelding {
   margin-top: 10px;
-  padding: 10px 12px;
-  background: #fdecea;
-  border: 1px solid #f5c6c0;
-  border-radius: 4px;
-  color: #8a1f15;
+  padding: 10px 14px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #8c1b3f;
+  font-size: 0.95rem;
 }
 
 .info-rij {
   margin-top: 12px;
   display: flex;
   justify-content: space-between;
-  padding: 8px 12px;
-  background: #f6f8fa;
-  border-radius: 4px;
+  padding: 10px 14px;
+  background: #eee3d3;
+  border: 1px solid #dccfb8;
+  border-radius: 8px;
 }
 
 .info-rij .label {
-  color: #555;
+  color: #4a5568;
 }
 
 .info-rij .value {
-  font-weight: 600;
+  font-weight: 700;
+  color: #8c1b3f;
 }
 
 .bulk-rij {
@@ -83,9 +91,10 @@
   gap: 10px;
   align-items: center;
   flex-wrap: wrap;
-  padding: 10px 12px;
-  background: #f6f8fa;
-  border-radius: 4px;
+  padding: 10px 14px;
+  background: #eee3d3;
+  border: 1px solid #dccfb8;
+  border-radius: 8px;
   margin: 10px 0;
 }
 
@@ -93,10 +102,18 @@
   display: flex;
   gap: 6px;
   align-items: center;
+  font-size: 0.9rem;
+  color: #4a5568;
 }
 
 .bulk-rij select {
-  padding: 4px 8px;
+  padding: 5px 10px;
+  border: 1px solid #dccfb8;
+  border-radius: 6px;
+  background: #f7efe6;
+  font-family: inherit;
+  font-size: 0.9rem;
+  color: #2d3748;
 }
 
 .leeslijsten-tabel {
@@ -108,16 +125,27 @@
 .leeslijsten-tabel th,
 .leeslijsten-tabel td {
   text-align: left;
-  padding: 8px 10px;
-  border-bottom: 1px solid #eee;
+  padding: 9px 12px;
+  border-bottom: 1px solid #dccfb8;
   vertical-align: middle;
 }
 
 .leeslijsten-tabel th {
   font-weight: 600;
   font-size: 0.85rem;
-  color: #555;
-  background: #fafbfc;
+  color: #4a5568;
+  background: #eee3d3;
+}
+
+.leeslijsten-tabel select {
+  padding: 5px 10px;
+  border: 1px solid #dccfb8;
+  border-radius: 6px;
+  background: #f7efe6;
+  font-family: inherit;
+  font-size: 0.85rem;
+  color: #2d3748;
+  width: 100%;
 }
 
 .lijst-naam {
@@ -126,27 +154,92 @@
 
 .badge {
   display: inline-block;
-  padding: 2px 8px;
-  background: #eef3f9;
-  border-radius: 12px;
-  font-size: 0.8rem;
-  color: #345;
+  padding: 3px 9px;
+  background: #dbeafe;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #1e40af;
 }
 
 .samenvatting {
   list-style: disc;
   padding-left: 22px;
-  margin: 8px 0 0;
+  margin: 10px 0 0;
 }
 
 .samenvatting li {
-  margin: 4px 0;
+  margin: 6px 0;
+  color: #2d3748;
 }
 
 .modal-footer {
-  padding: 12px 24px 18px;
+  padding: 14px 28px 20px;
   display: flex;
   justify-content: flex-end;
   gap: 8px;
-  border-top: 1px solid #eee;
+  border-top: 1px solid #dccfb8;
+}
+
+/* Buttons — bordeaux thema */
+button.btn-go {
+  background-color: #8c1b3f;
+  color: #ffffff;
+  border: 2px solid #8c1b3f;
+  padding: 9px 20px;
+  border-radius: 8px;
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+button.btn-go:hover:not(:disabled) {
+  background-color: #6d1531;
+  border-color: #6d1531;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(140, 27, 63, 0.25);
+}
+
+button.btn-go:disabled {
+  background-color: #e2e8f0;
+  color: #a0aec0;
+  border-color: #e2e8f0;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+button.btn-go.btn-delete {
+  background-color: #c53030;
+  border-color: #c53030;
+}
+
+button.btn-go.btn-delete:hover:not(:disabled) {
+  background-color: #9b2c2c;
+  border-color: #9b2c2c;
+}
+
+button.btn-outline {
+  background-color: #ffffff;
+  color: #2d3748;
+  border: 2px solid #dccfb8;
+  padding: 9px 20px;
+  border-radius: 8px;
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+button.btn-outline:hover {
+  background-color: #f2efe9;
+  border-color: #8c1b3f;
+}
+
+.btn-sm {
+  padding: 6px 14px !important;
+  font-size: 0.85rem !important;
 }
