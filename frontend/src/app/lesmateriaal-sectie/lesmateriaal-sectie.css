@@ -1,0 +1,326 @@
+.lesmateriaal-sectie {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 20px;
+  margin-top: 24px;
+}
+
+.lm-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.lm-title {
+  margin: 0;
+  font-size: 1.25rem;
+  color: #1a202c;
+  font-weight: 700;
+}
+
+.lm-subtitle {
+  margin: 2px 0 0 0;
+  font-size: 0.8rem;
+  color: #718096;
+  font-style: italic;
+}
+
+.lm-dropzone {
+  border: 2px dashed #cbd5e0;
+  border-radius: 8px;
+  padding: 28px 20px;
+  text-align: center;
+  background: #f7fafc;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.lm-dropzone.drag-over {
+  border-color: #8c1b3f;
+  background: #fff5f8;
+}
+
+.lm-dropzone.bezig {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.lm-dz-icon {
+  font-size: 2rem;
+  margin-bottom: 6px;
+}
+
+.lm-dz-text {
+  margin: 0 0 4px 0;
+  font-size: 0.95rem;
+  color: #2d3748;
+}
+
+.lm-dz-link {
+  color: #8c1b3f;
+  text-decoration: underline;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.lm-dz-hint {
+  margin: 0 0 12px 0;
+  font-size: 0.8rem;
+  color: #a0aec0;
+}
+
+.lm-dz-omschrijving {
+  width: 100%;
+  max-width: 420px;
+  padding: 8px 12px;
+  border: 1px solid #cbd5e0;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.lm-status {
+  margin: 10px 0 0 0;
+  font-size: 0.85rem;
+  color: #4a5568;
+}
+
+.lm-melding {
+  margin-top: 12px;
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 0.875rem;
+}
+
+.lm-fout {
+  background: #fed7d7;
+  color: #742a2a;
+}
+
+.lm-succes {
+  background: #c6f6d5;
+  color: #22543d;
+}
+
+.lm-loading {
+  margin-top: 16px;
+  color: #718096;
+  font-size: 0.9rem;
+}
+
+.lm-groep {
+  margin-top: 20px;
+}
+
+.lm-groep-titel {
+  font-size: 0.95rem;
+  color: #8c1b3f;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.lm-leeg {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #a0aec0;
+  font-style: italic;
+}
+
+.lm-lijst {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.lm-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid #edf2f7;
+  border-radius: 6px;
+  margin-bottom: 6px;
+  background: #fff;
+}
+
+.lm-item-eigen {
+  border-left: 3px solid #8c1b3f;
+}
+
+.lm-icoon {
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+
+.lm-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.lm-naam {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #1a202c;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lm-meta {
+  font-size: 0.78rem;
+  color: #718096;
+  margin-top: 2px;
+}
+
+.lm-beschrijving {
+  font-style: italic;
+}
+
+.lm-acties {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.lm-icon-knop {
+  background: transparent;
+  border: 1px solid #e2e8f0;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: #4a5568;
+  transition: background 0.15s, color 0.15s;
+}
+
+.lm-icon-knop:hover {
+  background: #f7fafc;
+}
+
+.lm-knop-rood:hover {
+  background: #fed7d7;
+  color: #742a2a;
+}
+
+.lm-bewerken {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+
+.lm-bewerken input {
+  flex: 1;
+  min-width: 180px;
+  padding: 6px 10px;
+  border: 1px solid #cbd5e0;
+  border-radius: 6px;
+  font-size: 0.85rem;
+}
+
+.lm-knop-prim {
+  background: #8c1b3f;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.lm-knop-sec {
+  background: transparent;
+  color: #4a5568;
+  border: 1px solid #cbd5e0;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.lm-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(26, 32, 44, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: lm-fade-in 0.15s ease-out;
+}
+
+.lm-modal {
+  background: #fff;
+  border-radius: 12px;
+  padding: 28px 28px 22px;
+  width: 90%;
+  max-width: 420px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+  text-align: center;
+  animation: lm-pop-in 0.18s ease-out;
+}
+
+.lm-modal-icoon {
+  font-size: 2.4rem;
+  margin-bottom: 8px;
+}
+
+.lm-modal-titel {
+  margin: 0 0 8px 0;
+  font-size: 1.15rem;
+  color: #1a202c;
+  font-weight: 700;
+}
+
+.lm-modal-tekst {
+  margin: 0 0 22px 0;
+  font-size: 0.9rem;
+  color: #4a5568;
+  line-height: 1.45;
+}
+
+.lm-modal-tekst strong {
+  color: #1a202c;
+  word-break: break-word;
+}
+
+.lm-modal-acties {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.lm-modal-acties .lm-knop-sec {
+  padding: 9px 18px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.lm-knop-gevaar {
+  background: #8c1b3f;
+  color: white;
+  border: none;
+  padding: 9px 18px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: background 0.15s;
+}
+
+.lm-knop-gevaar:hover {
+  background: #6e1430;
+}
+
+@keyframes lm-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes lm-pop-in {
+  from { opacity: 0; transform: scale(0.94); }
+  to { opacity: 1; transform: scale(1); }
+}
