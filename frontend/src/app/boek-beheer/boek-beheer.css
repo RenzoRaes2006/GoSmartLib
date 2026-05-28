@@ -651,13 +651,13 @@ form > div > div button[type='button']:hover {
 }
 
 .campus-wis-btn {
-  padding: 6px 12px;
-  background: #fff;
-  border: 1px solid #e2dfd5;
+  padding: 6px 14px;
+  background: #fff5f5;
+  border: 1px solid #fecaca;
   border-radius: 20px;
-  color: #718096;
+  color: #e53e3e;
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
   font-family: inherit;
   cursor: pointer;
   white-space: nowrap;
@@ -665,9 +665,9 @@ form > div > div button[type='button']:hover {
 }
 
 .campus-wis-btn:hover {
-  background: #f0efe4;
-  color: #8c1b3f;
-  border-color: #8c1b3f;
+  background: #fee2e2;
+  color: #c53030;
+  border-color: #f56565;
 }
 
 /* =====================
