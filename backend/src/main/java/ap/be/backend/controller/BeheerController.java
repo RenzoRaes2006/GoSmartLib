@@ -29,6 +29,7 @@ import ap.be.backend.entity.User;
 import ap.be.backend.exception.GebruikerNotFoundException;
 import ap.be.backend.exception.OngeldigeRolException;
 import ap.be.backend.mappers.GebruikerMapper;
+import ap.be.backend.repository.SchoolRepository;
 import ap.be.backend.repository.UserRepository;
 import ap.be.backend.service.GebruikerService;
 import ap.be.backend.service.OneRosterClient;
@@ -40,12 +41,14 @@ public class BeheerController {
 
     private final GebruikerService gebruikerService;
     private final UserRepository userRepository;
+    private final SchoolRepository schoolRepository;
     private final OneRosterClient oneRosterClient;
 
     public BeheerController(GebruikerService gebruikerService, UserRepository userRepository,
-                            OneRosterClient oneRosterClient) {
+                            SchoolRepository schoolRepository, OneRosterClient oneRosterClient) {
         this.gebruikerService = gebruikerService;
         this.userRepository = userRepository;
+        this.schoolRepository = schoolRepository;
         this.oneRosterClient = oneRosterClient;
     }
 
@@ -76,7 +79,12 @@ public class BeheerController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10000") int size) {
         User beheerder = SecurityUtils.getCurrentUser(userRepository);
-        School school = beheerder.getSchool();
+        if (beheerder.getSchool() == null) {
+            return ResponseEntity.ok(Page.empty());
+        }
+        // Vers ophalen via SchoolRepository — identiek aan AdminGebruikerController —
+        // zodat oauthClientId/secret en smartschoolDomein gegarandeerd geladen zijn.
+        School school = schoolRepository.findById(beheerder.getSchool().getId()).orElse(null);
         if (school == null) {
             return ResponseEntity.ok(Page.empty());
         }
