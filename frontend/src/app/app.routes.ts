@@ -31,6 +31,7 @@ import { KlassenleeslijstDetailLeerlingComponent } from './klassenleeslijst-deta
 import { AdminLogin } from './admin-login/admin-login';
 import { AdminAuditLog } from './admin-audit-log/admin-audit-log';
 import { BeschadigdeBoeken } from './beschadigde-boeken/beschadigde-boeken';
+import { BeheerderRollenComponent } from './beheerder-rollen/beheerder-rollen';
 
 export const routes: Routes = [
   // Geen guard
@@ -71,6 +72,7 @@ export const routes: Routes = [
   { path: 'boek-import', component: BoekImport, canActivate: [beheerderGuard] },
   { path: 'gerapporteerde-beoordelingen', component: GerapporteerdeReviews, canActivate: [beheerderGuard] },
   { path: 'beheer/beschadigd', component: BeschadigdeBoeken, canActivate: [beheerderGuard] },
+  { path: 'beheerder/rollen', component: BeheerderRollenComponent, canActivate: [beheerderGuard] },
 
   { path: '**', redirectTo: 'not-found' },
 ];

@@ -1,0 +1,105 @@
+<div class="rollen-layout">
+  <div class="rollen-header">
+    <a routerLink="/beheerder" class="terug-link">← Terug naar dashboard</a>
+    <h1>Leerkrachten beheren</h1>
+    <p class="subtitle">Wijs de beheerder-rol toe aan of trek ze in van leerkrachten op jouw school.</p>
+  </div>
+
+  <div class="rollen-card">
+    @if (laden()) {
+      <div class="laden-status">Leerkrachten ophalen...</div>
+    } @else {
+      <div class="table-responsive">
+        <table class="rollen-tabel">
+          <thead>
+            <tr>
+              <th>Naam</th>
+              <th>Klas</th>
+              <th>Beheerder?</th>
+              <th>Acties</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (leerkracht of leerkrachten(); track leerkracht.id) {
+              <tr>
+                <td><strong>{{ leerkracht.naam || leerkracht.smartschoolId }}</strong></td>
+                <td>{{ leerkracht.klas || '-' }}</td>
+                <td>{{ leerkracht.isBeheerder ? 'Ja' : 'Nee' }}</td>
+                <td>
+                  <label
+                    class="toggle-switch"
+                    [class.is-on]="leerkracht.isBeheerder"
+                    [class.is-busy]="promotieBezig() === leerkracht.id"
+                    [attr.title]="leerkracht.isBeheerder ? 'Beheerder-rol intrekken' : 'Maak beheerder'"
+                  >
+                    <input
+                      type="checkbox"
+                      [checked]="leerkracht.isBeheerder"
+                      [disabled]="promotieBezig() === leerkracht.id"
+                      (change)="openBeheerderModal(leerkracht)"
+                    />
+                    <span class="toggle-track">
+                      <span class="toggle-thumb"></span>
+                    </span>
+                    <span class="toggle-label">
+                      @if (promotieBezig() === leerkracht.id) {
+                        Bezig...
+                      } @else if (leerkracht.isBeheerder) {
+                        Beheerder
+                      } @else {
+                        Leerkracht
+                      }
+                    </span>
+                  </label>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="4" class="leeg">Geen leerkrachten gevonden op jouw school.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</div>
+
+@if (beheerderModalDoel(); as doel) {
+  <div class="modal-overlay" (click)="annuleerBeheerderModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>{{ doel.isBeheerder ? 'Beheerder-rol intrekken' : 'Beheerder maken' }}</h3>
+      </div>
+      <div class="modal-body">
+        <p>
+          Weet je zeker dat je
+          <strong>{{ doel.naam || doel.smartschoolId }}</strong>
+          {{ doel.isBeheerder ? 'de beheerder-rol wilt intrekken?' : 'beheerder wilt maken?' }}
+        </p>
+        @if (beheerderModalFout()) {
+          <p class="form-error">{{ beheerderModalFout() }}</p>
+        }
+      </div>
+      <div class="modal-footer">
+        <button class="btn-outline btn-sm" (click)="annuleerBeheerderModal()" [disabled]="promotieBezig() !== null">
+          Annuleren
+        </button>
+        <button
+          [class]="doel.isBeheerder ? 'btn-go btn-sm btn-delete' : 'btn-go btn-sm'"
+          (click)="bevestigBeheerderToggle()"
+          [disabled]="promotieBezig() !== null"
+        >
+          {{ promotieBezig() !== null ? 'Bezig...' : (doel.isBeheerder ? 'Intrekken' : 'Maak beheerder') }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (toastActief()) {
+  <div class="toast-notification" [ngClass]="toastType() === 'succes' ? 'toast-succes' : 'toast-fout'">
+    <span class="toast-icon">{{ toastType() === 'succes' ? '✅' : '⚠️' }}</span>
+    <span class="toast-tekst">{{ toastBericht() }}</span>
+  </div>
+}
