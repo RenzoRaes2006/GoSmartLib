@@ -101,10 +101,8 @@
 
     <div class="loan-item" *ngFor="let lening of recenteLeningen">
       <div>
-        <strong class="loan-item-title">{{ lening.boek.titel }}</strong>
-        <span class="loan-item-subtitle"
-          >Geleend door: {{ lening.gebruiker.voorNaam }} {{ lening.gebruiker.achternaam }}</span
-        >
+        <strong class="loan-item-title">{{ lening.boekTitel }}</strong>
+        <span class="loan-item-subtitle">Geleend door: {{ lening.smartschoolId }}</span>
       </div>
       <div class="loan-item-right">
         <span class="loan-item-label">Inleveren voor:</span>
