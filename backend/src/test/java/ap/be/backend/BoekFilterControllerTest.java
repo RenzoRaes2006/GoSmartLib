@@ -29,7 +29,7 @@ public class BoekFilterControllerTest extends AbstractIntegrationTest {
 
         private BoekDTO dto(String titel, String auteur) {
                 return new BoekDTO(1L, titel, auteur, "1234567890", "Uitg", "2020", 100,
-                                List.of(), "Beschrijving", 1, "Loc", "", null, null, false, null, null);
+                                List.of(), "Beschrijving", 1, "Loc", "", null, null, false, null, null, false);
         }
 
         private BoekenFilters captureFilters() {
@@ -94,7 +94,7 @@ public class BoekFilterControllerTest extends AbstractIntegrationTest {
         @Test
         void givenLeesniveauParam_whenGetAlleBoeken_thenLeesniveauWordtDoorgegevenAanService() throws Exception {
                 BoekDTO boek = new BoekDTO(1L, "Eenvoudig Boek", "Auteur", "1234567890", "U", "2020", 50,
-                                List.of(), "B", 1, "L", "", null, "A (eenvoudig taalgebruik)", false, null, null);
+                                List.of(), "B", 1, "L", "", null, "A (eenvoudig taalgebruik)", false, null, null, false);
                 when(boekService.filterBoeken(any(), any(), any(), any()))
                                 .thenReturn(new PageImpl<>(List.of(boek)));
 
@@ -159,7 +159,7 @@ public class BoekFilterControllerTest extends AbstractIntegrationTest {
         @Test
         void givenZoektermOpIsbn_whenGetAlleBoeken_thenGeeftMatchendeBoeken() throws Exception {
                 BoekDTO boek = new BoekDTO(1L, "Clean Code", "Robert Martin", "9780132350884", "U", "2020", 100,
-                                List.of(), "B", 1, "L", "", null, null, false, null, null);
+                                List.of(), "B", 1, "L", "", null, null, false, null, null, false);
                 when(boekService.filterBoeken(any(), any(), any(), any()))
                                 .thenReturn(new PageImpl<>(List.of(boek)));
 

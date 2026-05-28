@@ -17,4 +17,5 @@ export interface Boek {
   didactischMateriaal?: boolean;
   campusId?: number | null;
   campusNaam?: string | null;
+  heeftSchade?: boolean;
 }

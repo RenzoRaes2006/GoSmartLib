@@ -25,6 +25,7 @@ import ap.be.backend.exception.InvalidYearRangeException;
 import ap.be.backend.exception.IsbnAlreadyExistsException;
 import ap.be.backend.mappers.BoekMapper;
 import ap.be.backend.repository.BoekRepository;
+import ap.be.backend.repository.BoekSchadeRepository;
 import ap.be.backend.repository.CampusRepository;
 import ap.be.backend.repository.TagRepository;
 import ap.be.backend.repository.UserRepository;
@@ -36,14 +37,17 @@ public class BoekService {
     private final TagService tagService;
     private final CampusRepository campusRepository;
     private final UserRepository userRepository;
+    private final BoekSchadeRepository boekSchadeRepository;
 
     public BoekService(BoekRepository boekRepository, TagRepository tagRepository, TagService tagService,
-            CampusRepository campusRepository, UserRepository userRepository) {
+            CampusRepository campusRepository, UserRepository userRepository,
+            BoekSchadeRepository boekSchadeRepository) {
         this.boekRepository = boekRepository;
         this.tagRepository = tagRepository;
         this.tagService = tagService;
         this.campusRepository = campusRepository;
         this.userRepository = userRepository;
+        this.boekSchadeRepository = boekSchadeRepository;
     }
 
     public Boek addBoek(BoekDTO boekDTO) {
@@ -143,7 +147,13 @@ public class BoekService {
                 (filters.campusIds() == null || filters.campusIds().isEmpty()) ? null : filters.campusIds(),
                 filters.minSterren(),
                 paging.toPageable(sort.toSort()));
-        return page.map(BoekMapper::toDTO);
+
+        List<Long> boekIds = page.getContent().stream().map(Boek::getId).toList();
+        Set<Long> idsMetSchade = boekIds.isEmpty()
+                ? Set.of()
+                : Optional.ofNullable(boekSchadeRepository.findBoekIdsMetSchade(boekIds))
+                        .orElseGet(Set::of);
+        return page.map(b -> BoekMapper.toDTO(b, idsMetSchade.contains(b.getId())));
     }
 
     private Campus resolveCampus(Long campusId) {
@@ -189,6 +199,11 @@ public class BoekService {
 
     public Boek getBoekById(Long id) {
         return boekRepository.findById(id).orElse(null);
+    }
+
+    public boolean heeftSchade(Long boekId) {
+        if (boekId == null) return false;
+        return !boekSchadeRepository.findBoekIdsMetSchade(List.of(boekId)).isEmpty();
     }
 
     public Page<Boek> getBoekenPaged(int page, int size) {

@@ -53,6 +53,9 @@ public class BoekServiceTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private ap.be.backend.repository.BoekSchadeRepository boekSchadeRepository;
+
     @InjectMocks
     private BoekService boekService;
 
@@ -70,7 +73,7 @@ public class BoekServiceTest {
                 "A handbook of agile software craftsmanship",
                 3,
                 "A1",
-                "", null, null, true, null, null);
+                "", null, null, true, null, null, false);
 
         when(boekRepository.findByIsbn("9780132350884")).thenReturn(Optional.empty());
 
@@ -109,7 +112,8 @@ public class BoekServiceTest {
                 "",
                 null,
                 null,
-                null);
+                null,
+                false);
 
         when(boekRepository.findByIsbn("9780132350884")).thenReturn(Optional.empty());
 
@@ -142,7 +146,7 @@ public class BoekServiceTest {
                 "DDD blue book",
                 2,
                 "B2",
-                "", null, null, false, null, null);
+                "", null, null, false, null, null, false);
 
         when(boekRepository.findByIsbn("9780321125217")).thenReturn(Optional.of(new Boek()));
 
@@ -198,7 +202,7 @@ public class BoekServiceTest {
                 "Updated description",
                 7,
                 "C3",
-                "", null, null, true, null, null);
+                "", null, null, true, null, null, false);
 
         when(boekRepository.findById(boekId)).thenReturn(Optional.of(bestaandBoek));
         when(boekRepository.save(bestaandBoek)).thenReturn(bestaandBoek);
@@ -235,7 +239,7 @@ public class BoekServiceTest {
                 "Any",
                 1,
                 "Z1",
-                "", null, null, false, null, null);
+                "", null, null, false, null, null, false);
 
         when(boekRepository.findById(boekId)).thenReturn(Optional.empty());
 
