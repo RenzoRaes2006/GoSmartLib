@@ -87,6 +87,13 @@
 			<version>1.10.0</version>
 		</dependency>
 
+		<!-- Laadt automatisch de .env file zodat ${ONEROSTER_USERNAME} e.d. opgelost worden -->
+		<dependency>
+			<groupId>me.paulschwarz</groupId>
+			<artifactId>spring-dotenv</artifactId>
+			<version>4.0.0</version>
+		</dependency>
+
 		<dependency>
 			<groupId>org.apache.poi</groupId>
 			<artifactId>poi-ooxml</artifactId>

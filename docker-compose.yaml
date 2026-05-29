@@ -26,6 +26,12 @@ services:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysqldb:3306/schooldb
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
+      # Secrets komen uit GitLab CI/CD variabelen (Settings > CI/CD > Variables)
+      ONEROSTER_USERNAME: ${ONEROSTER_USERNAME}
+      ONEROSTER_PASSWORD: ${ONEROSTER_PASSWORD}
+      SMARTSCHOOL_CLIENT_ID: ${SMARTSCHOOL_CLIENT_ID}
+      SMARTSCHOOL_CLIENT_SECRET: ${SMARTSCHOOL_CLIENT_SECRET}
+      ADMIN_INITIAL_PASSWORD: ${ADMIN_INITIAL_PASSWORD}
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.backend.rule=(Host(`frontend-sp09.cloud-ap.be`) || Host(`api-sp09.cloud-ap.be`)) && (PathPrefix(`/api`) || PathPrefix(`/oauth2`) || PathPrefix(`/login/oauth2`) || Path(`/error`))"
