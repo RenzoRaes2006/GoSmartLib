@@ -11,24 +11,26 @@ import static org.hamcrest.Matchers.*;
 public class ImageControllerTest extends AbstractIntegrationTest {
 
     @Test
-    public void givenJpegFile_whenUpload_thenReturnsRelativePath() throws Exception {
+    public void givenJpegFile_whenUpload_thenReturnsAbsoluteUrl() throws Exception {
         MockMultipartFile file = new MockMultipartFile(
                 "file", "cover.jpg", "image/jpeg", "fake-image-data".getBytes());
 
         mockMvc.perform(multipart("/api/images/upload").file(file))
                 .andExpect(status().isOk())
-                .andExpect(content().string(startsWith("/api/images/")))
+                .andExpect(content().string(startsWith("http")))
+                .andExpect(content().string(containsString("/api/images/")))
                 .andExpect(content().string(endsWith(".jpg")));
     }
 
     @Test
-    public void givenPngFile_whenUpload_thenReturnsRelativePathWithPngExtension() throws Exception {
+    public void givenPngFile_whenUpload_thenReturnsAbsoluteUrlWithPngExtension() throws Exception {
         MockMultipartFile file = new MockMultipartFile(
                 "file", "cover.png", "image/png", "fake-image-data".getBytes());
 
         mockMvc.perform(multipart("/api/images/upload").file(file))
                 .andExpect(status().isOk())
-                .andExpect(content().string(startsWith("/api/images/")))
+                .andExpect(content().string(startsWith("http")))
+                .andExpect(content().string(containsString("/api/images/")))
                 .andExpect(content().string(endsWith(".png")));
     }
 
@@ -75,7 +77,7 @@ public class ImageControllerTest extends AbstractIntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        String bestandsnaam = pad.replace("/api/images/", "");
+        String bestandsnaam = pad.substring(pad.lastIndexOf('/') + 1);
 
         mockMvc.perform(get("/api/images/" + bestandsnaam))
                 .andExpect(status().isOk())
