@@ -11,6 +11,6 @@ import ap.be.backend.entity.BoekSchade;
 
 public interface BoekSchadeRepository extends JpaRepository<BoekSchade, Long> {
 
-    @Query("SELECT DISTINCT s.uitlening.boek.id FROM BoekSchade s WHERE s.uitlening.boek.id IN :ids")
+    @Query("SELECT DISTINCT s.uitlening.exemplaar.boek.id FROM BoekSchade s WHERE s.uitlening.exemplaar.boek.id IN :ids")
     Set<Long> findBoekIdsMetSchade(@Param("ids") Collection<Long> ids);
 }

@@ -57,12 +57,11 @@ class BoekRepositoryTest {
         Boek testBoek = new Boek();
         testBoek.setTitel("Test Boek");
         testBoek.setIsbn("1234567890123");
-        testBoek.setAantalExemplaren(0);
 
         Boek savedBoek = boekRepository.save(testBoek);
 
         assertThat(savedBoek.getId()).isNotNull();
-        assertThat(savedBoek.getAantalExemplaren()).isEqualTo(0);
+        assertThat(savedBoek.getAantalBeschikbaar()).isEqualTo(0);
         assertThat(savedBoek.getIsbn()).isEqualTo("1234567890123");
     }
 
@@ -121,8 +120,7 @@ class BoekRepositoryTest {
 
     @Test
     void givenBoekMetIsbn_whenFindByIsbn_thenGeeftBoekTerug() {
-        String uniekIsbn = "978" + (System.currentTimeMillis() % 10000000000L);
-        uniekIsbn = uniekIsbn.substring(0, 13);
+        String uniekIsbn = String.format("978%010d", System.currentTimeMillis() % 10000000000L);
         Boek boek = new Boek();
         boek.setTitel("ISBN Test Boek");
         boek.setAuteur("Test Auteur");
@@ -141,5 +139,17 @@ class BoekRepositoryTest {
         Optional<Boek> result = boekRepository.findByIsbn("0000000000000");
 
         assertThat(result).isEmpty();
+    }
+
+    @Test
+    void givenBoeken_whenFindTop5Populair_thenGeeftBoekenTerug() {
+        Boek b = new Boek();
+        b.setTitel("Populair testboek");
+        boekRepository.save(b);
+
+        List<Boek> top = boekRepository.findTop5PopulaireBoeken();
+
+        assertThat(top).isNotEmpty();
+        assertThat(top.get(0).getTitel()).isNotNull();
     }
 }

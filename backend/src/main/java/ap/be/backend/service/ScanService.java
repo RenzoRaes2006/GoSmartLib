@@ -11,9 +11,9 @@ import ap.be.backend.dto.ScanBatchItemResultDTO;
 import ap.be.backend.dto.ScanBatchRequestDTO;
 import ap.be.backend.dto.ScanBatchResponseDTO;
 import ap.be.backend.entity.Boek;
+import ap.be.backend.entity.Exemplaar;
 import ap.be.backend.entity.Uitlening;
 import ap.be.backend.entity.User;
-import ap.be.backend.repository.BoekRepository;
 import ap.be.backend.repository.UitleningRepository;
 import jakarta.transaction.Transactional;
 
@@ -21,19 +21,19 @@ import jakarta.transaction.Transactional;
 public class ScanService {
     private final GebruikerService gebruikerService;
     private final BoekService boekService;
-    private final BoekRepository boekRepository;
     private final UitleningRepository uitleningRepository;
     private final BoekSchadeService boekSchadeService;
+    private final ExemplaarService exemplaarService;
 
     public ScanService(GebruikerService gebruikerService, BoekService boekService,
-            BoekRepository boekRepository,
             UitleningRepository uitleningRepository,
-            BoekSchadeService boekSchadeService) {
+            BoekSchadeService boekSchadeService,
+            ExemplaarService exemplaarService) {
         this.gebruikerService = gebruikerService;
         this.boekService = boekService;
-        this.boekRepository = boekRepository;
         this.uitleningRepository = uitleningRepository;
         this.boekSchadeService = boekSchadeService;
+        this.exemplaarService = exemplaarService;
     }
 
     /**
@@ -55,7 +55,7 @@ public class ScanService {
                     continue;
                 }
                 Uitlening bestaande = uitleningRepository
-                        .findFirstByUserAndBoekAndIsIngeleverdFalseOrderByUitleenDatumAsc(user, boek)
+                        .findFirstByUserAndExemplaar_BoekAndIsIngeleverdFalseOrderByUitleenDatumAsc(user, boek)
                         .orElse(null);
                 if (bestaande == null) {
                     resultaten.add(new ScanBatchItemResultDTO(isbn, boek.getTitel(), "FOUT",
@@ -64,12 +64,16 @@ public class ScanService {
                 }
                 bestaande.setIngeleverd(true);
                 bestaande.setInleverDatum(LocalDate.now());
-                boek.setAantalExemplaren(boek.getAantalExemplaren() + 1);
                 uitleningRepository.save(bestaande);
-                boekRepository.save(boek);
 
+                Exemplaar exemplaar = bestaande.getExemplaar();
                 if (item.isBeschadigd()) {
+                    // Schade haalt het exemplaar uit circulatie (BESCHADIGD) i.p.v. het
+                    // terug op BESCHIKBAAR te zetten.
+                    exemplaarService.markeerBeschadigd(exemplaar);
                     boekSchadeService.registreer(bestaande, item.getOpmerking());
+                } else {
+                    exemplaarService.neemTerug(exemplaar);
                 }
 
                 resultaten.add(new ScanBatchItemResultDTO(isbn, boek.getTitel(), "OK", null));
@@ -100,7 +104,7 @@ public class ScanService {
                 }
 
                 Uitlening bestaande = uitleningRepository
-                        .findFirstByUserAndBoekAndIsIngeleverdFalseOrderByUitleenDatumAsc(user, boek)
+                        .findFirstByUserAndExemplaar_BoekAndIsIngeleverdFalseOrderByUitleenDatumAsc(user, boek)
                         .orElse(null);
 
                 if ("UITLENING".equals(actie)) {
@@ -109,17 +113,16 @@ public class ScanService {
                                 "Je hebt dit boek al geleend."));
                         continue;
                     }
-                    if (boek.getAantalExemplaren() <= 0) {
+                    if (!exemplaarService.isBeschikbaar(boek)) {
                         resultaten.add(new ScanBatchItemResultDTO(isbn, boek.getTitel(), "FOUT",
                                 "Geen exemplaren beschikbaar."));
                         continue;
                     }
-                    boek.setAantalExemplaren(boek.getAantalExemplaren() - 1);
-                    boekRepository.save(boek);
+                    Exemplaar exemplaar = exemplaarService.leenUit(boek);
 
                     Uitlening nieuw = new Uitlening();
                     nieuw.setUser(user);
-                    nieuw.setBoek(boek);
+                    nieuw.setExemplaar(exemplaar);
                     nieuw.setUitleenDatum(LocalDate.now());
                     nieuw.setInleverDatum(LocalDate.now().plusMonths(1));
                     nieuw.setIngeleverd(false);
@@ -135,9 +138,8 @@ public class ScanService {
                     }
                     bestaande.setIngeleverd(true);
                     bestaande.setInleverDatum(LocalDate.now());
-                    boek.setAantalExemplaren(boek.getAantalExemplaren() + 1);
                     uitleningRepository.save(bestaande);
-                    boekRepository.save(boek);
+                    exemplaarService.neemTerug(bestaande.getExemplaar());
 
                     resultaten.add(new ScanBatchItemResultDTO(isbn, boek.getTitel(), "OK", null));
                 }

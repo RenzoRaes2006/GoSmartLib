@@ -58,7 +58,7 @@ public class TeLaatNotificatieScheduler {
                 notificatieService.stuurTeLaatBericht(
                         school,
                         u.getUser().getSmartschoolId(),
-                        u.getBoek().getTitel(),
+                        u.getExemplaar().getBoek().getTitel(),
                         u.getInleverDatum());
                 u.setEersteTeLaatMailOp(vandaag);
                 uitleningRepository.save(u);
@@ -79,7 +79,7 @@ public class TeLaatNotificatieScheduler {
                 notificatieService.stuurHerinnering(
                         school,
                         u.getUser().getSmartschoolId(),
-                        u.getBoek().getTitel(),
+                        u.getExemplaar().getBoek().getTitel(),
                         u.getInleverDatum());
                 u.setHerinneringMailOp(vandaag);
                 uitleningRepository.save(u);

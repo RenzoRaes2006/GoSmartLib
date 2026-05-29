@@ -25,7 +25,7 @@ public class BoekMapper {
                 boek.getPagina(),
                 tagDtos,
                 boek.getBeschrijving(),
-                boek.getAantalExemplaren(),
+                boek.getAantalBeschikbaar(),
                 boek.getLocatie(),
                 boek.getAfbeelding(),
                 boek.getPopulariteit(),
@@ -33,6 +33,7 @@ public class BoekMapper {
                 boek.isDidactischMateriaal(),
                 boek.getCampus() == null ? null : boek.getCampus().getId(),
                 boek.getCampus() == null ? null : boek.getCampus().getNaam(),
-                heeftSchade);
+                heeftSchade,
+                boek.getAantalBeschadigd());
     }
 }

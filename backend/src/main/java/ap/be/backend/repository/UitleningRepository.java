@@ -24,7 +24,7 @@ public interface UitleningRepository extends JpaRepository<Uitlening, Long> {
 
     long countByIsIngeleverdFalseAndStatusInAndInleverDatumBefore(List<String> statussen, LocalDate datum);
 
-    @Query("SELECT t.naam FROM Uitlening u JOIN u.boek b JOIN b.tags t " +
+    @Query("SELECT t.naam FROM Uitlening u JOIN u.exemplaar.boek b JOIN b.tags t " +
             "WHERE u.status IN :statussen AND t.type = ap.be.backend.entity.TagType.GENRE " +
             "GROUP BY t.naam ORDER BY COUNT(t) DESC")
     List<String> findPopulairsteGenres(@Param("statussen") List<String> statussen, Pageable pageable);
@@ -68,9 +68,9 @@ public interface UitleningRepository extends JpaRepository<Uitlening, Long> {
                              @Param("statussen") List<String> statussen,
                              @Param("datum") LocalDate datum);
 
-    @Query("SELECT u.boek.titel FROM Uitlening u WHERE u.status IN :statussen " +
+    @Query("SELECT u.exemplaar.boek.titel FROM Uitlening u WHERE u.status IN :statussen " +
             "AND (:klas IS NULL OR :klas = '' OR LOWER(u.user.klas) = LOWER(:klas)) " +
-            "GROUP BY u.boek.titel ORDER BY COUNT(u) DESC")
+            "GROUP BY u.exemplaar.boek.titel ORDER BY COUNT(u) DESC")
     List<String> findTopBoekTitelsVoorKlas(@Param("klas") String klas,
                                            @Param("statussen") List<String> statussen,
                                            Pageable pageable);
@@ -79,7 +79,7 @@ public interface UitleningRepository extends JpaRepository<Uitlening, Long> {
 
     boolean existsByUser_IdAndIsIngeleverdFalseAndInleverDatumBefore(Long userId, LocalDate vandaag);
 
-    boolean existsByUser_IdAndBoek_IdAndIsIngeleverdFalse(Long userId, Long boekId);
+    boolean existsByUser_IdAndExemplaar_Boek_IdAndIsIngeleverdFalse(Long userId, Long boekId);
 
     List<Uitlening> findByStatus(String status);
 
@@ -87,7 +87,7 @@ public interface UitleningRepository extends JpaRepository<Uitlening, Long> {
 
     List<Uitlening> findByUser_IdOrderByUitleenDatumDesc(Long userId);
 
-    Optional<Uitlening> findFirstByUserAndBoekAndIsIngeleverdFalseOrderByUitleenDatumAsc(User user, Boek boek);
+    Optional<Uitlening> findFirstByUserAndExemplaar_BoekAndIsIngeleverdFalseOrderByUitleenDatumAsc(User user, Boek boek);
 
     List<Uitlening> findByIsIngeleverdFalseOrderByUitleenDatumDesc();
 

@@ -38,18 +38,21 @@ public class BoekService {
     private final CampusRepository campusRepository;
     private final UserRepository userRepository;
     private final BoekSchadeRepository boekSchadeRepository;
+    private final ExemplaarService exemplaarService;
 
     public BoekService(BoekRepository boekRepository, TagRepository tagRepository, TagService tagService,
             CampusRepository campusRepository, UserRepository userRepository,
-            BoekSchadeRepository boekSchadeRepository) {
+            BoekSchadeRepository boekSchadeRepository, ExemplaarService exemplaarService) {
         this.boekRepository = boekRepository;
         this.tagRepository = tagRepository;
         this.tagService = tagService;
         this.campusRepository = campusRepository;
         this.userRepository = userRepository;
         this.boekSchadeRepository = boekSchadeRepository;
+        this.exemplaarService = exemplaarService;
     }
 
+    @Transactional
     public Boek addBoek(BoekDTO boekDTO) {
         String trimmedIsbn = boekDTO.isbn().trim();
 
@@ -66,15 +69,17 @@ public class BoekService {
         boek.setTags(resolveTags(boekDTO.tags()));
         boek.setPagina(boekDTO.pagina());
         boek.setBeschrijving(boekDTO.beschrijving());
-        boek.setAantalExemplaren(boekDTO.aantalExemplaren());
         boek.setLocatie(isNotBlank(boekDTO.locatie()) ? boekDTO.locatie() : "Geen locatie");
         boek.setAfbeelding(isNotBlank(boekDTO.afbeelding()) ? boekDTO.afbeelding() : "");
         boek.setLeesniveau(isNotBlank(boekDTO.leesniveau()) ? boekDTO.leesniveau() : "Geen leesniveau");
         boek.setDidactischMateriaal(Boolean.TRUE.equals(boekDTO.didactischMateriaal()));
         boek.setCampus(resolveCampus(boekDTO.campusId()));
-        return boekRepository.save(boek);
+        Boek opgeslagen = boekRepository.save(boek);
+        exemplaarService.genereerExemplaren(opgeslagen, boekDTO.aantalExemplaren());
+        return opgeslagen;
     }
 
+    @Transactional
     public Boek updateBoek(Long id, BoekDTO boekDTO) {
         Optional<Boek> bestaandBoek = boekRepository.findById(id);
         if (bestaandBoek.isEmpty()) {
@@ -92,12 +97,14 @@ public class BoekService {
         boek.getTags().addAll(nieuweTags);
         boek.setPagina(boekDTO.pagina());
         boek.setBeschrijving(boekDTO.beschrijving());
-        boek.setAantalExemplaren(boekDTO.aantalExemplaren());
         boek.setLocatie(isNotBlank(boekDTO.locatie()) ? boekDTO.locatie() : "Geen locatie");
         boek.setAfbeelding(isNotBlank(boekDTO.afbeelding()) ? boekDTO.afbeelding() : "");
         boek.setLeesniveau(isNotBlank(boekDTO.leesniveau()) ? boekDTO.leesniveau() : "Geen leesniveau");
         boek.setDidactischMateriaal(Boolean.TRUE.equals(boekDTO.didactischMateriaal()));
         boek.setCampus(resolveCampus(boekDTO.campusId()));
+        // Het ingevulde aantal is het gewenste aantal beschikbare exemplaren; uitgeleende
+        // en beschadigde exemplaren blijven onaangeroerd (zie ExemplaarService).
+        exemplaarService.stelBeschikbaarAantalIn(boek, boekDTO.aantalExemplaren());
         return boekRepository.save(boek);
     }
 

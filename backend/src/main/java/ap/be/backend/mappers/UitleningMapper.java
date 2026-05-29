@@ -14,7 +14,7 @@ public class UitleningMapper {
         }
         return new UitleningDTO(
                 uitlening.getId(),
-                BoekMapper.toDTO(uitlening.getBoek()),
+                BoekMapper.toDTO(uitlening.getExemplaar().getBoek()),
                 GebruikerMapper.toDTO(uitlening.getUser()),
                 uitlening.getUitleenDatum(),
                 uitlening.getInleverDatum(),
@@ -27,7 +27,7 @@ public class UitleningMapper {
         if (uitlening == null) {
             return null;
         }
-        Boek boek = uitlening.getBoek();
+        Boek boek = uitlening.getExemplaar() == null ? null : uitlening.getExemplaar().getBoek();
         User user = uitlening.getUser();
         return new UitleningSummaryDTO(
                 uitlening.getId(),

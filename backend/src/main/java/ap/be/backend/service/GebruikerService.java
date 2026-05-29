@@ -10,6 +10,7 @@ import ap.be.backend.dto.LeeslijstMapDTO;
 import ap.be.backend.dto.UitleningDTO;
 import ap.be.backend.dto.UitleningSummaryDTO;
 import ap.be.backend.entity.Boek;
+import ap.be.backend.entity.Exemplaar;
 import ap.be.backend.entity.LeeslijstMap;
 import ap.be.backend.entity.Rol;
 import ap.be.backend.entity.Uitlening;
@@ -34,15 +35,17 @@ public class GebruikerService {
     private final BoekRepository boekRepository;
     private final UitleningRepository uitleningRepository;
     private final InstellingService instellingService;
+    private final ExemplaarService exemplaarService;
 
     public GebruikerService(UserRepository userRepository, LeeslijstMapRepository leeslijstMapRepository,
             BoekRepository boekRepository, UitleningRepository uitleningRepository,
-            InstellingService instellingService) {
+            InstellingService instellingService, ExemplaarService exemplaarService) {
         this.userRepository = userRepository;
         this.leeslijstMapRepository = leeslijstMapRepository;
         this.boekRepository = boekRepository;
         this.uitleningRepository = uitleningRepository;
         this.instellingService = instellingService;
+        this.exemplaarService = exemplaarService;
     }
 
     public List<LeeslijstMapDTO> getMappenVoorGebruiker(Long userId) {
@@ -123,11 +126,11 @@ public class GebruikerService {
         if (boek == null)
             return new LeenStatusResponse(false, "Boek niet gevonden");
 
-        if (boek.getAantalExemplaren() <= 0) {
+        if (!exemplaarService.isBeschikbaar(boek)) {
             return new LeenStatusResponse(false, "Boek is momenteel niet beschikbaar.");
         }
 
-        if (uitleningRepository.existsByUser_IdAndBoek_IdAndIsIngeleverdFalse(userId, boekId)) {
+        if (uitleningRepository.existsByUser_IdAndExemplaar_Boek_IdAndIsIngeleverdFalse(userId, boekId)) {
             return new LeenStatusResponse(false, "Je hebt dit boek al geleend of in aanvraag.");
         }
 
@@ -148,7 +151,11 @@ public class GebruikerService {
         return new LeenStatusResponse(true, "Beschikbaar om te reserveren");
     }
 
-    public synchronized void bevestigUitlening(Long userId, Long boekId) {
+    // @Transactional zodat de pessimistic lock in ExemplaarService.leenUit gehouden
+    // blijft tot de uitlening is weggeschreven. De DB-lock vervangt het vroegere
+    // synchronized: twee gelijktijdige leners krijgen nooit hetzelfde exemplaar.
+    @Transactional
+    public void bevestigUitlening(Long userId, Long boekId) {
         LeenStatusResponse status = checkLeenStatus(userId, boekId);
         if (!status.isMagLenen()) {
             throw new LeenVoorwaardeException(status.getReden());
@@ -159,14 +166,13 @@ public class GebruikerService {
         Boek boek = boekRepository.findById(boekId)
                 .orElseThrow(() -> new BoekNotFoundException("Boek niet gevonden"));
 
-        boek.setAantalExemplaren(boek.getAantalExemplaren() - 1);
-        boekRepository.save(boek);
+        Exemplaar exemplaar = exemplaarService.leenUit(boek);
 
         LocalDate vandaag = LocalDate.now();
         int extraDagen = instellingService.getInlevertermijnDagen();
         LocalDate inleverDatum = vandaag.plusDays(extraDagen);
 
-        Uitlening nieuweUitlening = new Uitlening(user, boek, vandaag, inleverDatum);
+        Uitlening nieuweUitlening = new Uitlening(user, exemplaar, vandaag, inleverDatum);
         uitleningRepository.save(nieuweUitlening);
     }
 
@@ -195,9 +201,7 @@ public class GebruikerService {
         uitlening.setStatus("GEWEIGERD");
         uitlening.setIngeleverd(true);
 
-        Boek boek = uitlening.getBoek();
-        boek.setAantalExemplaren(boek.getAantalExemplaren() + 1);
-        boekRepository.save(boek);
+        exemplaarService.neemTerug(uitlening.getExemplaar());
 
         uitleningRepository.save(uitlening);
     }
@@ -210,9 +214,7 @@ public class GebruikerService {
         Uitlening uitlening = uitleningRepository.findById(uitleningId)
                 .orElseThrow(() -> new UitleningNotFoundException("Uitlening niet gevonden"));
 
-        Boek boek = uitlening.getBoek();
-        boek.setAantalExemplaren(boek.getAantalExemplaren() + 1);
-        boekRepository.save(boek);
+        exemplaarService.neemTerug(uitlening.getExemplaar());
 
         uitleningRepository.delete(uitlening);
     }
@@ -297,18 +299,17 @@ public class GebruikerService {
                     .orElseThrow(() -> new ap.be.backend.exception.ResourceNotFoundException(
                             "Boek met ID " + boekId + " niet gevonden."));
 
-            if (boek.getAantalExemplaren() <= 0) {
+            if (!exemplaarService.isBeschikbaar(boek)) {
                 throw new ap.be.backend.exception.OnvoldoendeVoorraadException(
                         "Niet genoeg voorraad voor: " + boek.getTitel());
             }
 
-            boek.setAantalExemplaren(boek.getAantalExemplaren() - 1);
-            boekRepository.save(boek);
+            Exemplaar exemplaar = exemplaarService.leenUit(boek);
 
             int extraDagen = instellingService.getInlevertermijnDagen();
             LocalDate inleverDatum = LocalDate.now().plusDays(extraDagen);
 
-            Uitlening uitlening = new Uitlening(leraar, boek, LocalDate.now(), inleverDatum);
+            Uitlening uitlening = new Uitlening(leraar, exemplaar, LocalDate.now(), inleverDatum);
             uitlening.setStatus("ACTIEF");
             uitlening.setUitleenDatum(LocalDate.now());
             uitlening.setInleverDatum(inleverDatum);

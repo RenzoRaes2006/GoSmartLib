@@ -235,8 +235,8 @@
             @if (!isLeerling() && boek.didactischMateriaal) {
               <span class="didactisch-badge">Didactisch</span>
             }
-            @if (boek.heeftSchade) {
-              <span class="schade-badge">Beschadigd</span>
+            @if ((boek.aantalBeschadigd ?? 0) > 0) {
+              <span class="schade-badge">Beschadigd ({{ boek.aantalBeschadigd }})</span>
             }
             <span
               class="status-badge"

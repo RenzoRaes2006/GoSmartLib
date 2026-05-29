@@ -15,9 +15,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 import ap.be.backend.entity.Boek;
+import ap.be.backend.entity.Exemplaar;
+import ap.be.backend.entity.ExemplaarStatus;
 import ap.be.backend.entity.Tag;
 import ap.be.backend.entity.TagType;
 import ap.be.backend.repository.BoekRepository;
+import ap.be.backend.repository.ExemplaarRepository;
 import ap.be.backend.repository.TagRepository;
 
 @DataJpaTest
@@ -29,6 +32,9 @@ public class BoekFilterRepositoryTest {
 
     @Autowired
     private TagRepository tagRepository;
+
+    @Autowired
+    private ExemplaarRepository exemplaarRepository;
 
     private final Pageable defaultPageable = PageRequest.of(0, 100, Sort.by(Sort.Direction.ASC, "id"));
 
@@ -111,13 +117,13 @@ public class BoekFilterRepositoryTest {
     void givenBoekBeschikbaar_whenFilterBeschikbaarTrue_thenGeeftAlleenBeschikbareBoeken() {
         Boek beschikbaar = new Boek();
         beschikbaar.setTitel("Uniek Beschikbaar Boek " + System.currentTimeMillis());
-        beschikbaar.setAantalExemplaren(3);
         boekRepository.save(beschikbaar);
+        exemplaarRepository.save(new Exemplaar(beschikbaar, 1, ExemplaarStatus.BESCHIKBAAR));
 
         Boek uitgeleend = new Boek();
         uitgeleend.setTitel("Uniek Uitgeleend Boek " + System.currentTimeMillis());
-        uitgeleend.setAantalExemplaren(0);
         boekRepository.save(uitgeleend);
+        exemplaarRepository.save(new Exemplaar(uitgeleend, 1, ExemplaarStatus.UITGELEEND));
 
         Page<Boek> resultaat = boekRepository.filterBoeken(null, null, null, null, null,
                 true, null, null, null, null, null, null, null, defaultPageable);
@@ -143,8 +149,7 @@ public class BoekFilterRepositoryTest {
 
     @Test
     void givenBoekMetIsbn_whenFilterOpZoektermIsbn_thenGeeftMatchendeBoeken() {
-        String uniekIsbn = "978" + System.currentTimeMillis() % 10000000000L;
-        uniekIsbn = uniekIsbn.substring(0, 13);
+        String uniekIsbn = String.format("978%010d", System.currentTimeMillis() % 10000000000L);
         Boek boek = new Boek();
         boek.setTitel("ISBN Zoek Boek");
         boek.setIsbn(uniekIsbn);

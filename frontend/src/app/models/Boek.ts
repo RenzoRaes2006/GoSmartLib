@@ -18,4 +18,5 @@ export interface Boek {
   campusId?: number | null;
   campusNaam?: string | null;
   heeftSchade?: boolean;
+  aantalBeschadigd?: number;
 }
