@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -51,6 +52,10 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
+                        // Cover-afbeeldingen zijn publiek opvraagbaar: een <img src> stuurt geen
+                        // JWT mee, dus zonder dit zou elke cover op de VM een 401 geven (broken
+                        // image). Enkel GET is open; de upload (POST) blijft geauthenticeerd.
+                        .requestMatchers(HttpMethod.GET, "/api/images/**").permitAll()
                         .requestMatchers("/", "/login", "/error", "/api/boeken/**", "/api/tags/**", "/api/auth/admin/login", "/api/auth/admin/wachtwoord-wijzigen").permitAll()
                         .anyRequest().authenticated());
 
