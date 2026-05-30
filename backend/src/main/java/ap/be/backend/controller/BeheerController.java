@@ -161,6 +161,13 @@ public class BeheerController {
         }
 
         doelUser.setBeheerder(request.isBeheerder());
-        return ResponseEntity.ok(GebruikerMapper.toDTO(userRepository.save(doelUser)));
+        User opgeslagen = userRepository.save(doelUser);
+
+        School school = schoolRepository.findById(mijnSchoolId).orElse(null);
+        Map<String, String[]> namenLookup = school != null
+                ? haalNamenOp(school, Set.of(opgeslagen.getSmartschoolId()))
+                : Map.of();
+        String[] paar = namenLookup.getOrDefault(opgeslagen.getSmartschoolId(), new String[]{null, null});
+        return ResponseEntity.ok(GebruikerMapper.toDTO(opgeslagen, paar[0], paar[1]));
     }
 }
