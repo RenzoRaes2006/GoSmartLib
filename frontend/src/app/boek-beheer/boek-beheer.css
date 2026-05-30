@@ -369,6 +369,30 @@ form > div > div button[type='button']:hover {
 
 
 /* =====================
+   VERPLICHT VELD INDICATOR
+   ===================== */
+
+.verplicht {
+  color: #e53e3e;
+  margin-left: 3px;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.verplicht-legenda {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: 11px;
+  color: #718096;
+  text-align: right;
+}
+
+.verplicht-legenda .verplicht {
+  font-size: 12px;
+}
+
+/* =====================
    FORMULIER ACTIES
    ===================== */
 

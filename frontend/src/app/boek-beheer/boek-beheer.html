@@ -179,7 +179,7 @@
 @if (mode() === 'toevoegen' || boekGevonden()) {
   <form [formGroup]="boekForm" (ngSubmit)="onSubmit()">
     <div>
-      <label for="titel">Titel:</label>
+      <label for="titel">Titel:<span class="verplicht" aria-hidden="true">*</span></label>
       <input id="titel" formControlName="titel" />
       @if (boekForm.get('titel')?.invalid && boekForm.get('titel')?.touched) {
         <div>
@@ -194,7 +194,7 @@
     </div>
 
     <div>
-      <label for="auteur">Auteur:</label>
+      <label for="auteur">Auteur:<span class="verplicht" aria-hidden="true">*</span></label>
       <input id="auteur" formControlName="auteur" />
       @if (boekForm.get('auteur')?.invalid && boekForm.get('auteur')?.touched) {
         <div>
@@ -209,7 +209,7 @@
     </div>
 
     <div>
-      <label for="isbn">ISBN:</label>
+      <label for="isbn">ISBN:<span class="verplicht" aria-hidden="true">*</span></label>
       <div style="display: flex; gap: 10px">
         <input
           id="isbn"
@@ -372,7 +372,7 @@
     </div>
 
     <div>
-      <label for="beschrijving">Beschrijving:</label>
+      <label for="beschrijving">Beschrijving:<span class="verplicht" aria-hidden="true">*</span></label>
       <textarea id="beschrijving" formControlName="beschrijving"></textarea>
       @if (boekForm.get('beschrijving')?.invalid && boekForm.get('beschrijving')?.touched) {
         <div>
@@ -438,7 +438,7 @@
     </div>
 
     <div>
-      <label for="aantalExemplaren">Aantal exemplaren:</label>
+      <label for="aantalExemplaren">Aantal exemplaren:<span class="verplicht" aria-hidden="true">*</span></label>
       <input id="aantalExemplaren" formControlName="aantalExemplaren" />
       @if (boekForm.get('aantalExemplaren')?.invalid && boekForm.get('aantalExemplaren')?.touched) {
         <div>
@@ -522,6 +522,8 @@
       }
     </div>
     <!-- End toegevoegd door Jouw baas Mohamed -->
+
+    <p class="verplicht-legenda"><span class="verplicht" aria-hidden="true">*</span> Verplicht veld</p>
 
     <div class="form-actions">
       <button
