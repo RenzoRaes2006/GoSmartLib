@@ -32,6 +32,7 @@ services:
       SMARTSCHOOL_CLIENT_ID: ${SMARTSCHOOL_CLIENT_ID}
       SMARTSCHOOL_CLIENT_SECRET: ${SMARTSCHOOL_CLIENT_SECRET}
       ADMIN_INITIAL_PASSWORD: ${ADMIN_INITIAL_PASSWORD}
+      GOOGLE_BOOKS_API_KEY: ${GOOGLE_BOOKS_API_KEY}
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.backend.rule=(Host(`frontend-sp09.cloud-ap.be`) || Host(`api-sp09.cloud-ap.be`)) && (PathPrefix(`/api`) || PathPrefix(`/oauth2`) || PathPrefix(`/login/oauth2`) || Path(`/error`))"
