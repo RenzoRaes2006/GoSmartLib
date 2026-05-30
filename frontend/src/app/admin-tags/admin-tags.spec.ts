@@ -25,14 +25,14 @@ describe('AdminTags', () => {
     req.flush(tags);
   }
 
-  it('laadt tags voor de actieve tab bij init', () => {
+  it('givenAdminTags_whenInit_thenTagsVoorActieveTabGeladen', () => {
     fixture.detectChanges();
     antwoordOpListGenre([{ id: 1, naam: 'Fantasy', type: 'GENRE' }]);
     expect(component.tags().length).toBe(1);
     expect(component.tags()[0].naam).toBe('Fantasy');
   });
 
-  it('wisselTab herlaadt voor het nieuwe type', () => {
+  it('givenNieuwType_whenWisselTab_thenTagsVoorNieuwTypeHerladen', () => {
     fixture.detectChanges();
     antwoordOpListGenre([]);
 
@@ -43,7 +43,7 @@ describe('AdminTags', () => {
     expect(component.tags()[0].naam).toBe('Vriendschap');
   });
 
-  it('toevoegen POST tag en herlaadt', () => {
+  it('givenNieuweTagNaam_whenToevoegen_thenPostTagEnHerladen', () => {
     fixture.detectChanges();
     antwoordOpListGenre([]);
 
@@ -59,7 +59,7 @@ describe('AdminTags', () => {
     expect(component.tags()[0].naam).toBe('Sci-Fi');
   });
 
-  it('verwijderen bij 409 toont foutmelding', () => {
+  it('givenTagInGebruik_whenVerwijderen_then409FoutmeldingGetoond', () => {
     fixture.detectChanges();
     antwoordOpListGenre([{ id: 3, naam: 'Horror', type: 'GENRE' }]);
 
@@ -73,7 +73,7 @@ describe('AdminTags', () => {
     expect(component.fout()).toContain('gebruikt door 2');
   });
 
-  it('rename verstuurt PUT en herlaadt', () => {
+  it('givenGewijzigdeNaam_whenBewaarBewerken_thenPutVerstuurdEnHerladen', () => {
     fixture.detectChanges();
     antwoordOpListGenre([{ id: 4, naam: 'Avontuur', type: 'GENRE' }]);
 

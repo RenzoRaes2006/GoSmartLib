@@ -48,7 +48,7 @@ describe('LeerkrachtVertrekWizard', () => {
     component.leerkracht = leerkracht;
   });
 
-  it('blokkeert doorgaan als er open uitleningen zijn', () => {
+  it('givenOpenUitleningen_whenNaarStap2_thenGeblokkeerd', () => {
     serviceSpy.getLeerkrachtVertrekPreview.and.returnValue(
       of(maakPreview({ aantalOpenLeningen: 2 }))
     );
@@ -59,7 +59,7 @@ describe('LeerkrachtVertrekWizard', () => {
     expect(component.stap()).toBe(1);
   });
 
-  it('skipt stap 2 als de leerkracht geen actieve leeslijsten heeft', () => {
+  it('givenGeenActieveLeeslijsten_whenNaarStap2_thenStap2Overgeslagen', () => {
     serviceSpy.getLeerkrachtVertrekPreview.and.returnValue(of(maakPreview()));
     fixture.detectChanges();
 
@@ -68,7 +68,7 @@ describe('LeerkrachtVertrekWizard', () => {
     expect(component.stap()).toBe(3);
   });
 
-  it('past bulk-keuze toe op alle leeslijsten', () => {
+  it('givenBulkLeerkrachtId_whenPasBulkToe_thenKeuzeToegepastOpAlleLeeslijsten', () => {
     serviceSpy.getLeerkrachtVertrekPreview.and.returnValue(
       of(maakPreview({
         leeslijsten: [
@@ -90,7 +90,7 @@ describe('LeerkrachtVertrekWizard', () => {
     expect(component.aantalGearchiveerd()).toBe(0);
   });
 
-  it('stuurt overdrachten-map mee bij bevestigen', () => {
+  it('givenKeuzes_whenBevestig_thenOverdrachtenMapMeegestuurd', () => {
     serviceSpy.getLeerkrachtVertrekPreview.and.returnValue(
       of(maakPreview({
         leeslijsten: [
@@ -110,7 +110,7 @@ describe('LeerkrachtVertrekWizard', () => {
     expect(component.stap()).toBe('klaar');
   });
 
-  it('toont fout als preview-call faalt', () => {
+  it('givenPreviewCallFaalt_whenInit_thenFoutGetoond', () => {
     serviceSpy.getLeerkrachtVertrekPreview.and.returnValue(
       throwError(() => ({ error: 'Server down' }))
     );

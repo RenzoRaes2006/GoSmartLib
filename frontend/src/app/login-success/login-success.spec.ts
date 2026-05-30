@@ -29,7 +29,7 @@ describe('LoginSuccessComponent', () => {
     router = TestBed.inject(Router);
   }
 
-  it('zonder token navigeert naar /login', () => {
+  it('givenGeenToken_whenInit_thenNavigeertNaarLogin', () => {
     setup({});
     const navSpy = spyOn(router, 'navigate').and.resolveTo(true);
 
@@ -39,7 +39,7 @@ describe('LoginSuccessComponent', () => {
     expect(authSpy.setUserFromToken).not.toHaveBeenCalled();
   });
 
-  it('met token slaat token op en roept setUserFromToken aan', () => {
+  it('givenToken_whenInit_thenTokenOpsgeslagenEnSetUserFromTokenAangeroepen', () => {
     localStorage.removeItem('jwtToken');
     setup({ token: 'abc.def.ghi' });
     spyOn(router, 'navigate').and.resolveTo(true);
@@ -51,7 +51,7 @@ describe('LoginSuccessComponent', () => {
     localStorage.removeItem('jwtToken');
   });
 
-  it('teacher rol stuurt door naar /leerkracht-dashboard', () => {
+  it('givenTeacherRol_whenInit_thenNavigeertNaarLeerkrachtDashboard', () => {
     setup({ token: 'tok' });
     authSpy.currentUser.and.returnValue({ id: '1', name: 'X', role: 'teacher', klas: '5A' });
     const navSpy = spyOn(router, 'navigate').and.resolveTo(true);

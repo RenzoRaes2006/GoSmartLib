@@ -34,7 +34,7 @@ class KlassLeeslijstControllerTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void createLeeslijst_ReturnsCreatedDTO() throws Exception {
+    void givenLeerkrachtId_whenCreateLeeslijst_thenCreatedDto() throws Exception {
         KlassLeeslijstRequestDTO request = new KlassLeeslijstRequestDTO("Mijn Lijst", null, null, null, null);
         KlassLeeslijstResponseDTO expected = basicResponse(1L, "Mijn Lijst");
         when(leeslijstService.createLeeslijst(any(KlassLeeslijstRequestDTO.class), eq(1L))).thenReturn(expected);
@@ -47,7 +47,7 @@ class KlassLeeslijstControllerTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void createLeeslijst_metKlasEnBeschrijving_ReturnsCreatedDTO() throws Exception {
+    void givenKlasEnBeschrijving_whenCreateLeeslijst_thenCreatedDto() throws Exception {
         KlassLeeslijstRequestDTO request = new KlassLeeslijstRequestDTO(
                 "Lessen Wiskunde", "5INF1", null, "Boeken voor het rekenenkundig hoofdstuk", true);
         KlassLeeslijstResponseDTO expected = new KlassLeeslijstResponseDTO(
@@ -64,7 +64,7 @@ class KlassLeeslijstControllerTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void getLeeslijstenByLeerkracht_ReturnsList() throws Exception {
+    void givenLeerkrachtId_whenGetLeeslijstenByLeerkracht_thenLijst() throws Exception {
         Long leerkrachtId = 1L;
         when(leeslijstService.getLeeslijstenByLeerkracht(leerkrachtId)).thenReturn(List.of(
                 basicResponse(1L, "Lijst 1")));
@@ -76,7 +76,7 @@ class KlassLeeslijstControllerTest extends AbstractIntegrationTest {
 
     @Test
     @WithMockUser(roles = "STUDENT")
-    void getLeeslijstenVoorHuidigeLeerling_ReturnsList() throws Exception {
+    void givenIngelogdeLeerling_whenGetLeeslijstenVoorHuidigeLeerling_thenLijst() throws Exception {
         when(leeslijstService.getLeeslijstenVoorHuidigeLeerling()).thenReturn(List.of(
                 new KlassLeeslijstResponseDTO(1L, "Klas-lijst", "5INF1", null, null, null, null, null, true, false, List.of()),
                 new KlassLeeslijstResponseDTO(2L, "Persoonlijke lijst", null, null, null, List.of(42L), List.of("leerling42"), null, true, false, List.of())));
@@ -89,7 +89,7 @@ class KlassLeeslijstControllerTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void addBoekToLeeslijst_ReturnsUpdatedDTO() throws Exception {
+    void givenLijstEnBoekId_whenAddBoekToLeeslijst_thenUpdatedDto() throws Exception {
         Long lijstId = 10L;
         Long boekId = 5L;
         when(leeslijstService.addBoekToLeeslijst(lijstId, boekId))
@@ -102,7 +102,7 @@ class KlassLeeslijstControllerTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void getLeeslijstById_ReturnsDTO() throws Exception {
+    void givenLijstId_whenGetLeeslijstById_thenDto() throws Exception {
         Long lijstId = 10L;
         when(leeslijstService.getLeeslijstById(lijstId))
                 .thenReturn(basicResponse(lijstId, "Lijst"));
@@ -113,7 +113,7 @@ class KlassLeeslijstControllerTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void removeBoekFromLeeslijst_ReturnsUpdatedDTO() throws Exception {
+    void givenLijstEnBoekId_whenRemoveBoekFromLeeslijst_thenUpdatedDto() throws Exception {
         Long lijstId = 10L;
         Long boekId = 5L;
         when(leeslijstService.removeBoekFromLeeslijst(lijstId, boekId))
@@ -126,7 +126,7 @@ class KlassLeeslijstControllerTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void updateLeeslijstNaam_ReturnsUpdatedDTO() throws Exception {
+    void givenNieuweNaam_whenUpdateLeeslijstNaam_thenUpdatedDto() throws Exception {
         Long lijstId = 10L;
         String nieuweNaam = "Nieuwe Naam";
         when(leeslijstService.updateLeeslijstNaam(eq(lijstId), eq(nieuweNaam)))
@@ -140,7 +140,7 @@ class KlassLeeslijstControllerTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void updateBeschrijving_ReturnsUpdatedDTO() throws Exception {
+    void givenNieuweBeschrijving_whenUpdateBeschrijving_thenUpdatedDto() throws Exception {
         Long lijstId = 10L;
         String nieuweTekst = "Korte uitleg over de opdracht.";
         when(leeslijstService.updateBeschrijving(eq(lijstId), eq(nieuweTekst)))
@@ -155,7 +155,7 @@ class KlassLeeslijstControllerTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void updateZichtbaar_ReturnsUpdatedDTO() throws Exception {
+    void givenZichtbaarTrue_whenUpdateZichtbaar_thenUpdatedDto() throws Exception {
         Long lijstId = 10L;
         when(leeslijstService.updateZichtbaar(eq(lijstId), eq(true)))
                 .thenReturn(new KlassLeeslijstResponseDTO(
@@ -169,7 +169,7 @@ class KlassLeeslijstControllerTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void deleteLeeslijst_ReturnsNoContent() throws Exception {
+    void givenBestaandeLijst_whenDeleteLeeslijst_thenNoContent() throws Exception {
         Long lijstId = 10L;
         doNothing().when(leeslijstService).deleteLeeslijst(lijstId);
 
@@ -180,7 +180,7 @@ class KlassLeeslijstControllerTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void getAllKlassenLeeslijsten_ReturnsList() throws Exception {
+    void givenLeeslijsten_whenGetAllKlassenLeeslijsten_thenLijst() throws Exception {
         when(leeslijstService.getAllKlassenLeeslijsten()).thenReturn(List.of(
                 basicResponse(1L, "Lijst 1")));
 

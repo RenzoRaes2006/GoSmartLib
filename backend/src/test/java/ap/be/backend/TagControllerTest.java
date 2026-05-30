@@ -50,7 +50,7 @@ public class TagControllerTest {
 
     @Test
     @WithMockUser(roles = "LEERLING")
-    void list_byType_returns_tags() throws Exception {
+    void givenTagType_whenGetTags_thenLijst() throws Exception {
         when(tagService.getByType(TagType.GENRE)).thenReturn(List.of(tag(1L, "Fantasy", TagType.GENRE)));
 
         mockMvc.perform(get("/api/tags").param("type", "GENRE"))
@@ -62,7 +62,7 @@ public class TagControllerTest {
 
     @Test
     @WithMockUser(roles = "ADMIN")
-    void create_als_admin_werkt() throws Exception {
+    void givenAdminRol_whenCreateTag_thenOk() throws Exception {
         when(tagService.create(eq(TagType.GENRE), eq("Fantasy"), eq(null)))
                 .thenReturn(tag(1L, "Fantasy", TagType.GENRE));
 
@@ -75,7 +75,7 @@ public class TagControllerTest {
 
     @Test
     @WithMockUser(roles = "BEHEERDER")
-    void create_als_beheerder_geweigerd() throws Exception {
+    void givenBeheerderRol_whenCreateTag_thenForbidden() throws Exception {
         mockMvc.perform(post("/api/tags")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"naam\":\"Fantasy\",\"type\":\"GENRE\"}"))
@@ -84,7 +84,7 @@ public class TagControllerTest {
 
     @Test
     @WithMockUser(roles = "ADMIN")
-    void create_duplicate_gooit_409() throws Exception {
+    void givenDuplicateTag_whenCreateTag_thenConflict() throws Exception {
         when(tagService.create(any(), any(), any())).thenThrow(new DuplicateTagException("Fantasy"));
 
         mockMvc.perform(post("/api/tags")
@@ -95,7 +95,7 @@ public class TagControllerTest {
 
     @Test
     @WithMockUser(roles = "ADMIN")
-    void rename_werkt() throws Exception {
+    void givenBestaandeTag_whenRenameTag_thenOk() throws Exception {
         when(tagService.rename(eq(1L), eq("Sci-Fi"))).thenReturn(tag(1L, "Sci-Fi", TagType.GENRE));
 
         mockMvc.perform(put("/api/tags/1")
@@ -107,7 +107,7 @@ public class TagControllerTest {
 
     @Test
     @WithMockUser(roles = "ADMIN")
-    void rename_notfound_gooit_404() throws Exception {
+    void givenNietBestaandeTag_whenRenameTag_thenNotFound() throws Exception {
         when(tagService.rename(eq(99L), any())).thenThrow(new TagNotFoundException(99L));
 
         mockMvc.perform(put("/api/tags/99")
@@ -118,7 +118,7 @@ public class TagControllerTest {
 
     @Test
     @WithMockUser(roles = "ADMIN")
-    void delete_werkt() throws Exception {
+    void givenBestaandeTag_whenDeleteTag_thenNoContent() throws Exception {
         mockMvc.perform(delete("/api/tags/1"))
                 .andExpect(status().isNoContent());
 
@@ -127,7 +127,7 @@ public class TagControllerTest {
 
     @Test
     @WithMockUser(roles = "ADMIN")
-    void delete_inGebruik_gooit_409() throws Exception {
+    void givenTagInGebruik_whenDeleteTag_thenConflict() throws Exception {
         doThrow(new TagInGebruikException("Fantasy", 3L)).when(tagService).delete(1L);
 
         mockMvc.perform(delete("/api/tags/1"))
@@ -137,7 +137,7 @@ public class TagControllerTest {
 
     @Test
     @WithMockUser(roles = "BEHEERDER")
-    void delete_als_beheerder_geweigerd() throws Exception {
+    void givenBeheerderRol_whenDeleteTag_thenForbidden() throws Exception {
         mockMvc.perform(delete("/api/tags/1"))
                 .andExpect(status().isForbidden());
     }

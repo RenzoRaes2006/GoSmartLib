@@ -71,34 +71,34 @@ describe('KlassLeeslijstBeheerComponent', () => {
     fixture.detectChanges();
   });
 
-  it('moet aangemaakt kunnen worden', () => {
+  it('givenKlassLeeslijstBeheer_whenAangemaakt_thenComponentBestaat', () => {
     expect(component).toBeTruthy();
   });
 
-  it('laadt lijst en zoekresultaten bij init', () => {
+  it('givenServices_whenInit_thenLijstEnZoekresultatenGeladen', () => {
     expect(leeslijstSpy.getLeeslijstDetails).toHaveBeenCalledWith(5);
     expect(boekSpy.getBoekenGefilterd).toHaveBeenCalled();
     expect(component.lijst()?.id).toBe(5);
   });
 
-  it('isAlToegevoegd geeft true voor boek dat al in de lijst staat', () => {
+  it('givenBoekInLijst_whenIsAlToegevoegd_thenTrue', () => {
     expect(component.isAlToegevoegd(1)).toBeTrue();
     expect(component.isAlToegevoegd(99)).toBeFalse();
   });
 
-  it('voegBoekToe roept addBoekToLeeslijst aan met juiste id', () => {
+  it('givenBoekId_whenVoegBoekToe_thenAddBoekToLeeslijstAangeroepen', () => {
     component.voegBoekToe(2);
 
     expect(leeslijstSpy.addBoekToLeeslijst).toHaveBeenCalledWith(5, 2);
   });
 
-  it('toggleZichtbaar roept service aan met geinverteerde waarde', () => {
+  it('givenZichtbaarFalse_whenToggleZichtbaar_thenServiceAangeropenMetGeinverterdeWaarde', () => {
     component.toggleZichtbaar();
 
     expect(leeslijstSpy.updateZichtbaar).toHaveBeenCalledWith(5, true);
   });
 
-  it('slaBeschrijvingOp roept updateBeschrijving aan', () => {
+  it('givenNieuweBeschrijving_whenSlaBeschrijvingOp_thenUpdateBeschrijvingAangeroepen', () => {
     component.bewerkBeschrijving.set('Nieuwe tekst');
 
     component.slaBeschrijvingOp();
@@ -106,7 +106,7 @@ describe('KlassLeeslijstBeheerComponent', () => {
     expect(leeslijstSpy.updateBeschrijving).toHaveBeenCalledWith(5, 'Nieuwe tekst');
   });
 
-  it('slaKoppelingOp wisselt klas-koppeling om naar leerling-koppeling', () => {
+  it('givenLeerlingKoppeling_whenSlaKoppelingOp_thenKlasKoppelingNaarLeerlingGewisseld', () => {
     component.koppelType.set('LEERLING');
     component.koppelLeerlingId.set(42);
 
@@ -116,7 +116,7 @@ describe('KlassLeeslijstBeheerComponent', () => {
     expect(component.showKoppelingModal()).toBeFalse();
   });
 
-  it('bevestigVerwijderen roept service aan en navigeert naar /leeslijsten', () => {
+  it('givenLeeslijst_whenBevestigVerwijderen_thenServiceAangeropenEnNavigeertNaarLeeslijsten', () => {
     const navSpy = spyOn(router, 'navigate').and.resolveTo(true);
 
     component.bevestigVerwijderen();
@@ -125,7 +125,7 @@ describe('KlassLeeslijstBeheerComponent', () => {
     expect(navSpy).toHaveBeenCalledWith(['/leeslijsten']);
   });
 
-  it('updateFilters zet paginaError bij negatieve minPagina', () => {
+  it('givenNegatiefMinPagina_whenUpdateFilters_thenPaginaErrorGezet', () => {
     component.minPagina.set(-1);
 
     component.updateFilters();
@@ -133,7 +133,7 @@ describe('KlassLeeslijstBeheerComponent', () => {
     expect(component.paginaError()).toContain('Min.');
   });
 
-  it('updateFilters zet paginaError bij negatieve maxPagina', () => {
+  it('givenNegatiefMaxPagina_whenUpdateFilters_thenPaginaErrorGezet', () => {
     component.minPagina.set(0);
     component.maxPagina.set(-5);
 
@@ -142,7 +142,7 @@ describe('KlassLeeslijstBeheerComponent', () => {
     expect(component.paginaError()).toContain('Max.');
   });
 
-  it('updateFilters zet paginaError als min > max', () => {
+  it('givenMinGroterDanMax_whenUpdateFilters_thenPaginaErrorGezet', () => {
     component.minPagina.set(200);
     component.maxPagina.set(100);
 
@@ -151,7 +151,7 @@ describe('KlassLeeslijstBeheerComponent', () => {
     expect(component.paginaError()).toContain('Min');
   });
 
-  it('onMinPaginaSlider clampt waarde naar maxPagina', () => {
+  it('givenWaardeBovenmaxPagina_whenOnMinPaginaSlider_thenWaardeGeclampedNaarMaxPagina', () => {
     component.maxPagina.set(100);
     const input = document.createElement('input');
     input.value = '300';
@@ -162,7 +162,7 @@ describe('KlassLeeslijstBeheerComponent', () => {
     expect(input.value).toBe('100');
   });
 
-  it('onMaxPaginaSlider clampt waarde naar minPagina', () => {
+  it('givenWaardeOnderMinPagina_whenOnMaxPaginaSlider_thenWaardeGeclampedNaarMinPagina', () => {
     component.minPagina.set(200);
     const input = document.createElement('input');
     input.value = '50';

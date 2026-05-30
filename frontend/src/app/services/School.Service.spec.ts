@@ -18,11 +18,11 @@ describe('SchoolService', () => {
 
   afterEach(() => httpMock.verify());
 
-  it('should be created', () => {
+  it('givenSchoolService_whenAangemaakt_thenServiceBestaat', () => {
     expect(service).toBeTruthy();
   });
 
-  it('getAlleScholen stuurt GET op /api/scholen', () => {
+  it('givenSchoolService_whenGetAlleScholen_thenGetNaarApiScholen', () => {
     service.getAlleScholen().subscribe((res) => expect(res.length).toBe(2));
 
     const req = httpMock.expectOne((r) => r.url.endsWith('/api/scholen'));
@@ -30,7 +30,7 @@ describe('SchoolService', () => {
     req.flush([{ id: 1 }, { id: 2 }]);
   });
 
-  it('maakSchoolAan stuurt POST met body', () => {
+  it('givenSchoolData_whenMaakSchoolAan_thenPostMetBodyVerstuurd', () => {
     service.maakSchoolAan({ naam: 'Test' }).subscribe();
 
     const req = httpMock.expectOne((r) => r.url.endsWith('/api/scholen'));
@@ -39,7 +39,7 @@ describe('SchoolService', () => {
     req.flush({ id: 1, naam: 'Test' });
   });
 
-  it('verwijderSchool stuurt DELETE met id', () => {
+  it('givenSchoolId_whenVerwijderSchool_thenDeleteMetIdVerstuurd', () => {
     service.verwijderSchool(7).subscribe();
 
     const req = httpMock.expectOne((r) => r.url.endsWith('/api/scholen/7'));

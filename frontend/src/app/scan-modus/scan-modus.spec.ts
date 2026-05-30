@@ -25,16 +25,16 @@ describe('ScanModus', () => {
     fixture.detectChanges();
   });
 
-  it('moet aangemaakt kunnen worden', () => {
+  it('givenScanModus_whenAangemaakt_thenComponentBestaat', () => {
     expect(component).toBeTruthy();
   });
 
-  it('haalt leerlingen op via scanService bij init', () => {
+  it('givenScanService_whenInit_thenLeerlingenOpgehaald', () => {
     expect(scanSpy.zoekLeerlingen).toHaveBeenCalledWith('', 0, 4);
     expect(component.leerlingen().length).toBe(1);
   });
 
-  it('kiesLeerling zet de geselecteerde leerling en stap naar MODUS', () => {
+  it('givenLeerling_whenKiesLeerling_thenGeselecteerdeLeerlingGezettEnStapNaarModus', () => {
     const leerling = { gebruikerID: 7, voorNaam: 'Test', achterNaam: 'X' } as any;
 
     component.kiesLeerling(leerling);
@@ -43,7 +43,7 @@ describe('ScanModus', () => {
     expect(component.stap()).toBe('MODUS');
   });
 
-  it('scanIsbn weigert ongeldig ISBN met een foutmelding', () => {
+  it('givenOngeldigIsbn_whenScanIsbn_thenFoutmeldingEnGeenServiceCall', () => {
     component.isbnInput.set('123');
 
     component.scanIsbn();
@@ -52,7 +52,7 @@ describe('ScanModus', () => {
     expect(scanSpy.zoekBoekOpIsbn).not.toHaveBeenCalled();
   });
 
-  it('scanIsbn met geldig ISBN voegt boek toe aan mandje', () => {
+  it('givenGeldigIsbn_whenScanIsbn_thenBoekToegevoegjAanMandje', () => {
     component.isbnInput.set('9780132350884');
 
     component.scanIsbn();
@@ -62,7 +62,7 @@ describe('ScanModus', () => {
     expect(component.mandje()[0].titel).toBe('Test Boek');
   });
 
-  it('verwijderUitMandje haalt boek met juiste isbn weg', () => {
+  it('givenIsbn_whenVerwijderUitMandje_thenBoekMetJuisteIsbnVerwijderd', () => {
     component.mandje.set([
       { isbn: 'A', titel: 'X' } as any,
       { isbn: 'B', titel: 'Y' } as any,

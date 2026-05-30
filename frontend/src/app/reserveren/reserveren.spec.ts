@@ -44,23 +44,23 @@ describe('ReserverenComponent', () => {
     fixture.detectChanges();
   });
 
-  it('moet aangemaakt kunnen worden', () => {
+  it('givenReserveren_whenAangemaakt_thenComponentBestaat', () => {
     expect(component).toBeTruthy();
   });
 
-  it('subscribet op mandje$ en haalt actieve leningen + limiet op', () => {
+  it('givenMandjeEnServices_whenInit_thenBoekenLeningenEnLimietGeladen', () => {
     expect(component.boekenInMandje.length).toBe(1);
     expect(component.actieveLeningen()).toBe(1);
     expect(component.maxLeenLimiet()).toBe(3);
   });
 
-  it('verwijderBoek delegeert naar de mandje-service', () => {
+  it('givenBoekId_whenVerwijderBoek_thenMandjeServiceAangeroepen', () => {
     component.verwijderBoek(1);
 
     expect(mandjeStub.verwijderBoek).toHaveBeenCalledWith(1);
   });
 
-  it('bevestigReservering met leeg mandje toont melding zonder service-call', () => {
+  it('givenLeegMandje_whenBevestigReservering_thenMeldingZonderServiceCall', () => {
     component.boekenInMandje = [];
     boekSpy.leenBoek.calls.reset();
 
@@ -70,7 +70,7 @@ describe('ReserverenComponent', () => {
     expect(component.statusMelding).toContain('leeg');
   });
 
-  it('bevestigReservering roept BoekService.leenBoek aan voor elk boek en leegt mandje bij succes', () => {
+  it('givenBoekInMandje_whenBevestigReservering_thenLeenBoekAangeropenEnMandjeLeeggemaakt', () => {
     component.bevestigReservering();
 
     expect(boekSpy.leenBoek).toHaveBeenCalledWith(1, 1);

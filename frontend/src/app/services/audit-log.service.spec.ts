@@ -28,7 +28,7 @@ describe('AuditLogService', () => {
 
   afterEach(() => httpMock.verify());
 
-  it('zoek zonder filters stuurt enkel page+size', () => {
+  it('givenGeenFilters_whenZoek_thenEnkelPageEnSizeMeegestuurd', () => {
     service.zoek({}).subscribe();
     const req = httpMock.expectOne((r) => r.url.endsWith('/api/admin/audit-log'));
     expect(req.request.method).toBe('GET');
@@ -42,7 +42,7 @@ describe('AuditLogService', () => {
     req.flush(lege);
   });
 
-  it('zoek bouwt alle filter-params correct', () => {
+  it('givenAlleFilters_whenZoek_thenAlleFilterParamsCorrectGebouwd', () => {
     service
       .zoek({
         actie: 'GEBRUIKER_VERTROKKEN',
@@ -66,7 +66,7 @@ describe('AuditLogService', () => {
     req.flush(lege);
   });
 
-  it('zoek met null-filters laat ze weg', () => {
+  it('givenNullFilters_whenZoek_thenFilterParamsWeggelaten', () => {
     service
       .zoek({ actie: null, entiteitType: null, actorId: null, vanaf: null, tot: null })
       .subscribe();
@@ -76,7 +76,7 @@ describe('AuditLogService', () => {
     req.flush(lege);
   });
 
-  it('zoek geeft de page-respons door', () => {
+  it('givenAuditLogData_whenZoek_thenPageResponsDoorgegeven', () => {
     const data: AuditLogPage = {
       content: [
         {

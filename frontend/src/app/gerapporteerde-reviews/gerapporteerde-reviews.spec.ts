@@ -37,23 +37,23 @@ describe('GerapporteerdeReviews', () => {
     fixture.detectChanges();
   });
 
-  it('moet aangemaakt kunnen worden', () => {
+  it('givenGerapporteerdeReviews_whenAangemaakt_thenComponentBestaat', () => {
     expect(component).toBeTruthy();
   });
 
-  it('haalt rapportages op via service bij init', () => {
+  it('givenRapportageService_whenInit_thenRapportagesOpgehaald', () => {
     expect(rapportSpy.getRapportages).toHaveBeenCalled();
     expect(component.rapportages.length).toBe(2);
   });
 
-  it('negeerRapportage roept service aan en filtert het rapport eruit', () => {
+  it('givenRapportageId_whenNegeerRapportage_thenServiceAangeropenEnRapportGefilterd', () => {
     component.negeerRapportage(1);
 
     expect(rapportSpy.negeerRapportage).toHaveBeenCalledWith(1);
     expect(component.rapportages.find((r: any) => r.id === 1)).toBeUndefined();
   });
 
-  it('verwijderReview filtert alle rapportages voor dezelfde reviewId weg', () => {
+  it('givenReviewId_whenVerwijderReview_thenAlleRapportagesVoorReviewIdGefilterd', () => {
     component.verwijderReview(10);
 
     expect(reviewSpy.verwijderRapporteerdeBeoordeling).toHaveBeenCalledWith(10);

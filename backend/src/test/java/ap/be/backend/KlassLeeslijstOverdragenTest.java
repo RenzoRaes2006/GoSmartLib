@@ -79,7 +79,7 @@ class KlassLeeslijstOverdragenTest {
     }
 
     @Test
-    void overdragen_geldig_wisseltLeerkracht() {
+    void givenGeldigeOverdracht_whenOverdragen_thenLeerkrachtGewisseld() {
         when(userRepository.findById(20L)).thenReturn(Optional.of(andereLeerkracht));
 
         service.overdragen(100L, 20L);
@@ -88,34 +88,34 @@ class KlassLeeslijstOverdragenTest {
     }
 
     @Test
-    void overdragen_zonderId_gooitException() {
+    void givenGeenDoelId_whenOverdragen_thenIllegalArgumentException() {
         assertThrows(IllegalArgumentException.class,
                 () -> service.overdragen(100L, null));
     }
 
     @Test
-    void overdragen_onbekendeLijst_gooitNotFound() {
+    void givenOnbekendeLijst_whenOverdragen_thenKlassLeeslijstNotFoundException() {
         when(leeslijstRepository.findById(999L)).thenReturn(Optional.empty());
         assertThrows(KlassLeeslijstNotFoundException.class,
                 () -> service.overdragen(999L, 20L));
     }
 
     @Test
-    void overdragen_onbekendeDoelLeerkracht_gooitNotFound() {
+    void givenOnbekendeDoelLeerkracht_whenOverdragen_thenGebruikerNotFoundException() {
         when(userRepository.findById(999L)).thenReturn(Optional.empty());
         assertThrows(GebruikerNotFoundException.class,
                 () -> service.overdragen(100L, 999L));
     }
 
     @Test
-    void overdragen_zelfdeLeerkracht_gooitException() {
+    void givenZelfdeLeerkracht_whenOverdragen_thenIllegalArgumentException() {
         when(userRepository.findById(10L)).thenReturn(Optional.of(huidigeLeerkracht));
         assertThrows(IllegalArgumentException.class,
                 () -> service.overdragen(100L, 10L));
     }
 
     @Test
-    void overdragen_naarLeerling_gooitException() {
+    void givenDoelIsLeerling_whenOverdragen_thenIllegalArgumentException() {
         User leerling = new User("ll-1", "1A", Rol.LEERLING);
         leerling.setId(30L);
         leerling.setSchool(school1);
@@ -127,7 +127,7 @@ class KlassLeeslijstOverdragenTest {
     }
 
     @Test
-    void overdragen_naarInactieveLeerkracht_gooitException() {
+    void givenInactieveDoelLeerkracht_whenOverdragen_thenIllegalArgumentException() {
         andereLeerkracht.setActief(false);
         when(userRepository.findById(20L)).thenReturn(Optional.of(andereLeerkracht));
 
@@ -136,7 +136,7 @@ class KlassLeeslijstOverdragenTest {
     }
 
     @Test
-    void overdragen_naarAndereSchool_gooitException() {
+    void givenDoelLeerkrachtAndereSchool_whenOverdragen_thenIllegalArgumentException() {
         andereLeerkracht.setSchool(school2);
         when(userRepository.findById(20L)).thenReturn(Optional.of(andereLeerkracht));
 

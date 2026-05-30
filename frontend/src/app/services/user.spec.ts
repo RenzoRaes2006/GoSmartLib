@@ -20,11 +20,11 @@ describe('GebruikerService', () => {
 
   afterEach(() => httpMock.verify());
 
-  it('should be created', () => {
+  it('givenGebruikerService_whenAangemaakt_thenServiceBestaat', () => {
     expect(service).toBeTruthy();
   });
 
-  it('getUsers stuurt GET naar /api/gebruikers', () => {
+  it('givenGebruikerService_whenGetUsers_thenGetNaarApiGebruikers', () => {
     const mock: Gebruiker[] = [
       { id: 1, smartschoolId: 'a.b', rol: 'LEERLING' },
     ];
@@ -35,7 +35,7 @@ describe('GebruikerService', () => {
     req.flush(mock);
   });
 
-  it('getLeeslijst stuurt GET met gebruiker-id in path', () => {
+  it('givenGebruikerId_whenGetLeeslijst_thenGetMetGebruikerIdInPath', () => {
     const mock: Boek[] = [];
     service.getLeeslijst(42).subscribe((result) => expect(result).toEqual(mock));
 

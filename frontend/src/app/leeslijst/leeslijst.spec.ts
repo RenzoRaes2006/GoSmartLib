@@ -34,11 +34,11 @@ describe('Leeslijst', () => {
     fixture.detectChanges();
   });
 
-  it('moet aangemaakt kunnen worden', () => {
+  it('givenLeeslijst_whenAangemaakt_thenComponentBestaat', () => {
     expect(component).toBeTruthy();
   });
 
-  it('haalt mappen op en voegt Favorieten toe als er nog geen is', () => {
+  it('givenLeeslijstService_whenInit_thenMappenOpgehaaldEnFavorietenToegevoegd', () => {
     expect(serviceSpy.getMappenVanGebruiker).toHaveBeenCalledWith(1);
     const namen = component.mappen.map((m) => m.naam);
     expect(namen).toContain('Favorieten');
@@ -46,7 +46,7 @@ describe('Leeslijst', () => {
     expect(namen).not.toContain('Leeg');
   });
 
-  it('openMap zet geselecteerdeMap op het meegegeven object', () => {
+  it('givenMapObject_whenOpenMap_thenGeselecteerdeMapGezet', () => {
     const map = { id: 1, naam: 'School' };
 
     component.openMap(map);
@@ -54,7 +54,7 @@ describe('Leeslijst', () => {
     expect(component.geselecteerdeMap).toBe(map);
   });
 
-  it('verwijderBoek roept service aan en haalt boek uit lokale map', () => {
+  it('givenBoekId_whenVerwijderBoek_thenServiceAangeropenEnBoekUitLokaleMapVerwijderd', () => {
     component.geselecteerdeMap = { id: 1, naam: 'School', boeken: [{ id: 10 }, { id: 11 }] };
 
     component.verwijderBoek(10, { stopPropagation: () => {} } as any);

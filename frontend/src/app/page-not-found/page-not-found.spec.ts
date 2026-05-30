@@ -13,17 +13,17 @@ describe('PageNotFound', () => {
     fixture.detectChanges();
   });
 
-  it('moet aangemaakt kunnen worden', () => {
+  it('givenPageNotFound_whenAangemaakt_thenComponentBestaat', () => {
     expect(component).toBeTruthy();
   });
 
-  it('toont de 404 boodschap', () => {
+  it('givenPageNotFound_whenGerenderd_then404BoodschapZichtbaar', () => {
     const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
     expect(text).toContain('404');
     expect(text).toContain('niet meer bestaat');
   });
 
-  it('biedt acties terug naar homepage en catalogus', () => {
+  it('givenPageNotFound_whenGerenderd_thenLinksNaarHomepageEnCatalogusAanwezig', () => {
     const hrefs = Array.from(
       (fixture.nativeElement as HTMLElement).querySelectorAll('a'),
     ).map((a) => a.getAttribute('href') ?? '');

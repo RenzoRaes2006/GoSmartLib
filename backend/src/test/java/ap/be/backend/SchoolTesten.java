@@ -80,7 +80,7 @@ public class SchoolTesten extends AbstractIntegrationTest {
     // }
 
     @Test
-    void givenExistingSchoolId_whenDeleteSchool_thenCallRepositoryAndReturnNoContent() throws Exception {
+    void givenBestaandSchoolId_whenDeleteSchool_thenNoContent() throws Exception {
         // given: an existing school id that is confirmed by the repository
         Long schoolId = 1L;
         given(schoolRepository.existsById(schoolId)).willReturn(true);
@@ -97,7 +97,7 @@ public class SchoolTesten extends AbstractIntegrationTest {
     // --- Tests voor bewerken van beschikbare school (catalogus) ---
 
     @Test
-    void givenExistingBeschikbareSchool_whenBewerken_thenReturnUpdatedSchool() throws Exception {
+    void givenBestaandeBeschikbareSchool_whenBewerken_thenReturnUpdatedSchool() throws Exception {
         // given: een bestaande beschikbare school in de catalogus
         Long id = 1L;
         BeschikbareSchool bestaand = new BeschikbareSchool(id, "GO! Oude Naam", "Oud Adres 1");
@@ -122,7 +122,7 @@ public class SchoolTesten extends AbstractIntegrationTest {
     }
 
     @Test
-    void givenNonExistingBeschikbareSchool_whenBewerken_thenReturnNotFound() throws Exception {
+    void givenNietBestaandeBeschikbareSchool_whenBewerken_thenNotFound() throws Exception {
         // given: een id dat niet voorkomt in de catalogus
         Long id = 42L;
         BeschikbareSchool update = new BeschikbareSchool(null, "GO! Naam", "Adres 1");
@@ -139,7 +139,7 @@ public class SchoolTesten extends AbstractIntegrationTest {
     }
 
     @Test
-    void givenBlankNaam_whenBewerken_thenReturnBadRequest() throws Exception {
+    void givenLegeNaam_whenBewerken_thenBadRequest() throws Exception {
         // given: bestaande school maar update bevat lege naam
         Long id = 1L;
         BeschikbareSchool bestaand = new BeschikbareSchool(id, "GO! Oude Naam", "Oud Adres 1");
@@ -158,7 +158,7 @@ public class SchoolTesten extends AbstractIntegrationTest {
     }
 
     @Test
-    void givenBlankAdres_whenBewerken_thenReturnBadRequest() throws Exception {
+    void givenLeegAdres_whenBewerken_thenBadRequest() throws Exception {
         // given: bestaande school maar update bevat leeg adres
         Long id = 1L;
         BeschikbareSchool bestaand = new BeschikbareSchool(id, "GO! Oude Naam", "Oud Adres 1");
@@ -177,7 +177,7 @@ public class SchoolTesten extends AbstractIntegrationTest {
     }
 
     @Test
-    void givenDuplicateNaam_whenBewerken_thenReturnBadRequest() throws Exception {
+    void givenDuplicateNaam_whenBewerken_thenBadRequest() throws Exception {
         // given: bestaande school waarbij de update-naam al door een andere school in de catalogus wordt gebruikt
         Long id = 1L;
         BeschikbareSchool bestaand = new BeschikbareSchool(id, "GO! Oude Naam", "Oud Adres 1");

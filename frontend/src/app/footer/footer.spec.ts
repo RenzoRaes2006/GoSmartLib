@@ -18,17 +18,17 @@ describe('Footer', () => {
     fixture.detectChanges();
   });
 
-  it('moet aangemaakt kunnen worden', () => {
+  it('givenFooter_whenAangemaakt_thenComponentBestaat', () => {
     expect(component).toBeTruthy();
   });
 
-  it('rendert contact-info in de footer', () => {
+  it('givenFooter_whenGerenderd_thenContactInfoZichtbaar', () => {
     const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
     expect(text).toContain('GO! Scholengroep Antwerpen');
     expect(text).toContain('Contact');
   });
 
-  it('toont een link naar /boek-beheer', () => {
+  it('givenFooter_whenGerenderd_thenLinkNaarBoekBeheerAanwezig', () => {
     const links = (fixture.nativeElement as HTMLElement).querySelectorAll('a');
     const hrefs = Array.from(links).map((a) => a.getAttribute('href') ?? '');
     expect(hrefs.some((h) => h.includes('boek-beheer'))).toBeTrue();

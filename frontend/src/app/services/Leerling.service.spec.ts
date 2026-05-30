@@ -18,11 +18,11 @@ describe('LeerlingService', () => {
 
   afterEach(() => httpMock.verify());
 
-  it('should be created', () => {
+  it('givenLeerlingService_whenAangemaakt_thenServiceBestaat', () => {
     expect(service).toBeTruthy();
   });
 
-  it('getLeerlingen geeft pagineerquery + filters mee', () => {
+  it('givenPaginaEnFilters_whenGetLeerlingen_thenQueryParamsCorrectMeegestuurd', () => {
     service.getLeerlingen(2, 5, '5A', 'jan').subscribe();
 
     const req = httpMock.expectOne((r) => r.url.endsWith('/api/leerlingen'));
@@ -33,7 +33,7 @@ describe('LeerlingService', () => {
     req.flush({ content: [], totalElements: 0 });
   });
 
-  it('getLeerlingStats stuurt GET /{id}/stats', () => {
+  it('givenLeerlingId_whenGetLeerlingStats_thenGetNaarIdStatsEndpoint', () => {
     service.getLeerlingStats(42).subscribe();
 
     const req = httpMock.expectOne((r) => r.url.endsWith('/api/leerlingen/42/stats'));
@@ -41,7 +41,7 @@ describe('LeerlingService', () => {
     req.flush({ totaalGeleend: 5, opTijdTerug: 4, teLaat: 1 });
   });
 
-  it('getKlassen stuurt GET /klassen en returns string-array', () => {
+  it('givenLeerlingService_whenGetKlassen_thenGetNaarKlassenEnStringArrayTeruggegeven', () => {
     let resultaat: string[] | undefined;
     service.getKlassen().subscribe((data) => (resultaat = data));
 

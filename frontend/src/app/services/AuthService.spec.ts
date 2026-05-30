@@ -13,12 +13,12 @@ describe('AuthService', () => {
 
   afterEach(() => localStorage.clear());
 
-  it('should be created met currentUser null als er geen token in localStorage staat', () => {
+  it('givenGeenTokenInLocalStorage_whenAangemaakt_thenCurrentUserNull', () => {
     expect(service).toBeTruthy();
     expect(service.currentUser()).toBeNull();
   });
 
-  it('setUserFromToken decodeert JWT en zet currentUser', () => {
+  it('givenGeldigJwt_whenSetUserFromToken_thenCurrentUserGezet', () => {
     // payload: {"sub":"123","name":"Test","role":"student","klas":"2SOF"} (base64url)
     const fakeJwt =
       'eyJhbGciOiJIUzI1NiJ9.' +
@@ -35,7 +35,7 @@ describe('AuthService', () => {
     expect(user!.klas).toBe('2SOF');
   });
 
-  it('logout verwijdert token uit localStorage en zet currentUser op null', () => {
+  it('givenIngelogdeUser_whenLogout_thenTokenVerwijderdEnCurrentUserNull', () => {
     localStorage.setItem('jwtToken', 'iets');
     service.currentUser.set({ id: '1', name: 'X', role: 'student', klas: '1A' });
 

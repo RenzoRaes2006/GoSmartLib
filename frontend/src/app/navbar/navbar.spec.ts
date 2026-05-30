@@ -34,17 +34,17 @@ describe('Navbar', () => {
     fixture.detectChanges();
   });
 
-  it('moet aangemaakt kunnen worden', () => {
+  it('givenNavbar_whenAangemaakt_thenComponentBestaat', () => {
     expect(component).toBeTruthy();
   });
 
-  it('toggleDyslexie roept ToegankelijkheidService.toggleDyslexieFont aan', () => {
+  it('givenNavbar_whenToggleDyslexie_thenToegankelijkheidServiceAangeroepen', () => {
     component.toggleDyslexie();
 
     expect(toegankelijkheidSpy.toggleDyslexieFont).toHaveBeenCalledTimes(1);
   });
 
-  it('logout roept AuthService.logout aan en navigeert naar /login', () => {
+  it('givenNavbar_whenLogout_thenAuthServiceAangeropenEnNavigeertNaarLogin', () => {
     const navSpy = spyOn(router, 'navigate').and.resolveTo(true);
 
     component.logout();
@@ -53,7 +53,7 @@ describe('Navbar', () => {
     expect(navSpy).toHaveBeenCalledWith(['/login']);
   });
 
-  it('homeRoute geeft / terug voor niet-leerkracht', () => {
+  it('givenNietLeerkrachtRol_whenHomeRoute_thenRootPathTeruggegeven', () => {
     authSpy.currentUser.and.returnValue({ id: '1', name: 'X', role: 'student', klas: '1A' });
     expect(component.homeRoute).toBe('/');
   });

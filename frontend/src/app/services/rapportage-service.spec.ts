@@ -18,11 +18,11 @@ describe('RapportageService', () => {
 
   afterEach(() => httpMock.verify());
 
-  it('should be created', () => {
+  it('givenRapportageService_whenAangemaakt_thenServiceBestaat', () => {
     expect(service).toBeTruthy();
   });
 
-  it('rapporteerBeoordeling stuurt POST met reden in body', () => {
+  it('givenBeoordelingIdEnReden_whenRapporteerBeoordeling_thenPostMetRedenInBody', () => {
     service.rapporteerBeoordeling(7, 'spoiler').subscribe();
 
     const req = httpMock.expectOne((r) => r.url.endsWith('/api/reviews/7/report'));
@@ -31,7 +31,7 @@ describe('RapportageService', () => {
     req.flush({});
   });
 
-  it('getRapportages stuurt GET /api/reports', () => {
+  it('givenRapportageService_whenGetRapportages_thenGetNaarApiReports', () => {
     service.getRapportages().subscribe((res) => expect(res.length).toBe(1));
 
     const req = httpMock.expectOne((r) => r.url.endsWith('/api/reports'));
@@ -39,7 +39,7 @@ describe('RapportageService', () => {
     req.flush([{ id: 1 }]);
   });
 
-  it('negeerRapportage stuurt DELETE met rapport-id', () => {
+  it('givenRapportId_whenNegeerRapportage_thenDeleteMetRapportIdVerstuurd', () => {
     service.negeerRapportage(11).subscribe();
 
     const req = httpMock.expectOne((r) => r.url.endsWith('/api/reports/11'));

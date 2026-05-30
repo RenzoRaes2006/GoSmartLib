@@ -42,18 +42,18 @@ describe('Leerkrachtdashboard', () => {
     fixture.detectChanges();
   });
 
-  it('moet aangemaakt kunnen worden', () => {
+  it('givenLeerkrachtdashboard_whenAangemaakt_thenComponentBestaat', () => {
     expect(component).toBeTruthy();
   });
 
-  it('haalt leerlingen, leningen en statistieken op bij init', () => {
+  it('givenServices_whenInit_thenLeerlingenLeningenEnStatistiekenOpgehaald', () => {
     expect(leerlingSpy.getLeerlingen).toHaveBeenCalled();
     expect(boekSpy.getActieveLeningen).toHaveBeenCalled();
     expect(statSpy.getLeerkrachtStatistieken).toHaveBeenCalled();
     expect(component.aantalLeerlingen()).toBe(25);
   });
 
-  it('volgendePagina verhoogt huidigePagina en herlaadt leerlingen', () => {
+  it('givenMeerderePaginas_whenVolgendePagina_thenHuidigePaginaVerhoogdEnLeerlingenHerladen', () => {
     component.totaalAantalPaginas.set(3);
     leerlingSpy.getLeerlingen.calls.reset();
 
@@ -63,7 +63,7 @@ describe('Leerkrachtdashboard', () => {
     expect(leerlingSpy.getLeerlingen).toHaveBeenCalled();
   });
 
-  it('openHistory zet geselecteerde student en haalt stats op', () => {
+  it('givenStudent_whenOpenHistory_thenGeselecteerdeStudentGezettEnStatsOpgehaald', () => {
     component.openHistory({ id: 42, naam: 'Jan' });
 
     expect(component.selectedStudent()?.id).toBe(42);

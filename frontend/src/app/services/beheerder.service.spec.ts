@@ -18,11 +18,11 @@ describe('BeheerderService', () => {
 
   afterEach(() => httpMock.verify());
 
-  it('should be created', () => {
+  it('givenBeheerderService_whenAangemaakt_thenServiceBestaat', () => {
     expect(service).toBeTruthy();
   });
 
-  it('getAlleLeerlingen stuurt GET naar leerlingen/all endpoint', () => {
+  it('givenBeheerderService_whenGetAlleLeerlingen_thenGetNaarLeerlingenAllEndpoint', () => {
     service.getAlleLeerlingen().subscribe((res) => expect(res.length).toBe(2));
 
     const req = httpMock.expectOne((r) => r.url.endsWith('/leerlingen/all'));
@@ -30,7 +30,7 @@ describe('BeheerderService', () => {
     req.flush([{ id: 1 }, { id: 2 }]);
   });
 
-  it('getAlleKlassen stuurt GET naar klassen/all endpoint', () => {
+  it('givenBeheerderService_whenGetAlleKlassen_thenGetNaarKlassenAllEndpoint', () => {
     service.getAlleKlassen().subscribe();
 
     const req = httpMock.expectOne((r) => r.url.endsWith('/klassen/all'));
@@ -38,7 +38,7 @@ describe('BeheerderService', () => {
     req.flush([]);
   });
 
-  it('startSchoolOp stuurt FormData via POST naar onboard endpoint', () => {
+  it('givenSchoolData_whenStartSchoolOp_thenFormDataPostNaarOnboardEndpoint', () => {
     const schoolData = { naam: 'Test', adres: 'A', hoofdAdminNaam: 'X', hoofdAdminEmail: 'x@y', klassen: ['1A'] };
     service.startSchoolOp(schoolData, null).subscribe();
 

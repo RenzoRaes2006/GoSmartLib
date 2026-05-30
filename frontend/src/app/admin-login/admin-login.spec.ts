@@ -32,11 +32,11 @@ describe('AdminLogin', () => {
     httpMock.verify();
   });
 
-  it('moet aangemaakt kunnen worden', () => {
+  it('givenAdminLogin_whenAangemaakt_thenComponentBestaat', () => {
     expect(component).toBeTruthy();
   });
 
-  it('login() POST naar /api/auth/admin/login en navigeert bij succes naar /admin', () => {
+  it('givenGeldigeCredentials_whenLogin_thenPostNaarApiEnNavigeertNaarAdmin', () => {
     const navSpy = spyOn(router, 'navigate').and.resolveTo(true);
     component.gebruikersnaam = 'admin';
     component.wachtwoord = 'geheim';
@@ -52,7 +52,7 @@ describe('AdminLogin', () => {
     expect(navSpy).toHaveBeenCalledWith(['/admin']);
   });
 
-  it('login() zet foutmelding bij HTTP-fout', () => {
+  it('givenHttpFout_whenLogin_thenFoutmeldingGetoond', () => {
     component.login();
     const req = httpMock.expectOne((r) => r.url.endsWith('/api/auth/admin/login'));
     req.flush('nope', { status: 401, statusText: 'Unauthorized' });

@@ -85,7 +85,7 @@ public class OneRosterImportServiceTest {
     }
 
     @Test
-    void eersteImport_maaktAlleGebruikersAan() {
+    void givenGeenBestaandeGebruikers_whenImportSchool_thenAlleGebruikersNieuw() {
         when(userRepository.findBySmartschoolId(anyString())).thenReturn(Optional.empty());
 
         OneRosterImportService.ImportResultaat r = service.importSchool(1L);
@@ -101,7 +101,7 @@ public class OneRosterImportServiceTest {
     }
 
     @Test
-    void tweedeImportMetIdentiekeData_wijzigtNiets() {
+    void givenIdentiekeLiveData_whenImportSchool_thenNietsGewijzigd() {
         User ll1 = bestaande("ll-100", "1A", Rol.LEERLING);
         User ll2 = bestaande("ll-101", "1B", Rol.LEERLING);
         User lk = bestaande("lk-200", "", Rol.LEERKRACHT);
@@ -121,7 +121,7 @@ public class OneRosterImportServiceTest {
     }
 
     @Test
-    void klaswijziging_updatetBestaandeUser() {
+    void givenGewijzigdeKlas_whenImportSchool_thenUserGeupdatetMetHistoriek() {
         User ll1 = bestaande("ll-100", "1A", Rol.LEERLING);
         User ll2 = bestaande("ll-101", "OUDE-KLAS", Rol.LEERLING);
         User lk = bestaande("lk-200", "", Rol.LEERKRACHT);
@@ -143,7 +143,7 @@ public class OneRosterImportServiceTest {
     }
 
     @Test
-    void ongewijzigdeKlas_schrijftGeenHistoriek() {
+    void givenOngewijzigdeKlas_whenImportSchool_thenGeenHistoriek() {
         User ll1 = bestaande("ll-100", "1A", Rol.LEERLING);
         User ll2 = bestaande("ll-101", "1B", Rol.LEERLING);
         User lk = bestaande("lk-200", "", Rol.LEERKRACHT);
@@ -158,14 +158,14 @@ public class OneRosterImportServiceTest {
     }
 
     @Test
-    void zonderOneRosterCredentials_gooitException() {
+    void givenGeenOneRosterCredentials_whenImportSchool_thenIllegalStateException() {
         school.setSmartschoolDomein(null);
 
         assertThrows(IllegalStateException.class, () -> service.importSchool(1L));
     }
 
     @Test
-    void onbekendeSchool_gooitException() {
+    void givenOnbekendeSchool_whenImportSchool_thenIllegalArgumentException() {
         when(schoolRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThrows(IllegalArgumentException.class, () -> service.importSchool(99L));

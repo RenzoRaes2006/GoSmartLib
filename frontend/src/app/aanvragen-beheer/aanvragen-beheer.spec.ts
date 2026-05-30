@@ -43,24 +43,24 @@ describe('AanvragenBeheer', () => {
     fixture.detectChanges();
   });
 
-  it('moet aangemaakt kunnen worden', () => {
+  it('givenAanvragenBeheer_whenAangemaakt_thenComponentBestaat', () => {
     expect(component).toBeTruthy();
   });
 
-  it('haalt aanvragen, verlengingen en limiet op bij init', () => {
+  it('givenServices_whenInit_thenAanvragenVerlengingEnLimietOpgehaald', () => {
     expect(boekSpy.getAlleAanvragen).toHaveBeenCalled();
     expect(boekSpy.getAlleVerlengingAanvragen).toHaveBeenCalled();
     expect(instellingSpy.getLeenLimiet).toHaveBeenCalled();
     expect(component.maxLeenLimiet()).toBe(3);
   });
 
-  it('keurGoed roept BoekService.keurAanvraagGoed aan met juiste id', () => {
+  it('givenAanvraagId_whenKeurGoed_thenBoekServiceKeurAanvraagGoedAangeroepen', () => {
     component.keurGoed(42);
 
     expect(boekSpy.keurAanvraagGoed).toHaveBeenCalledWith(42);
   });
 
-  it('wijsAf roept BoekService.weigerAanvraag aan met juiste id', () => {
+  it('givenAanvraagId_whenWijsAf_thenBoekServiceWeigerAanvraagAangeroepen', () => {
     component.wijsAf(99);
 
     expect(boekSpy.weigerAanvraag).toHaveBeenCalledWith(99);

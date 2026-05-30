@@ -18,17 +18,17 @@ describe('Login', () => {
     fixture.detectChanges();
   });
 
-  it('moet aangemaakt kunnen worden', () => {
+  it('givenLogin_whenAangemaakt_thenComponentBestaat', () => {
     expect(component).toBeTruthy();
   });
 
-  it('rendert de Smartschool-aanmeldknop', () => {
+  it('givenLogin_whenGerenderd_thenSmartschoolAanmeldknopZichtbaar', () => {
     const btn = (fixture.nativeElement as HTMLElement).querySelector('button.smartschool-btn');
     expect(btn).not.toBeNull();
     expect(btn?.textContent).toContain('Smartschool');
   });
 
-  it('klik op aanmeldknop roept loginMetSmartschool aan', () => {
+  it('givenAanmeldknop_whenGeklikt_thenLoginMetSmartschoolAangeroepen', () => {
     const spy = spyOn(component, 'loginMetSmartschool');
     const btn = (fixture.nativeElement as HTMLElement).querySelector('button.smartschool-btn') as HTMLButtonElement;
 

@@ -31,15 +31,15 @@ describe('KlassenleeslijstDetailLeerlingComponent', () => {
     fixture.detectChanges();
   });
 
-  it('moet aangemaakt kunnen worden', () => {
+  it('givenKlassenleeslijstDetailLeerling_whenAangemaakt_thenComponentBestaat', () => {
     expect(component).toBeTruthy();
   });
 
-  it('haalt leeslijst-details op met id uit de route', () => {
+  it('givenRouteMetId_whenInit_thenLeeslijstDetailsOpgehaald', () => {
     expect(serviceSpy.getLeeslijstDetails).toHaveBeenCalledWith(5);
   });
 
-  it('zet de lijst-signal op het response van de service', () => {
+  it('givenServiceResponse_whenInit_thenLijstSignalGevuld', () => {
     expect(component.lijst()?.naam).toBe('Top 10');
   });
 });

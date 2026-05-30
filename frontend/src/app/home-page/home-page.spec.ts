@@ -49,25 +49,25 @@ describe('HomePage', () => {
     fixture.detectChanges();
   });
 
-  it('moet aangemaakt kunnen worden', () => {
+  it('givenHomePage_whenAangemaakt_thenComponentBestaat', () => {
     expect(component).toBeTruthy();
   });
 
-  it('laadt populaire boeken, leeslijsten en statistieken bij init', () => {
+  it('givenServices_whenInit_thenPopulaireBoekendLeeslijstenEnStatistiekenGeladen', () => {
     expect(boekSpy.getPopulaireBoeken).toHaveBeenCalled();
     expect(leeslijstSpy.getMappenVanGebruiker).toHaveBeenCalledWith(1);
     expect(statSpy.getLeerlingStatistieken).toHaveBeenCalledWith('1');
     expect(component.gelezenBoeken()).toBe(5);
   });
 
-  it('progressPercentage berekent percentage gelezen boeken', () => {
+  it('givenGelezenEnLeesDoel_whenProgressPercentage_thenPercentageBerekend', () => {
     component.gelezenBoeken.set(5);
     component.leesDoel.set(10);
 
     expect(component.progressPercentage).toBe(50);
   });
 
-  it('slaLeesdoelOp clamped waarde tot maximaal 10', () => {
+  it('givenLeesdoelBoven10_whenSlaLeesdoelOp_thenWaardeGeclampedOpMaximaal10', () => {
     component.nieuwLeesdoel.set(50);
     component.openEditModal();
 
@@ -77,7 +77,7 @@ describe('HomePage', () => {
     expect(component.isEditModalOpen()).toBeFalse();
   });
 
-  it('bevestigVerlengen roept BoekService.verlengLening aan met geselecteerde id', () => {
+  it('givenLeningId_whenBevestigVerlengen_thenBoekServiceVerlengLeningAangeroepen', () => {
     component.teVerlengenLeningId.set(7);
 
     component.bevestigVerlengen();

@@ -23,7 +23,7 @@ class StatistiekControllerTest extends AbstractIntegrationTest {
     private StatistiekService statistiekService;
 
     @Test
-    void getAdminStatistieken_GeeftDtoVanService() throws Exception {
+    void givenAdminStatistieken_whenGetAdminStatistieken_thenDtoVanService() throws Exception {
         // Arrange
         AdminStatistiekDTO expected = new AdminStatistiekDTO(25.0, 4, "Fantasy", 12);
         when(statistiekService.getAdminStatistieken()).thenReturn(expected);
@@ -37,7 +37,7 @@ class StatistiekControllerTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void getLeerkrachtStatistieken_MetKlasIdGeeftDtoVanService() throws Exception {
+    void givenKlasId_whenGetLeerkrachtStatistieken_thenDtoVanService() throws Exception {
         // Arrange
         String klasId = "5A";
         LeerkrachtStatistiekDTO expected = new LeerkrachtStatistiekDTO(22, 8, 2, 5, List.of("Boek A"));
@@ -51,7 +51,7 @@ class StatistiekControllerTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void getLeerkrachtStatistieken_ZonderKlasIdGeeftDtoVanService() throws Exception {
+    void givenGeenKlasId_whenGetLeerkrachtStatistieken_thenDtoVanService() throws Exception {
         // Arrange
         LeerkrachtStatistiekDTO expected = new LeerkrachtStatistiekDTO(150, 40, 6, 20, List.of());
         when(statistiekService.getLeerkrachtStatistieken(null)).thenReturn(expected);
@@ -65,7 +65,7 @@ class StatistiekControllerTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void getLeerlingStatistieken_GeeftDtoVanService() throws Exception {
+    void givenSchoolId_whenGetLeerlingStatistieken_thenDtoVanService() throws Exception {
         // Arrange
         String schoolId = "12345";
         LeerlingStatistiekDTO expected = new LeerlingStatistiekDTO(11, 10, 2, 1);

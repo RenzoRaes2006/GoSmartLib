@@ -34,22 +34,22 @@ describe('LeningenBeheerder', () => {
     fixture.detectChanges();
   });
 
-  it('moet aangemaakt kunnen worden', () => {
+  it('givenLeningenBeheerder_whenAangemaakt_thenComponentBestaat', () => {
     expect(component).toBeTruthy();
   });
 
-  it('haalt actieve leningen op via service', () => {
+  it('givenBoekService_whenInit_thenActieveLeningenOpgehaald', () => {
     expect(boekSpy.getAlleActieveLeningenSysteem).toHaveBeenCalled();
     expect(component.alleLeningen().length).toBe(2);
   });
 
-  it('dringendeLeningen toont alleen leningen die binnen 7 dagen verlopen', () => {
+  it('givenActieveLeningen_whenDringendeLeningen_thenAlleenLeningenBinnenZevenDagenGetoond', () => {
     const dringend = component.dringendeLeningen();
     expect(dringend.length).toBe(1);
     expect(dringend[0].id).toBe(1);
   });
 
-  it('updateZoekterm filtert op boektitel en reset paginatie', () => {
+  it('givenZoekterm_whenUpdateZoekterm_thenGefilterdOpBoektitelEnPaginatieGereset', () => {
     component.huidigePagina.set(3);
 
     component.updateZoekterm('java');
@@ -59,7 +59,7 @@ describe('LeningenBeheerder', () => {
     expect(component.gefilterdeLeningen().length).toBe(1);
   });
 
-  it('volgendePagina blijft binnen totaalAantalPaginas', () => {
+  it('givenLaatstePagina_whenVolgendePagina_thenPaginaBlijftBinnenTotaal', () => {
     component.huidigePagina.set(component.totaalAantalPaginas());
 
     component.volgendePagina();

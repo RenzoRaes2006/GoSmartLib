@@ -48,7 +48,7 @@ class BeoordelingControllerTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void getBeoordelingenOpBoekIdGeeftLijstTerug() throws Exception {
+    void givenBoekId_whenGetBeoordelingenOpBoekId_thenLijst() throws Exception {
         // Arrange
         Long boekId = 1L;
         when(beoordelingService.getBeoordelingenOpBoekId(boekId)).thenReturn(List.of(
@@ -64,7 +64,7 @@ class BeoordelingControllerTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void beoordelingOpslaanReturnedZelfdeDto() throws Exception {
+    void givenBeoordelingDto_whenBeoordelingOpslaan_thenZelfdeDto() throws Exception {
         // Arrange
         BeoordelingDTO dto = new BeoordelingDTO(11L, "Leerling", 2L, 5, "Top boek", true, false, false);
         doNothing().when(beoordelingService).beoordelingOpslaan(any(BeoordelingDTO.class));
@@ -80,7 +80,7 @@ class BeoordelingControllerTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void rapporteerBeoordelingGebruiktTijdelijkeGebruikerId1() throws Exception {
+    void givenBeoordelingId_whenRapporteerBeoordeling_thenGebruiktGebruikerId1() throws Exception {
         // Arrange
         Long beoordelingId = 7L;
         String reden = "spoiler";
@@ -97,7 +97,7 @@ class BeoordelingControllerTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void verwijderBeoordelingGeeftNoContent() throws Exception {
+    void givenBestaandeBeoordeling_whenVerwijderBeoordeling_thenNoContent() throws Exception {
         // Arrange
         Long beoordelingId = 33L;
         doNothing().when(beoordelingService).verwijderBeoordeling(beoordelingId);

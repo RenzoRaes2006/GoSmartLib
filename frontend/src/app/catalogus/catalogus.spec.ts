@@ -40,17 +40,17 @@ describe('Catalogus', () => {
 
   afterEach(() => sessionStorage.clear());
 
-  it('moet aangemaakt kunnen worden', () => {
+  it('givenCatalogus_whenAangemaakt_thenComponentBestaat', () => {
     expect(component).toBeTruthy();
   });
 
-  it('roept BoekService.getBoekenGefilterd aan bij init en zet boekenlijst', () => {
+  it('givenBoekService_whenInit_thenGetBoekenGefilterdAangeropenEnBoekenlijstGezet', () => {
     expect(boekSpy.getBoekenGefilterd).toHaveBeenCalled();
     expect(component.boekenlijst().length).toBe(1);
     expect(component.boekenlijst()[0].titel).toBe('Test Boek');
   });
 
-  it('updateFilters zet huidigePagina terug op 0 en roept service opnieuw aan', () => {
+  it('givenFilters_whenUpdateFilters_thenHuidigePaginaNulEnServiceOpnieuwAangeroepen', () => {
     component.huidigePagina.set(3);
     boekSpy.getBoekenGefilterd.calls.reset();
 

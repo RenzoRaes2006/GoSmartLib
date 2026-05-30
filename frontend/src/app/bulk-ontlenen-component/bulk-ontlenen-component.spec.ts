@@ -33,24 +33,24 @@ describe('BulkOntlenenComponent', () => {
     http.match((r) => r.url.includes('/api/tags')).forEach((r) => r.flush([]));
   });
 
-  it('moet aangemaakt kunnen worden', () => {
+  it('givenBulkOntlenen_whenAangemaakt_thenComponentBestaat', () => {
     expect(component).toBeTruthy();
   });
 
-  it('zoekBoeken roept BoekService aan met beschikbaarheid=true', () => {
+  it('givenBoekService_whenZoekBoeken_thenAangeropenMetBeschikbaarheidTrue', () => {
     expect(boekSpy.getBoekenGefilterd).toHaveBeenCalled();
     const args = boekSpy.getBoekenGefilterd.calls.mostRecent().args[0] as any;
     expect(args.beschikbaarheid).toBe('true');
   });
 
-  it('voegToeAanMandje voegt nieuw boek toe met aantal 1', () => {
+  it('givenBoek_whenVoegToeAanMandje_thenBoekMetAantalEenToegevoegd', () => {
     component.voegToeAanMandje({ id: 1, aantalExemplaren: 5 } as any);
 
     expect(component.mandje().length).toBe(1);
     expect(component.mandje()[0].aantal).toBe(1);
   });
 
-  it('verwijderUitMandje haalt boek met juiste id weg', () => {
+  it('givenBoekId_whenVerwijderUitMandje_thenBoekMetJuisteIdVerwijderd', () => {
     component.mandje.set([
       { boek: { id: 1, aantalExemplaren: 5 } as any, aantal: 1 },
       { boek: { id: 2, aantalExemplaren: 5 } as any, aantal: 1 },
@@ -61,7 +61,7 @@ describe('BulkOntlenenComponent', () => {
     expect(component.mandje().map((i) => i.boek.id)).toEqual([2]);
   });
 
-  it('bevestigBulkOntlening stuurt expanded id-lijst naar service', () => {
+  it('givenMandje_whenBevestigBulkOntlening_thenExpandedIdLijstNaarServiceGestuurd', () => {
     component.mandje.set([{ boek: { id: 7, aantalExemplaren: 5 } as any, aantal: 3 }]);
 
     component.bevestigBulkOntlening();

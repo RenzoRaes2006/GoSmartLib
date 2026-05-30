@@ -77,7 +77,7 @@ public class GebruikerServiceTest {
     }
 
     @Test
-    void testVerwijderBoekUitMap_VerwijdertMapAlsLeeg_TenzijFavorieten() {
+    void givenLegeMap_whenVerwijderBoekUitMap_thenMapVerwijderd() {
         LeeslijstMap schoolMap = new LeeslijstMap();
         schoolMap.setNaam("School");
         schoolMap.getBoeken().add(testBoek);

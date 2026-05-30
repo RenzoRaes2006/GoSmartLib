@@ -18,11 +18,11 @@ describe('BoekService', () => {
 
   afterEach(() => httpMock.verify());
 
-  it('should be created', () => {
+  it('givenBoekService_whenAangemaakt_thenServiceBestaat', () => {
     expect(service).toBeTruthy();
   });
 
-  it('getBoekOpId stuurt GET /api/boeken/{id}', () => {
+  it('givenBoekId_whenGetBoekOpId_thenGetNaarApiBoekId', () => {
     service.getBoekOpId(7).subscribe();
 
     const req = httpMock.expectOne((r) => r.url.endsWith('/api/boeken/7'));
@@ -30,14 +30,14 @@ describe('BoekService', () => {
     req.flush({ id: 7, titel: 'X' });
   });
 
-  it('verwijderen stuurt DELETE en accepteert tekstrespons', () => {
+  it('givenBoekId_whenVerwijderen_thenDeleteEnTekstrespons', () => {
     service.verwijderen(3).subscribe((r) => expect(r).toContain('verwijderd'));
 
     const req = httpMock.expectOne((r) => r.url.endsWith('/api/boeken/3') && r.method === 'DELETE');
     req.flush('Boek is verwijderd.');
   });
 
-  it('leenBoek stuurt POST naar gebruiker-leen-endpoint voor ingelogde user', () => {
+  it('givenBoekId_whenLeenBoek_thenPostNaarGebruikerLeenEndpoint', () => {
     service.leenBoek(5).subscribe();
 
     const req = httpMock.expectOne((r) => r.url.endsWith('/api/gebruiker/me/lenen/5'));

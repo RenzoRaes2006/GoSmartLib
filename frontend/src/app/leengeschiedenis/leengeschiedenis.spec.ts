@@ -29,22 +29,22 @@ describe('Leengeschiedenis', () => {
     fixture.detectChanges();
   });
 
-  it('moet aangemaakt kunnen worden', () => {
+  it('givenLeengeschiedenis_whenAangemaakt_thenComponentBestaat', () => {
     expect(component).toBeTruthy();
   });
 
-  it('haalt geschiedenis op voor de gebruiker en filtert geweigerde leningen weg', () => {
+  it('givenBoekService_whenInit_thenGeschiedenisOpgehaaldEnGeweigerdGefilterd', () => {
     expect(boekSpy.getLeengeschiedenis).toHaveBeenCalledWith(1);
     expect(component.alleLeningen().length).toBe(1);
     expect(component.alleLeningen()[0].status).toBe('GOEDGEKEURD');
   });
 
-  it('berekenSchooljaren voegt huidig schooljaar toe en selecteert het nieuwste', () => {
+  it('givenHuidigDatum_whenBerekenSchooljaren_thenHuidigSchooljaarToegevoegdEnGeselecteerd', () => {
     expect(component.beschikbareSchooljaren().length).toBeGreaterThan(0);
     expect(component.geselecteerdSchooljaar()).toBe(component.beschikbareSchooljaren()[0]);
   });
 
-  it('dataPerMaand levert 12 maanden, ook bij weinig data', () => {
+  it('givenLeendata_whenDataPerMaand_thenTwaalfMaandenTeruggegeven', () => {
     expect(component.dataPerMaand().length).toBe(12);
     expect(component.dataPerMaand()[0].naam).toBe('September');
   });

@@ -49,16 +49,16 @@ describe('Detail', () => {
     fixture.detectChanges();
   });
 
-  it('moet aangemaakt kunnen worden', () => {
+  it('givenDetail_whenAangemaakt_thenComponentBestaat', () => {
     expect(component).toBeTruthy();
   });
 
-  it('haalt boek op via BoekService.getBoekOpId met id uit de route', () => {
+  it('givenRouteMetId_whenInit_thenBoekOpgehaaldViaBoekService', () => {
     expect(boekSpy.getBoekOpId).toHaveBeenCalledWith(1);
     expect(component.boek?.titel).toBe('Test');
   });
 
-  it('filtert favorieten uit de mappenlijst', () => {
+  it('givenMappen_whenInit_thenFavorietenGefilterdUitMappenlijst', () => {
     expect(leeslijstSpy.getMappenVanGebruiker).toHaveBeenCalledWith(1);
     expect(component.mappen.every((m) => m.naam.toLowerCase() !== 'favorieten')).toBeTrue();
   });

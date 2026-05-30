@@ -49,18 +49,18 @@ describe('BeheerderDashboard', () => {
     fixture.detectChanges();
   });
 
-  it('moet aangemaakt kunnen worden', () => {
+  it('givenBeheerderDashboard_whenAangemaakt_thenComponentBestaat', () => {
     expect(component).toBeTruthy();
   });
 
-  it('laadt limiet en statistieken bij init', () => {
+  it('givenServices_whenInit_thenLimietEnStatistiekenGeladen', () => {
     expect(instellingSpy.getLeenLimiet).toHaveBeenCalled();
     expect(statSpy.getAdminStatistieken).toHaveBeenCalled();
     expect(component.huidigeLimiet()).toBe(3);
     expect(component.populairsteGenre()).toBe('Fantasy');
   });
 
-  it('opslaanLimiet stuurt nieuwe waarde door en toont succes-toast', () => {
+  it('givenGeldigeLimiet_whenOpslaanLimiet_thenNieuweWaardeDoorgestuurdEnSuccesToastGetoond', () => {
     component.opslaanLimiet('5');
 
     expect(instellingSpy.updateLeenLimiet).toHaveBeenCalledWith(5);
@@ -69,7 +69,7 @@ describe('BeheerderDashboard', () => {
     expect(component.huidigeLimiet()).toBe(5);
   });
 
-  it('opslaanLimiet weigert negatieve waarden', () => {
+  it('givenNegatiefGetal_whenOpslaanLimiet_thenWeigeringEnFoutToast', () => {
     instellingSpy.updateLeenLimiet.calls.reset();
 
     component.opslaanLimiet('-1');

@@ -18,11 +18,11 @@ describe('ScanService', () => {
 
   afterEach(() => httpMock.verify());
 
-  it('should be created', () => {
+  it('givenScanService_whenAangemaakt_thenServiceBestaat', () => {
     expect(service).toBeTruthy();
   });
 
-  it('zoekLeerlingOpSchoolId stuurt GET met schoolid in path', () => {
+  it('givenSchoolId_whenZoekLeerlingOpSchoolId_thenGetMetSchoolIdInPath', () => {
     service.zoekLeerlingOpSchoolId(12345).subscribe();
 
     const req = httpMock.expectOne((r) => r.url.endsWith('/api/gebruiker/schoolid/12345'));
@@ -30,7 +30,7 @@ describe('ScanService', () => {
     req.flush({ gebruikerID: 1 });
   });
 
-  it('zoekBoekOpIsbn stuurt GET op /api/boeken/isbn/{isbn}', () => {
+  it('givenIsbn_whenZoekBoekOpIsbn_thenGetNaarApiBoekIsbn', () => {
     service.zoekBoekOpIsbn('9780132350884').subscribe();
 
     const req = httpMock.expectOne((r) => r.url.endsWith('/api/boeken/isbn/9780132350884'));
@@ -38,7 +38,7 @@ describe('ScanService', () => {
     req.flush({ id: 1, titel: 'Clean Code' });
   });
 
-  it('verwerkBatch stuurt POST naar /api/scan/batch', () => {
+  it('givenBatchData_whenVerwerkBatch_thenPostNaarApiScanBatch', () => {
     service.verwerkBatch({ gebruikerId: 1, actie: 'UITLENING', isbns: ['x'] }).subscribe();
 
     const req = httpMock.expectOne((r) => r.url.endsWith('/api/scan/batch'));

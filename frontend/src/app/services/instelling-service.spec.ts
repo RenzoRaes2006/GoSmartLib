@@ -18,11 +18,11 @@ describe('InstellingService', () => {
 
   afterEach(() => httpMock.verify());
 
-  it('should be created', () => {
+  it('givenInstellingService_whenAangemaakt_thenServiceBestaat', () => {
     expect(service).toBeTruthy();
   });
 
-  it('getLeenLimiet stuurt GET en geeft het aantal terug', () => {
+  it('givenInstellingService_whenGetLeenLimiet_thenGetEnLimietTeruggegeven', () => {
     service.getLeenLimiet().subscribe((limiet) => expect(limiet).toBe(3));
 
     const req = httpMock.expectOne((r) => r.url.endsWith('/api/instellingen/leenlimiet'));
@@ -30,7 +30,7 @@ describe('InstellingService', () => {
     req.flush(3);
   });
 
-  it('updateLeenLimiet stuurt PUT met nieuwe waarde als body', () => {
+  it('givenNieuweWaarde_whenUpdateLeenLimiet_thenPutMetWaardeAlsBody', () => {
     service.updateLeenLimiet(5).subscribe((res) => expect(res).toBe('ok'));
 
     const req = httpMock.expectOne((r) => r.url.endsWith('/api/instellingen/leenlimiet'));

@@ -18,11 +18,11 @@ describe('StatistiekService', () => {
 
   afterEach(() => httpMock.verify());
 
-  it('should be created', () => {
+  it('givenStatistiekService_whenAangemaakt_thenServiceBestaat', () => {
     expect(service).toBeTruthy();
   });
 
-  it('getAdminStatistieken stuurt GET op /admin', () => {
+  it('givenStatistiekService_whenGetAdminStatistieken_thenGetNaarApiStatistiekenAdmin', () => {
     service.getAdminStatistieken().subscribe();
 
     const req = httpMock.expectOne((r) => r.url.endsWith('/api/statistieken/admin'));
@@ -30,7 +30,7 @@ describe('StatistiekService', () => {
     req.flush({ percentageUitgeleend: 25, teLaatIngeleverd: 4, populairsteGenre: 'Fantasy', uitleningenDezeMaand: 12 });
   });
 
-  it('getLeerkrachtStatistieken zonder klasId stuurt GET zonder query parameter', () => {
+  it('givenGeenKlasId_whenGetLeerkrachtStatistieken_thenGetZonderQueryParameter', () => {
     service.getLeerkrachtStatistieken().subscribe();
 
     const req = httpMock.expectOne((r) => r.url.endsWith('/api/statistieken/leerkracht'));
@@ -38,7 +38,7 @@ describe('StatistiekService', () => {
     req.flush({});
   });
 
-  it('getLeerkrachtStatistieken met klasId voegt query parameter toe', () => {
+  it('givenKlasId_whenGetLeerkrachtStatistieken_thenKlasIdQueryParameterToegevoegd', () => {
     service.getLeerkrachtStatistieken('5A').subscribe();
 
     const req = httpMock.expectOne((r) => r.url.includes('klasId=5A'));
@@ -46,7 +46,7 @@ describe('StatistiekService', () => {
     req.flush({});
   });
 
-  it('getLeerlingStatistieken stuurt GET met schoolId in path', () => {
+  it('givenSchoolId_whenGetLeerlingStatistieken_thenGetMetSchoolIdInPath', () => {
     service.getLeerlingStatistieken('123').subscribe();
 
     const req = httpMock.expectOne((r) => r.url.endsWith('/api/statistieken/leerling/123'));

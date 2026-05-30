@@ -44,18 +44,18 @@ describe('KlassLeeslijstenOverzichtComponent', () => {
     fixture.detectChanges();
   });
 
-  it('moet aangemaakt kunnen worden', () => {
+  it('givenKlassLeeslijstenOverzicht_whenAangemaakt_thenComponentBestaat', () => {
     expect(component).toBeTruthy();
   });
 
-  it('laadt leeslijsten en klassen via service bij init', () => {
+  it('givenServices_whenInit_thenLeeslijstenEnKlassenGeladen', () => {
     expect(serviceSpy.getMijnLeerkrachtLijsten).toHaveBeenCalled();
     expect(leerlingSpy.getKlassen).toHaveBeenCalled();
     expect(component.leeslijsten.length).toBe(1);
     expect(component.klassen).toEqual(['1a', '2a', '5INF1']);
   });
 
-  it('openNieuweLijstModal opent modal en reset velden naar KLAS-default', () => {
+  it('givenModal_whenOpenNieuweLijstModal_thenModalGeopendEnVeldenGereset', () => {
     component.nieuweLijstNaam = 'oud';
     component.koppelType = 'LEERLING';
 
@@ -66,7 +66,7 @@ describe('KlassLeeslijstenOverzichtComponent', () => {
     expect(component.koppelType).toBe('KLAS');
   });
 
-  it('bevestigNieuweLijst met klas stuurt klas-veld mee', () => {
+  it('givenKlasType_whenBevestigNieuweLijst_thenKlasVeldMeegestuurd', () => {
     const navSpy = spyOn(router, 'navigate').and.resolveTo(true);
     component.nieuweLijstNaam = 'Klas-lijst';
     component.koppelType = 'KLAS';
@@ -82,7 +82,7 @@ describe('KlassLeeslijstenOverzichtComponent', () => {
     expect(navSpy).toHaveBeenCalledWith(['/leeslijsten', 99]);
   });
 
-  it('onLeerlingKlasChange haalt leerlingen op voor de gekozen klas', () => {
+  it('givenGekozenklas_whenOnLeerlingKlasChange_thenLeerlingenVoorKlasOpgehaald', () => {
     component.leerlingKlas = '2a';
     component.onLeerlingKlasChange();
 
@@ -90,7 +90,7 @@ describe('KlassLeeslijstenOverzichtComponent', () => {
     expect(component.leerlingResultaten.length).toBe(1);
   });
 
-  it('kanBevestigen is false bij KLAS-type zonder klas-selectie', () => {
+  it('givenKlasTypeZonderKlasSelectie_whenKanBevestigen_thenFalse', () => {
     component.nieuweLijstNaam = 'X';
     component.koppelType = 'KLAS';
     component.geselecteerdeKlas = '';
@@ -98,7 +98,7 @@ describe('KlassLeeslijstenOverzichtComponent', () => {
     expect(component.kanBevestigen).toBeFalse();
   });
 
-  it('kanBevestigen is false bij LEERLING-type zonder leerling-selectie', () => {
+  it('givenLeerlingTypeZonderLeerlingSelectie_whenKanBevestigen_thenFalse', () => {
     component.nieuweLijstNaam = 'X';
     component.koppelType = 'LEERLING';
     component.geselecteerdeLeerlingId = null;
@@ -106,7 +106,7 @@ describe('KlassLeeslijstenOverzichtComponent', () => {
     expect(component.kanBevestigen).toBeFalse();
   });
 
-  it('bevestigNieuweLijst doet niets bij lege naam', () => {
+  it('givenLegeNaam_whenBevestigNieuweLijst_thenGeenServiceCall', () => {
     component.nieuweLijstNaam = '   ';
     component.koppelType = 'KLAS';
     component.geselecteerdeKlas = '1a';

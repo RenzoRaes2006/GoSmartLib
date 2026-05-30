@@ -70,7 +70,7 @@ class GebruikerLifecycleServiceTest {
     }
 
     @Test
-    void wijzigKlas_updatetEnSchrijftHistoriek() {
+    void givenNieuweKlas_whenWijzigKlas_thenUpdatetEnSchrijftHistoriek() {
         service.wijzigKlas(42L, "1B");
 
         assertEquals("1B", leerling.getKlas());
@@ -87,7 +87,7 @@ class GebruikerLifecycleServiceTest {
     }
 
     @Test
-    void wijzigKlas_ongewijzigd_doetNiets() {
+    void givenZelfdeKlas_whenWijzigKlas_thenDoetNiets() {
         service.wijzigKlas(42L, "1A");
 
         verify(userRepository, never()).save(any(User.class));
@@ -95,18 +95,18 @@ class GebruikerLifecycleServiceTest {
     }
 
     @Test
-    void wijzigKlas_onbestaandeKlas_gooitException() {
+    void givenOnbestaandeKlas_whenWijzigKlas_thenIllegalArgumentException() {
         assertThrows(IllegalArgumentException.class, () -> service.wijzigKlas(42L, "ZZZ"));
         verify(klasWijzigingRepository, never()).save(any(KlasWijziging.class));
     }
 
     @Test
-    void wijzigKlas_leegInput_gooitException() {
+    void givenLeegKlasInput_whenWijzigKlas_thenIllegalArgumentException() {
         assertThrows(IllegalArgumentException.class, () -> service.wijzigKlas(42L, "  "));
     }
 
     @Test
-    void wijzigKlas_leerkracht_gooitException() {
+    void givenLeerkracht_whenWijzigKlas_thenIllegalArgumentException() {
         User lk = new User("lk-1", null, Rol.LEERKRACHT);
         lk.setSchool(school);
         when(userRepository.findById(99L)).thenReturn(Optional.of(lk));
@@ -115,13 +115,13 @@ class GebruikerLifecycleServiceTest {
     }
 
     @Test
-    void wijzigKlas_onbekendeLeerling_gooitNotFound() {
+    void givenOnbekendeLeerling_whenWijzigKlas_thenGebruikerNotFoundException() {
         when(userRepository.findById(123L)).thenReturn(Optional.empty());
         assertThrows(GebruikerNotFoundException.class, () -> service.wijzigKlas(123L, "1B"));
     }
 
     @Test
-    void wijzigKlas_schrijftAuditRij() {
+    void givenNieuweKlas_whenWijzigKlas_thenAuditRijGeschreven() {
         service.wijzigKlas(42L, "1B");
         verify(auditService).log(
                 org.mockito.ArgumentMatchers.eq(AuditActie.KLAS_GEWIJZIGD),
@@ -131,7 +131,7 @@ class GebruikerLifecycleServiceTest {
     }
 
     @Test
-    void wijzigKlas_ongewijzigd_geenAudit() {
+    void givenZelfdeKlas_whenWijzigKlas_thenGeenAudit() {
         service.wijzigKlas(42L, "1A");
         verify(auditService, never()).log(
                 org.mockito.ArgumentMatchers.any(AuditActie.class),
@@ -141,7 +141,7 @@ class GebruikerLifecycleServiceTest {
     }
 
     @Test
-    void markeerVertrokken_schrijftAuditRij() {
+    void givenActieveGebruiker_whenMarkeerVertrokken_thenAuditRijGeschreven() {
         when(uitleningRepository.findByUser_IdAndIsIngeleverdFalse(42L)).thenReturn(List.of());
         when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
 
@@ -155,7 +155,7 @@ class GebruikerLifecycleServiceTest {
     }
 
     @Test
-    void reactiveer_schrijftAuditRij() {
+    void givenInactieveGebruiker_whenReactiveer_thenAuditRijGeschreven() {
         leerling.setActief(false);
         when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
 
@@ -169,7 +169,7 @@ class GebruikerLifecycleServiceTest {
     }
 
     @Test
-    void voegHandmatigToe_schrijftAuditRij() {
+    void givenNieuweGebruiker_whenVoegHandmatigToe_thenAuditRijGeschreven() {
         when(schoolRepository.findById(1L)).thenReturn(Optional.of(school));
         when(userRepository.findBySmartschoolId("nieuw-1")).thenReturn(Optional.empty());
         when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
@@ -184,7 +184,7 @@ class GebruikerLifecycleServiceTest {
     }
 
     @Test
-    void markeerVertrokken_leerkracht_archiveertActieveLeeslijsten() {
+    void givenLeerkrachtMetLeeslijsten_whenMarkeerVertrokken_thenLeeslijstenGearchiveerd() {
         User lk = new User("lk-1", null, Rol.LEERKRACHT);
         lk.setId(77L);
         lk.setActief(true);
@@ -208,7 +208,7 @@ class GebruikerLifecycleServiceTest {
     }
 
     @Test
-    void markeerVertrokken_leerling_doetNietsMetLeeslijsten() {
+    void givenLeerling_whenMarkeerVertrokken_thenGeenLeeslijstActie() {
         leerling.setId(42L);
         leerling.setActief(true);
         when(uitleningRepository.findByUser_IdAndIsIngeleverdFalse(42L)).thenReturn(List.of());
@@ -222,7 +222,7 @@ class GebruikerLifecycleServiceTest {
     }
 
     @Test
-    void markeerVertrokken_alVertrokken_doetNiets() {
+    void givenAlVertrokken_whenMarkeerVertrokken_thenDoetNiets() {
         User lk = new User("lk-1", null, Rol.LEERKRACHT);
         lk.setId(77L);
         lk.setActief(false);
@@ -235,7 +235,7 @@ class GebruikerLifecycleServiceTest {
     }
 
     @Test
-    void markeerVertrokken_metOverdrachten_draagtGeselecteerdeLijstenOverEnArchiveertRest() {
+    void givenOverdrachten_whenMarkeerVertrokken_thenGeselecteerdOvergedragenRestGearchiveerd() {
         User lk = new User("lk-1", null, Rol.LEERKRACHT);
         lk.setId(77L);
         lk.setActief(true);
@@ -273,7 +273,7 @@ class GebruikerLifecycleServiceTest {
     }
 
     @Test
-    void markeerVertrokken_overdrachtVoorVreemdeLijst_gooitException() {
+    void givenVreemdeLijstInOverdracht_whenMarkeerVertrokken_thenIllegalArgumentException() {
         User lk = new User("lk-1", null, Rol.LEERKRACHT);
         lk.setId(77L);
         lk.setActief(true);
@@ -295,7 +295,7 @@ class GebruikerLifecycleServiceTest {
     }
 
     @Test
-    void markeerVertrokken_leerlingMetOverdrachten_gooitException() {
+    void givenLeerlingMetOverdrachten_whenMarkeerVertrokken_thenIllegalArgumentException() {
         leerling.setId(42L);
         leerling.setActief(true);
         when(uitleningRepository.findByUser_IdAndIsIngeleverdFalse(42L)).thenReturn(List.of());
@@ -307,7 +307,7 @@ class GebruikerLifecycleServiceTest {
     }
 
     @Test
-    void getLeerkrachtVertrekPreview_geeftLeeslijstenEnActieveCollegasTerug() {
+    void givenLeerkracht_whenGetLeerkrachtVertrekPreview_thenLeeslijstenEnActieveCollegas() {
         // Mapper toDTO heeft een statische OneRoster-afhankelijkheid; om hem
         // zonder Spring-context te kunnen aanroepen geven we een lege lijst van
         // leeslijsten terug. De preview-call zelf doet zo geen mapping.
@@ -341,7 +341,7 @@ class GebruikerLifecycleServiceTest {
     }
 
     @Test
-    void getLeerkrachtVertrekPreview_voorLeerling_gooitException() {
+    void givenLeerling_whenGetLeerkrachtVertrekPreview_thenIllegalArgumentException() {
         leerling.setId(42L);
         assertThrows(IllegalArgumentException.class,
                 () -> service.getLeerkrachtVertrekPreview(42L));

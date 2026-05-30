@@ -14,12 +14,12 @@ describe('LeenMandjeService', () => {
     service = TestBed.inject(LeenMandjeService);
   });
 
-  it('should be created met leeg mandje', () => {
+  it('givenLeenMandjeService_whenAangemaakt_thenLeegMandje', () => {
     expect(service).toBeTruthy();
     expect(service.getMandje().length).toBe(0);
   });
 
-  it('voegBoekToe weigert een vierde boek', () => {
+  it('givenDrieBoeken_whenVoegVierdBoekToe_thenGeweigerd', () => {
     service.voegBoekToe(boek(1));
     service.voegBoekToe(boek(2));
     service.voegBoekToe(boek(3));
@@ -30,7 +30,7 @@ describe('LeenMandjeService', () => {
     expect(service.getMandje().length).toBe(3);
   });
 
-  it('voegBoekToe weigert dubbel boek', () => {
+  it('givenBoekAlInMandje_whenVoegBoekToe_thenDubbelGeweigerd', () => {
     service.voegBoekToe(boek(1));
 
     const result = service.voegBoekToe(boek(1));
@@ -38,14 +38,14 @@ describe('LeenMandjeService', () => {
     expect(result).toContain('al in je reserveringen');
   });
 
-  it('voegBoekToe weigert boek zonder voorraad', () => {
+  it('givenBoekZonderVoorraad_whenVoegBoekToe_thenGeweigerd', () => {
     const result = service.voegBoekToe(boek(99, 0));
 
     expect(result).toContain('niet beschikbaar');
     expect(service.getMandje().length).toBe(0);
   });
 
-  it('verwijderBoek haalt het juiste boek weg', () => {
+  it('givenBoekId_whenVerwijderBoek_thenJuisteBoekVerwijderd', () => {
     service.voegBoekToe(boek(1));
     service.voegBoekToe(boek(2));
 
@@ -54,7 +54,7 @@ describe('LeenMandjeService', () => {
     expect(service.getMandje().map((b) => b.id)).toEqual([2]);
   });
 
-  it('maakMandjeLeeg leegt het mandje', () => {
+  it('givenMandjeMetBoeken_whenMaakMandjeLeeg_thenMandjeLeeg', () => {
     service.voegBoekToe(boek(1));
 
     service.maakMandjeLeeg();

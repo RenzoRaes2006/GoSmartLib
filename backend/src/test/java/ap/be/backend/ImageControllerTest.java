@@ -11,7 +11,7 @@ import static org.hamcrest.Matchers.*;
 public class ImageControllerTest extends AbstractIntegrationTest {
 
     @Test
-    public void givenJpegFile_whenUpload_thenReturnsAbsoluteUrl() throws Exception {
+    public void givenJpegBestand_whenUpload_thenAbsoluteUrl() throws Exception {
         MockMultipartFile file = new MockMultipartFile(
                 "file", "cover.jpg", "image/jpeg", "fake-image-data".getBytes());
 
@@ -23,7 +23,7 @@ public class ImageControllerTest extends AbstractIntegrationTest {
     }
 
     @Test
-    public void givenPngFile_whenUpload_thenReturnsAbsoluteUrlWithPngExtension() throws Exception {
+    public void givenPngBestand_whenUpload_thenAbsoluteUrlMetPngExtensie() throws Exception {
         MockMultipartFile file = new MockMultipartFile(
                 "file", "cover.png", "image/png", "fake-image-data".getBytes());
 
@@ -35,7 +35,7 @@ public class ImageControllerTest extends AbstractIntegrationTest {
     }
 
     @Test
-    public void givenInvalidFileType_whenUpload_thenReturnsBadRequest() throws Exception {
+    public void givenOngeldigBestandstype_whenUpload_thenBadRequest() throws Exception {
         MockMultipartFile file = new MockMultipartFile(
                 "file", "document.pdf", "application/pdf", "fake-pdf-data".getBytes());
 
@@ -45,7 +45,7 @@ public class ImageControllerTest extends AbstractIntegrationTest {
     }
 
     @Test
-    public void givenNoContentType_whenUpload_thenReturnsBadRequest() throws Exception {
+    public void givenGeenContentType_whenUpload_thenBadRequest() throws Exception {
         MockMultipartFile file = new MockMultipartFile(
                 "file", "cover.jpg", null, "fake-image-data".getBytes());
 
@@ -55,19 +55,19 @@ public class ImageControllerTest extends AbstractIntegrationTest {
     }
 
     @Test
-    public void givenNonExistentFile_whenGetImage_thenReturnsNotFound() throws Exception {
+    public void givenNietBestaandBestand_whenGetImage_thenNotFound() throws Exception {
         mockMvc.perform(get("/api/images/niet-bestaand.jpg"))
                 .andExpect(status().isNotFound());
     }
 
     @Test
-    public void givenPathTraversalAttempt_whenGetImage_thenReturnsErrorStatus() throws Exception {
+    public void givenPathTraversalPoging_whenGetImage_thenErrorStatus() throws Exception {
         mockMvc.perform(get("/api/images/..%2F..%2Fetc%2Fpasswd"))
                 .andExpect(status().is4xxClientError());
     }
 
     @Test
-    public void givenUploadedFile_whenGetImage_thenReturnsImage() throws Exception {
+    public void givenGeuploadBestand_whenGetImage_thenAfbeelding() throws Exception {
         MockMultipartFile file = new MockMultipartFile(
                 "file", "cover.jpg", "image/jpeg", "fake-image-data".getBytes());
 

@@ -29,23 +29,23 @@ describe('KlassenleeslijstenLeerlingComponent', () => {
     fixture.detectChanges();
   });
 
-  it('moet aangemaakt kunnen worden', () => {
+  it('givenKlassenleeslijstenLeerling_whenAangemaakt_thenComponentBestaat', () => {
     expect(component).toBeTruthy();
   });
 
-  it('haalt leeslijsten voor mij op via de service bij init', () => {
+  it('givenKlassLeeslijstService_whenInit_thenLeeslijstenVoorMijOpgehaald', () => {
     expect(serviceSpy.getLeeslijstenVoorMij).toHaveBeenCalledTimes(1);
     expect(component.leeslijsten().length).toBe(2);
   });
 
-  it('splitst klas-lijsten en persoonlijke lijsten correct', () => {
+  it('givenGemengdeLeeslijsten_whenInit_thenKlasEnPersoonlijkeLijstenCorrectGesplitst', () => {
     expect(component.klasLijsten().length).toBe(1);
     expect(component.klasLijsten()[0].klas).toBe('5INF1');
     expect(component.persoonlijkeLijsten().length).toBe(1);
     expect(component.persoonlijkeLijsten()[0].leerlingId).toBe(42);
   });
 
-  it('rendert namen van zowel klas- als persoonlijke lijsten', () => {
+  it('givenLeeslijsten_whenGerenderd_thenNamenVanKlasEnPersoonlijkeLijstenZichtbaar', () => {
     const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
     expect(text).toContain('Klas A');
     expect(text).toContain('Persoonlijk');

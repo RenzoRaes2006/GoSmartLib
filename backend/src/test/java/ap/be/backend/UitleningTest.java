@@ -71,7 +71,7 @@ public class UitleningTest {
     }
 
     @Test
-    void checkLeenStatus_MagLenen_AlsAllesKlopt() {
+    void givenAllesKlopt_whenCheckLeenStatus_thenMagLenen() {
         // Arrange
         when(boekRepository.findById(100L)).thenReturn(Optional.of(testBoek));
         when(uitleningRepository.existsByUser_IdAndExemplaar_Boek_IdAndIsIngeleverdFalse(1L, 100L))
@@ -87,7 +87,7 @@ public class UitleningTest {
     }
 
     @Test
-    void checkLeenStatus_MagNietLenen_AlsVoorraadNulIs() {
+    void givenGeenVoorraad_whenCheckLeenStatus_thenMagNietLenen() {
         // Arrange
         when(boekRepository.findById(100L)).thenReturn(Optional.of(testBoek));
         when(exemplaarService.isBeschikbaar(testBoek)).thenReturn(false);
@@ -101,7 +101,7 @@ public class UitleningTest {
     }
 
     @Test
-    void checkLeenStatus_MagNietLenen_AlsMax3BoekenBereiktIs() {
+    void givenMax3BoekenBereikt_whenCheckLeenStatus_thenMagNietLenen() {
         // Arrange
         when(boekRepository.findById(100L)).thenReturn(Optional.of(testBoek));
 
@@ -117,7 +117,7 @@ public class UitleningTest {
     }
 
     @Test
-    void checkLeenStatus_MagNietLenen_AlsBoekAlGeleendOfAangevraagdIs() {
+    void givenBoekAlGeleend_whenCheckLeenStatus_thenMagNietLenen() {
         // Arrange
         when(boekRepository.findById(100L)).thenReturn(Optional.of(testBoek));
         when(uitleningRepository.existsByUser_IdAndExemplaar_Boek_IdAndIsIngeleverdFalse(1L, 100L))
@@ -133,7 +133,7 @@ public class UitleningTest {
     }
 
     @Test
-    void checkLeenStatus_MagNietLenen_AlsGebruikerTeLateBoekenHeeft() {
+    void givenTeLateBoekenAanwezig_whenCheckLeenStatus_thenMagNietLenen() {
         // Arrange
         when(boekRepository.findById(100L)).thenReturn(Optional.of(testBoek));
         when(uitleningRepository.existsByUser_IdAndExemplaar_Boek_IdAndIsIngeleverdFalse(1L, 100L))
@@ -150,7 +150,7 @@ public class UitleningTest {
     }
 
     @Test
-    void bevestigUitlening_Succes_ReserveertExemplaarEnSlaatOp() {
+    void givenGeldigeData_whenBevestigUitlening_thenExemplaarGereserveerdEnOpgeslagen() {
         // Arrange
         when(boekRepository.findById(100L)).thenReturn(Optional.of(testBoek));
         when(userRepository.findById(1L)).thenReturn(Optional.of(testGebruiker));

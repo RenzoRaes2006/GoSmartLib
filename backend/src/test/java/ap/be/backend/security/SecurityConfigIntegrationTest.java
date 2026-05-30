@@ -25,13 +25,13 @@ class SecurityConfigIntegrationTest {
     private MockMvc mockMvc;
 
     @Test
-    void publicBookEndpoint_isAccessibleWithoutAuth() throws Exception {
+    void givenGeenAuth_whenGetPublicBoekEndpoint_thenToegestaan() throws Exception {
         mockMvc.perform(get("/api/boeken"))
                 .andExpect(status().is2xxSuccessful());
     }
 
     @Test
-    void protectedEndpoint_blocksUnauthenticatedAccess() throws Exception {
+    void givenGeenAuth_whenGetBeschermEndpoint_thenNiet2xx() throws Exception {
         // Met oauth2Login geconfigureerd wordt unauthenticated request omgeleid (302)
         // i.p.v. 401 — beide zijn aanvaardbaar, zolang er geen 2xx terugkomt.
         int status = mockMvc.perform(get("/api/gebruiker/aanvragen"))
@@ -41,14 +41,14 @@ class SecurityConfigIntegrationTest {
 
     @Test
     @WithMockUser(roles = "STUDENT")
-    void teacherOnlyEndpoint_isForbiddenForStudent() throws Exception {
+    void givenStudentRol_whenGetLeerkrachtEndpoint_thenForbidden() throws Exception {
         mockMvc.perform(get("/api/gebruiker/aanvragen"))
                 .andExpect(status().isForbidden());
     }
 
     @Test
     @WithMockUser(roles = "STUDENT")
-    void beheerderEndpoint_isForbiddenForStudent() throws Exception {
+    void givenStudentRol_whenGetBeheerderEndpoint_thenForbidden() throws Exception {
         mockMvc.perform(get("/api/reports"))
                 .andExpect(status().isForbidden());
     }

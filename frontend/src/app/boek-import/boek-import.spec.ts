@@ -24,11 +24,11 @@ describe('BoekImport', () => {
     fixture.detectChanges();
   });
 
-  it('moet aangemaakt kunnen worden', () => {
+  it('givenBoekImport_whenAangemaakt_thenComponentBestaat', () => {
     expect(component).toBeTruthy();
   });
 
-  it('verwijderUitPreview haalt boek uit lijst en toont succesmelding', () => {
+  it('givenIndex_whenVerwijderUitPreview_thenBoekVerwijderdEnSuccesmeldingGetoond', () => {
     component.previewLijst.set([{ titel: 'A' }, { titel: 'B' }] as any);
 
     component.verwijderUitPreview(0, 'A');
@@ -37,7 +37,7 @@ describe('BoekImport', () => {
     expect(component.successMessage()).toContain('A');
   });
 
-  it('bevestigImport stuurt previewLijst door naar BoekService.bevestigImport', () => {
+  it('givenPreviewLijst_whenBevestigImport_thenBoekServiceBevestigImportAangeroepen', () => {
     component.previewLijst.set([{ titel: 'X' }] as any);
 
     component.bevestigImport();

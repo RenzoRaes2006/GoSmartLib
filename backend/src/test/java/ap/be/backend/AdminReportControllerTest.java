@@ -23,7 +23,7 @@ class AdminReportControllerTest extends AbstractIntegrationTest {
     private GerapporteerdeBeoordelingService gerapporteerdeBeoordelingService;
 
     @Test
-    void getAlleRapportagesGeeftOkMetDataTerug() throws Exception {
+    void givenGerapporteerdeBeoordelingen_whenGetAlleRapportages_thenOkMetData() throws Exception {
         // Arrange
         when(gerapporteerdeBeoordelingService.getAlleGerapporteerdeBeoordelingen()).thenReturn(List.of(
                 new GerapporteerdeBeoordelingAdminDTO(1L, 10L, "Boektitel", "Reviewtekst", 2L, 3L,
@@ -39,7 +39,7 @@ class AdminReportControllerTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void negeerRapportageGeeftNoContentTerug() throws Exception {
+    void givenBestaandeRapportage_whenNegeerRapportage_thenNoContent() throws Exception {
         // Arrange
         Long rapportageId = 7L;
         doNothing().when(gerapporteerdeBeoordelingService).verwijderRapportage(rapportageId);

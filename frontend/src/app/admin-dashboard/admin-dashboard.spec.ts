@@ -24,21 +24,21 @@ describe('AdminDashboard', () => {
     fixture.detectChanges();
   });
 
-  it('moet aangemaakt kunnen worden', () => {
+  it('givenAdminDashboard_whenAangemaakt_thenComponentBestaat', () => {
     expect(component).toBeTruthy();
   });
 
-  it('laadt geregistreerde scholen via de service bij init', () => {
+  it('givenSchoolService_whenInit_thenGeregistreerdeScholenGeladen', () => {
     expect(schoolSpy.getAlleScholen).toHaveBeenCalled();
     expect(component.geregistreerdeScholen().length).toBe(1);
   });
 
-  it('beschikbareScholen filtert reeds-geregistreerde namen weg', () => {
+  it('givenGeregistreerdeScholen_whenBeschikbareScholenOpgevraagd_thenGeregistreerdeNamenWeggefilterd', () => {
     const namen = component.beschikbareScholen().map((s) => s.naam);
     expect(namen).not.toContain('GO! Atheneum Antwerpen');
   });
 
-  it('wisselTab wisselt actieve tab en sluit school-details', () => {
+  it('givenGeselecteerdeSchool_whenWisselTab_thenActieveTabGewisseldEnSchoolGesloten', () => {
     component.geselecteerdeSchool.set({ id: 1 });
 
     component.wisselTab('wizard');

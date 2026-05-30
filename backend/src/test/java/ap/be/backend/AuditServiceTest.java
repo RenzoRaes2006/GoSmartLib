@@ -53,7 +53,7 @@ class AuditServiceTest {
     }
 
     @Test
-    void log_metIngelogdeUser_zetActorVelden() {
+    void givenIngelogdeUser_whenLog_thenActorVeldenGezet() {
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken("admin-1", null, java.util.List.of()));
         when(userRepository.findBySmartschoolId("admin-1")).thenReturn(Optional.of(admin));
@@ -75,7 +75,7 @@ class AuditServiceTest {
     }
 
     @Test
-    void log_zonderSecurityContext_actorBlijftNull() {
+    void givenGeenSecurityContext_whenLog_thenActorBlijftNull() {
         service.log(AuditActie.KLAS_GEWIJZIGD, "Gebruiker", 1L, Map.of("van", "1A", "naar", "1B"));
 
         ArgumentCaptor<AuditLog> captor = ArgumentCaptor.forClass(AuditLog.class);
@@ -86,7 +86,7 @@ class AuditServiceTest {
     }
 
     @Test
-    void logSysteem_zetActorOpNull() {
+    void givenIngelogdeUser_whenLogSysteem_thenActorIsNull() {
         // Bewijst dat sync-acties geen actor krijgen ook al is er een ingelogde user.
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken("admin-1", null, java.util.List.of()));
@@ -105,7 +105,7 @@ class AuditServiceTest {
     }
 
     @Test
-    void log_zonderDetails_detailsJsonIsNull() {
+    void givenGeenDetails_whenLog_thenDetailsJsonIsNull() {
         service.log(AuditActie.GEBRUIKER_GEREACTIVEERD, "Gebruiker", 1L, null);
 
         ArgumentCaptor<AuditLog> captor = ArgumentCaptor.forClass(AuditLog.class);
@@ -114,7 +114,7 @@ class AuditServiceTest {
     }
 
     @Test
-    void log_repositoryGooitException_blokeertCallerNiet() {
+    void givenRepositoryException_whenLog_thenCallerWordtNietGeblokkeerd() {
         // Audit-bug mag nooit een lifecycle-actie laten falen.
         when(repository.save(any())).thenThrow(new RuntimeException("DB stuk"));
 
@@ -123,7 +123,7 @@ class AuditServiceTest {
     }
 
     @Test
-    void details_oneven_gooitException() {
+    void givenOnevenAantalArgs_whenDetails_thenException() {
         org.junit.jupiter.api.Assertions.assertThrows(
                 IllegalArgumentException.class,
                 () -> AuditService.details("een"));

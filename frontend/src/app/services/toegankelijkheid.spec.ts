@@ -13,19 +13,19 @@ describe('ToegankelijkheidService', () => {
 
   afterEach(() => document.body.classList.remove('dyslexia-mode'));
 
-  it('should be created met dyslexie-modus uit', () => {
+  it('givenToegankelijkheidService_whenAangemaakt_thenDyslexieModusUitgeschakeld', () => {
     expect(service).toBeTruthy();
     expect(service.isActief).toBeFalse();
   });
 
-  it('toggleDyslexieFont voegt body class toe bij eerste toggle', () => {
+  it('givenDyslexieModusUit_whenToggleDyslexieFont_thenBodyClassToegevoegd', () => {
     service.toggleDyslexieFont();
 
     expect(service.isActief).toBeTrue();
     expect(document.body.classList.contains('dyslexia-mode')).toBeTrue();
   });
 
-  it('toggleDyslexieFont haalt body class weer weg bij tweede toggle', () => {
+  it('givenDyslexieModusAan_whenToggleDyslexieFontTweedeKeer_thenBodyClassVerwijderd', () => {
     service.toggleDyslexieFont();
     service.toggleDyslexieFont();
 
@@ -33,7 +33,7 @@ describe('ToegankelijkheidService', () => {
     expect(document.body.classList.contains('dyslexia-mode')).toBeFalse();
   });
 
-  it('dyslexieModus$ emit nieuwe waarde na toggle', (done) => {
+  it('givenDyslexieModus_whenToggle_thenObservableEmitNieuweWaarde', (done) => {
     let count = 0;
     service.dyslexieModus$.subscribe((v) => {
       if (count === 1) {

@@ -18,11 +18,11 @@ describe('KlassLeeslijstService', () => {
 
   afterEach(() => httpMock.verify());
 
-  it('should be created', () => {
+  it('givenKlassLeeslijstService_whenAangemaakt_thenServiceBestaat', () => {
     expect(service).toBeTruthy();
   });
 
-  it('getLeeslijstenByLeerkracht stuurt GET met leerkracht-id in URL', () => {
+  it('givenLeerkrachtId_whenGetLeeslijstenByLeerkracht_thenGetMetLeerkrachtIdInUrl', () => {
     service.getLeeslijstenByLeerkracht(7).subscribe();
 
     const req = httpMock.expectOne((r) => r.url.endsWith('/leeslijsten/leerkracht/7'));
@@ -30,7 +30,7 @@ describe('KlassLeeslijstService', () => {
     req.flush([]);
   });
 
-  it('getMijnLeerkrachtLijsten stuurt GET op /mijn-leerkracht-lijsten', () => {
+  it('givenKlassLeeslijstService_whenGetMijnLeerkrachtLijsten_thenGetNaarMijnLeerkrachtLijsten', () => {
     service.getMijnLeerkrachtLijsten().subscribe();
 
     const req = httpMock.expectOne((r) => r.url.endsWith('/leeslijsten/mijn-leerkracht-lijsten'));
@@ -38,7 +38,7 @@ describe('KlassLeeslijstService', () => {
     req.flush([]);
   });
 
-  it('getLeeslijstenVoorMij stuurt GET op /mijn-leerling-lijsten', () => {
+  it('givenKlassLeeslijstService_whenGetLeeslijstenVoorMij_thenGetNaarMijnLeerlingLijsten', () => {
     service.getLeeslijstenVoorMij().subscribe();
 
     const req = httpMock.expectOne((r) => r.url.endsWith('/leeslijsten/mijn-leerling-lijsten'));
@@ -46,7 +46,7 @@ describe('KlassLeeslijstService', () => {
     req.flush([]);
   });
 
-  it('createLeeslijst stuurt POST met body', () => {
+  it('givenLeeslijstData_whenCreateLeeslijst_thenPostMetBodyVerstuurd', () => {
     service.createLeeslijst(1, { naam: 'Mijn lijst' } as any).subscribe();
 
     const req = httpMock.expectOne((r) => r.url.endsWith('/leeslijsten/leerkracht/1'));
@@ -55,7 +55,7 @@ describe('KlassLeeslijstService', () => {
     req.flush({ id: 1, naam: 'Mijn lijst', boeken: [] });
   });
 
-  it('createLeeslijstVoorMij stuurt POST op /api/leeslijsten met body', () => {
+  it('givenLeeslijstData_whenCreateLeeslijstVoorMij_thenPostNaarApiLeeslijstenMetBody', () => {
     service.createLeeslijstVoorMij({ naam: 'Klas-lijst', klas: '5INF1', zichtbaar: true } as any).subscribe();
 
     const req = httpMock.expectOne((r) => r.url.endsWith('/api/leeslijsten') || r.url.endsWith('/leeslijsten'));
@@ -64,7 +64,7 @@ describe('KlassLeeslijstService', () => {
     req.flush({ id: 1, naam: 'Klas-lijst', klas: '5INF1', zichtbaar: true, boeken: [] });
   });
 
-  it('updateBeschrijving stuurt PUT op /{id}/beschrijving', () => {
+  it('givenIdEnBeschrijving_whenUpdateBeschrijving_thenPutNaarIdBeschrijving', () => {
     service.updateBeschrijving(7, 'Nieuwe tekst').subscribe();
 
     const req = httpMock.expectOne((r) => r.url.endsWith('/leeslijsten/7/beschrijving'));
@@ -73,7 +73,7 @@ describe('KlassLeeslijstService', () => {
     req.flush({ id: 7, naam: 'X', beschrijving: 'Nieuwe tekst', boeken: [] });
   });
 
-  it('updateZichtbaar stuurt PUT op /{id}/zichtbaar', () => {
+  it('givenIdEnZichtbaar_whenUpdateZichtbaar_thenPutNaarIdZichtbaar', () => {
     service.updateZichtbaar(7, true).subscribe();
 
     const req = httpMock.expectOne((r) => r.url.endsWith('/leeslijsten/7/zichtbaar'));
@@ -82,7 +82,7 @@ describe('KlassLeeslijstService', () => {
     req.flush({ id: 7, naam: 'X', zichtbaar: true, boeken: [] });
   });
 
-  it('updateKoppeling stuurt PUT op /{id}/koppeling met klas/leerlingId body', () => {
+  it('givenIdEnKoppelingData_whenUpdateKoppeling_thenPutNaarIdKoppelingMetBody', () => {
     service.updateKoppeling(7, { klas: null, leerlingId: 42 }).subscribe();
 
     const req = httpMock.expectOne((r) => r.url.endsWith('/leeslijsten/7/koppeling'));
@@ -91,7 +91,7 @@ describe('KlassLeeslijstService', () => {
     req.flush({ id: 7, naam: 'X', leerlingId: 42, boeken: [] });
   });
 
-  it('deleteLeeslijst stuurt DELETE op /api/leeslijsten/{id}', () => {
+  it('givenLeeslijstId_whenDeleteLeeslijst_thenDeleteNaarApiLeeslijstenId', () => {
     service.deleteLeeslijst(9).subscribe();
 
     const req = httpMock.expectOne((r) => r.url.endsWith('/leeslijsten/9'));

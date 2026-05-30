@@ -18,11 +18,11 @@ describe('ReviewService', () => {
 
   afterEach(() => httpMock.verify());
 
-  it('should be created', () => {
+  it('givenReviewService_whenAangemaakt_thenServiceBestaat', () => {
     expect(service).toBeTruthy();
   });
 
-  it('getBeoordelingenOpBoekId stuurt GET met boek-id', () => {
+  it('givenBoekId_whenGetBeoordelingenOpBoekId_thenGetMetBoekIdVerstuurd', () => {
     service.getBeoordelingenOpBoekId(3).subscribe((res) => expect(res.length).toBe(1));
 
     const req = httpMock.expectOne((r) => r.url.endsWith('/api/books/3/reviews'));
@@ -30,7 +30,7 @@ describe('ReviewService', () => {
     req.flush([{ id: 1 }]);
   });
 
-  it('voegBeoordelingToe stuurt POST met body', () => {
+  it('givenBeoordelingData_whenVoegBeoordelingToe_thenPostMetBodyVerstuurd', () => {
     service.voegBeoordelingToe({ inhoud: 'top' } as any).subscribe();
 
     const req = httpMock.expectOne((r) => r.url.endsWith('/api/reviews'));
@@ -39,7 +39,7 @@ describe('ReviewService', () => {
     req.flush({ id: 1, inhoud: 'top' });
   });
 
-  it('verwijderRapporteerdeBeoordeling stuurt DELETE', () => {
+  it('givenBeoordelingId_whenVerwijderRapporteerdeBeoordeling_thenDeleteVerstuurd', () => {
     service.verwijderRapporteerdeBeoordeling(9).subscribe();
 
     const req = httpMock.expectOne((r) => r.url.endsWith('/api/reviews/9'));

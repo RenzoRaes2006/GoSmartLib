@@ -59,14 +59,14 @@ describe('AdminAuditLog', () => {
 
   afterEach(() => httpMock.verify());
 
-  it('laadt initiële pagina bij init', () => {
+  it('givenAuditLog_whenInit_thenInitielePaginaGeladen', () => {
     fixture.detectChanges();
     pakLaatsteRequest().flush(pagina);
     expect(component.rijen().length).toBe(2);
     expect(component.totalElements()).toBe(2);
   });
 
-  it('parseDetails geeft key/value-paren terug', () => {
+  it('givenGeldigJson_whenParseDetails_thenKeyValueParenTeruggegeven', () => {
     fixture.detectChanges();
     pakLaatsteRequest().flush(pagina);
     const kv = component.parseDetails('{"van":"1A","naar":"1B"}');
@@ -76,19 +76,19 @@ describe('AdminAuditLog', () => {
     ]);
   });
 
-  it('parseDetails op null geeft lege lijst', () => {
+  it('givenNull_whenParseDetails_thenLegeLijstTeruggegeven', () => {
     fixture.detectChanges();
     pakLaatsteRequest().flush(pagina);
     expect(component.parseDetails(null)).toEqual([]);
   });
 
-  it('parseDetails op niet-JSON valt terug op raw', () => {
+  it('givenOngeldigeJson_whenParseDetails_thenRawWaardeTeruggegeven', () => {
     fixture.detectChanges();
     pakLaatsteRequest().flush(pagina);
     expect(component.parseDetails('niet json')).toEqual([{ k: 'raw', v: 'niet json' }]);
   });
 
-  it('toepassen reset paginatie en stuurt filters mee', () => {
+  it('givenFilters_whenToepassen_thenPaginatieResetEnFiltersMeegestuurd', () => {
     fixture.detectChanges();
     pakLaatsteRequest().flush(pagina);
 
@@ -109,7 +109,7 @@ describe('AdminAuditLog', () => {
     expect(component.pagina()).toBe(0);
   });
 
-  it('wis leegt alle filter-velden en herlaadt', () => {
+  it('givenActieveFilters_whenWis_thenFilterveldenLeegEnHerladen', () => {
     fixture.detectChanges();
     pakLaatsteRequest().flush(pagina);
 
@@ -132,7 +132,7 @@ describe('AdminAuditLog', () => {
     expect(component.tot).toBe('');
   });
 
-  it('volgende verhoogt pagina en laadt', () => {
+  it('givenMeerderePaginas_whenVolgende_thenPaginaVerhoogdEnGeladen', () => {
     fixture.detectChanges();
     pakLaatsteRequest().flush({ ...pagina, totalPages: 3 });
 
@@ -143,7 +143,7 @@ describe('AdminAuditLog', () => {
     expect(component.pagina()).toBe(1);
   });
 
-  it('vorige op eerste pagina doet niets', () => {
+  it('givenEerstePagina_whenVorige_thenGeenVerandering', () => {
     fixture.detectChanges();
     pakLaatsteRequest().flush(pagina);
 
@@ -152,7 +152,7 @@ describe('AdminAuditLog', () => {
     expect(component.pagina()).toBe(0);
   });
 
-  it('toont foutmelding bij HTTP-fout', () => {
+  it('givenHttpFout_whenLaden_thenFoutmeldingGetoond', () => {
     fixture.detectChanges();
     pakLaatsteRequest().flush('Server stuk', {
       status: 500,
@@ -162,7 +162,7 @@ describe('AdminAuditLog', () => {
     expect(component.laden()).toBeFalse();
   });
 
-  it('actieLabel mapt enum-codes naar menselijke tekst', () => {
+  it('givenEnumCode_whenActieLabel_thenMenselijkeTekstTeruggegeven', () => {
     expect(component.actieLabel('KLAS_GEWIJZIGD')).toBe('Klas gewijzigd');
     expect(component.actieLabel('GEBRUIKER_VERTROKKEN_SYNC')).toBe('Gebruiker vertrokken (sync)');
   });

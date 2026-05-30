@@ -45,7 +45,7 @@ class StatistiekServiceTest {
     private StatistiekService statistiekService;
 
     @Test
-    void getAdminStatistieken_BerekentPercentageEnVeldenCorrect() {
+    void givenActieveLeningenEnExemplaren_whenGetAdminStatistieken_thenPercentageEnVeldenCorrect() {
         when(uitleningRepository.countByIsIngeleverdFalseAndStatusIn(anyList())).thenReturn(20L);
         when(boekRepository.sumTotaalAantalExemplaren()).thenReturn(80L);
         when(uitleningRepository.countByIsIngeleverdFalseAndStatusInAndInleverDatumBefore(anyList(), any(LocalDate.class)))
@@ -64,7 +64,7 @@ class StatistiekServiceTest {
     }
 
     @Test
-    void getAdminStatistieken_GeeftNullVoorGenreAlsLijstLeeg() {
+    void givenGeenPopulaireGenres_whenGetAdminStatistieken_thenPopulairsteGenreIsNull() {
         when(uitleningRepository.countByIsIngeleverdFalseAndStatusIn(anyList())).thenReturn(0L);
         when(boekRepository.sumTotaalAantalExemplaren()).thenReturn(50L);
         when(uitleningRepository.countByIsIngeleverdFalseAndStatusInAndInleverDatumBefore(anyList(), any(LocalDate.class)))
@@ -82,7 +82,7 @@ class StatistiekServiceTest {
     }
 
     @Test
-    void getAdminStatistieken_GeeftNulPercentageAlsCapaciteitNul() {
+    void givenCapaciteitNul_whenGetAdminStatistieken_thenPercentageNul() {
         when(uitleningRepository.countByIsIngeleverdFalseAndStatusIn(anyList())).thenReturn(0L);
         when(boekRepository.sumTotaalAantalExemplaren()).thenReturn(0L);
         when(uitleningRepository.countByIsIngeleverdFalseAndStatusInAndInleverDatumBefore(anyList(), any(LocalDate.class)))
@@ -97,7 +97,7 @@ class StatistiekServiceTest {
     }
 
     @Test
-    void getLeerkrachtStatistieken_MetKlasGebruiktKlasFilter() {
+    void givenKlasFilter_whenGetLeerkrachtStatistieken_thenGebruiktKlasFilter() {
         String klas = "5A";
 
         when(userRepository.countByRolAndKlasIgnoreCaseAndActiefTrue(Rol.LEERLING, klas)).thenReturn(22L);
@@ -117,7 +117,7 @@ class StatistiekServiceTest {
     }
 
     @Test
-    void getLeerkrachtStatistieken_ZonderKlasGebruiktTotaalAantalLeerlingen() {
+    void givenGeenKlasFilter_whenGetLeerkrachtStatistieken_thenTotaalAantalLeerlingen() {
         when(userRepository.countByRolAndActiefTrue(Rol.LEERLING)).thenReturn(150L);
         when(uitleningRepository.countActieveLeningenVoorKlas(eq(null), anyList())).thenReturn(40L);
         when(uitleningRepository.countTeLaatVoorKlas(eq(null), anyList(), any(LocalDate.class))).thenReturn(6L);
@@ -133,7 +133,7 @@ class StatistiekServiceTest {
     }
 
     @Test
-    void getLeerkrachtStatistieken_LegeStringTeltAlsGeenFilter() {
+    void givenLegeKlasString_whenGetLeerkrachtStatistieken_thenGeenFilter() {
         when(userRepository.countByRolAndActiefTrue(Rol.LEERLING)).thenReturn(99L);
         when(uitleningRepository.countActieveLeningenVoorKlas(eq(null), anyList())).thenReturn(0L);
         when(uitleningRepository.countTeLaatVoorKlas(eq(null), anyList(), any(LocalDate.class))).thenReturn(0L);
@@ -147,7 +147,7 @@ class StatistiekServiceTest {
     }
 
     @Test
-    void getLeerlingStatistieken_GeldigSchoolIdRetourneertCounts() {
+    void givenGeldigSchoolId_whenGetLeerlingStatistieken_thenCountsCorrect() {
         User testUser = new User();
         testUser.setId(1L);
         testUser.setSmartschoolId("12345");
@@ -165,7 +165,7 @@ class StatistiekServiceTest {
     }
 
     @Test
-    void getLeerlingStatistieken_OngeldigSchoolIdRetourneertDefaults() {
+    void givenOngeldigSchoolId_whenGetLeerlingStatistieken_thenDefaults() {
         LeerlingStatistiekDTO dto = statistiekService.getLeerlingStatistieken("niet-een-getal");
 
         assertEquals(0, dto.getGelezenBoeken());

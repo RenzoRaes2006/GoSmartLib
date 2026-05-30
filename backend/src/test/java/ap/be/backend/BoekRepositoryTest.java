@@ -25,7 +25,7 @@ class BoekRepositoryTest {
     private BoekRepository boekRepository;
 
     @Test
-    void givenBooksInDatabase_whenFindAllOrderByLocatie_thenReturnsSortedBooks() {
+    void givenBoekenInDatabase_whenFindAllOrderByLocatie_thenGesorteerd() {
         Boek boek1 = new Boek();
         boek1.setTitel("ZZZ Test Boek");
         boek1.setLocatie("MaGO! Antwerpen");
@@ -53,7 +53,7 @@ class BoekRepositoryTest {
     }
 
     @Test
-    void givenBookWithZeroExemplaren_whenSaved_thenIsbnIsStoredCorrectly() {
+    void givenBoekZonderExemplaren_whenSaved_thenIsbnCorrectOpgeslagen() {
         Boek testBoek = new Boek();
         testBoek.setTitel("Test Boek");
         testBoek.setIsbn("1234567890123");
@@ -66,7 +66,7 @@ class BoekRepositoryTest {
     }
 
     @Test
-    public void givenBoekenInDatabase_whenSearchWithExistingTitle_thenReturnsFilteredList() {
+    public void givenBestaandeTitel_whenFilterBoeken_thenGefilterdeResultaten() {
         Boek b1 = new Boek();
         b1.setTitel("Java for Beginners");
         b1.setAuteur("John Doe");
@@ -86,7 +86,7 @@ class BoekRepositoryTest {
     }
 
     @Test
-    public void givenBoekWithAuthor_whenSearchOnAuthorName_thenReturnsMatchingBoek() {
+    public void givenBoekMetAuteur_whenFilterBoekenOpAuteur_thenPassendBoek() {
         Boek b1 = new Boek();
         b1.setTitel("Effective Java");
         b1.setAuteur("Joshua Bloch");

@@ -40,15 +40,15 @@ describe('BoekBeheer', () => {
     http.match((r) => r.url.includes('/api/tags')).forEach((r) => r.flush([]));
   });
 
-  it('moet aangemaakt kunnen worden', () => {
+  it('givenBoekBeheer_whenAangemaakt_thenComponentBestaat', () => {
     expect(component).toBeTruthy();
   });
 
-  it('roept BoekService.getBoekenPaged aan in wijzigmodus na init', () => {
+  it('givenWijzigmodus_whenInit_thenBoekServiceGetBoekenPagedAangeroepen', () => {
     expect(boekSpy.getBoekenPaged).toHaveBeenCalled();
   });
 
-  it('setMode("toevoegen") leegt het boekenoverzicht', () => {
+  it('givenToevoegenModus_whenSetMode_thenBoekenoverzichtLeeggemaakt', () => {
     component.boeknOverzicht.set([{ id: 1 } as any]);
 
     component.setMode('toevoegen');

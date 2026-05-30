@@ -18,11 +18,11 @@ describe('LeeslijstService', () => {
 
   afterEach(() => httpMock.verify());
 
-  it('should be created', () => {
+  it('givenLeeslijstService_whenAangemaakt_thenServiceBestaat', () => {
     expect(service).toBeTruthy();
   });
 
-  it('getMijnMappen stuurt GET naar /me/mappen', () => {
+  it('givenLeeslijstService_whenGetMijnMappen_thenGetNaarMeMappen', () => {
     service.getMijnMappen().subscribe();
 
     const req = httpMock.expectOne((r) => r.url.endsWith('/api/gebruiker/me/mappen'));
@@ -30,7 +30,7 @@ describe('LeeslijstService', () => {
     req.flush([]);
   });
 
-  it('voegBoekToeAanMijnMap stuurt POST met emoji query parameter', () => {
+  it('givenMapNaamEnBoekId_whenVoegBoekToeAanMijnMap_thenPostMetEmojiQueryParameter', () => {
     service.voegBoekToeAanMijnMap('Favorieten', 5, '⭐').subscribe();
 
     const req = httpMock.expectOne(
@@ -40,7 +40,7 @@ describe('LeeslijstService', () => {
     req.flush('OK');
   });
 
-  it('verwijderBoekUitMijnMap stuurt DELETE op de juiste route', () => {
+  it('givenMapNaamEnBoekId_whenVerwijderBoekUitMijnMap_thenDeleteOpJuisteRoute', () => {
     service.verwijderBoekUitMijnMap('School', 9).subscribe();
 
     const req = httpMock.expectOne((r) => r.url.endsWith('/api/gebruiker/me/mappen/School/boeken/9'));

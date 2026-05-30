@@ -18,11 +18,11 @@ describe('GoogleBookService', () => {
 
   afterEach(() => httpMock.verify());
 
-  it('should be created', () => {
+  it('givenGoogleBookService_whenAangemaakt_thenServiceBestaat', () => {
     expect(service).toBeTruthy();
   });
 
-  it('zoekOpIsbn roept de backend aan en geeft het boek terug', () => {
+  it('givenGeldigIsbn_whenZoekOpIsbn_thenBackendAangeropenEnBoekTeruggegeven', () => {
     let result: any;
     service.zoekOpIsbn('9780132350884').subscribe((r) => (result = r));
 
@@ -45,7 +45,7 @@ describe('GoogleBookService', () => {
     expect(result.afbeelding.startsWith('https://')).toBeTrue();
   });
 
-  it('zoekOpIsbn geeft null terug wanneer de backend niets vindt', () => {
+  it('givenOnbekendIsbn_whenZoekOpIsbn_thenNullTeruggegeven', () => {
     let result: any = 'sentinel';
     service.zoekOpIsbn('0000000000').subscribe((r) => (result = r));
 

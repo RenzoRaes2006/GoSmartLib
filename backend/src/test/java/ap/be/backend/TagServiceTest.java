@@ -48,7 +48,7 @@ public class TagServiceTest {
     }
 
     @Test
-    void create_trimt_en_slaat_op() {
+    void givenNieuweTagMeSpaties_whenCreate_thenGetrimdEnOpgeslagen() {
         when(tagRepository.existsByTypeAndNaamIgnoreCase(TagType.GENRE, "Fantasy")).thenReturn(false);
         when(tagRepository.save(any(Tag.class))).thenAnswer(inv -> inv.getArgument(0));
 
@@ -59,7 +59,7 @@ public class TagServiceTest {
     }
 
     @Test
-    void create_gooit_duplicate_bij_bestaande_naam() {
+    void givenBestaandeNaam_whenCreate_thenDuplicateTagException() {
         when(tagRepository.existsByTypeAndNaamIgnoreCase(TagType.GENRE, "Fantasy")).thenReturn(true);
 
         assertThrows(DuplicateTagException.class, () -> tagService.create(TagType.GENRE, "Fantasy", null));
@@ -67,13 +67,13 @@ public class TagServiceTest {
     }
 
     @Test
-    void create_gooit_bij_lege_naam() {
+    void givenLegeNaam_whenCreate_thenIllegalArgumentException() {
         assertThrows(IllegalArgumentException.class, () -> tagService.create(TagType.GENRE, "  ", null));
         assertThrows(IllegalArgumentException.class, () -> tagService.create(TagType.GENRE, null, null));
     }
 
     @Test
-    void create_met_parent_werkt_voor_genre() {
+    void givenGenreMetParent_whenCreate_thenSubtagAangemaakt() {
         Tag parent = new Tag("Non-fictie algemeen", TagType.GENRE);
         parent.setId(10L);
         when(tagRepository.existsByTypeAndNaamIgnoreCase(TagType.GENRE, "Biografie")).thenReturn(false);
@@ -87,7 +87,7 @@ public class TagServiceTest {
     }
 
     @Test
-    void create_met_parent_weigert_thematisch() {
+    void givenThematischMetParent_whenCreate_thenIllegalArgumentException() {
         when(tagRepository.existsByTypeAndNaamIgnoreCase(TagType.THEMATISCH, "Sub")).thenReturn(false);
 
         assertThrows(IllegalArgumentException.class,
@@ -96,7 +96,7 @@ public class TagServiceTest {
     }
 
     @Test
-    void create_met_parent_weigert_didactisch() {
+    void givenDidactischMetParent_whenCreate_thenIllegalArgumentException() {
         when(tagRepository.existsByTypeAndNaamIgnoreCase(TagType.DIDACTISCH, "Sub")).thenReturn(false);
 
         assertThrows(IllegalArgumentException.class,
@@ -104,7 +104,7 @@ public class TagServiceTest {
     }
 
     @Test
-    void create_weigert_subtag_van_subtag() {
+    void givenSubtagAlsParent_whenCreate_thenIllegalArgumentException() {
         Tag hoofdtag = new Tag("Non-fictie algemeen", TagType.GENRE);
         hoofdtag.setId(10L);
         Tag bestaandeSub = new Tag("Biografie", TagType.GENRE, hoofdtag);
@@ -117,7 +117,7 @@ public class TagServiceTest {
     }
 
     @Test
-    void create_gooit_not_found_bij_onbekende_parent() {
+    void givenOnbekendeParent_whenCreate_thenTagNotFoundException() {
         when(tagRepository.existsByTypeAndNaamIgnoreCase(TagType.GENRE, "X")).thenReturn(false);
         when(tagRepository.findById(99L)).thenReturn(Optional.empty());
 
@@ -126,7 +126,7 @@ public class TagServiceTest {
     }
 
     @Test
-    void rename_werkt() {
+    void givenBestaandeTag_whenRename_thenNieuweNaam() {
         when(tagRepository.findById(1L)).thenReturn(Optional.of(bestaande));
         when(tagRepository.existsByTypeAndNaamIgnoreCaseAndIdNot(TagType.GENRE, "Sci-Fi", 1L)).thenReturn(false);
         when(tagRepository.save(any(Tag.class))).thenAnswer(inv -> inv.getArgument(0));
@@ -137,7 +137,7 @@ public class TagServiceTest {
     }
 
     @Test
-    void rename_gooit_duplicate_bij_botsing() {
+    void givenBotsendNaam_whenRename_thenDuplicateTagException() {
         when(tagRepository.findById(1L)).thenReturn(Optional.of(bestaande));
         when(tagRepository.existsByTypeAndNaamIgnoreCaseAndIdNot(TagType.GENRE, "Roman", 1L)).thenReturn(true);
 
@@ -145,14 +145,14 @@ public class TagServiceTest {
     }
 
     @Test
-    void rename_gooit_not_found() {
+    void givenNietBestaandeTag_whenRename_thenTagNotFoundException() {
         when(tagRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThrows(TagNotFoundException.class, () -> tagService.rename(99L, "X"));
     }
 
     @Test
-    void delete_verwijdert_als_niet_in_gebruik() {
+    void givenTagNietInGebruik_whenDelete_thenVerwijderd() {
         when(tagRepository.findById(1L)).thenReturn(Optional.of(bestaande));
         when(tagRepository.countByParentId(1L)).thenReturn(0L);
         when(tagRepository.countBoekenWithTag(1L)).thenReturn(0L);
@@ -163,7 +163,7 @@ public class TagServiceTest {
     }
 
     @Test
-    void delete_blokkeert_als_in_gebruik() {
+    void givenTagInGebruik_whenDelete_thenTagInGebruikException() {
         when(tagRepository.findById(1L)).thenReturn(Optional.of(bestaande));
         when(tagRepository.countByParentId(1L)).thenReturn(0L);
         when(tagRepository.countBoekenWithTag(1L)).thenReturn(3L);
@@ -174,7 +174,7 @@ public class TagServiceTest {
     }
 
     @Test
-    void delete_blokkeert_als_subs_aanwezig() {
+    void givenTagMetSubtags_whenDelete_thenTagHeeftSubtagsException() {
         when(tagRepository.findById(1L)).thenReturn(Optional.of(bestaande));
         when(tagRepository.countByParentId(1L)).thenReturn(2L);
 
@@ -184,14 +184,14 @@ public class TagServiceTest {
     }
 
     @Test
-    void delete_gooit_not_found() {
+    void givenNietBestaandeTag_whenDelete_thenTagNotFoundException() {
         when(tagRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThrows(TagNotFoundException.class, () -> tagService.delete(99L));
     }
 
     @Test
-    void expandWithSubtags_geeft_originelen_terug_als_geen_subs() {
+    void givenTagsZonderSubs_whenExpandWithSubtags_thenOriginelen() {
         when(tagRepository.findSubtagIdsByParentIds(List.of(1L, 2L))).thenReturn(List.of());
 
         List<Long> result = tagService.expandWithSubtags(List.of(1L, 2L));
@@ -201,7 +201,7 @@ public class TagServiceTest {
     }
 
     @Test
-    void expandWithSubtags_voegt_subs_toe() {
+    void givenTagMetSubs_whenExpandWithSubtags_thenSubsToegevoegd() {
         when(tagRepository.findSubtagIdsByParentIds(List.of(1L))).thenReturn(List.of(11L, 12L));
 
         List<Long> result = tagService.expandWithSubtags(List.of(1L));
@@ -211,7 +211,7 @@ public class TagServiceTest {
     }
 
     @Test
-    void expandWithSubtags_lege_input_wordt_doorgegeven() {
+    void givenLegeInput_whenExpandWithSubtags_thenLegeResultaat() {
         List<Long> result = tagService.expandWithSubtags(List.of());
 
         assertTrue(result.isEmpty());

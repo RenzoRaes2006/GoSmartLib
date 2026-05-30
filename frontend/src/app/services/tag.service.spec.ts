@@ -18,7 +18,7 @@ describe('TagService', () => {
 
   afterEach(() => httpMock.verify());
 
-  it('list met type bouwt query-param correct', () => {
+  it('givenTagType_whenList_thenQueryParamCorrectGebouwd', () => {
     const verwacht: Tag[] = [{ id: 1, naam: 'Fantasy', type: 'GENRE' }];
     service.list('GENRE').subscribe((tags) => expect(tags).toEqual(verwacht));
     const req = httpMock.expectOne((r) => r.url.endsWith('/api/tags') && r.params.get('type') === 'GENRE');
@@ -26,14 +26,14 @@ describe('TagService', () => {
     req.flush(verwacht);
   });
 
-  it('list zonder type roept basis-url aan', () => {
+  it('givenGeenType_whenList_thenBasisUrlAangeroepen', () => {
     service.list().subscribe();
     const req = httpMock.expectOne((r) => r.url.endsWith('/api/tags') && !r.params.has('type'));
     expect(req.request.method).toBe('GET');
     req.flush([]);
   });
 
-  it('create POST naam+type', () => {
+  it('givenNaamEnType_whenCreate_thenPostMetNaamEnTypeVerstuurd', () => {
     const nieuw: Tag = { id: 5, naam: 'Sci-Fi', type: 'GENRE' };
     service.create('Sci-Fi', 'GENRE').subscribe((t) => expect(t).toEqual(nieuw));
     const req = httpMock.expectOne((r) => r.url.endsWith('/api/tags') && r.method === 'POST');
@@ -41,7 +41,7 @@ describe('TagService', () => {
     req.flush(nieuw);
   });
 
-  it('rename PUT op id met nieuwe naam', () => {
+  it('givenIdEnNieuweNaam_whenRename_thenPutOpIdMetNieuweNaam', () => {
     const gewijzigd: Tag = { id: 5, naam: 'Sci-Fi', type: 'GENRE' };
     service.rename(5, 'Sci-Fi').subscribe((t) => expect(t).toEqual(gewijzigd));
     const req = httpMock.expectOne((r) => r.url.endsWith('/api/tags/5') && r.method === 'PUT');
@@ -49,7 +49,7 @@ describe('TagService', () => {
     req.flush(gewijzigd);
   });
 
-  it('delete DELETE op id', () => {
+  it('givenTagId_whenDelete_thenDeleteOpId', () => {
     service.delete(7).subscribe();
     const req = httpMock.expectOne((r) => r.url.endsWith('/api/tags/7') && r.method === 'DELETE');
     req.flush(null);
