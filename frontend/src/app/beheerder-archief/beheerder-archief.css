@@ -1,9 +1,15 @@
+:host {
+  display: block;
+  background-color: #f0efe4;
+  min-height: calc(100vh - 80px);
+}
+
 .container {
   max-width: 1400px;
   margin: 0 auto;
   padding: 40px;
   font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: var(--admin-text, #2d3748);
+  color: #2d3748;
 }
 
 .header {
@@ -23,14 +29,16 @@
 }
 
 .terug-link {
-  color: var(--admin-bordeaux, #8c1b3f);
+  display: inline-block;
+  color: #8c1b3f;
   text-decoration: none;
   font-weight: 600;
-  font-size: 0.95rem;
+  margin-bottom: 12px;
+  transition: transform 0.2s;
 }
 
 .terug-link:hover {
-  text-decoration: underline;
+  transform: translateX(-5px);
 }
 
 .uitleg {

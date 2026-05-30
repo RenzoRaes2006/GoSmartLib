@@ -86,13 +86,6 @@
         } @else if (retourFout()) {
           <p class="fout">{{ retourFout() }}</p>
         } @else {
-          <input
-            type="text"
-            placeholder="Filter op ISBN of titel..."
-            [ngModel]="retourFilter()"
-            (ngModelChange)="retourFilter.set($event)"
-            style="margin-top: 8px"
-          />
           <div class="retour-lijst" style="max-height: 280px; overflow-y: auto; margin-top: 8px">
             @for (l of retourLeningenGefilterd(); track l.id) {
               <button type="button" class="lijst-item" (click)="selecteerUitLijst(l)"

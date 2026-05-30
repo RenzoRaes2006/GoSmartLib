@@ -1,12 +1,13 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { BoekService } from '../services/boek.service';
 import { InstellingService } from '../services/instelling-service';
 
 @Component({
   selector: 'app-aanvragen-beheer',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './aanvragen-beheer.html',
   styleUrl: './aanvragen-beheer.css',
 })

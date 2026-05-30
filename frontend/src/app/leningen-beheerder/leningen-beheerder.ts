@@ -1,11 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { BoekService } from '../services/boek.service';
 
 @Component({
   selector: 'app-leningen-beheerder',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './leningen-beheerder.html',
   styleUrl: './leningen-beheerder.css',
 })

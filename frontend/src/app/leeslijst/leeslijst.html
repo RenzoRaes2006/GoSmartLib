@@ -1,5 +1,7 @@
 <div class="reading-list-container">
   @if (!geselecteerdeMap) {
+    <a [routerLink]="isLeerling ? '/' : '/leerkracht-dashboard'" class="back-link">← Terug naar dashboard</a>
+
     <h1>Mijn leeslijsten</h1>
 
     @if (isLoading) {

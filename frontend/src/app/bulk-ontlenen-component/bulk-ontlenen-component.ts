@@ -1,6 +1,7 @@
 import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { BoekService } from '../services/boek.service';
 import { TagService } from '../services/tag.service';
 import { Boek } from '../models/Boek';
@@ -17,7 +18,7 @@ interface CartItem {
 @Component({
   selector: 'app-bulk-ontlenen',
   standalone: true,
-  imports: [CommonModule, FormsModule, TagsByTypePipe],
+  imports: [CommonModule, FormsModule, RouterModule, TagsByTypePipe],
   templateUrl: './bulk-ontlenen-component.html',
   styleUrl: './bulk-ontlenen-component.css',
 })

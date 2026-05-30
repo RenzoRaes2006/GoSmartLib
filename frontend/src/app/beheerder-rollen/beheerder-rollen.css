@@ -7,6 +7,12 @@
   --border-color: #e2dfd5;
 }
 
+:host {
+  display: block;
+  background-color: #f0efe4;
+  min-height: calc(100vh - 80px);
+}
+
 .rollen-layout {
   max-width: 900px;
   margin: 0 auto;
@@ -21,14 +27,15 @@
 
 .terug-link {
   display: inline-block;
-  color: var(--go-bordeaux);
+  color: #8c1b3f;
   text-decoration: none;
-  font-size: 0.9rem;
+  font-weight: 600;
   margin-bottom: 12px;
+  transition: transform 0.2s;
 }
 
 .terug-link:hover {
-  text-decoration: underline;
+  transform: translateX(-5px);
 }
 
 .rollen-header h1 {

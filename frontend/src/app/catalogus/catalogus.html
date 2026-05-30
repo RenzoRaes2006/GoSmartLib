@@ -223,6 +223,8 @@
 
   <!-- Boeken -->
   <div class="catalogus-container">
+    <a [routerLink]="isLeerling() ? '/' : '/leerkracht-dashboard'" class="back-link">← Terug naar dashboard</a>
+
     <h3 class="result-count">
       {{ totaalBoeken() }}
       {{ totaalBoeken() === 1 ? 'resultaat' : 'resultaten' }}

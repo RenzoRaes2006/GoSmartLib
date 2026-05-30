@@ -85,7 +85,18 @@ grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));gap: 50px;    margi
 .hover-effect:hover { transform: translateY(-5px); }
 
 /* Terug knop */
+.back-link {
+    display: inline-block;
+    color: #8c1b3f;
+    text-decoration: none;
+    font-weight: 600;
+    margin-bottom: 12px;
+    transition: transform 0.2s;
+}
 
+.back-link:hover {
+    transform: translateX(-5px);
+}
 
 .header-section h1 {
     margin-top: 10px; /* Klein beetje ruimte tussen de knop en de titel */

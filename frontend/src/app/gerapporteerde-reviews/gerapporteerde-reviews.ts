@@ -1,11 +1,12 @@
 import { Component, inject, OnInit } from '@angular/core';
+import { RouterModule } from '@angular/router';
 import { GerapporteerdeBeoordelingAdmin } from '../models/gerapporteerde-beoordeling-repository';
 import { ReviewService } from '../services/review-service';
 import { RapportageService } from '../services/rapportage-service';
 
 @Component({
   selector: 'app-gerapporteerde-reviews',
-  imports: [],
+  imports: [RouterModule],
   templateUrl: './gerapporteerde-reviews.html',
   styleUrl: './gerapporteerde-reviews.css',
 })
