@@ -38,9 +38,11 @@ Je logt in met je **schoolaccount**. Je hoeft dus géén nieuw wachtwoord te ont
 
 > **Belangrijk:** Log altijd uit op een gedeelde of openbare computer. Dat doe je met de knop rechtsboven (zie volgende hoofdstuk).
 
-> 📷 _Plaats hier een screenshot van het inlogscherm._
->
-> 🎥 _Optioneel: een kort filmpje van het volledige inlogproces._
+![Het inlogscherm van GO! SmartLib](Fotos/leerling/inlogScherm1.png)
+
+![Inloggen met je Smartschool-account](Fotos/leerling/inlogScherm2.png)
+
+🎥 [Bekijk het filmpje van het volledige inlogproces](Fotos/leerling/inlogVideoLeerling.mp4)
 
 ---
 
@@ -57,7 +59,7 @@ Bovenaan elke pagina staat de **menubalk**. Hiermee navigeer je door de hele app
 | 👤 **Profiel**                | Naar je leengeschiedenis en leesstatistieken.                                                                                      |
 | ➜] **Uitloggen**              | Sluit je veilig af.                                                                                                                |
 
-> 📷 _Plaats hier een screenshot van de menubalk met de knoppen aangeduid (bijvoorbeeld met pijltjes of nummers)._
+![De menubalk bovenaan met de navigatieknoppen](Fotos/leerling/startPaginaNavigatie.png)
 
 ---
 
@@ -72,6 +74,10 @@ De balk toont hoeveel boeken je al gelezen hebt van je doel (bijvoorbeeld _3 / 5
 
 - Wil je je doel aanpassen? Klik op het **potlood-icoon** ✏️.
 - Kies een nieuw aantal boeken en klik op **Opslaan**.
+
+![Welkomstboodschap met je leesdoel en het potlood-icoon](Fotos/leerling/startPaginaWelcomEnPotlood.png)
+
+![Het venster om je leesdoel aan te passen](Fotos/leerling/startPaginaLeedDoelAanPassen.png)
 
 ### Uitgelicht in jouw school
 
@@ -90,7 +96,7 @@ Hier zie je welke boeken je hebt geleend en **hoeveel dagen** je ze nog mag houd
 - Met de knop **Verlengen** kan je een boek langer houden (zie [hoofdstuk 7](#7-je-geleende-boeken-verlengen)).
 - Boeken die nog niet zijn goedgekeurd krijgen het label **"Wachtend ⏳"**.
 
-> 📷 _Plaats hier een screenshot van de volledige startpagina._
+![De volledige startpagina van de leerling](Fotos/leerling/startpaginaLeerling.png)
 
 ---
 
