@@ -783,6 +783,11 @@ form > div > div button[type='button']:hover {
   gap: 6px;
 }
 
+.boeken-overzicht table td.aantal-cell {
+  text-align: center;
+  font-weight: 600;
+}
+
 .action-button {
   padding: 7px 12px;
   background: #fff;

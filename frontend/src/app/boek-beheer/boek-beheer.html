@@ -120,6 +120,7 @@
             <th>Auteur</th>
             <th>ISBN</th>
             <th>Genre</th>
+            <th>Beschikbaar</th>
             <th>Actie</th>
           </tr>
         </thead>
@@ -130,6 +131,7 @@
               <td>{{ boek.auteur }}</td>
               <td>{{ boek.isbn }}</td>
               <td>{{ boek.tags.map(naamFn).join(', ') }}</td>
+              <td class="aantal-cell">{{ boek.aantalExemplaren }}</td>
               <td>
                 <button
                   type="button"
