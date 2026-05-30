@@ -631,22 +631,22 @@
 }
 
 .btn-terug {
-    background: transparent;
-    border: 1px solid #c4bead;
-    color: #4a5568;
-    padding: 8px 14px;
-    border-radius: 8px;
+    background: none;
+    border: none;
+    color: #8c1b3f;
+    padding: 0;
     font-weight: 600;
-    font-size: 0.9rem;
+    font-size: 1rem;
     cursor: pointer;
     margin-bottom: 16px;
-    transition: all 0.2s ease;
+    font-family: inherit;
+    text-decoration: none;
+    display: inline-block;
+    transition: transform 0.2s;
 }
 
 .btn-terug:hover {
-    background: #f0efe4;
-    color: #8c1b3f;
-    border-color: #8c1b3f;
+    transform: translateX(-5px);
 }
 
 .page-footer {
