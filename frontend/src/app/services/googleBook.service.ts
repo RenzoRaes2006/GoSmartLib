@@ -1,34 +1,22 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
 })
 export class GoogleBookService {
-  private apiUrl = 'https://www.googleapis.com/books/v1/volumes';
+  private http = inject(HttpClient);
 
-  constructor(private http: HttpClient) {}
+  // Roept onze eigen backend aan i.p.v. rechtstreeks Google Books. De
+  // API-sleutel blijft zo op de server en komt niet in de browser terecht.
+  private baseUrl =
+    window.location.hostname === 'localhost'
+      ? 'http://localhost:8081/api/googlebooks'
+      : '/api/googlebooks';
 
   zoekOpIsbn(isbn: string): Observable<any> {
-    return this.http.get(`${this.apiUrl}?q=isbn:${isbn}`).pipe(
-      map((response: any) => {
-        if (response.items && response.items.length > 0) {
-          const boekInfo = response.items[0].volumeInfo;
-          return {
-            titel: boekInfo.title || '',
-            auteur: boekInfo.authors ? boekInfo.authors.join(', ') : '',
-            isbn: isbn,
-            uitgever: boekInfo.publisher || '',
-            uitgaveJaar: boekInfo.publishedDate ? boekInfo.publishedDate.substring(0, 4) : '',
-            pagina: boekInfo.pageCount ? boekInfo.pageCount.toString() : '',
-            beschrijving: boekInfo.description || '',
-            afbeelding: boekInfo.imageLinks ? boekInfo.imageLinks.thumbnail.replace('http://', 'https://') : '',
-          };
-        }
-        return null;
-      }),
-    );
+    // Backend geeft het boek terug, of een lege body (204) als er niets gevonden is.
+    return this.http.get(`${this.baseUrl}/isbn/${isbn}`);
   }
 }

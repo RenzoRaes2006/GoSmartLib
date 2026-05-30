@@ -22,27 +22,21 @@ describe('GoogleBookService', () => {
     expect(service).toBeTruthy();
   });
 
-  it('zoekOpIsbn mapt google books response naar nieuw boek', () => {
+  it('zoekOpIsbn roept de backend aan en geeft het boek terug', () => {
     let result: any;
     service.zoekOpIsbn('9780132350884').subscribe((r) => (result = r));
 
-    const req = httpMock.expectOne((r) => r.url.includes('isbn:9780132350884'));
+    const req = httpMock.expectOne((r) => r.url.includes('/isbn/9780132350884'));
     expect(req.request.method).toBe('GET');
     req.flush({
-      items: [
-        {
-          volumeInfo: {
-            title: 'Clean Code',
-            authors: ['Robert Martin'],
-            publisher: 'Prentice Hall',
-            publishedDate: '2008-08-01',
-            pageCount: 464,
-            categories: ['Software'],
-            description: 'A handbook',
-            imageLinks: { thumbnail: 'http://img/x.jpg' },
-          },
-        },
-      ],
+      titel: 'Clean Code',
+      auteur: 'Robert Martin',
+      isbn: '9780132350884',
+      uitgever: 'Prentice Hall',
+      uitgaveJaar: '2008',
+      pagina: '464',
+      beschrijving: 'A handbook',
+      afbeelding: 'https://img/x.jpg',
     });
 
     expect(result.titel).toBe('Clean Code');
@@ -51,11 +45,11 @@ describe('GoogleBookService', () => {
     expect(result.afbeelding.startsWith('https://')).toBeTrue();
   });
 
-  it('zoekOpIsbn geeft null terug wanneer er geen items zijn', () => {
+  it('zoekOpIsbn geeft null terug wanneer de backend niets vindt', () => {
     let result: any = 'sentinel';
     service.zoekOpIsbn('0000000000').subscribe((r) => (result = r));
 
-    httpMock.expectOne((r) => r.url.includes('isbn:0000000000')).flush({});
+    httpMock.expectOne((r) => r.url.includes('/isbn/0000000000')).flush(null);
 
     expect(result).toBeNull();
   });

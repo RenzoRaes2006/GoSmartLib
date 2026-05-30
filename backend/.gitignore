@@ -31,3 +31,9 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Secrets ###
+# Nooit committen: bevat Smartschool/OneRoster/Google-sleutels e.d.
+.env
+.env.*
+!.env.example
