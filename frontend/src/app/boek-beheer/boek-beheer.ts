@@ -355,12 +355,25 @@ export class BoekBeheer implements OnInit {
     }
   }
 
+  private commitPendingTags(): void {
+    if (this.selectedGenreId() != null || this.selectedSubGenreId() != null) {
+      this.voegGenreToe();
+    }
+    if (this.selectedThematischeId() != null) {
+      this.voegTagToe('THEMATISCH', this.selectedThematischeId);
+    }
+    if (this.selectedDidactischeId() != null) {
+      this.voegTagToe('DIDACTISCH', this.selectedDidactischeId);
+    }
+  }
+
   // Verwerk het toevoegen van een nieuw boek
   private submitToevoegen() {
     if (this.boekForm.invalid) {
       this.boekForm.markAllAsTouched();
       return;
     } else {
+      this.commitPendingTags();
       const nieuwBoek = { ...this.boekForm.value, tags: this.geselecteerdeTags() } as NieuwBoek;
       this.boekService.toevoegen(nieuwBoek).subscribe({
         next: () => {
@@ -401,6 +414,7 @@ export class BoekBeheer implements OnInit {
       return;
     }
 
+    this.commitPendingTags();
     const bijgewerktBoek = { ...this.boekForm.value, tags: this.geselecteerdeTags() } as NieuwBoek;
 
     this.boekService.wijzigen(boek.id, bijgewerktBoek as unknown as Boek).subscribe({
