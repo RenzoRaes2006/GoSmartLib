@@ -35,8 +35,11 @@ public class GoogleBooksService {
 
     @SuppressWarnings("unchecked")
     public GoogleBoekDTO zoekOpIsbn(String isbn) {
+        // country is door Google verplicht gemaakt; zonder deze parameter geeft de
+        // API vaak 0 resultaten terug, ook voor bestaande boeken.
         UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(API_URL)
-                .queryParam("q", "isbn:" + isbn);
+                .queryParam("q", "isbn:" + isbn)
+                .queryParam("country", "BE");
         if (apiKey != null && !apiKey.isBlank()) {
             builder.queryParam("key", apiKey);
         }
