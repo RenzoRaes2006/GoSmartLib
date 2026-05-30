@@ -42,8 +42,6 @@ Je logt in met je **schoolaccount**. Je hoeft dus géén nieuw wachtwoord te ont
 
 ![Inloggen met je Smartschool-account](Fotos/leerling/inlogScherm2.png)
 
-🎥 [Bekijk het filmpje van het volledige inlogproces](Fotos/leerling/inlogVideoLeerling.mp4)
-
 ---
 
 ## 2. De menubalk bovenaan
@@ -137,8 +135,6 @@ Elk boek wordt getoond als een kaartje met de cover, titel, auteur en een label:
 Klik op een kaartje om de detailpagina te openen. Onderaan kan je met **Vorige** en **Volgende** door de pagina's bladeren.
 
 ![De catalogus met de filterbalk links en de boekenkaartjes rechts](Fotos/leerling/catalogusMetfilter.png)
->
-> 🎥 _Optioneel: een filmpje waarin je een boek zoekt en filtert._
 
 ---
 
@@ -193,8 +189,6 @@ De bibliotheekbeheerder bekijkt je aanvraag. Tot dan zie je het boek met het lab
 > - Je kan maar een **beperkt aantal** boeken tegelijk lenen (je school stelt dit in). Soms staat "onbeperkt lenen" aan.
 
 ![De mandje- en reserveringspagina](Fotos/leerling/reserveerMandjePagina.png)
->
-> 🎥 _Optioneel: een filmpje van het volledige leenproces, van boek toevoegen tot bevestigen._
 
 ---
 
@@ -262,8 +256,6 @@ Er zijn twee soorten:
 
 Klik op een lijst om de boeken te bekijken. Bovenaan zie je eventueel een korte **beschrijving** van de leerkracht. Klik op een boek om naar de detailpagina te gaan en het bijvoorbeeld te lenen.
 
-> 📷 _Plaats hier een screenshot van het overzicht van leerkracht-leeslijsten en van een geopende lijst._
-
 ---
 
 ## 10. Een review schrijven
@@ -317,8 +309,6 @@ Deze knop staat bovenaan in de menubalk.
 - Klik nog eens om het weer uit te zetten.
 
 Deze instelling is er om het lezen voor iedereen wat aangenamer te maken. Probeer het gerust uit! 😊
-
-> 📷 _Plaats hier twee screenshots naast elkaar: tekst zónder en mét leeshulp, zodat het verschil duidelijk is._
 
 ---
 
