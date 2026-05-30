@@ -45,3 +45,4 @@ deploy-to-server:
     - docker compose up -d --build
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
+ 
