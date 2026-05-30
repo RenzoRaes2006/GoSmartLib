@@ -17,6 +17,7 @@ import ap.be.backend.entity.Tag;
 import ap.be.backend.entity.TagType;
 import ap.be.backend.repository.BoekRepository;
 import ap.be.backend.repository.TagRepository;
+import ap.be.backend.service.ExemplaarService;
 
 @Component
 @Profile("dev")
@@ -27,6 +28,7 @@ public class BoekSeed implements CommandLineRunner {
     private final BoekRepository boekRepository;
     private final TagRepository tagRepository;
     private final RestTemplate restTemplate;
+    private final ExemplaarService exemplaarService;
 
     String[] locaties = { "GO! Spectrumschool", "GO! muzische basisschool K’DO", "GO! basisschool VONK!",
             "GO! lyceum Antwerpen", "MaGO! Antwerpen" };
@@ -43,10 +45,12 @@ public class BoekSeed implements CommandLineRunner {
     String[] didactischeTags = { "Lesmethodes", "Didactische handboeken", "Evaluatiemateriaal", "Naslagwerken" };
     Random random = new Random();
 
-    public BoekSeed(BoekRepository boekRepository, TagRepository tagRepository, RestTemplate restTemplate) {
+    public BoekSeed(BoekRepository boekRepository, TagRepository tagRepository, RestTemplate restTemplate,
+            ExemplaarService exemplaarService) {
         this.boekRepository = boekRepository;
         this.tagRepository = tagRepository;
         this.restTemplate = restTemplate;
+        this.exemplaarService = exemplaarService;
     }
 
     private Tag findOrCreateTag(TagType type, String naam) {
@@ -119,8 +123,8 @@ public class BoekSeed implements CommandLineRunner {
                         }
                     }
 
-                    // Random aantal exemplaren
-                    nieuwBoek.setAantalExemplaren(random.nextInt(11));
+                    // Random aantal exemplaren — wordt na save omgezet naar Exemplaar-rijen.
+                    int aantalExemplaren = random.nextInt(11);
 
                     // Ongeveer 1 op 4 boeken markeren als didactisch materiaal.
                     boolean isDidactisch = random.nextDouble() < 0.25;
@@ -151,6 +155,7 @@ public class BoekSeed implements CommandLineRunner {
 
                     // Opslaan
                     boekRepository.save(nieuwBoek);
+                    exemplaarService.genereerExemplaren(nieuwBoek, aantalExemplaren);
                 }
             }
         }

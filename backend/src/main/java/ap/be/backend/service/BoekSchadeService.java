@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import ap.be.backend.dto.BoekSchadeDTO;
 import ap.be.backend.entity.BoekSchade;
+import ap.be.backend.entity.Exemplaar;
 import ap.be.backend.entity.Uitlening;
 import ap.be.backend.repository.BoekSchadeRepository;
 
@@ -24,11 +25,14 @@ public class BoekSchadeService {
 
     private final BoekSchadeRepository boekSchadeRepository;
     private final OneRosterService oneRosterService;
+    private final ExemplaarService exemplaarService;
 
     public BoekSchadeService(BoekSchadeRepository boekSchadeRepository,
-                             OneRosterService oneRosterService) {
+                             OneRosterService oneRosterService,
+                             ExemplaarService exemplaarService) {
         this.boekSchadeRepository = boekSchadeRepository;
         this.oneRosterService = oneRosterService;
+        this.exemplaarService = exemplaarService;
     }
 
     @Transactional
@@ -40,10 +44,20 @@ public class BoekSchadeService {
         return boekSchadeRepository.save(schade);
     }
 
+    /**
+     * Verwijdert een schade-rapport. De beheerder doet dit wanneer het exemplaar
+     * hersteld is / er geen schade meer is, dus het bijhorende exemplaar gaat terug
+     * naar BESCHIKBAAR — anders blijft de "Beschadigd"-badge in catalogus/detail staan
+     * en blijft het exemplaar onterecht uit circulatie.
+     */
     @Transactional
     public boolean verwijder(Long id) {
-        if (!boekSchadeRepository.existsById(id)) return false;
-        boekSchadeRepository.deleteById(id);
+        BoekSchade schade = boekSchadeRepository.findById(id).orElse(null);
+        if (schade == null) return false;
+
+        Exemplaar exemplaar = schade.getUitlening() == null ? null : schade.getUitlening().getExemplaar();
+        boekSchadeRepository.delete(schade);
+        exemplaarService.herstelBeschadigd(exemplaar);
         return true;
     }
 
@@ -61,8 +75,8 @@ public class BoekSchadeService {
         String naam = oneRosterService.getNaamBySourcedId(smartschoolId);
         return new BoekSchadeDTO(
                 s.getId(),
-                u.getBoek().getTitel(),
-                u.getBoek().getIsbn(),
+                u.getExemplaar().getBoek().getTitel(),
+                u.getExemplaar().getBoek().getIsbn(),
                 smartschoolId,
                 naam,
                 u.getUser().getKlas(),

@@ -79,6 +79,10 @@ export class AdminGebruikerService {
     ? 'http://localhost:8081/api/leerlingen'
     : 'https://api-sp09.cloud-ap.be/api/leerlingen';
 
+  private beheerApiUrl = window.location.hostname === 'localhost'
+    ? 'http://localhost:8081/api/beheer'
+    : 'https://api-sp09.cloud-ap.be/api/beheer';
+
   getAlleLeerkrachten(
     schoolId?: number | null,
     inclVertrokken = false,
@@ -165,5 +169,19 @@ export class AdminGebruikerService {
 
   reactiveerLeerkracht(id: number): Observable<AdminGebruiker> {
     return this.http.patch<AdminGebruiker>(`${this.apiUrl}/leerkrachten/${id}/reactiveer`, {});
+  }
+
+  // Beheerder-varianten: zelfde structuur als admin, maar endpoint is /api/beheer/...
+  // De school wordt server-side bepaald o.b.v. de ingelogde beheerder.
+  getLeerkrachtenVanMijnSchool(page = 0, size = 10000): Observable<PageResponse<AdminGebruiker>> {
+    const params = new HttpParams().set('page', page).set('size', size);
+    return this.http.get<PageResponse<AdminGebruiker>>(`${this.beheerApiUrl}/leerkrachten`, { params });
+  }
+
+  setBeheerderVanMijnSchool(id: number, isBeheerder: boolean): Observable<AdminGebruiker> {
+    return this.http.patch<AdminGebruiker>(
+      `${this.beheerApiUrl}/gebruikers/${id}/beheerder`,
+      { isBeheerder }
+    );
   }
 }

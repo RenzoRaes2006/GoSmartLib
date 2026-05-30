@@ -10,6 +10,9 @@
             @if (boek?.aantalExemplaren && boek!.aantalExemplaren > 0) {
               <span class="status-badge">Beschikbaar</span>
             }
+            @if ((boek?.aantalBeschadigd ?? 0) > 0) {
+              <span class="schade-badge">Beschadigd ({{ boek?.aantalBeschadigd }})</span>
+            }
             <img
               [src]="
                 boek?.afbeelding ||

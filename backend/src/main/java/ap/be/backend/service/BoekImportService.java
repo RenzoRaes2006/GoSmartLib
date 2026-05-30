@@ -18,6 +18,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import ap.be.backend.entity.Boek;
@@ -44,12 +45,14 @@ public class BoekImportService {
     private final BoekRepository boekRepository;
     private final TagRepository tagRepository;
     private final CampusRepository campusRepository;
+    private final ExemplaarService exemplaarService;
 
     public BoekImportService(BoekRepository boekRepository, TagRepository tagRepository,
-            CampusRepository campusRepository) {
+            CampusRepository campusRepository, ExemplaarService exemplaarService) {
         this.boekRepository = boekRepository;
         this.tagRepository = tagRepository;
         this.campusRepository = campusRepository;
+        this.exemplaarService = exemplaarService;
     }
 
     /**
@@ -83,6 +86,7 @@ public class BoekImportService {
      * @param goedgekeurdeBoeken de lijst van boeken die de beheerder heeft goedgekeurd
      * @return het totaal aantal toegevoegde exemplaren
      */
+    @Transactional
     public int bevestigImport(List<Boek> goedgekeurdeBoeken) {
         int totaalExemplarenToegevoegd = 0;
 
@@ -97,11 +101,10 @@ public class BoekImportService {
                 bestaandBoekOpt = boekRepository.findByTitelAndAuteur(nieuwBoek.getTitel(), nieuwBoek.getAuteur());
             }
 
-            int toeTeVoegenExemplaren = nieuwBoek.getAantalExemplaren() > 0 ? nieuwBoek.getAantalExemplaren() : 1;
+            int toeTeVoegenExemplaren = nieuwBoek.getImportAantal() > 0 ? nieuwBoek.getImportAantal() : 1;
 
             if (bestaandBoekOpt.isPresent()) {
                 Boek bestaandBoek = bestaandBoekOpt.get();
-                bestaandBoek.setAantalExemplaren(bestaandBoek.getAantalExemplaren() + toeTeVoegenExemplaren);
 
                 if ((bestaandBoek.getIsbn() == null || bestaandBoek.getIsbn().isEmpty())
                         && nieuwBoek.getIsbn() != null && !nieuwBoek.getIsbn().isEmpty()) {
@@ -109,8 +112,9 @@ public class BoekImportService {
                 }
 
                 boekRepository.save(bestaandBoek);
+                // Bestaand boek: extra exemplaren bijmaken i.p.v. een teller te verhogen.
+                exemplaarService.genereerExemplaren(bestaandBoek, toeTeVoegenExemplaren);
             } else {
-                nieuwBoek.setAantalExemplaren(toeTeVoegenExemplaren);
                 if (nieuwBoek.getBulkCampusId() != null) {
                     Campus campus = campusRepository.findById(nieuwBoek.getBulkCampusId()).orElse(null);
                     nieuwBoek.setCampus(campus);
@@ -123,7 +127,8 @@ public class BoekImportService {
                     }
                 }
                 nieuwBoek.setTags(managedTags);
-                boekRepository.save(nieuwBoek);
+                Boek opgeslagen = boekRepository.save(nieuwBoek);
+                exemplaarService.genereerExemplaren(opgeslagen, toeTeVoegenExemplaren);
             }
 
             totaalExemplarenToegevoegd += toeTeVoegenExemplaren;
@@ -221,7 +226,7 @@ public class BoekImportService {
                         boek.setIsbn(dbCheck.get().getIsbn());
 
                         String exemplarenStr = getWaarde(currentRow, headerMap.get("Aantal exemplaren"), dataFormatter);
-                        boek.setAantalExemplaren(
+                        boek.setImportAantal(
                                 (exemplarenStr != null && !exemplarenStr.isEmpty()) ? Integer.parseInt(exemplarenStr)
                                         : 1);
 
@@ -241,7 +246,7 @@ public class BoekImportService {
                         boek.setPagina((paginaStr != null && !paginaStr.isEmpty()) ? Integer.parseInt(paginaStr) : 0);
 
                         String exemplarenStr = getWaarde(currentRow, headerMap.get("Aantal exemplaren"), dataFormatter);
-                        boek.setAantalExemplaren(
+                        boek.setImportAantal(
                                 (exemplarenStr != null && !exemplarenStr.isEmpty()) ? Integer.parseInt(exemplarenStr)
                                         : 1);
 

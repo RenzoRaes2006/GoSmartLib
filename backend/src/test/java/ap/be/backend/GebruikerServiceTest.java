@@ -2,17 +2,18 @@ package ap.be.backend;
 
 import ap.be.backend.dto.LeenStatusResponse;
 import ap.be.backend.entity.Boek;
+import ap.be.backend.entity.Exemplaar;
+import ap.be.backend.entity.ExemplaarStatus;
 import ap.be.backend.entity.User;
 import ap.be.backend.entity.LeeslijstMap;
 import ap.be.backend.entity.Uitlening;
 import ap.be.backend.exception.InvalidImportDataException;
-import ap.be.backend.exception.LeenVoorwaardeException;
 import ap.be.backend.exception.OnvoldoendeVoorraadException;
-import ap.be.backend.exception.ResourceNotFoundException;
 import ap.be.backend.repository.BoekRepository;
 import ap.be.backend.repository.UserRepository;
 import ap.be.backend.repository.LeeslijstMapRepository;
 import ap.be.backend.repository.UitleningRepository;
+import ap.be.backend.service.ExemplaarService;
 import ap.be.backend.service.GebruikerService;
 import ap.be.backend.service.InstellingService;
 
@@ -49,10 +50,14 @@ public class GebruikerServiceTest {
     @Mock
     private InstellingService instellingService;
 
+    @Mock
+    private ExemplaarService exemplaarService;
+
     @InjectMocks
     private GebruikerService gebruikerService;
 
     private Boek testBoek;
+    private Exemplaar testExemplaar;
     private User testGebruiker;
     private Uitlening testUitlening;
 
@@ -62,10 +67,12 @@ public class GebruikerServiceTest {
         testBoek.setId(1L);
         testBoek.setTitel("Test Boek");
 
+        testExemplaar = new Exemplaar(testBoek, 1, ExemplaarStatus.UITGELEEND);
+
         testGebruiker = new User();
         testGebruiker.setId(1L);
 
-        testUitlening = new Uitlening(testGebruiker, testBoek, LocalDate.now(), LocalDate.now().plusMonths(1));
+        testUitlening = new Uitlening(testGebruiker, testExemplaar, LocalDate.now(), LocalDate.now().plusMonths(1));
         testUitlening.setId(100L);
     }
 
@@ -115,14 +122,13 @@ public class GebruikerServiceTest {
     @Test
     void givenValidLoanId_whenWeigerAanvraag_thenUpdateStatusAndRestoreStock() {
         testUitlening.setStatus("AANGEVRAAGD");
-        testBoek.setAantalExemplaren(5);
         given(uitleningRepository.findById(100L)).willReturn(Optional.of(testUitlening));
 
         gebruikerService.weigerAanvraag(100L);
 
         assertEquals("GEWEIGERD", testUitlening.getStatus());
         assertTrue(testUitlening.isIngeleverd());
-        assertEquals(6, testBoek.getAantalExemplaren());
+        verify(exemplaarService, times(1)).neemTerug(testExemplaar);
     }
 
     @Test
@@ -131,12 +137,12 @@ public class GebruikerServiceTest {
         Long bookId = 2L;
 
         Boek mockBoek = new Boek();
-        mockBoek.setAantalExemplaren(5);
 
         given(boekRepository.findById(bookId)).willReturn(Optional.of(mockBoek));
+        given(exemplaarService.isBeschikbaar(mockBoek)).willReturn(true);
         given(uitleningRepository.existsByUser_IdAndIsIngeleverdFalseAndInleverDatumBefore(
                 eq(userId), any(LocalDate.class))).willReturn(false);
-        given(uitleningRepository.existsByUser_IdAndBoek_IdAndIsIngeleverdFalse(userId, bookId))
+        given(uitleningRepository.existsByUser_IdAndExemplaar_Boek_IdAndIsIngeleverdFalse(userId, bookId))
                 .willReturn(false);
         given(instellingService.getLeenLimiet()).willReturn(3);
         given(uitleningRepository.findByUser_IdAndIsIngeleverdFalse(userId)).willReturn(List.of());
@@ -154,10 +160,10 @@ public class GebruikerServiceTest {
 
         Boek boek = new Boek();
         boek.setId(boekId);
-        boek.setAantalExemplaren(5);
 
         when(boekRepository.findById(boekId)).thenReturn(Optional.of(boek));
-        when(uitleningRepository.existsByUser_IdAndBoek_IdAndIsIngeleverdFalse(gebruikerId, boekId))
+        when(exemplaarService.isBeschikbaar(boek)).thenReturn(true);
+        when(uitleningRepository.existsByUser_IdAndExemplaar_Boek_IdAndIsIngeleverdFalse(gebruikerId, boekId))
                 .thenReturn(false);
         when(uitleningRepository.existsByUser_IdAndIsIngeleverdFalseAndInleverDatumBefore(eq(gebruikerId),
                 any())).thenReturn(false);
@@ -184,25 +190,25 @@ public class GebruikerServiceTest {
 
         Boek boek1 = new Boek("De Hobbit", "Tolkien");
         boek1.setId(10L);
-        boek1.setAantalExemplaren(3);
 
         Boek boek2 = new Boek("1984", "Orwell");
         boek2.setId(11L);
-        boek2.setAantalExemplaren(1);
 
         when(userRepository.findById(leraarId)).thenReturn(Optional.of(leraar));
         when(boekRepository.findById(10L)).thenReturn(Optional.of(boek1));
         when(boekRepository.findById(11L)).thenReturn(Optional.of(boek2));
+        when(exemplaarService.isBeschikbaar(boek1)).thenReturn(true);
+        when(exemplaarService.isBeschikbaar(boek2)).thenReturn(true);
+        when(exemplaarService.leenUit(boek1)).thenReturn(new Exemplaar(boek1, 1, ExemplaarStatus.UITGELEEND));
+        when(exemplaarService.leenUit(boek2)).thenReturn(new Exemplaar(boek2, 1, ExemplaarStatus.UITGELEEND));
 
         // CRUCIAAL: Vertel de mock hoeveel dagen hij moet teruggeven!
         when(instellingService.getInlevertermijnDagen()).thenReturn(14);
 
         gebruikerService.bevestigBulkUitlening(leraarId, boekIds);
 
-        assertEquals(2, boek1.getAantalExemplaren(), "Voorraad boek 1 moet met 1 verminderd zijn");
-        assertEquals(0, boek2.getAantalExemplaren(), "Voorraad boek 2 moet met 1 verminderd zijn");
-
-        verify(boekRepository, times(2)).save(any(Boek.class));
+        verify(exemplaarService, times(1)).leenUit(boek1);
+        verify(exemplaarService, times(1)).leenUit(boek2);
         verify(uitleningRepository, times(2)).save(any(Uitlening.class));
     }
 
@@ -222,10 +228,10 @@ public class GebruikerServiceTest {
 
         Boek boekUitVerkocht = new Boek("Clean Code", "Robert C. Martin");
         boekUitVerkocht.setId(5L);
-        boekUitVerkocht.setAantalExemplaren(0);
 
         when(userRepository.findById(leraarId)).thenReturn(Optional.of(leraar));
         when(boekRepository.findById(5L)).thenReturn(Optional.of(boekUitVerkocht));
+        when(exemplaarService.isBeschikbaar(boekUitVerkocht)).thenReturn(false);
 
         assertThrows(OnvoldoendeVoorraadException.class, () -> {
             gebruikerService.bevestigBulkUitlening(leraarId, Arrays.asList(5L));

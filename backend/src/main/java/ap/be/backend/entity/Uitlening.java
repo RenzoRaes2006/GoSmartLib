@@ -30,9 +30,13 @@ public class Uitlening {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    // FK is op DB-niveau NOT NULL (afgedwongen door ExemplaarMigratie), maar bewust
+    // niet nullable=false hier: bij ddl-auto=update mag Hibernate de kolom eerst als
+    // nullable aanmaken zodat de migratie bestaande rijen kan backfillen vóór de
+    // NOT NULL-constraint erop gezet wordt.
     @ManyToOne
-    @JoinColumn(name = "boek_id", nullable = false)
-    private Boek boek;
+    @JoinColumn(name = "exemplaar_id")
+    private Exemplaar exemplaar;
 
     private LocalDate uitleenDatum;
     private LocalDate inleverDatum;
@@ -47,9 +51,9 @@ public class Uitlening {
     // Datum waarop de herinnering (7 dagen na de eerste mail) is verstuurd. Null = nog niet.
     private LocalDate herinneringMailOp;
 
-    public Uitlening(User user, Boek boek, LocalDate uitleenDatum, LocalDate inleverDatum) {
+    public Uitlening(User user, Exemplaar exemplaar, LocalDate uitleenDatum, LocalDate inleverDatum) {
         this.user = user;
-        this.boek = boek;
+        this.exemplaar = exemplaar;
         this.status = "AANGEVRAAGD";
         this.uitleenDatum = null;
         this.inleverDatum = null;

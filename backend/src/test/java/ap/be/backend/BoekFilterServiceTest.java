@@ -53,6 +53,9 @@ public class BoekFilterServiceTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private ap.be.backend.repository.BoekSchadeRepository boekSchadeRepository;
+
     @InjectMocks
     private BoekService boekService;
 

@@ -80,8 +80,8 @@ public class SchooljaarService {
                 .map(u -> new OpenLeningPreviewDTO(
                         u.getId(),
                         u.getUser().getSmartschoolId(),
-                        u.getBoek().getTitel(),
-                        u.getBoek().getIsbn()))
+                        u.getExemplaar().getBoek().getTitel(),
+                        u.getExemplaar().getBoek().getIsbn()))
                 .toList();
 
         // Klas-leeslijsten die gearchiveerd worden: alle actieve klas-leeslijsten van leerkrachten van deze school

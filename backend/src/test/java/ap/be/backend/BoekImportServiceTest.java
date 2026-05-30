@@ -24,6 +24,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import ap.be.backend.entity.Boek;
 import ap.be.backend.repository.BoekRepository;
 import ap.be.backend.service.BoekImportService;
+import ap.be.backend.service.ExemplaarService;
 import ap.be.backend.exception.InvalidImportDataException;
 
 @ExtendWith(MockitoExtension.class)
@@ -31,6 +32,9 @@ public class BoekImportServiceTest {
 
     @Mock
     private BoekRepository boekRepository;
+
+    @Mock
+    private ExemplaarService exemplaarService;
 
     @InjectMocks
     private BoekImportService boekImportService;
@@ -74,7 +78,7 @@ public class BoekImportServiceTest {
         assertEquals(1, previewLijst.size(), "Er moet exact 1 boek geparseerd zijn");
         Boek geparseerdBoek = previewLijst.get(0);
         assertEquals("Clean Code", geparseerdBoek.getTitel());
-        assertEquals(3, geparseerdBoek.getAantalExemplaren());
+        assertEquals(3, geparseerdBoek.getImportAantal());
         assertFalse(geparseerdBoek.isBestaatAl(), "Het boek is nieuw, dus bestaatAl moet false zijn");
     }
 
@@ -104,10 +108,11 @@ public class BoekImportServiceTest {
         nieuwBoek.setTitel("Spring Boot in Action");
         nieuwBoek.setAuteur("Craig Walls");
         nieuwBoek.setIsbn("9781617292545");
-        nieuwBoek.setAantalExemplaren(2);
+        nieuwBoek.setImportAantal(2);
 
         when(boekRepository.findByIsbn("9781617292545")).thenReturn(Optional.empty());
         when(boekRepository.findByTitelAndAuteur("Spring Boot in Action", "Craig Walls")).thenReturn(Optional.empty());
+        when(boekRepository.save(nieuwBoek)).thenReturn(nieuwBoek);
 
         // Act
         int result = boekImportService.bevestigImport(List.of(nieuwBoek));
@@ -115,6 +120,7 @@ public class BoekImportServiceTest {
         // Assert
         assertEquals(2, result, "Het totaal aantal toegevoegde exemplaren moet 2 zijn");
         verify(boekRepository, times(1)).save(nieuwBoek); // Controleer of save() is aangeroepen
+        verify(exemplaarService, times(1)).genereerExemplaren(nieuwBoek, 2);
     }
 
     @Test
@@ -125,14 +131,13 @@ public class BoekImportServiceTest {
         dbBoek.setTitel("De Hobbit");
         dbBoek.setAuteur("Tolkien");
         dbBoek.setIsbn("12345");
-        dbBoek.setAantalExemplaren(3);
 
         // Het boek dat via de import binnenkomt heeft 2 extra exemplaren
         Boek importBoek = new Boek();
         importBoek.setTitel("De Hobbit");
         importBoek.setAuteur("Tolkien");
         importBoek.setIsbn("12345");
-        importBoek.setAantalExemplaren(2);
+        importBoek.setImportAantal(2);
 
         when(boekRepository.findByIsbn("12345")).thenReturn(Optional.of(dbBoek));
 
@@ -141,7 +146,8 @@ public class BoekImportServiceTest {
 
         // Assert
         assertEquals(2, result, "De methode moet 2 extra exemplaren rapporteren");
-        assertEquals(5, dbBoek.getAantalExemplaren(), "De voorraad in het DB object moet verhoogd zijn naar 5 (3+2)");
+        // Bij een bestaand boek worden er 2 extra exemplaren bijgemaakt (geen nieuwe boek-rij).
+        verify(exemplaarService, times(1)).genereerExemplaren(dbBoek, 2);
         verify(boekRepository, times(1)).save(dbBoek); // We slaan het geüpdatete DB boek op, geen nieuwe!
     }
 }

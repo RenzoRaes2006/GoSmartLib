@@ -29,8 +29,8 @@ public interface BoekRepository extends JpaRepository<Boek, Long> {
                         "(:minPagina IS NULL OR b.pagina >= :minPagina) AND " +
                         "(:maxPagina IS NULL OR b.pagina <= :maxPagina) AND " +
                         "(:beschikbaar IS NULL OR " +
-                        "  (:beschikbaar = true AND b.aantalExemplaren > 0) OR " +
-                        "  (:beschikbaar = false AND b.aantalExemplaren = 0)) AND " +
+                        "  (:beschikbaar = true AND EXISTS (SELECT 1 FROM Exemplaar e WHERE e.boek = b AND e.status = ap.be.backend.entity.ExemplaarStatus.BESCHIKBAAR)) OR " +
+                        "  (:beschikbaar = false AND NOT EXISTS (SELECT 1 FROM Exemplaar e WHERE e.boek = b AND e.status = ap.be.backend.entity.ExemplaarStatus.BESCHIKBAAR))) AND " +
                         "(:uitgaveJaarVan IS NULL OR b.uitgaveJaar >= :uitgaveJaarVan) AND " +
                         "(:uitgaveJaarTot IS NULL OR b.uitgaveJaar <= :uitgaveJaarTot) AND " +
                         "(:leesniveau IS NULL OR b.leesniveau = :leesniveau) AND " +
@@ -55,12 +55,27 @@ public interface BoekRepository extends JpaRepository<Boek, Long> {
 
         Page<Boek> findByDidactischMateriaalTrue(Pageable pageable);
 
-        @Query(value = "SELECT b.* FROM boeken b LEFT JOIN leeslijst_map_boeken lmb ON b.id = lmb.boek_id GROUP BY b.id ORDER BY COUNT(lmb.map_id) DESC LIMIT 5", nativeQuery = true)
+        // De afgeleide @Formula `aantalBeschikbaar` op Boek wordt door Hibernate niet
+        // automatisch aan een native SELECT toegevoegd; daarom moet de subquery hier
+        // expliciet als gelijknamige kolom meegegeven worden, anders faalt de entity-mapping
+        // met "Column 'aantalBeschikbaar' not found".
+        @Query(value = "SELECT b.*, " +
+                        "(SELECT COUNT(e.id) FROM exemplaren e WHERE e.boek_id = b.id AND e.status = 'BESCHIKBAAR') AS aantalBeschikbaar, " +
+                        "(SELECT COUNT(e.id) FROM exemplaren e WHERE e.boek_id = b.id AND e.status = 'BESCHADIGD') AS aantalBeschadigd " +
+                        "FROM boeken b LEFT JOIN leeslijst_map_boeken lmb ON b.id = lmb.boek_id " +
+                        "WHERE b.didactisch_materiaal = false " +
+                        "GROUP BY b.id ORDER BY COUNT(lmb.map_id) DESC LIMIT 5", nativeQuery = true)
         List<Boek> findTop5PopulaireBoeken();
 
         Optional<Boek> findByTitelAndAuteur(String titel, String auteur);
 
-        @Query("SELECT COALESCE(SUM(b.aantalExemplaren), 0) FROM Boek b")
+        // Aantal beschikbare exemplaren over de hele collectie. Behoudt de oude
+        // semantiek (het vroegere aantalExemplaren-veld was óók de beschikbare voorraad),
+        // zodat de dashboard-statistieken vóór en na de migratie blijven kloppen.
+        @Query("SELECT COUNT(e) FROM Exemplaar e WHERE e.status = ap.be.backend.entity.ExemplaarStatus.BESCHIKBAAR")
         long sumTotaalAantalExemplaren();
+
+        @Query("SELECT b FROM Boek b JOIN b.tags t WHERE t.id = :tagId")
+        List<Boek> findAllMetTag(@Param("tagId") Long tagId);
 
 }

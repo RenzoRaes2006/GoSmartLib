@@ -23,12 +23,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import ap.be.backend.dto.LeenStatusResponse;
 import ap.be.backend.entity.Boek;
+import ap.be.backend.entity.Exemplaar;
+import ap.be.backend.entity.ExemplaarStatus;
 import ap.be.backend.entity.User;
 import ap.be.backend.entity.Uitlening;
 import ap.be.backend.repository.BoekRepository;
 import ap.be.backend.repository.UserRepository;
 import ap.be.backend.repository.LeeslijstMapRepository;
 import ap.be.backend.repository.UitleningRepository;
+import ap.be.backend.service.ExemplaarService;
 import ap.be.backend.service.GebruikerService;
 import ap.be.backend.service.InstellingService;
 
@@ -45,6 +48,9 @@ public class UitleningTest {
     @Mock
     private InstellingService instellingService;
 
+    @Mock
+    private ExemplaarService exemplaarService;
+
     @InjectMocks
     private GebruikerService gebruikerService;
 
@@ -59,16 +65,16 @@ public class UitleningTest {
         testBoek = new Boek();
         testBoek.setId(100L);
         testBoek.setTitel("Spring Boot voor Beginners");
-        testBoek.setAantalExemplaren(5);
 
         lenient().when(instellingService.getLeenLimiet()).thenReturn(3);
+        lenient().when(exemplaarService.isBeschikbaar(testBoek)).thenReturn(true);
     }
 
     @Test
     void checkLeenStatus_MagLenen_AlsAllesKlopt() {
         // Arrange
         when(boekRepository.findById(100L)).thenReturn(Optional.of(testBoek));
-        when(uitleningRepository.existsByUser_IdAndBoek_IdAndIsIngeleverdFalse(1L, 100L))
+        when(uitleningRepository.existsByUser_IdAndExemplaar_Boek_IdAndIsIngeleverdFalse(1L, 100L))
                 .thenReturn(false);
         when(uitleningRepository.findByUser_IdAndIsIngeleverdFalse(1L)).thenReturn(new ArrayList<>());
 
@@ -83,8 +89,8 @@ public class UitleningTest {
     @Test
     void checkLeenStatus_MagNietLenen_AlsVoorraadNulIs() {
         // Arrange
-        testBoek.setAantalExemplaren(0);
         when(boekRepository.findById(100L)).thenReturn(Optional.of(testBoek));
+        when(exemplaarService.isBeschikbaar(testBoek)).thenReturn(false);
 
         // Act
         LeenStatusResponse response = gebruikerService.checkLeenStatus(1L, 100L);
@@ -114,7 +120,7 @@ public class UitleningTest {
     void checkLeenStatus_MagNietLenen_AlsBoekAlGeleendOfAangevraagdIs() {
         // Arrange
         when(boekRepository.findById(100L)).thenReturn(Optional.of(testBoek));
-        when(uitleningRepository.existsByUser_IdAndBoek_IdAndIsIngeleverdFalse(1L, 100L))
+        when(uitleningRepository.existsByUser_IdAndExemplaar_Boek_IdAndIsIngeleverdFalse(1L, 100L))
                 .thenReturn(true);
 
         // Act
@@ -130,7 +136,7 @@ public class UitleningTest {
     void checkLeenStatus_MagNietLenen_AlsGebruikerTeLateBoekenHeeft() {
         // Arrange
         when(boekRepository.findById(100L)).thenReturn(Optional.of(testBoek));
-        when(uitleningRepository.existsByUser_IdAndBoek_IdAndIsIngeleverdFalse(1L, 100L))
+        when(uitleningRepository.existsByUser_IdAndExemplaar_Boek_IdAndIsIngeleverdFalse(1L, 100L))
                 .thenReturn(false);
         when(uitleningRepository.existsByUser_IdAndIsIngeleverdFalseAndInleverDatumBefore(any(Long.class),
                 any(LocalDate.class))).thenReturn(true);
@@ -144,19 +150,18 @@ public class UitleningTest {
     }
 
     @Test
-    void bevestigUitlening_Succes_VermindertVoorraadEnSlaatOp() {
+    void bevestigUitlening_Succes_ReserveertExemplaarEnSlaatOp() {
         // Arrange
         when(boekRepository.findById(100L)).thenReturn(Optional.of(testBoek));
         when(userRepository.findById(1L)).thenReturn(Optional.of(testGebruiker));
-
-        int startVoorraad = testBoek.getAantalExemplaren();
+        Exemplaar exemplaar = new Exemplaar(testBoek, 1, ExemplaarStatus.UITGELEEND);
+        when(exemplaarService.leenUit(testBoek)).thenReturn(exemplaar);
 
         // Act
         gebruikerService.bevestigUitlening(1L, 100L);
 
         // Assert
-        assertEquals(startVoorraad - 1, testBoek.getAantalExemplaren(), "De voorraad moet met 1 verminderd zijn");
-        verify(boekRepository, times(1)).save(testBoek);
+        verify(exemplaarService, times(1)).leenUit(testBoek);
         verify(uitleningRepository, times(1)).save(any(Uitlening.class));
     }
 }

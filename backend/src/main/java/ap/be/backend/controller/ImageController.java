@@ -7,6 +7,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
@@ -41,14 +42,15 @@ public class ImageController {
     }
 
     /**
-     * Slaat een geüploade afbeelding op en geeft het relatieve pad terug.
+     * Slaat een geüploade afbeelding op en geeft de absolute URL terug.
      *
-     * Het teruggegeven pad kan direct worden opgeslagen als afbeeldings-URL
-     * bij een boek. Alleen JPEG en PNG zijn toegestaan.
+     * De teruggegeven URL kan direct worden opgeslagen als afbeeldings-URL bij een
+     * boek en in een &lt;img src&gt; gebruikt worden, ook als frontend en backend op
+     * verschillende origins draaien. Alleen JPEG en PNG zijn toegestaan.
      *
      * @param file    de te uploaden afbeelding
-     * @param request het HTTP-verzoek (gereserveerd voor toekomstige base-URL-logica)
-     * @return het relatieve pad naar de opgeslagen afbeelding
+     * @param request het HTTP-verzoek
+     * @return de absolute URL naar de opgeslagen afbeelding
      * @throws IOException als het opslaan van het bestand mislukt
      */
     @PostMapping("/upload")
@@ -64,7 +66,17 @@ public class ImageController {
 
         Files.copy(file.getInputStream(), uploadDirectory.resolve(bestandsnaam));
 
-        return ResponseEntity.ok("/api/images/" + bestandsnaam);
+        // Absolute URL teruggeven (incl. host/scheme). Een relatief pad zou in de
+        // browser tegen de frontend-origin opgelost worden i.p.v. de backend, wat een
+        // broken image geeft zodra frontend en backend niet dezelfde origin delen
+        // (localhost:4200 vs :8081). fromCurrentContextPath respecteert de
+        // X-Forwarded-headers (server.forward-headers-strategy=framework), dus achter
+        // Traefik klopt de publieke URL ook.
+        String volledigeUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path("/api/images/" + bestandsnaam)
+                .toUriString();
+
+        return ResponseEntity.ok(volledigeUrl);
     }
 
     /**

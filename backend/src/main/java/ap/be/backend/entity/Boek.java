@@ -6,6 +6,9 @@ import java.util.Set;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import org.hibernate.annotations.Formula;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -55,8 +58,21 @@ public class Boek {
     @Column(columnDefinition = "LONGTEXT")
     private String afbeelding;
 
-    @Column
-    private int aantalExemplaren;
+    /**
+     * Aantal momenteel uitleenbare exemplaren (status BESCHIKBAAR). Read-only,
+     * door Hibernate per query berekend met een subselect — geen aparte teller
+     * meer die kan ontsporen. Vervangt het oude {@code aantalExemplaren}-veld en
+     * voedt het gelijknamige veld in {@link ap.be.backend.dto.BoekDTO}, zodat het
+     * frontend-contract ongewijzigd blijft.
+     */
+    @JsonIgnore
+    @Formula("(SELECT COUNT(e.id) FROM exemplaren e WHERE e.boek_id = id AND e.status = 'BESCHIKBAAR')")
+    private int aantalBeschikbaar;
+
+    /** Aantal exemplaren dat momenteel BESCHADIGD is. Read-only, per query berekend. */
+    @JsonIgnore
+    @Formula("(SELECT COUNT(e.id) FROM exemplaren e WHERE e.boek_id = id AND e.status = 'BESCHADIGD')")
+    private int aantalBeschadigd;
 
     @Column
     private String locatie;
@@ -79,7 +95,7 @@ public class Boek {
 
     @JsonIgnore
     @OneToMany(mappedBy = "boek", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Uitlening> uitleningen;
+    private List<Exemplaar> exemplaren = new java.util.ArrayList<>();
 
     @JsonIgnore
     @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
@@ -91,6 +107,16 @@ public class Boek {
 
     @Transient
     private Long bulkCampusId;
+
+    /**
+     * Tijdelijk veld voor de import-/preview-pijp: hoeveel exemplaren de Excel-rij
+     * vraagt. Wordt nooit gepersisteerd; na save zet de importer dit om naar echte
+     * {@link Exemplaar}-rijen. Serialiseert als "aantalExemplaren" zodat het
+     * import-frontend (dat dat veld bindt en terugstuurt) ongewijzigd blijft.
+     */
+    @Transient
+    @JsonProperty("aantalExemplaren")
+    private int importAantal;
 
     public Boek(String titel, String auteur) {
         this.titel = titel;

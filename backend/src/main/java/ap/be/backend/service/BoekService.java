@@ -25,6 +25,7 @@ import ap.be.backend.exception.InvalidYearRangeException;
 import ap.be.backend.exception.IsbnAlreadyExistsException;
 import ap.be.backend.mappers.BoekMapper;
 import ap.be.backend.repository.BoekRepository;
+import ap.be.backend.repository.BoekSchadeRepository;
 import ap.be.backend.repository.CampusRepository;
 import ap.be.backend.repository.TagRepository;
 import ap.be.backend.repository.UserRepository;
@@ -36,16 +37,22 @@ public class BoekService {
     private final TagService tagService;
     private final CampusRepository campusRepository;
     private final UserRepository userRepository;
+    private final BoekSchadeRepository boekSchadeRepository;
+    private final ExemplaarService exemplaarService;
 
     public BoekService(BoekRepository boekRepository, TagRepository tagRepository, TagService tagService,
-            CampusRepository campusRepository, UserRepository userRepository) {
+            CampusRepository campusRepository, UserRepository userRepository,
+            BoekSchadeRepository boekSchadeRepository, ExemplaarService exemplaarService) {
         this.boekRepository = boekRepository;
         this.tagRepository = tagRepository;
         this.tagService = tagService;
         this.campusRepository = campusRepository;
         this.userRepository = userRepository;
+        this.boekSchadeRepository = boekSchadeRepository;
+        this.exemplaarService = exemplaarService;
     }
 
+    @Transactional
     public Boek addBoek(BoekDTO boekDTO) {
         String trimmedIsbn = boekDTO.isbn().trim();
 
@@ -62,15 +69,17 @@ public class BoekService {
         boek.setTags(resolveTags(boekDTO.tags()));
         boek.setPagina(boekDTO.pagina());
         boek.setBeschrijving(boekDTO.beschrijving());
-        boek.setAantalExemplaren(boekDTO.aantalExemplaren());
         boek.setLocatie(isNotBlank(boekDTO.locatie()) ? boekDTO.locatie() : "Geen locatie");
         boek.setAfbeelding(isNotBlank(boekDTO.afbeelding()) ? boekDTO.afbeelding() : "");
         boek.setLeesniveau(isNotBlank(boekDTO.leesniveau()) ? boekDTO.leesniveau() : "Geen leesniveau");
         boek.setDidactischMateriaal(Boolean.TRUE.equals(boekDTO.didactischMateriaal()));
         boek.setCampus(resolveCampus(boekDTO.campusId()));
-        return boekRepository.save(boek);
+        Boek opgeslagen = boekRepository.save(boek);
+        exemplaarService.genereerExemplaren(opgeslagen, boekDTO.aantalExemplaren());
+        return opgeslagen;
     }
 
+    @Transactional
     public Boek updateBoek(Long id, BoekDTO boekDTO) {
         Optional<Boek> bestaandBoek = boekRepository.findById(id);
         if (bestaandBoek.isEmpty()) {
@@ -88,12 +97,14 @@ public class BoekService {
         boek.getTags().addAll(nieuweTags);
         boek.setPagina(boekDTO.pagina());
         boek.setBeschrijving(boekDTO.beschrijving());
-        boek.setAantalExemplaren(boekDTO.aantalExemplaren());
         boek.setLocatie(isNotBlank(boekDTO.locatie()) ? boekDTO.locatie() : "Geen locatie");
         boek.setAfbeelding(isNotBlank(boekDTO.afbeelding()) ? boekDTO.afbeelding() : "");
         boek.setLeesniveau(isNotBlank(boekDTO.leesniveau()) ? boekDTO.leesniveau() : "Geen leesniveau");
         boek.setDidactischMateriaal(Boolean.TRUE.equals(boekDTO.didactischMateriaal()));
         boek.setCampus(resolveCampus(boekDTO.campusId()));
+        // Het ingevulde aantal is het gewenste aantal beschikbare exemplaren; uitgeleende
+        // en beschadigde exemplaren blijven onaangeroerd (zie ExemplaarService).
+        exemplaarService.stelBeschikbaarAantalIn(boek, boekDTO.aantalExemplaren());
         return boekRepository.save(boek);
     }
 
@@ -143,7 +154,13 @@ public class BoekService {
                 (filters.campusIds() == null || filters.campusIds().isEmpty()) ? null : filters.campusIds(),
                 filters.minSterren(),
                 paging.toPageable(sort.toSort()));
-        return page.map(BoekMapper::toDTO);
+
+        List<Long> boekIds = page.getContent().stream().map(Boek::getId).toList();
+        Set<Long> idsMetSchade = boekIds.isEmpty()
+                ? Set.of()
+                : Optional.ofNullable(boekSchadeRepository.findBoekIdsMetSchade(boekIds))
+                        .orElseGet(Set::of);
+        return page.map(b -> BoekMapper.toDTO(b, idsMetSchade.contains(b.getId())));
     }
 
     private Campus resolveCampus(Long campusId) {
@@ -189,6 +206,11 @@ public class BoekService {
 
     public Boek getBoekById(Long id) {
         return boekRepository.findById(id).orElse(null);
+    }
+
+    public boolean heeftSchade(Long boekId) {
+        if (boekId == null) return false;
+        return !boekSchadeRepository.findBoekIdsMetSchade(List.of(boekId)).isEmpty();
     }
 
     public Page<Boek> getBoekenPaged(int page, int size) {

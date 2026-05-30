@@ -72,7 +72,8 @@ class SchooljaarServiceTest {
         openUitlening = new Uitlening();
         openUitlening.setId(20L);
         openUitlening.setUser(vertrokkenLeerling);
-        openUitlening.setBoek(testBoek);
+        openUitlening.setExemplaar(new ap.be.backend.entity.Exemplaar(testBoek, 1,
+                ap.be.backend.entity.ExemplaarStatus.UITGELEEND));
         openUitlening.setIngeleverd(false);
 
         testLeeslijst = new KlassLeeslijst();
