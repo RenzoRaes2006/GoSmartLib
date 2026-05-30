@@ -84,6 +84,8 @@ De balk toont hoeveel boeken je al gelezen hebt van je doel (bijvoorbeeld _3 / 5
 Hieronder staan boeken die door je school worden **uitgelicht**. Klik op een boek om er meer over te lezen.
 Wil je de volledige bibliotheek zien? Klik op **"Ontdek de volledige bibliotheek! 📚"**.
 
+![Uitgelichte boeken in jouw school](Fotos/leerling/startpaginaUitgelichtInJouwSchool.png)
+
 ### Jouw leeslijsten
 
 Een snelle blik op je eigen mappen met boeken. Klik op een map om hem te openen.
@@ -96,7 +98,7 @@ Hier zie je welke boeken je hebt geleend en **hoeveel dagen** je ze nog mag houd
 - Met de knop **Verlengen** kan je een boek langer houden (zie [hoofdstuk 7](#7-je-geleende-boeken-verlengen)).
 - Boeken die nog niet zijn goedgekeurd krijgen het label **"Wachtend ⏳"**.
 
-![De volledige startpagina van de leerling](Fotos/leerling/startpaginaLeerling.png)
+![Jouw leeslijsten en je uitleentermijnen op de startpagina](Fotos/leerling/startpaginaLeeslijstenEnUitleenTermijnen.png)
 
 ---
 
@@ -104,11 +106,11 @@ Hier zie je welke boeken je hebt geleend en **hoeveel dagen** je ze nog mag houd
 
 In de **catalogus** vind je alle boeken van de bibliotheek. Je opent de catalogus via de startpagina of door op een boek te klikken.
 
-### 🔎 Zoeken
+### Zoeken
 
 Typ in het zoekvak een **titel, auteur of ISBN-nummer**. De resultaten verschijnen meteen.
 
-### 🧰 Filteren
+### Filteren
 
 Aan de linkerkant staan **filters** om sneller te vinden wat je zoekt:
 
@@ -125,7 +127,7 @@ Aan de linkerkant staan **filters** om sneller te vinden wat je zoekt:
 
 Klik op **"Filters wissen"** om opnieuw te beginnen.
 
-### 📖 De boekenkaartjes
+### De boekenkaartjes
 
 Elk boek wordt getoond als een kaartje met de cover, titel, auteur en een label:
 
@@ -134,7 +136,7 @@ Elk boek wordt getoond als een kaartje met de cover, titel, auteur en een label:
 
 Klik op een kaartje om de detailpagina te openen. Onderaan kan je met **Vorige** en **Volgende** door de pagina's bladeren.
 
-> 📷 _Plaats hier een screenshot van de catalogus met de filterbalk links en de boekenkaartjes rechts._
+![De catalogus met de filterbalk links en de boekenkaartjes rechts](Fotos/leerling/catalogusMetfilter.png)
 >
 > 🎥 _Optioneel: een filmpje waarin je een boek zoekt en filtert._
 
@@ -162,7 +164,7 @@ Wat je hier ziet:
 
 > ⚠️ Soms kan je een boek **niet** lenen (bijvoorbeeld als het uitgeleend is of je leenlimiet bereikt is). Dan staat er een berichtje dat uitlegt waarom.
 
-> 📷 _Plaats hier een screenshot van een boekdetailpagina met de knoppen aangeduid._
+![De detailpagina van een boek met alle knoppen](Fotos/leerling/boekDetailPagina.png)
 
 ---
 
@@ -187,10 +189,10 @@ De bibliotheekbeheerder bekijkt je aanvraag. Tot dan zie je het boek met het lab
 
 > 📌 **Goed om te weten:**
 >
-> - De standaard uitleentermijn is **1 maand**.
+> - De standaard uitleentermijn is **afhangend van de school**.
 > - Je kan maar een **beperkt aantal** boeken tegelijk lenen (je school stelt dit in). Soms staat "onbeperkt lenen" aan.
 
-> 📷 _Plaats hier een screenshot van de mandje-/reserveringspagina._
+![De mandje- en reserveringspagina](Fotos/leerling/reserveerMandjePagina.png)
 >
 > 🎥 _Optioneel: een filmpje van het volledige leenproces, van boek toevoegen tot bevestigen._
 
@@ -209,7 +211,7 @@ Heb je een boek nog niet uit? Dan kan je het **verlengen**.
 >
 > ⚠️ **Let op:** je kan een boek **maar één keer** verlengen. Daarna verschijnt het label _"Verlenging in aanvraag ⏳"_ tot de beheerder het goedkeurt.
 
-> 📷 _Plaats hier een screenshot van een boek met de knop "Verlengen"._
+![Een geleend boek met de knop "Verlengen"](Fotos/leerling/BoekVerlengen.png)
 
 ---
 
@@ -219,7 +221,11 @@ Met **leeslijsten** maak je je eigen mappen om boeken in te bewaren — bijvoorb
 
 ### Een map openen
 
-Klik op een map om te zien welke boeken erin zitten. Elke map heeft een eigen **emoji** zodat je ze snel herkent. 📁⭐🚀
+Klik op een map om te zien welke boeken erin zitten. Elke map heeft een eigen **emoji** zodat je ze snel herkent.
+
+![Het overzicht van je mappen](Fotos/leerling/MappenLeeslijst.png)
+
+![Een geopende map met de boeken erin](Fotos/leerling/geopendeMap.png)
 
 ### Een boek toevoegen aan een map
 
@@ -228,15 +234,15 @@ Klik op een map om te zien welke boeken erin zitten. Elke map heeft een eigen **
 3. Kies een **bestaande map**, of maak een **nieuwe map**:
    - Geef de map een naam.
    - Kies een leuke emoji.
-4. Klik op **Opslaan**. 🎉
+4. Klik op **Opslaan**.
+
+![Een boek toevoegen aan een map](Fotos/leerling/boekToevoegenAanMap.png)
 
 ### Een boek uit een map verwijderen
 
 Open de map en klik op het **✕**-knopje bij het boek dat je wil verwijderen.
 
 > 💡 De map **Favorieten ⭐** is een speciale map: alle boeken waarop je op **"♡ Favoriet"** klikt, komen hier automatisch in terecht.
-
-> 📷 _Plaats hier een screenshot van het mappenoverzicht en van een geopende map._
 
 ---
 
@@ -262,8 +268,8 @@ Klik op een lijst om de boeken te bekijken. Bovenaan zie je eventueel een korte 
 
 ## 10. Een review schrijven
 
-Heb je een boek gelezen? Laat anderen weten wat je ervan vond! ✍️
-Reviews vind je onderaan de **detailpagina** van een boek.
+Heb je een boek gelezen? Laat anderen weten wat je ervan vond!
+Reviews vind je op de **detailpagina** van een boek.
 
 ### Een review schrijven
 
@@ -282,7 +288,7 @@ Zie je een review die niet door de beugel kan (scheldwoorden, pesten, spam, een 
 
 > 🙂 **Wees vriendelijk!** Schrijf eerlijke en respectvolle reviews. Zo helpt iedereen elkaar om leuke boeken te vinden.
 
-> 📷 _Plaats hier een screenshot van het reviewformulier met de sterren._
+![Het reviewformulier met de sterren](Fotos/leerling/Review.png)
 
 ---
 
@@ -298,7 +304,7 @@ Wat je hier vindt:
 
 Klik op een boek om opnieuw naar de detailpagina te gaan.
 
-> 📷 _Plaats hier een screenshot van de leengeschiedenis met de grafiek._
+![Je profiel met de leengeschiedenis en de grafiek](Fotos/leerling/profielLeenGeschiedenis.png)
 
 ---
 
@@ -342,4 +348,4 @@ Klik rechtsboven op de **uitlogknop** ➜]. Doe dit altijd op een gedeelde compu
 
 > ✏️ _Heb je nog een vraag die hier niet bij staat? Vraag het aan je leerkracht of aan de bibliotheekbeheerder van je school._
 
-**Veel leesplezier met GO! SmartLib! 📚✨**
+**Veel leesplezier met GO! SmartLib!**
