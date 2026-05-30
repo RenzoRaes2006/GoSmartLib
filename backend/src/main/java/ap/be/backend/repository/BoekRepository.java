@@ -63,6 +63,7 @@ public interface BoekRepository extends JpaRepository<Boek, Long> {
                         "(SELECT COUNT(e.id) FROM exemplaren e WHERE e.boek_id = b.id AND e.status = 'BESCHIKBAAR') AS aantalBeschikbaar, " +
                         "(SELECT COUNT(e.id) FROM exemplaren e WHERE e.boek_id = b.id AND e.status = 'BESCHADIGD') AS aantalBeschadigd " +
                         "FROM boeken b LEFT JOIN leeslijst_map_boeken lmb ON b.id = lmb.boek_id " +
+                        "WHERE b.didactisch_materiaal = false " +
                         "GROUP BY b.id ORDER BY COUNT(lmb.map_id) DESC LIMIT 5", nativeQuery = true)
         List<Boek> findTop5PopulaireBoeken();
 
