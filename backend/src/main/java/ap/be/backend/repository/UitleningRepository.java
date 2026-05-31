@@ -94,6 +94,11 @@ public interface UitleningRepository extends JpaRepository<Uitlening, Long> {
     @Query("SELECT COUNT(u) FROM Uitlening u WHERE u.user.id = :id AND u.isIngeleverd = true")
     long countOnTime(@Param("id") Long id);
 
+    @Query("SELECT COUNT(u) FROM Uitlening u WHERE u.user.id = :userId " +
+            "AND u.isIngeleverd = true AND u.status IN :statussen")
+    long countGelezenVoorUser(@Param("userId") Long userId,
+                               @Param("statussen") List<String> statussen);
+
     // Geeft alle open uitleningen voor een lijst van gebruikers — gebruikt bij rollover preview
     // om te controleren of vertrekkende leerlingen nog boeken hebben uitstaan.
     List<Uitlening> findByUser_IdInAndIsIngeleverdFalse(Collection<Long> userIds);
