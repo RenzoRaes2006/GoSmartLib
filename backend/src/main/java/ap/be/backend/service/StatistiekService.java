@@ -115,14 +115,21 @@ public class StatistiekService {
         User user = userOpt.get();
         Long userId = user.getId();
 
-        // Alle teruggebrachte boeken tellen mee, ongeacht status — dezelfde definitie
-        // als /api/leerlingen/{id}/stats zodat beide endpoints hetzelfde getal geven.
-        int gelezen = (int) uitleningRepository.countOnTime(userId);
+        // "Gelezen dit jaar" = teruggebrachte boeken uitgeleend sinds 1 september van het
+        // lopende schooljaar. Dezelfde bucket-logica als /leengeschiedenis (frontend), zodat
+        // de teller op de homepage 1-op-1 overeenkomt met de staafjes per maand.
+        LocalDate startSchooljaar = startHuidigSchooljaar(LocalDate.now());
+        int gelezen = (int) uitleningRepository.countTeruggebrachtSindsVoorUser(userId, startSchooljaar);
         int actief = (int) uitleningRepository.countActieveLeningenVoorUser(userId, ACTIEVE_STATUSSEN);
         int teLaat = (int) uitleningRepository.countTeLaatVoorUser(userId, ACTIEVE_STATUSSEN, LocalDate.now());
 
         int leesdoel = user.getLeesdoel() == null ? 10 : user.getLeesdoel();
         return new LeerlingStatistiekDTO(gelezen, leesdoel, actief, teLaat);
+    }
+
+    private static LocalDate startHuidigSchooljaar(LocalDate vandaag) {
+        int jaar = vandaag.getMonthValue() >= 9 ? vandaag.getYear() : vandaag.getYear() - 1;
+        return LocalDate.of(jaar, 9, 1);
     }
 
     /**

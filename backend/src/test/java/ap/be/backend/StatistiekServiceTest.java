@@ -153,7 +153,7 @@ class StatistiekServiceTest {
         testUser.setSmartschoolId("12345");
         testUser.setLeesdoel(7);
         when(userRepository.findBySmartschoolId("12345")).thenReturn(Optional.of(testUser));
-        when(uitleningRepository.countOnTime(1L)).thenReturn(11L);
+        when(uitleningRepository.countTeruggebrachtSindsVoorUser(eq(1L), any(LocalDate.class))).thenReturn(11L);
         when(uitleningRepository.countActieveLeningenVoorUser(eq(1L), anyList())).thenReturn(2L);
         when(uitleningRepository.countTeLaatVoorUser(eq(1L), anyList(), any(LocalDate.class))).thenReturn(1L);
 
