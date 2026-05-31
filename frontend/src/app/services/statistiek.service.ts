@@ -46,4 +46,11 @@ export class StatistiekService {
   getLeerlingStatistieken(schoolId: string): Observable<LeerlingStatistiek> {
     return this.http.get<LeerlingStatistiek>(`${this.apiUrl}/leerling/${schoolId}`);
   }
+
+  updateLeesdoel(schoolId: string, leesdoel: number): Observable<LeerlingStatistiek> {
+    return this.http.put<LeerlingStatistiek>(
+      `${this.apiUrl}/leerling/${schoolId}/leesdoel`,
+      { leesdoel },
+    );
+  }
 }

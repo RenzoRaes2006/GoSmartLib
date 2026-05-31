@@ -102,8 +102,7 @@ public class StatistiekService {
      * Berekent de statistieken voor de profielpagina van een leerling.
      *
      * Geeft standaardwaarden terug als de leerling niet gevonden wordt.
-     * Het leesdoel is nog niet persistent opgeslagen en staat voorlopig
-     * vast op 10 totdat er een instelling per leerling beschikbaar is.
+     * Het leesdoel wordt per leerling persistent opgeslagen op {@link User#getLeesdoel()}.
      *
      * @param smartschoolId de unieke Smartschool-ID van de leerling
      * @return een LeerlingStatistiekDTO met de berekende waarden
@@ -113,12 +112,28 @@ public class StatistiekService {
         if (userOpt.isEmpty()) {
             return new LeerlingStatistiekDTO(0, 10, 0, 0);
         }
-        Long userId = userOpt.get().getId();
+        User user = userOpt.get();
+        Long userId = user.getId();
 
-        int gelezen = (int) uitleningRepository.countGelezenVoorUser(userId, ACTIEVE_STATUSSEN);
+        // Alle teruggebrachte boeken tellen mee, ongeacht status — dezelfde definitie
+        // als /api/leerlingen/{id}/stats zodat beide endpoints hetzelfde getal geven.
+        int gelezen = (int) uitleningRepository.countOnTime(userId);
         int actief = (int) uitleningRepository.countActieveLeningenVoorUser(userId, ACTIEVE_STATUSSEN);
         int teLaat = (int) uitleningRepository.countTeLaatVoorUser(userId, ACTIEVE_STATUSSEN, LocalDate.now());
 
-        return new LeerlingStatistiekDTO(gelezen, 10, actief, teLaat);
+        int leesdoel = user.getLeesdoel() == null ? 10 : user.getLeesdoel();
+        return new LeerlingStatistiekDTO(gelezen, leesdoel, actief, teLaat);
+    }
+
+    /**
+     * Slaat een nieuw leesdoel op voor de leerling. Waarde wordt geclampt tussen 1 en 10.
+     */
+    public LeerlingStatistiekDTO updateLeesdoel(String smartschoolId, int nieuwLeesdoel) {
+        int veilig = Math.max(1, Math.min(10, nieuwLeesdoel));
+        User user = userRepository.findBySmartschoolId(smartschoolId)
+                .orElseThrow(() -> new IllegalArgumentException("Leerling niet gevonden: " + smartschoolId));
+        user.setLeesdoel(veilig);
+        userRepository.save(user);
+        return getLeerlingStatistieken(smartschoolId);
     }
 }

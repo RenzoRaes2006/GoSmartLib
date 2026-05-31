@@ -64,6 +64,9 @@ public class User {
     // Datum waarop deze gebruiker als vertrokken is gemarkeerd. Null zolang actief=true.
     private LocalDate vertrokkenOp;
 
+    @Column(nullable = false)
+    private Integer leesdoel = 10;
+
     @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<LeeslijstMap> mappen = new HashSet<>();

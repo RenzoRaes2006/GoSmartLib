@@ -26,8 +26,9 @@ export class Leengeschiedenis implements OnInit {
   ngOnInit() {
     this.boekService.getMijnLeengeschiedenis().subscribe({
       next: (data) => {
-        // Filter gewijgerde aanvragen eruit als je die niet in de geschiedenis wil zien
-        const geldigeLeningen = data.filter(l => l.status !== 'GEWEIGERD');
+        // Toon enkel daadwerkelijk teruggebrachte boeken — dezelfde definitie als
+        // de "gelezen boeken"-teller op de homepage, zodat de staafjes 1-op-1 matchen.
+        const geldigeLeningen = data.filter(l => l.isIngeleverd === true);
         this.alleLeningen.set(geldigeLeningen);
         this.berekenSchooljaren(geldigeLeningen);
       },

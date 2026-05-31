@@ -25,9 +25,12 @@ describe('HomePage', () => {
     leeslijstSpy = jasmine.createSpyObj('LeeslijstService', ['getMappenVanGebruiker']);
     leeslijstSpy.getMappenVanGebruiker.and.returnValue(of([{ naam: 'Favorieten' }]));
 
-    statSpy = jasmine.createSpyObj('StatistiekService', ['getLeerlingStatistieken']);
+    statSpy = jasmine.createSpyObj('StatistiekService', ['getLeerlingStatistieken', 'updateLeesdoel']);
     statSpy.getLeerlingStatistieken.and.returnValue(
       of({ gelezenBoeken: 5, leesDoel: 10, aantalActieveLeningen: 2, aantalTeLaat: 0 } as any),
+    );
+    statSpy.updateLeesdoel.and.callFake((_id: string, leesdoel: number) =>
+      of({ gelezenBoeken: 5, leesDoel: leesdoel, aantalActieveLeningen: 2, aantalTeLaat: 0 } as any),
     );
 
     authSpy = jasmine.createSpyObj('AuthService', ['currentUser', 'logout', 'setUserFromToken']);

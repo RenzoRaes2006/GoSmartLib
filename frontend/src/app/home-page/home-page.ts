@@ -142,21 +142,24 @@ export class HomePage implements OnInit {
   }
 
   slaLeesdoelOp() {
-    // 1. Haal de ingetypte waarde op
     let veiligDoel = this.nieuwLeesdoel();
-
-    // 2. Beveilig de grenzen (min 1, max 100)
     if (veiligDoel < 1) {
       veiligDoel = 1;
     } else if (veiligDoel > 10) {
       veiligDoel = 10;
     }
 
-    // 3. Sla de veilige waarde op
-    this.leesDoel.set(veiligDoel);
-
-    // 4. Sluit de pop-up
-    this.isEditModalOpen.set(false);
+    this.statistiekService.updateLeesdoel(this.schoolId(), veiligDoel).subscribe({
+      next: (stats) => {
+        this.leesDoel.set(stats.leesDoel ?? veiligDoel);
+        this.isEditModalOpen.set(false);
+      },
+      error: (err) => {
+        console.error('Kon leesdoel niet opslaan:', err);
+        this.leesDoel.set(veiligDoel);
+        this.isEditModalOpen.set(false);
+      },
+    });
   }
 
   openVerlengModal(leningId: number) {

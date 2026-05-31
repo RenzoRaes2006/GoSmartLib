@@ -151,15 +151,16 @@ class StatistiekServiceTest {
         User testUser = new User();
         testUser.setId(1L);
         testUser.setSmartschoolId("12345");
+        testUser.setLeesdoel(7);
         when(userRepository.findBySmartschoolId("12345")).thenReturn(Optional.of(testUser));
-        when(uitleningRepository.countGelezenVoorUser(eq(1L), anyList())).thenReturn(11L);
+        when(uitleningRepository.countOnTime(1L)).thenReturn(11L);
         when(uitleningRepository.countActieveLeningenVoorUser(eq(1L), anyList())).thenReturn(2L);
         when(uitleningRepository.countTeLaatVoorUser(eq(1L), anyList(), any(LocalDate.class))).thenReturn(1L);
 
         LeerlingStatistiekDTO dto = statistiekService.getLeerlingStatistieken("12345");
 
         assertEquals(11, dto.getGelezenBoeken());
-        assertEquals(10, dto.getLeesDoel());
+        assertEquals(7, dto.getLeesDoel());
         assertEquals(2, dto.getAantalActieveLeningen());
         assertEquals(1, dto.getAantalTeLaat());
     }
